@@ -1,0 +1,25 @@
+# ninja log v5
+214	2337	6908556130553520	3rdparty/getopt/CMakeFiles/getopt.dir/getopt.cpp.obj	4c1b6c87c5f1105f
+2340	2451	6908556131685660	3rdparty/getopt/getopt.lib	8403d5d6ac47f9a5
+15	6335	6910324489569780	src/CMakeFiles/assfonts.dir/main.cc.obj	4100b2721a4c3c37
+25	3818	6910307243405682	src/CMakeFiles/assfonts.dir/ass_font_embedder.cc.obj	89244581e0d185db
+14	3934	6910307244656117	src/CMakeFiles/assfonts.dir/ass_parser.cc.obj	ebfe03924e894760
+25	7569	6910297571660832	src/CMakeFiles/assfonts.dir/font_subsetter.cc.obj	49fe7008e3256cef
+15	3865	6910326942167219	src/CMakeFiles/assfonts.dir/font_parser.cc.obj	cc88f46734e7e52d
+3866	4980	6910326949256210	src/assfonts.exe	57dd2ffcf777c8d2
+14	6516	6910379968579062	src/CMakeFiles/assfonts.dir/main.cc.obj	4100b2721a4c3c37
+6519	9038	6910379987975640	src/assfonts.exe	57dd2ffcf777c8d2
+31	4940	6910689406472707	src/CMakeFiles/assfonts.dir/ass_font_embedder.cc.obj	89244581e0d185db
+14	5111	6910689408191442	src/CMakeFiles/assfonts.dir/ass_parser.cc.obj	ebfe03924e894760
+41	5658	6910689413816455	src/CMakeFiles/assfonts.dir/font_subsetter.cc.obj	49fe7008e3256cef
+23	5817	6910689415378926	src/CMakeFiles/assfonts.dir/font_parser.cc.obj	cc88f46734e7e52d
+5818	11230	6910689465387105	src/assfonts.exe	57dd2ffcf777c8d2
+14	5941	6910692485970334	src/CMakeFiles/assfonts.dir/main.cc.obj	4100b2721a4c3c37
+5942	6994	6910692492376230	src/assfonts.exe	57dd2ffcf777c8d2
+0	21	0	clean	8c45b54705a541e8
+55	5067	6910692613204859	src/CMakeFiles/assfonts.dir/ass_font_embedder.cc.obj	89244581e0d185db
+23	5406	6910692616017395	src/CMakeFiles/assfonts.dir/ass_parser.cc.obj	ebfe03924e894760
+33	6590	6910692628517331	src/CMakeFiles/assfonts.dir/font_parser.cc.obj	cc88f46734e7e52d
+44	6895	6910692631486146	src/CMakeFiles/assfonts.dir/font_subsetter.cc.obj	49fe7008e3256cef
+14	8833	6910692650861066	src/CMakeFiles/assfonts.dir/main.cc.obj	4100b2721a4c3c37
+8833	9970	6910692658240130	src/assfonts.exe	57dd2ffcf777c8d2
