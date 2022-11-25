@@ -21,6 +21,7 @@
 #define ASSFONTS_ERRORPROXYSINK_H_
 
 #include <cstdlib>
+#include <memory>
 #include <mutex>
 
 #include <spdlog/details/null_mutex.h>
