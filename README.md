@@ -6,6 +6,8 @@ Subset fonts and embed them into an ASS subtitle.
 
 Build environment ---- Visual Studio 2022 with MSVC 19.33.31630
 
+Use [vcpkg](https://vcpkg.io/) as package manager
+
 - [FreeType](http://freetype.org/)
 
 - [HarfBuzz](https://github.com/harfbuzz/harfbuzz)
