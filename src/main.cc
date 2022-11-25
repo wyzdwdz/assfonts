@@ -194,7 +194,8 @@ int main(int argc, char** argv) {
 
   if (!is_subset_only) {
     afe.set_input_ass_path(input_path.generic_string());
-    afe.set_output_ass_path(input_path.parent_path().generic_string() + "/" +
+
+    afe.set_output_ass_path(output_path.generic_string() + "/" +
                             input_path.stem().generic_string() + "_assfonts" +
                             input_path.extension().generic_string());
     afe.Run();
