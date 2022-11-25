@@ -451,4 +451,4 @@ _deps
 
 
 #output directory
-/out
+out/
