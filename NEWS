@@ -7,6 +7,7 @@ Saturday, November 26, 2022
 - Add new function "CleanFonts"
   When detected [Fonts] in input file, create non-fonts version "xxx.cleaned.ass"
 - Change new file's suffix name: xxx_assfonts.ass --> xxx.assfonts.ass
+- Add version info in help
 
 
 Overview of changes leading to v0.1.0
