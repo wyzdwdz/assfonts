@@ -50,14 +50,15 @@ int main(int argc, char** argv) {
   ass::FontSubsetter fs(ap, fp);
   ass::AssFontEmbedder afe(fs);
 
-  spdlog::set_pattern("[%n] [%^%l%$] %v");
+  //spdlog::set_pattern("[%n] [%^%l%$] %v");
+  spdlog::set_pattern("[%^%l%$] %v");
 
   std::string input;
   std::string output;
   std::string fonts;
   std::string database(".");
   bool is_build = false;
-  bool is_no_subset = false;
+  bool is_embed_only = false;
   bool is_subset_only = false;
   bool is_help = false;
   int verbose = 3;
@@ -71,7 +72,7 @@ int main(int argc, char** argv) {
   auto* p_opt_b =
       app.add_flag("-b,--build", is_build, "Build or update fonts database");
   auto* p_opt_n =
-      app.add_flag("-n,--no-subset", is_no_subset, "Do not subset fonts");
+      app.add_flag("-e,--embed-only", is_embed_only, "Do not subset fonts");
   auto* p_opt_s = app.add_flag("-s,--subset-only", is_subset_only,
                                "Subset fonts but not embed them into subtitle");
   auto* p_opt_v = app.add_option("-v,--verbose", verbose, "Set logging level.");
@@ -107,8 +108,8 @@ int main(int argc, char** argv) {
                "  -f, --fontpath    <dir>   Set fonts directory\n"
                "  -b, --build               Build or update fonts database    (Require --fontpath)\n"
                "  -d, --dbpath      <dir>   Set fonts database path    (Default: current path)\n"
-               "  -n, --no-subset           Do not subset fonts\n"
                "  -s, --subset-only         Subset fonts but not embed them into subtitle\n"
+               "  -e, --embed-only          Do not subset fonts\n"
                "  -v, --verbose     <num>   Set logging level (0 to 3), 0 is off    (Default: 3)\n"
                "  -h, --help                Get help info\n\n");
     if (argc == 2) {
@@ -186,19 +187,23 @@ int main(int argc, char** argv) {
     output_path = input_path.parent_path();
   }
 
-  if (!is_no_subset) {
+  if (is_embed_only && is_subset_only) {
+    afe.set_input_ass_path(input_path.generic_string());
+    afe.set_output_dir_path(output_path.generic_string());
+    afe.Run(true);
+    exit(EXIT_SUCCESS);
+  }
+
+  if (!is_embed_only) {
     fs.SetSubfontDir(output_path.generic_string() + "/" +
                      input_path.stem().generic_string() + "_subsetted");
   }
-  fs.Run(is_no_subset);
+  fs.Run(is_embed_only);
 
   if (!is_subset_only) {
     afe.set_input_ass_path(input_path.generic_string());
-
-    afe.set_output_ass_path(output_path.generic_string() + "/" +
-                            input_path.stem().generic_string() + "_assfonts" +
-                            input_path.extension().generic_string());
-    afe.Run();
+    afe.set_output_dir_path(output_path.generic_string());
+    afe.Run(false);
   }
 
   spdlog::drop("main");
