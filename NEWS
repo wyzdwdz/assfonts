@@ -8,6 +8,8 @@ Saturday, November 26, 2022
   When detected [Fonts] in input file, create non-fonts version "xxx.cleaned.ass"
 - Change new file's suffix name: xxx_assfonts.ass --> xxx.assfonts.ass
 - Add version info in help
+- Change logging level of "missing fonts" from ERROR to WARN
+  Print all missing fonts first and then throw an ERROR
 
 
 Overview of changes leading to v0.1.0
