@@ -14,6 +14,8 @@ Use [vcpkg](https://vcpkg.io/) as package manager
 
 - [Boost](https://www.boost.org/) filesystem locale serialization
 
+- [spdlog](https://github.com/gabime/spdlog)
+
 - [fmt](https://github.com/fmtlib/fmt)
 
 - [CLI11](https://github.com/CLIUtils/CLI11)
