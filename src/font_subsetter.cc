@@ -38,6 +38,8 @@ namespace ass {
 void FontSubsetter::SetSubfontDir(const std::string& subfont_dir) {
   fs::path dir_path(subfont_dir);
   if (!fs::exists(dir_path)) {
+    logger_->info("Create subset fonts directory: \"{}\"",
+                  dir_path.generic_string());
     fs::create_directory(dir_path);
   }
   subfont_dir_ = subfont_dir;
@@ -45,6 +47,7 @@ void FontSubsetter::SetSubfontDir(const std::string& subfont_dir) {
 
 void FontSubsetter::Run(bool is_no_subset) {
   if (is_no_subset) {
+    bool have_missing = false;
     std::string path;
     long index = 0;
     for (const auto& font_set : ap_.font_sets_) {
@@ -67,12 +70,16 @@ void FontSubsetter::Run(bool is_no_subset) {
 #endif
       if (!FindFont(font_set.first, fp_.font_list_, path, index) &&
           !FindFont(font_set.first, fp_.font_list_in_db_, path, index)) {
-        logger_->error("Missing the font: \"{}\"", fontname);
+        logger_->warn("Missing the font: \"{}\"", fontname);
+        have_missing = true;
       } else {
         logger_->info("Found font: \"{}\" --> \"{}\"[{}]", fontname, path,
                       index);
       }
       subfonts_path_.push_back(path);
+    }
+    if (have_missing) {
+      logger_->error("Found missing fonts. Check warning info above.");
     }
     return;
   }
@@ -146,6 +153,7 @@ bool FontSubsetter::FindFont(const std::string& font_name,
 }
 
 void FontSubsetter::set_subset_font_codepoint_sets() {
+  bool have_missing = false;
   for (const auto& font_set : ap_.font_sets_) {
     FontPath font_path;
     std::set<uint32_t> codepoint_set;
@@ -170,7 +178,8 @@ void FontSubsetter::set_subset_font_codepoint_sets() {
                   font_path.index) &&
         !FindFont(font_set.first, fp_.font_list_in_db_, font_path.path,
                   font_path.index)) {
-      logger_->error("Missing the font: \"{}\"", fontname);
+      logger_->warn("Missing the font: \"{}\"", fontname);
+      have_missing = true;
     } else {
       logger_->info("Found font: \"{}\" --> \"{}\"[{}]", fontname,
                     font_path.path, font_path.index);
@@ -185,6 +194,9 @@ void FontSubsetter::set_subset_font_codepoint_sets() {
       subset_font_codepoint_sets_[font_path].insert(codepoint_set.begin(),
                                                     codepoint_set.end());
     }
+  }
+  if (have_missing) {
+    logger_->error("Found missing fonts. Check warning info above.");
   }
 }
 

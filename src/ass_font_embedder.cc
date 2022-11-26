@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iterator>
+#include <regex>
 #include <sstream>
 
 #include <boost/algorithm/string.hpp>
@@ -36,21 +37,35 @@ void AssFontEmbedder::set_input_ass_path(const std::string& input_ass_path) {
   input_ass_path_ = input_ass_path;
 }
 
-void AssFontEmbedder::set_output_ass_path(const std::string& output_ass_path) {
-  output_ass_path_ = output_ass_path;
+void AssFontEmbedder::set_output_dir_path(const std::string& output_dir_path) {
+  output_dir_path_ = output_dir_path;
 }
 
-void AssFontEmbedder::Run() {
+void AssFontEmbedder::Run(bool is_clean_only) {
   fs::path input_path(input_ass_path_);
-  fs::path output_path(output_ass_path_);
-  std::ifstream input_ass(input_path.generic_string());
-  std::ofstream output_ass(output_path.generic_string());
-  std::string line;
-  if (!input_ass.is_open()) {
-    logger_->error("\"{}\" cannot be opened.", input_path.generic_string());
+  fs::path output_path(output_dir_path_ + "/" +
+                       input_path.stem().generic_string() + ".assfonts" +
+                       input_path.extension().generic_string());
+  std::string real_input_path;
+  bool have_fonts = CleanFonts();
+  if (is_clean_only) {
     return;
   }
+  if (have_fonts) {
+    real_input_path = output_dir_path_ + "/" +
+                      input_path.stem().generic_string() + ".cleaned" +
+                      input_path.extension().generic_string();
+  } else {
+    real_input_path = input_path.generic_string();
+  }
+  std::ifstream input_ass(real_input_path);
+  if (!input_ass.is_open()) {
+    logger_->error("\"{}\" cannot be opened.", real_input_path);
+  }
+  std::ofstream output_ass(output_path.generic_string());
+  std::string line;
   if (!output_ass.is_open()) {
+    input_ass.close();
     logger_->error("\"{}\" cannot be created.", output_path.generic_string());
     return;
   }
@@ -72,21 +87,23 @@ void AssFontEmbedder::Run() {
                                   fs::path(font_path).extension().wstring();
         std::string fontname =
             boost::locale::conv::utf_to_utf<char, wchar_t>(w_fontname);
-        std::ifstream font(font, std::ios::binary);
+        std::ifstream is(font, std::ios::binary);
         std::ostringstream ostrm;
-        ostrm << font.rdbuf();
+        ostrm << is.rdbuf();
         std::string font_data(ostrm.str());
         std::string uu_str = UUEncode(
             font_data.c_str(), font_data.c_str() + font_data.size(), true);
         output_ass << "\nfontname: " << fontname << "\n";
         output_ass << uu_str;
-        font.close();
+        is.close();
       }
       output_ass << "\n\n" << line << "\n";
     } else {
       output_ass << line << "\n";
     }
   }
+  logger_->info("Create font-embeded subtitle: \"{}\"",
+                output_path.generic_string());
   input_ass.close();
   output_ass.close();
 }
@@ -131,6 +148,51 @@ std::string AssFontEmbedder::UUEncode(const char* begin, const char* end,
     }
   }
   return ret;
+}
+
+bool AssFontEmbedder::CleanFonts() {
+  std::vector<std::string> output_lines;
+  std::string line;
+  bool have_fonts = false;
+  const std::regex r_chapter_title("\\s*\\[.+\\]\\s*");
+  std::smatch sm;
+  fs::path input_path(input_ass_path_);
+  std::ifstream is(input_path.generic_string());
+  while (getline(is, line)) {
+    if (boost::algorithm::trim_copy(boost::algorithm::to_lower_copy(line)) ==
+        "[fonts]") {
+      have_fonts = true;
+      while (getline(is, line)) {
+        if (std::regex_match(line, sm, r_chapter_title) && sm.size() == 1 &&
+            sm.str() == line) {
+          output_lines.push_back(line + '\n');
+          break;
+        }
+      }
+    } else {
+      output_lines.push_back(line + '\n');
+    }
+  }
+  if (have_fonts) {
+    fs::path output_path(output_dir_path_ + "/" +
+                         input_path.stem().generic_string() + ".cleaned" +
+                         input_path.extension().generic_string());
+    logger_->info(
+        "Found fonts in \"{}\" Delete them and save new file in \"{}\"",
+        input_path.generic_string(), output_path.generic_string());
+    std::ofstream os(output_path.generic_string());
+    if (!os.is_open()) {
+      is.close();
+      logger_->error("\"{}\" cannot be created.", output_path.generic_string());
+      return have_fonts;
+    }
+    for (const auto& str : output_lines) {
+      os << str;
+    }
+    os.close();
+  }
+  is.close();
+  return have_fonts;
 }
 
 }  // namespace ass
