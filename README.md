@@ -26,8 +26,8 @@ Use [vcpkg](https://vcpkg.io/) as package manager
 Usage:     assfonts [options...] [<file>]
 Examples:  assfonts <file>                  Embed subset fonts into ASS script
            assfonts -i <file>               Same as above
-           assfonts -f <dir> -n -i <file>   Only embed fonts without subset
            assfonts -o <dir> -s -i <file>   Only subset fonts but not embed
+           assfonts -f <dir> -e -i <file>   Only embed fonts without subset
            assfonts -f <dir> -b             Build or update fonts database only
 Options:
   -i, --input,      <file>  Input .ass file
