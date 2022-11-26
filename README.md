@@ -35,8 +35,8 @@ Options:
   -f, --fontpath    <dir>   Set fonts directory
   -b, --build               Build or update fonts database    (Require --fontpath)
   -d, --dbpath      <dir>   Set fonts database path    (Default: current path)
-  -n, --no-subset           Do not subset fonts
   -s, --subset-only         Subset fonts but not embed them into subtitle
+  -e, --embed-only          Do not subset fonts
   -v, --verbose     <num>   Set logging level (0 to 3), 0 is off    (Default: 3)
   -h, --help                Get help info
  ```

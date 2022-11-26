@@ -1,0 +1,16 @@
+Overview of changes leading to v0.1.1
+Saturday, November 26, 2022
+====================================
+- Change command line option -n,--no-subset to -e,--embed-only
+  But its function has no change
+- Add INFO loggings about creating new folder and new files
+- Add new function "CleanFonts"
+  When detected [Fonts] in input file, create non-fonts version "xxx.cleaned.ass"
+- Change new file's suffix name: xxx_assfonts.ass --> xxx.assfonts.ass
+
+
+Overview of changes leading to v0.1.0
+Friday, November 25, 2022
+====================================
+- First time upload
+- Release x86-64 Windows executable file
