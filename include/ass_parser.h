@@ -50,12 +50,32 @@ class AssParser {
   void ReadFile(const std::string& ass_file_path);
 
  private:
+  struct FontDesc {
+    std::string fontname;
+    int bold = 400;
+    int italic = 0;
+
+    bool operator<(const FontDesc& r) const {
+      if (fontname < r.fontname) {
+        return true;
+      } else if (fontname == r.fontname) {
+        if (bold < r.bold) {
+          return true;
+        } else if (bold == r.bold) {
+          if (italic < r.italic) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+  };
   std::shared_ptr<spdlog::logger> logger_;
   std::string ass_path_;
   std::vector<std::string> text_;
   std::vector<std::vector<std::string>> styles_;
   std::vector<std::vector<std::string>> dialogues_;
-  std::map<std::string, std::set<char32_t>> font_sets_;
+  std::map<FontDesc, std::set<char32_t>> font_sets_;
 
   bool IsUTF8(const std::string& line);
   bool FindTitle(const std::string& line, const std::string& title);

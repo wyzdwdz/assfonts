@@ -29,6 +29,7 @@ extern "C" {
 #include FT_TYPE1_TABLES_H
 #include FT_SFNT_NAMES_H
 #include FT_TRUETYPE_IDS_H
+#include FT_TRUETYPE_TABLES_H
 #ifdef __cplusplus
 }
 #endif
@@ -169,6 +170,12 @@ bool FontParser::GetFontInfo(const std::string& font_path) {
     if (families.empty() && fullnames.empty() && psnames.empty()) {
       continue;
     }
+    font_info.slant = 110 * !!(ft_face->style_flags & FT_STYLE_FLAG_ITALIC);
+    font_info.weight = AssFaceGetWeight(ft_face);
+    if (font_info.slant < 0 || font_info.slant > 110)
+      font_info.slant = 0;
+    if (font_info.weight < 100 || font_info.weight > 900)
+      font_info.weight = 400;
     font_info.families = families;
     font_info.fullnames = fullnames;
     font_info.psnames = psnames;
@@ -184,6 +191,37 @@ bool FontParser::GetFontInfo(const std::string& font_path) {
   } else {
     return true;
   }
+}
+
+int FontParser::AssFaceGetWeight(FT_Face face) {
+  /*
+ * Copyright (C) 2006 Evgeniy Stepanov <eugeni.stepanov@gmail.com>
+ *
+ * This file is part of libass.
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+#if FREETYPE_MAJOR > 2 || (FREETYPE_MAJOR == 2 && FREETYPE_MINOR >= 6)
+  TT_OS2* os2 = (TT_OS2*)FT_Get_Sfnt_Table(face, FT_SFNT_OS2);
+#else
+  // This old name is still included (as a macro), but deprecated as of 2.6, so avoid using it if we can
+  TT_OS2* os2 = (TT_OS2*)FT_Get_Sfnt_Table(face, ft_sfnt_os2);
+#endif
+  if (os2 && os2->version != 0xffff && os2->usWeightClass)
+    return os2->usWeightClass;
+  else
+    return 300 * !!(face->style_flags & FT_STYLE_FLAG_BOLD) + 400;
 }
 
 }  // namespace ass

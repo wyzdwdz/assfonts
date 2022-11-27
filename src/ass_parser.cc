@@ -189,12 +189,19 @@ void AssParser::set_font_sets() {
     ++style_index;
   }
   for (const auto& dialogue : dialogues_) {
-    std::string font = styles_[style_name_table[dialogue[4]]][2];
-    if (font[0] == '@') {
-      font.erase(0, 1);
+    FontDesc font_desc;
+    font_desc.fontname = styles_[style_name_table[dialogue[4]]][2];
+    if (styles_[style_name_table[dialogue[4]]][8] == "-1") {
+      font_desc.bold = 700;
     }
-    if (font_sets_.find(font) == font_sets_.end()) {
-      font_sets_[font] = empty_set;
+    if (styles_[style_name_table[dialogue[4]]][9] == "-1") {
+      font_desc.italic = 100;
+    }
+    if (font_desc.fontname[0] == '@') {
+      font_desc.fontname.erase(0, 1);
+    }
+    if (font_sets_.find(font_desc) == font_sets_.end()) {
+      font_sets_[font_desc] = empty_set;
     }
     std::u32string w_dialogue =
         boost::locale::conv::utf_to_utf<char32_t>(dialogue[10]);
@@ -215,11 +222,12 @@ void AssParser::set_font_sets() {
           if (w_dialogue.end() - wch < 3) {
             continue;
           }
-          std::u32string tmp(wch, wch + 3);
-          if (tmp == U"\\fn") {
+          std::u32string tmp_3(wch, wch + 3);
+          std::u32string tmp_2(wch, wch + 2);
+          if (tmp_3 == U"\\fn") {
             wch = wch + 3;
             std::u32string w_font;
-            font.clear();
+            font_desc.fontname.clear();
             for (; wch != w_dialogue.end(); ++wch) {
               if (*wch == U'\\' || *wch == U'}') {
                 break;
@@ -230,17 +238,59 @@ void AssParser::set_font_sets() {
             if (w_font[0] == U'@') {
               w_font.erase(0, 1);
             }
-            font = boost::locale::conv::utf_to_utf<char>(w_font);
-            if (font_sets_.find(font) == font_sets_.end()) {
-              font_sets_[font] = empty_set;
+            font_desc.fontname = boost::locale::conv::utf_to_utf<char>(w_font);
+            //if (font_sets_.find(font) == font_sets_.end()) {
+            //  font_sets_[font] = empty_set;
+            //}
+          }
+          if (tmp_2 == U"\\b" && ((*(wch + 2) >= L'0' && *(wch + 2) <= L'9') ||
+                                  *(wch + 2) == L'-')) {
+            wch = wch + 2;
+            std::u32string w_bold;
+            font_desc.bold = 400;
+            for (; wch != w_dialogue.end(); ++wch) {
+              if (*wch == U'\\' || *wch == U'}') {
+                break;
+              }
+              w_bold.push_back(*wch);
             }
+            w_bold = boost::algorithm::trim_copy(w_bold);
+            int val = std::stoi(boost::locale::conv::utf_to_utf<char>(w_bold));
+            if (val == 1 || val == -1)
+              val = 700;
+            else if (val <= 0)
+              val = 400;
+            font_desc.bold = val;
+          }
+          if (tmp_2 == U"\\i" && ((*(wch + 2) >= L'0' && *(wch + 2) <= L'9') ||
+                                  *(wch + 2) == L'-')) {
+            wch = wch + 2;
+            std::u32string w_italic;
+            font_desc.italic = 0;
+            for (; wch != w_dialogue.end(); ++wch) {
+              if (*wch == U'\\' || *wch == U'}') {
+                break;
+              }
+              w_italic.push_back(*wch);
+            }
+            w_italic = boost::algorithm::trim_copy(w_italic);
+            int val =
+                std::stoi(boost::locale::conv::utf_to_utf<char>(w_italic));
+            if (val == 1)
+              val = 100;
+            else if (val <= 0)
+              val = 0;
+            font_desc.italic = val;
+          }
+          if (font_sets_.find(font_desc) == font_sets_.end()) {
+            font_sets_[font_desc] = empty_set;
           }
         } while ((wch != w_dialogue.end()) && (*wch != U'}'));
         ++wch;
         continue;
       }
       if (wch != w_dialogue.end()) {
-        font_sets_[font].insert(*wch);
+        font_sets_[font_desc].insert(*wch);
         ++wch;
       }
     }

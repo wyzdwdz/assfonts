@@ -82,12 +82,14 @@ class FontSubsetter {
   std::string subfont_dir_;
   std::map<FontPath, std::set<uint32_t>> subset_font_codepoint_sets_;
   std::vector<std::string> subfonts_path_;
-  bool FindFont(const std::string& font_name,
+  bool FindFont(
+      const std::pair<AssParser::FontDesc, std::set<char32_t>> font_set,
                 const std::vector<FontParser::FontInfo>& font_list,
                 std::string& found_path, long& found_index);
   void set_subset_font_codepoint_sets();
   bool FontSubsetter::CreateSubfont(
       const std::pair<FontPath, std::set<uint32_t>>& subset_font);
+  bool CheckGlyph(FontParser::FontInfo font, std::set<char32_t>);
 
   friend class AssFontEmbedder;
 };

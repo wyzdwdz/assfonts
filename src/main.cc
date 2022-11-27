@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
   fs::path db_path = fs::system_complete(database);
 
   if (!input.empty() && !fs::is_regular_file(input_path)) {
-    logger->error("\"{}\" is not found. See --help for more info.", input);
+    logger->error("\"{}\" is not a file. See --help for more info.", input);
   }
   if (!output.empty() && !fs::is_directory(output_path)) {
     logger->error(
