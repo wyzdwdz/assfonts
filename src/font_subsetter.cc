@@ -24,6 +24,7 @@
 #include <fstream>
 #include <locale>
 
+#include <fmt/core.h>
 #include <harfbuzz/hb-subset.h>
 #include <harfbuzz/hb.h>
 #include <boost/algorithm/string.hpp>
@@ -78,6 +79,7 @@ void FontSubsetter::Run(bool is_no_subset) {
       } else {
         logger_->info("Found font: \"{}\" ({},{}) --> \"{}\"[{}]", fontname,
                       font_set.first.bold, font_set.first.italic, path, index);
+        CheckGlyph(path, index, font_set.second);
       }
       subfonts_path_.push_back(path);
     }
@@ -135,9 +137,6 @@ bool FontSubsetter::FindFont(
       score = 0;
     }
     if (score < min_score) {
-      if (!CheckGlyph(font, font_set.second)) {
-        continue;
-      }
       min_score = score;
       tmp_path = font.path;
       tmp_index = font.index;
@@ -181,9 +180,6 @@ bool FontSubsetter::FindFont(
       score = 0;
     }
     if (score < min_score) {
-      if (!CheckGlyph(font, font_set.second)) {
-        continue;
-      }
       min_score = score;
       tmp_path = font.path;
       tmp_index = font.index;
@@ -240,6 +236,7 @@ void FontSubsetter::set_subset_font_codepoint_sets() {
       logger_->info("Found font: \"{}\" ({},{}) --> \"{}\"[{}]", fontname,
                     font_set.first.bold, font_set.first.italic, font_path.path,
                     font_path.index);
+      CheckGlyph(font_path.path, font_path.index, font_set.second);
     }
     for (const char32_t& wch : font_set.second) {
       codepoint_set.insert(static_cast<uint32_t>(wch));
@@ -326,19 +323,25 @@ bool FontSubsetter::CreateSubfont(
   return true;
 }
 
-bool FontSubsetter::CheckGlyph(FontParser::FontInfo font,
+bool FontSubsetter::CheckGlyph(std::string font_path, long font_index,
                                std::set<char32_t> codepoint_set) {
   bool have_all_glyph = true;
   FT_Face ft_face;
-  FT_New_Face(ft_library_, font.path.c_str(), font.index, &ft_face);
+  std::vector<uint32_t> missing_codepoints;
+  FT_New_Face(ft_library_, font_path.c_str(), font_index, &ft_face);
   for (const auto& codepoint : codepoint_set) {
     if (!codepoint) {
       continue;
     }
     if (!FT_Get_Char_Index(ft_face, codepoint)) {
+      missing_codepoints.push_back(codepoint);
       have_all_glyph = false;
       break;
     }
+  }
+  if (!missing_codepoints.empty()) {
+    logger_->warn("Missing codepoints: {:#06x}",
+                  fmt::join(missing_codepoints, "  "));
   }
   FT_Done_Face(ft_face);
   return have_all_glyph;

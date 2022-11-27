@@ -76,6 +76,8 @@ class FontParser {
       ar& families;
       ar& fullnames;
       ar& psnames;
+      ar& weight;
+      ar& slant;
       ar& path;
       ar& index;
     }
