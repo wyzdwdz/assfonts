@@ -191,12 +191,18 @@ void AssParser::set_font_sets() {
   for (const auto& dialogue : dialogues_) {
     FontDesc font_desc;
     font_desc.fontname = styles_[style_name_table[dialogue[4]]][2];
-    if (styles_[style_name_table[dialogue[4]]][8] == "-1") {
-      font_desc.bold = 700;
-    }
-    if (styles_[style_name_table[dialogue[4]]][9] == "-1") {
-      font_desc.italic = 100;
-    }
+    int val = std::stoi(styles_[style_name_table[dialogue[4]]][8]);
+    if (val == 1 || val == -1)
+      val = 700;
+    else if (val <= 0)
+      val = 400;
+    font_desc.bold = val;
+    val = std::stoi(styles_[style_name_table[dialogue[4]]][9]);
+    if (val == 1)
+      val = 100;
+    else if (val <= 0)
+      val = 0;
+    font_desc.italic = val;
     if (font_desc.fontname[0] == '@') {
       font_desc.fontname.erase(0, 1);
     }
@@ -255,7 +261,7 @@ void AssParser::set_font_sets() {
               w_bold.push_back(*wch);
             }
             w_bold = boost::algorithm::trim_copy(w_bold);
-            int val = std::stoi(boost::locale::conv::utf_to_utf<char>(w_bold));
+            val = std::stoi(boost::locale::conv::utf_to_utf<char>(w_bold));
             if (val == 1 || val == -1)
               val = 700;
             else if (val <= 0)
@@ -274,8 +280,7 @@ void AssParser::set_font_sets() {
               w_italic.push_back(*wch);
             }
             w_italic = boost::algorithm::trim_copy(w_italic);
-            int val =
-                std::stoi(boost::locale::conv::utf_to_utf<char>(w_italic));
+            val = std::stoi(boost::locale::conv::utf_to_utf<char>(w_italic));
             if (val == 1)
               val = 100;
             else if (val <= 0)
