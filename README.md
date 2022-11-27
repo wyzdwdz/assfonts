@@ -48,7 +48,7 @@ Options:
  This program will ignore this rule and embed non-ttf fonts in by force. Some video players may not load these fonts correctly.
  One recommended solution is to subset fonts without embedding firstly by giving option `-s` or `--subset-only` Then convert those
  subsetted fonts (which are located in `<output_directory>/<input_file_name>_subsetted/`) to .ttf fonts using some 3rdparty tools like
- [otf2ttf](https://github.com/shimarulin/otf2ttf). Finally, rerun this program by giving option `-n` or `--no-subset` and setting
+ [otf2ttf](https://github.com/shimarulin/otf2ttf). Finally, rerun this program by giving option `-e` or `--embed-only` and setting
  fonts directory to subsetted fonts `-f <output_directory>/<input_file_name>_subsetted/`
  
  ```
