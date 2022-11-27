@@ -83,6 +83,8 @@ class AssParser {
                                      const unsigned int num_field);
   void ParseAss();
   void set_font_sets();
+  void StyleOverride(const std::u32string& code,
+                     FontDesc* font_desc, const FontDesc& font_desc_style);
 
   friend class FontSubsetter;
 };
