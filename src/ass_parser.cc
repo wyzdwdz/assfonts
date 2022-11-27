@@ -323,6 +323,7 @@ void AssParser::StyleOverride(const std::u32string& code, FontDesc* font_desc,
       while (iter != code.end() && *iter != U'\\') {
         italic.push_back(*iter);
         ++iter;
+        ++pos;
       }
       if (!boost::algorithm::trim_copy(italic).empty()) {
         int val = std::stoi(boost::locale::conv::utf_to_utf<char>(
