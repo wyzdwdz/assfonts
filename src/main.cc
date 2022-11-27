@@ -38,7 +38,7 @@
 
 #define VERSION_MAX 0
 #define VERSION_MID 1
-#define VERSION_MIN 1
+#define VERSION_MIN 2
 
 namespace fs = boost::filesystem;
 
