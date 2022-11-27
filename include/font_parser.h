@@ -66,6 +66,8 @@ class FontParser {
     std::vector<std::string> families;
     std::vector<std::string> fullnames;
     std::vector<std::string> psnames;
+    int weight = 400;
+    int slant = 0;
     std::string path;
     long index = 0;
 
@@ -88,6 +90,7 @@ class FontParser {
   std::vector<std::string> FindFileInDir(const std::string& dir,
                                          const std::string& pattern);
   bool GetFontInfo(const std::string& font_path);
+  int FontParser::AssFaceGetWeight(FT_Face face);
 
   friend class FontSubsetter;
 };
