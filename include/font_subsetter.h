@@ -84,8 +84,8 @@ class FontSubsetter {
   std::vector<std::string> subfonts_path_;
   bool FindFont(
       const std::pair<AssParser::FontDesc, std::set<char32_t>> font_set,
-                const std::vector<FontParser::FontInfo>& font_list,
-                std::string& found_path, long& found_index);
+      const std::vector<FontParser::FontInfo>& font_list,
+      std::string& found_path, long& found_index);
   void set_subset_font_codepoint_sets();
   bool FontSubsetter::CreateSubfont(
       const std::pair<FontPath, std::set<uint32_t>>& subset_font);
