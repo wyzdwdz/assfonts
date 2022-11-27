@@ -1,3 +1,15 @@
+Overview of changes leading to v0.1.2
+Sunday, November 27, 2022
+====================================
+- Add "Bold" and "Italic" support
+  AssParser can parse "bold" and "italic" info correctly,
+  FontParser can record "slant" and "weight" value,
+  FontSubsetter now can select correct fonts from database based on its "bold"
+  and "italic" information
+- Fix some ass parsing bugs
+
+
+
 Overview of changes leading to v0.1.1
 Saturday, November 26, 2022
 ====================================
