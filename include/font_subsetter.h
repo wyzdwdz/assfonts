@@ -88,10 +88,10 @@ class FontSubsetter {
       const std::vector<FontParser::FontInfo>& font_list,
       std::string& found_path, long& found_index);
   void set_subset_font_codepoint_sets();
-  bool FontSubsetter::CreateSubfont(
+  bool CreateSubfont(
       const std::pair<FontPath, std::set<uint32_t>>& subset_font);
-  bool FontSubsetter::CheckGlyph(std::string font_path, long font_index,
-                                 std::set<char32_t> codepoint_set);
+  bool CheckGlyph(std::string font_path, long font_index,
+                  std::set<char32_t> codepoint_set);
 
   friend class AssFontEmbedder;
 };

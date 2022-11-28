@@ -92,7 +92,7 @@ class FontParser {
   std::vector<std::string> FindFileInDir(const std::string& dir,
                                          const std::string& pattern);
   bool GetFontInfo(const std::string& font_path);
-  int FontParser::AssFaceGetWeight(FT_Face face);
+  int AssFaceGetWeight(FT_Face face);
 
   friend class FontSubsetter;
 };
