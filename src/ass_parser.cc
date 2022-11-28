@@ -47,9 +47,10 @@ void AssParser::ReadFile(const std::string& ass_file_path) {
   }
   ass_file.close();
   ParseAss();
+  set_stylename_fontdesc();
   set_font_sets();
   if (font_sets_.empty()) {
-    logger_->error("\"{}\" is not a legal ASS subtitle file.",
+    logger_->error("\"{}\" may not be a legal ASS subtitle file.",
                    ass_path.generic_string());
   }
 }
@@ -143,10 +144,17 @@ std::vector<std::string> AssParser::ParseLine(const std::string& line,
   } else {
     words.push_back(boost::algorithm::trim_copy(word));
   }
+  if (field < num_field - 1) {
+    logger_->error(
+        "\"{}\" is not a legal ASS subtitle file. Incorrect number of field.",
+        ass_path_);
+  }
   return words;
 }
 
 void AssParser::ParseAss() {
+  bool has_style = false;
+  bool has_event = false;
   auto line = text_.begin();
   while (true) {
     if (line == text_.end()) {
@@ -162,6 +170,7 @@ void AssParser::ParseAss() {
           styles_.push_back(ParseLine(*line, 23));
         }
       }
+      has_style = true;
     }
     if (FindTitle(*line, "[Events]")) {
       ++line;
@@ -173,41 +182,66 @@ void AssParser::ParseAss() {
           dialogues_.push_back(ParseLine(*line, 10));
         }
       }
+      has_event = true;
     }
     if (line != text_.end()) {
       ++line;
     }
   }
+  if (!has_style) {
+    logger_->error(
+        "\"{}\" is not a legal ASS subtitle file. No Style Title found.",
+        ass_path_);
+  }
+  if (!has_event) {
+    logger_->error(
+        "\"{}\" is not a legal ASS subtitle file. No Event Title found.",
+        ass_path_);
+  }
 }
 
-void AssParser::set_font_sets() {
-  std::map<std::string, unsigned int> style_name_table;
-  unsigned int style_index = 0;
-  const std::set<char32_t> empty_set;
+void AssParser::set_stylename_fontdesc() {
+  FontDesc empty_font_desc;
   for (const auto& style : styles_) {
-    style_name_table[style[1]] = style_index;
-    ++style_index;
-  }
-  for (const auto& dialogue : dialogues_) {
-    FontDesc font_desc_style;
-    FontDesc font_desc;
-    font_desc_style.fontname = styles_[style_name_table[dialogue[4]]][2];
-    int val = std::stoi(styles_[style_name_table[dialogue[4]]][8]);
+    if (style[1] == "Default") {
+      has_default_style_ = true;
+    }
+    stylename_fontdesc_[style[1]] = empty_font_desc;
+    std::string fontname = style[2];
+    if (fontname[0] == '@') {
+      fontname.erase(0, 1);
+    }
+    stylename_fontdesc_[style[1]].fontname = fontname;
+    int val = std::stoi(style[8]);
     if (val == 1 || val == -1) {
       val = 700;
     } else if (val <= 0) {
       val = 400;
     }
-    font_desc_style.bold = val;
-    val = std::stoi(styles_[style_name_table[dialogue[4]]][9]);
+    stylename_fontdesc_[style[1]].bold = val;
+    val = std::stoi(style[9]);
     if (val == 1) {
       val = 100;
     } else if (val <= 0) {
       val = 0;
     }
-    font_desc_style.italic = val;
-    if (font_desc.fontname[0] == '@') {
-      font_desc.fontname.erase(0, 1);
+    stylename_fontdesc_[style[1]].italic = val;
+  }
+}
+
+void AssParser::set_font_sets() {
+  const std::set<char32_t> empty_set;
+  for (const auto& dialogue : dialogues_) {
+    FontDesc font_desc_style;
+    FontDesc font_desc;
+    if (stylename_fontdesc_.find(dialogue[4]) == stylename_fontdesc_.end()) {
+      if (has_default_style_) {
+        font_desc_style = stylename_fontdesc_["Default"];
+      } else {
+        logger_->error("Style \"{}\" not found.", dialogue[4]);
+      }
+    } else {
+      font_desc_style = stylename_fontdesc_[dialogue[4]];
     }
     if (font_sets_.find(font_desc_style) == font_sets_.end()) {
       font_sets_[font_desc_style] = empty_set;
@@ -336,6 +370,33 @@ void AssParser::StyleOverride(const std::u32string& code, FontDesc* font_desc,
         font_desc->italic = val;
       } else {
         font_desc->italic = font_desc_style.italic;
+      }
+    } else {
+      break;
+    }
+  }
+  pos = 0;
+  while (true) {
+    pos = code.find(U"\\r", pos);
+    if (pos != std::u32string::npos) {
+      pos += 2;
+      iter = code.begin() + pos;
+      std::u32string style;
+      while (iter != code.end() && *iter != U'\\') {
+        style.push_back(*iter);
+        ++iter;
+        ++pos;
+      }
+      std::string style_name = boost::locale::conv::utf_to_utf<char>(
+          boost::algorithm::trim_copy(style));
+      if (stylename_fontdesc_.find(style_name) == stylename_fontdesc_.end()) {
+        if (has_default_style_) {
+          *font_desc = stylename_fontdesc_["Default"];
+        } else {
+          logger_->error("Style \"{}\" not found.", style_name);
+        }
+      } else {
+        *font_desc = stylename_fontdesc_[style_name];
       }
     } else {
       break;

@@ -76,15 +76,18 @@ class AssParser {
   std::vector<std::vector<std::string>> styles_;
   std::vector<std::vector<std::string>> dialogues_;
   std::map<FontDesc, std::set<char32_t>> font_sets_;
+  std::map<std::string, FontDesc> stylename_fontdesc_;
+  bool has_default_style_ = false;
 
   bool IsUTF8(const std::string& line);
   bool FindTitle(const std::string& line, const std::string& title);
   std::vector<std::string> ParseLine(const std::string& line,
                                      const unsigned int num_field);
   void ParseAss();
+  void set_stylename_fontdesc();
   void set_font_sets();
-  void StyleOverride(const std::u32string& code,
-                     FontDesc* font_desc, const FontDesc& font_desc_style);
+  void StyleOverride(const std::u32string& code, FontDesc* font_desc,
+                     const FontDesc& font_desc_style);
 
   friend class FontSubsetter;
 };
