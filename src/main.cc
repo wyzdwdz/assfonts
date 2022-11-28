@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU General Public
  *  License along with assfonts. If not, see <https://www.gnu.org/licenses/>.
- *  
+ *
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
@@ -36,9 +36,9 @@
 #include "font_parser.h"
 #include "font_subsetter.h"
 
-#define VERSION_MAX 0
-#define VERSION_MID 1
-#define VERSION_MIN 2
+constexpr auto VERSION_MAX = 0;
+constexpr auto VERSION_MID = 1;
+constexpr auto VERSION_MIN = 3;
 
 namespace fs = boost::filesystem;
 
@@ -100,23 +100,23 @@ int main(int argc, char** argv) {
   // clang-format off
   if (is_help) {
     fmt::print("assfonts v{}.{}.{}\n"
-               "Subset fonts and embed them into an ASS subtitle.\n"
-               "Usage:     assfonts [options...] [<file>]\n"
-               "Examples:  assfonts <file>                  Embed subset fonts into ASS script\n"
-               "           assfonts -i <file>               Same as above\n"
-               "           assfonts -o <dir> -s -i <file>   Only subset fonts but not embed\n"
-               "           assfonts -f <dir> -e -i <file>   Only embed fonts without subset\n"
-               "           assfonts -f <dir> -b             Build or update fonts database only\n"
-               "Options:\n"
-               "  -i, --input,      <file>  Input .ass file\n"
-               "  -o, --output      <dir>   Output directory    (Default: same directory as input)\n"
-               "  -f, --fontpath    <dir>   Set fonts directory\n"
-               "  -b, --build               Build or update fonts database    (Require --fontpath)\n"
-               "  -d, --dbpath      <dir>   Set fonts database path    (Default: current path)\n"
-               "  -s, --subset-only         Subset fonts but not embed them into subtitle\n"
-               "  -e, --embed-only          Do not subset fonts\n"
-               "  -v, --verbose     <num>   Set logging level (0 to 3), 0 is off    (Default: 3)\n"
-               "  -h, --help                Get help info\n\n", VERSION_MAX, VERSION_MID, VERSION_MIN);
+      "Subset fonts and embed them into an ASS subtitle.\n"
+      "Usage:     assfonts [options...] [<file>]\n"
+      "Examples:  assfonts <file>                  Embed subset fonts into ASS script\n"
+      "           assfonts -i <file>               Same as above\n"
+      "           assfonts -o <dir> -s -i <file>   Only subset fonts but not embed\n"
+      "           assfonts -f <dir> -e -i <file>   Only embed fonts without subset\n"
+      "           assfonts -f <dir> -b             Build or update fonts database only\n"
+      "Options:\n"
+      "  -i, --input,      <file>  Input .ass file\n"
+      "  -o, --output      <dir>   Output directory    (Default: same directory as input)\n"
+      "  -f, --fontpath    <dir>   Set fonts directory\n"
+      "  -b, --build               Build or update fonts database    (Require --fontpath)\n"
+      "  -d, --dbpath      <dir>   Set fonts database path    (Default: current path)\n"
+      "  -s, --subset-only         Subset fonts but not embed them into subtitle\n"
+      "  -e, --embed-only          Do not subset fonts\n"
+      "  -v, --verbose     <num>   Set logging level (0 to 3), 0 is off    (Default: 3)\n"
+      "  -h, --help                Get help info\n\n", VERSION_MAX, VERSION_MID, VERSION_MIN);
     if (argc == 2) {
       exit(EXIT_SUCCESS);
     }
