@@ -2,6 +2,7 @@ Overview of changes leading to v0.1.2
 Sunday, November 27, 2022
 ====================================
 - Add ASS style override code (\r) support
+- Add "Default" style support
 - Optimize error handling mechanism
 
 
