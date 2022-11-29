@@ -34,11 +34,9 @@ namespace ass {
 
 class AssFontEmbedder {
  public:
-  AssFontEmbedder(const FontSubsetter& fs) : fs_(fs) {
-    auto color_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    auto error_sink =
-        std::make_shared<mylog::sinks::error_proxy_sink_mt>(color_sink);
-    logger_ = std::make_shared<spdlog::logger>("ass_font_embedder", error_sink);
+  template <typename T>
+  AssFontEmbedder(const FontSubsetter& fs, std::shared_ptr<T> sink) : fs_(fs) {
+    logger_ = std::make_shared<spdlog::logger>("ass_font_embedder", sink);
     spdlog::register_logger(logger_);
   };
   ~AssFontEmbedder() { spdlog::drop("ass_font_embedder"); };

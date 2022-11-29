@@ -35,6 +35,7 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
@@ -46,17 +47,18 @@ namespace ass {
 
 class FontSubsetter {
  public:
-  FontSubsetter(const AssParser& ap, const FontParser& fp) : ap_(ap), fp_(fp) {
-    auto color_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    auto error_sink =
-        std::make_shared<mylog::sinks::error_proxy_sink_mt>(color_sink);
-    logger_ = std::make_shared<spdlog::logger>("font_subsetter", error_sink);
+  template <typename T>
+  FontSubsetter(const AssParser& ap, const FontParser& fp,
+                std::shared_ptr<T> sink)
+      : ap_(ap), fp_(fp) {
+    logger_ = std::make_shared<spdlog::logger>("font_subsetter", sink);
     spdlog::register_logger(logger_);
     FT_Init_FreeType(&ft_library_);
   };
+  template <typename T>
   FontSubsetter(const AssParser& ap, const FontParser& fp,
-                const std::string& subfont_dir)
-      : FontSubsetter(ap, fp) {
+                const std::string& subfont_dir, std::shared_ptr<T> sink)
+      : FontSubsetter(sink, ap, fp) {
     SetSubfontDir(subfont_dir);
   };
   ~FontSubsetter() {

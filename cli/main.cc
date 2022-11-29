@@ -22,6 +22,7 @@
 #include <string>
 
 #include <fmt/core.h>
+#include <spdlog/async.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 #include <CLI/App.hpp>
@@ -43,16 +44,17 @@ constexpr auto VERSION_MIN = 3;
 namespace fs = boost::filesystem;
 
 int main(int argc, char** argv) {
+  spdlog::init_thread_pool(512, 1);
   auto color_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
   auto error_sink =
       std::make_shared<mylog::sinks::error_proxy_sink_mt>(color_sink);
   auto logger = std::make_shared<spdlog::logger>("main", error_sink);
   spdlog::register_logger(logger);
 
-  ass::AssParser ap;
-  ass::FontParser fp;
-  ass::FontSubsetter fs(ap, fp);
-  ass::AssFontEmbedder afe(fs);
+  ass::AssParser ap(error_sink);
+  ass::FontParser fp(error_sink);
+  ass::FontSubsetter fs(ap, fp, error_sink);
+  ass::AssFontEmbedder afe(fs, error_sink);
 
   //spdlog::set_pattern("[%n] [%^%l%$] %v");
   spdlog::set_pattern("[%^%l%$] %v");
@@ -118,6 +120,7 @@ int main(int argc, char** argv) {
       "  -v, --verbose     <num>   Set logging level (0 to 3), 0 is off    (Default: 3)\n"
       "  -h, --help                Get help info\n\n", VERSION_MAX, VERSION_MID, VERSION_MIN);
     if (argc == 2) {
+      spdlog::shutdown();
       exit(EXIT_SUCCESS);
     }
   }
@@ -183,6 +186,7 @@ int main(int argc, char** argv) {
   }
 
   if (input.empty()) {
+    spdlog::shutdown();
     exit(EXIT_SUCCESS);
   }
 
@@ -196,6 +200,7 @@ int main(int argc, char** argv) {
     afe.set_input_ass_path(input_path.generic_string());
     afe.set_output_dir_path(output_path.generic_string());
     afe.Run(true);
+    spdlog::shutdown();
     exit(EXIT_SUCCESS);
   }
 
@@ -212,5 +217,6 @@ int main(int argc, char** argv) {
   }
 
   spdlog::drop("main");
+  spdlog::shutdown();
   return 0;
 }

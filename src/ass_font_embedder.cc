@@ -95,6 +95,7 @@ void AssFontEmbedder::Run(bool is_clean_only) {
             font_data.c_str(), font_data.c_str() + font_data.size(), true);
         output_ass << "\nfontname: " << fontname << "\n";
         output_ass << uu_str;
+        ostrm.clear();
         is.close();
       }
       output_ass << "\n\n" << line << "\n";

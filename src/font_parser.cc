@@ -21,10 +21,13 @@
 
 #include <fstream>
 #include <regex>
+#include <thread>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #include FT_MODULE_H
 #include FT_TYPE1_TABLES_H
 #include FT_SFNT_NAMES_H
@@ -33,8 +36,10 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
+#include <boost/asio.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/locale.hpp>
 #include <boost/serialization/vector.hpp>
@@ -45,9 +50,12 @@ namespace ass {
 
 void FontParser::LoadFonts(const std::string& fonts_dir) {
   fonts_path_ = FindFileInDir(fonts_dir, ".+\\.(ttf|otf|ttc|otc)$");
-  for (const auto& font_path : fonts_path_) {
-    GetFontInfo(font_path);
+  font_list_.reserve(fonts_path_.size());
+  boost::asio::thread_pool pool(std::thread::hardware_concurrency());
+  for (const std::string& font_path : fonts_path_) {
+    boost::asio::post(pool, [&] { GetFontInfo(font_path); });
   }
+  pool.join();
 }
 
 void FontParser::SaveDB(const std::string& db_path) {
@@ -98,19 +106,21 @@ std::vector<std::string> FontParser::FindFileInDir(const std::string& dir,
   return res;
 }
 
-bool FontParser::GetFontInfo(const std::string& font_path) {
+void FontParser::GetFontInfo(const std::string& font_path) {
   std::vector<std::string> families;
   std::vector<std::string> fullnames;
   std::vector<std::string> psnames;
   FontInfo font_info;
+  FT_Library ft_library;
+  FT_Init_FreeType(&ft_library);
   FT_Face ft_face;
-  if (FT_New_Face(ft_library_, font_path.c_str(), -1, &ft_face)) {
+  if (FT_New_Face(ft_library, font_path.c_str(), -1, &ft_face)) {
     logger_->warn("\"{}\" cannot be opened.", font_path);
-    return false;
+    return;
   }
   const long n_face = ft_face->num_faces;
   for (long face_idx = 0; face_idx < n_face; ++face_idx) {
-    FT_New_Face(ft_library_, font_path.c_str(), face_idx, &ft_face);
+    FT_New_Face(ft_library, font_path.c_str(), face_idx, &ft_face);
     if (!(ft_face->face_flags & FT_FACE_FLAG_SCALABLE)) {
       logger_->warn("\"{}\"[{}] contains no scalable font face.", font_path,
                     face_idx);
@@ -181,16 +191,16 @@ bool FontParser::GetFontInfo(const std::string& font_path) {
     font_info.psnames = psnames;
     font_info.path = font_path;
     font_info.index = face_idx;
+    mtx_.lock();
     font_list_.push_back(font_info);
+    mtx_.unlock();
     FT_Done_Face(ft_face);
   }
   if (font_info.families.empty() && font_info.fullnames.empty() &&
       font_info.psnames.empty()) {
     logger_->warn("\"{}\" has no parsable name.", font_path);
-    return false;
-  } else {
-    return true;
   }
+  FT_Done_FreeType(ft_library);
 }
 
 int FontParser::AssFaceGetWeight(FT_Face face) {
