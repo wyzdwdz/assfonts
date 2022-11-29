@@ -39,7 +39,7 @@
 
 constexpr auto VERSION_MAX = 0;
 constexpr auto VERSION_MID = 1;
-constexpr auto VERSION_MIN = 3;
+constexpr auto VERSION_MIN = 4;
 
 namespace fs = boost::filesystem;
 
