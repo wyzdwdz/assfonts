@@ -35,14 +35,14 @@ namespace ass {
 
 class AssParser {
  public:
-  AssParser() {
-    auto color_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    auto error_sink =
-        std::make_shared<mylog::sinks::error_proxy_sink_mt>(color_sink);
-    logger_ = std::make_shared<spdlog::logger>("ass_parser", error_sink);
+  template <typename T>
+  AssParser(std::shared_ptr<T> sink) {
+    logger_ = std::make_shared<spdlog::logger>("ass_parser", sink);
     spdlog::register_logger(logger_);
   };
-  AssParser(const std::string& ass_file_path) : AssParser() {
+  template <typename T>
+  AssParser(const std::string& ass_file_path, std::shared_ptr<T> sink)
+      : AssParser(sink) {
     ReadFile(ass_file_path);
   }
   ~AssParser() { spdlog::drop("ass_parser"); };

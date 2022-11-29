@@ -21,6 +21,7 @@
 #define ASSFONTS_FONTPARSER_H_
 
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -32,6 +33,8 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+#include <spdlog/async.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
@@ -41,21 +44,18 @@ namespace ass {
 
 class FontParser {
  public:
-  FontParser() {
-    auto color_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-    auto error_sink =
-        std::make_shared<mylog::sinks::error_proxy_sink_mt>(color_sink);
-    logger_ = std::make_shared<spdlog::logger>("font_parser", error_sink);
+  template <typename T>
+  FontParser(std::shared_ptr<T> sink) {
+    logger_ = std::make_shared<spdlog::async_logger>("font_parser", sink,
+                                                     spdlog::thread_pool());
     spdlog::register_logger(logger_);
-    FT_Init_FreeType(&ft_library_);
   };
-  FontParser(const std::string& fonts_dir) : FontParser() {
+  template <typename T>
+  FontParser(const std::string& fonts_dir, std::shared_ptr<T> sink)
+      : FontParser(sink) {
     LoadFonts(fonts_dir);
   };
-  ~FontParser() {
-    FT_Done_FreeType(ft_library_);
-    spdlog::drop("font_parser");
-  };
+  ~FontParser() { spdlog::drop("font_parser"); };
   void LoadFonts(const std::string& fonts_dir);
   void SaveDB(const std::string& db_path);
   void LoadDB(const std::string& db_path);
@@ -83,15 +83,15 @@ class FontParser {
     }
   };
 
-  FT_Library ft_library_;
   std::shared_ptr<spdlog::logger> logger_;
   std::vector<FontInfo> font_list_;
   std::vector<FontInfo> font_list_in_db_;
   std::vector<std::string> fonts_path_;
+  std::mutex mtx_;
 
   std::vector<std::string> FindFileInDir(const std::string& dir,
                                          const std::string& pattern);
-  bool GetFontInfo(const std::string& font_path);
+  void GetFontInfo(const std::string& font_path);
   int AssFaceGetWeight(FT_Face face);
 
   friend class FontSubsetter;

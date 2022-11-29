@@ -14,6 +14,7 @@ find_package(Boost REQUIRED filesystem locale serialization)
 find_package(spdlog CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(CLI11 CONFIG REQUIRED)
+# find_package(wxWidgets CONFIG REQUIRED)
 
 add_library(harfbuzz-subset INTERFACE IMPORTED PRIVATE)
 find_library(HARFBUZZ_SUBSET_LIBRARY_DEBUG NAMES harfbuzz-subset PATHS "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug" PATH_SUFFIXES lib NO_DEFAULT_PATH)
@@ -24,3 +25,5 @@ find_library(HARFBUZZ_SUBSET_LIBRARY_RELEASE NAMES harfbuzz-subset PATHS "${_VCP
 target_link_libraries(harfbuzz-subset INTERFACE $<$<NOT:$<CONFIG:DEBUG>>:${HARFBUZZ_SUBSET_LIBRARY_RELEASE}>)
 
 ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/src)
+ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/cli)
+# ADD_SUBDIRECTORY(${PROJECT_SOURCE_DIR}/gui)

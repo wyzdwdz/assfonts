@@ -24,14 +24,14 @@
 #include <fstream>
 #include <locale>
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 #include <fmt/core.h>
 #include <harfbuzz/hb-subset.h>
 #include <harfbuzz/hb.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
-#ifdef _WIN32
-#include <Windows.h>
-#endif
 
 namespace fs = boost::filesystem;
 

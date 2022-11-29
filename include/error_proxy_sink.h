@@ -45,6 +45,7 @@ class error_proxy_sink : public spdlog::sinks::base_sink<Mutex> {
       sink_->log(msg);
     }
     if (spdlog::level::err == msg.level) {
+      spdlog::shutdown();
       exit(EXIT_FAILURE);
     }
   }
