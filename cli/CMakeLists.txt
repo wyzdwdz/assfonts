@@ -8,7 +8,7 @@ add_executable(assfonts main.cc)
 target_link_libraries(assfonts PRIVATE libassfonts ${THIRD_PARTY_LIBS})
 
 target_include_directories(assfonts PRIVATE ${PROJECT_SOURCE_DIR}/include
-                                                ${VCPKG_INCLUDE_DIR})
+                                            ${VCPKG_INCLUDE_DIR})
 
 if(MSVC)
     if(CMAKE_BUILD_TYPE MATCHES "Debug")
