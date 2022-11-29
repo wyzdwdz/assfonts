@@ -1,4 +1,13 @@
-Overview of changes leading to v0.1.2
+Overview of changes leading to v0.1.4
+Tuesday, November 29, 2022
+====================================
+- Add multithreading support for parsing fonts
+- When parsing fonts, change logger to asynchronous mode
+- Adjust solution structure
+- TODO: GUI
+
+
+Overview of changes leading to v0.1.3
 Sunday, November 27, 2022
 ====================================
 - Add ASS style override code (\r) support
