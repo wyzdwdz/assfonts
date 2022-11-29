@@ -84,10 +84,10 @@ class FontParser {
   };
 
   std::shared_ptr<spdlog::logger> logger_;
+  std::mutex mtx_;
   std::vector<FontInfo> font_list_;
   std::vector<FontInfo> font_list_in_db_;
   std::vector<std::string> fonts_path_;
-  std::mutex mtx_;
 
   std::vector<std::string> FindFileInDir(const std::string& dir,
                                          const std::string& pattern);
