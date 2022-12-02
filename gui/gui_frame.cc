@@ -7,7 +7,10 @@
 GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
                    const wxPoint& pos, const wxSize& size, long style)
     : wxFrame(parent, id, title, pos, size, style) {
-  this->SetSize(FromDIP(wxSize(800, 600)));
+  wxSize frame_size = FromDIP(wxSize(800, 600));
+  this->SetSize(frame_size);
+  this->SetMaxSize(frame_size);
+  this->SetMinSize(frame_size);
   this->SetTitle(_T("assfonts"));
 
 #ifdef _WIN32
@@ -15,7 +18,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 #else
   wxIcon icon = wxIcon(icon_xpm);
 #endif
-  SetIcon(icon);
+  this->SetIcon(icon);
 
   main_panel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                            wxTAB_TRAVERSAL);
