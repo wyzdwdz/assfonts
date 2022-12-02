@@ -36,11 +36,9 @@ extern "C" {
 }
 #endif
 
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
 #include "ass_parser.h"
-#include "error_proxy_sink.h"
 #include "font_parser.h"
 
 namespace ass {

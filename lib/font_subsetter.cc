@@ -55,19 +55,21 @@ void FontSubsetter::Run(bool is_no_subset) {
     for (const auto& font_set : ap_.font_sets_) {
 #ifdef _WIN32
       std::wstring w_fontname;
-      int w_len =
-          MultiByteToWideChar(CP_UTF8, 0, font_set.first.fontname.c_str(),
-                              font_set.first.fontname.size(), NULL, 0);
+      int w_len = MultiByteToWideChar(
+          CP_UTF8, 0, font_set.first.fontname.c_str(),
+          static_cast<int>(font_set.first.fontname.size()), NULL, 0);
       w_fontname.resize(w_len);
       MultiByteToWideChar(CP_UTF8, 0, font_set.first.fontname.c_str(),
-                          font_set.first.fontname.size(), &w_fontname[0],
-                          w_fontname.size());
+                          static_cast<int>(font_set.first.fontname.size()),
+                          &w_fontname[0], static_cast<int>(w_fontname.size()));
       std::string fontname;
       int len = WideCharToMultiByte(CP_ACP, 0, w_fontname.c_str(),
-                                    w_fontname.size(), NULL, 0, NULL, NULL);
+                                    static_cast<int>(w_fontname.size()), NULL,
+                                    0, NULL, NULL);
       fontname.resize(len);
-      WideCharToMultiByte(CP_ACP, 0, w_fontname.c_str(), w_fontname.size(),
-                          &fontname[0], fontname.size(), NULL, NULL);
+      WideCharToMultiByte(CP_ACP, 0, w_fontname.c_str(),
+                          static_cast<int>(w_fontname.size()), &fontname[0],
+                          static_cast<int>(fontname.size()), NULL, NULL);
 #elif
       std::string fontname(font_set.first);
 #endif
@@ -211,18 +213,21 @@ void FontSubsetter::set_subset_font_codepoint_sets() {
     std::set<uint32_t> codepoint_set;
 #ifdef _WIN32
     std::wstring w_fontname;
-    int w_len = MultiByteToWideChar(CP_UTF8, 0, font_set.first.fontname.c_str(),
-                                    font_set.first.fontname.size(), NULL, 0);
+    int w_len = MultiByteToWideChar(
+        CP_UTF8, 0, font_set.first.fontname.c_str(),
+        static_cast<int>(font_set.first.fontname.size()), NULL, 0);
     w_fontname.resize(w_len);
     MultiByteToWideChar(CP_UTF8, 0, font_set.first.fontname.c_str(),
-                        font_set.first.fontname.size(), &w_fontname[0],
-                        w_fontname.size());
+                        static_cast<int>(font_set.first.fontname.size()),
+                        &w_fontname[0], static_cast<int>(w_fontname.size()));
     std::string fontname;
     int len = WideCharToMultiByte(CP_ACP, 0, w_fontname.c_str(),
-                                  w_fontname.size(), NULL, 0, NULL, NULL);
+                                  static_cast<int>(w_fontname.size()), NULL, 0,
+                                  NULL, NULL);
     fontname.resize(len);
-    WideCharToMultiByte(CP_ACP, 0, w_fontname.c_str(), w_fontname.size(),
-                        &fontname[0], fontname.size(), NULL, NULL);
+    WideCharToMultiByte(CP_ACP, 0, w_fontname.c_str(),
+                        static_cast<int>(w_fontname.size()), &fontname[0],
+                        static_cast<int>(fontname.size()), NULL, NULL);
 #elif
     std::string fontname(font_set.first);
 #endif
@@ -258,18 +263,17 @@ bool FontSubsetter::CreateSubfont(
     const std::pair<FontPath, std::set<uint32_t>>& subset_font) {
   fs::path input_filepath(subset_font.first.path);
   fs::path output_filepath(
-      subfont_dir_ + "/" + input_filepath.stem().generic_string() + "[" +
+      subfont_dir_ + "/" + input_filepath.stem().string() + "[" +
       std::to_string(subset_font.first.index) + "]_subset" +
-      ((boost::algorithm ::to_lower_copy(
-            input_filepath.extension().generic_string()) == ".otf" ||
-        boost::algorithm ::to_lower_copy(
-            input_filepath.extension().generic_string()) == ".otc")
+      ((boost::algorithm ::to_lower_copy(input_filepath.extension().string()) ==
+            ".otf" ||
+        boost::algorithm ::to_lower_copy(input_filepath.extension().string()) ==
+            ".otc")
            ? ".otf"
            : ".ttf"));
   hb_blob_t* hb_blob =
-      hb_blob_create_from_file(input_filepath.generic_string().c_str());
+      hb_blob_create_from_file(input_filepath.string().c_str());
   hb_face_t* hb_face = hb_face_create(hb_blob, subset_font.first.index);
-  hb_font_t* hb_font = hb_font_create(hb_face);
   FT_Face ft_face;
   FT_New_Face(ft_library_, subset_font.first.path.c_str(),
               subset_font.first.index, &ft_face);
@@ -305,7 +309,7 @@ bool FontSubsetter::CreateSubfont(
   hb_blob_t* subset_blob = hb_face_reference_blob(subset_face);
   unsigned int len = 0;
   const char* subset_data = hb_blob_get_data(subset_blob, &len);
-  std::ofstream subset_file(output_filepath.generic_string(), std::ios::binary);
+  std::ofstream subset_file(output_filepath.string(), std::ios::binary);
   subset_file.write(subset_data, len);
   subset_file.close();
   FT_Done_Face(ft_face);
@@ -319,7 +323,7 @@ bool FontSubsetter::CreateSubfont(
   if (len == 0) {
     return false;
   }
-  subfonts_path_.push_back(output_filepath.generic_string());
+  subfonts_path_.push_back(output_filepath.string());
   return true;
 }
 

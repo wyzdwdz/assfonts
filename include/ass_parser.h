@@ -26,10 +26,7 @@
 #include <string>
 #include <vector>
 
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
-
-#include "error_proxy_sink.h"
 
 namespace ass {
 
@@ -74,10 +71,10 @@ class AssParser {
   std::string ass_path_;
   std::vector<std::string> text_;
   std::vector<std::vector<std::string>> styles_;
+  bool has_default_style_ = false;
   std::vector<std::vector<std::string>> dialogues_;
   std::map<FontDesc, std::set<char32_t>> font_sets_;
   std::map<std::string, FontDesc> stylename_fontdesc_;
-  bool has_default_style_ = false;
 
   bool IsUTF8(const std::string& line);
   bool FindTitle(const std::string& line, const std::string& title);

@@ -43,9 +43,8 @@ void AssFontEmbedder::set_output_dir_path(const std::string& output_dir_path) {
 
 void AssFontEmbedder::Run(bool is_clean_only) {
   fs::path input_path(input_ass_path_);
-  fs::path output_path(output_dir_path_ + "/" +
-                       input_path.stem().generic_string() + ".assfonts" +
-                       input_path.extension().generic_string());
+  fs::path output_path(output_dir_path_ + "/" + input_path.stem().string() +
+                       ".assfonts" + input_path.extension().string());
   std::string real_input_path;
   bool have_fonts = CleanFonts();
   if (is_clean_only) {
@@ -62,7 +61,7 @@ void AssFontEmbedder::Run(bool is_clean_only) {
   if (!input_ass.is_open()) {
     logger_->error("\"{}\" cannot be opened.", real_input_path);
   }
-  std::ofstream output_ass(output_path.generic_string());
+  std::ofstream output_ass(output_path.string());
   std::string line;
   if (!output_ass.is_open()) {
     input_ass.close();
@@ -158,7 +157,7 @@ bool AssFontEmbedder::CleanFonts() {
   const std::regex r_chapter_title("\\s*\\[.+\\]\\s*");
   std::smatch sm;
   fs::path input_path(input_ass_path_);
-  std::ifstream is(input_path.generic_string());
+  std::ifstream is(input_path.string());
   while (getline(is, line)) {
     if (boost::algorithm::trim_copy(boost::algorithm::to_lower_copy(line)) ==
         "[fonts]") {
@@ -175,13 +174,12 @@ bool AssFontEmbedder::CleanFonts() {
     }
   }
   if (have_fonts) {
-    fs::path output_path(output_dir_path_ + "/" +
-                         input_path.stem().generic_string() + ".cleaned" +
-                         input_path.extension().generic_string());
+    fs::path output_path(output_dir_path_ + "/" + input_path.stem().string() +
+                         ".cleaned" + input_path.extension().string());
     logger_->info(
         "Found fonts in \"{}\" Delete them and save new file in \"{}\"",
         input_path.generic_string(), output_path.generic_string());
-    std::ofstream os(output_path.generic_string());
+    std::ofstream os(output_path.string());
     if (!os.is_open()) {
       is.close();
       logger_->error("\"{}\" cannot be created.", output_path.generic_string());
