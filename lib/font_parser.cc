@@ -65,7 +65,7 @@ void FontParser::SaveDB(const std::string& db_path) {
                   file_path.generic_string());
     fs::remove(file_path);
   }
-  std::ofstream db_file(file_path.generic_string(), std::ios::binary);
+  std::ofstream db_file(file_path.string(), std::ios::binary);
   boost::archive::binary_oarchive oa(db_file);
   oa << font_list_;
   db_file.close();
@@ -75,7 +75,7 @@ void FontParser::SaveDB(const std::string& db_path) {
 
 void FontParser::LoadDB(const std::string& db_path) {
   fs::path file_path(db_path);
-  std::ifstream db_file(file_path.generic_string(), std::ios::binary);
+  std::ifstream db_file(file_path.string(), std::ios::binary);
   if (db_file.is_open()) {
     boost::archive::binary_iarchive ia(db_file);
     std::vector<FontInfo> tmp_font_list;
@@ -99,7 +99,7 @@ std::vector<std::string> FontParser::FindFileInDir(const std::string& dir,
   const fs::path dir_path(dir);
   const fs::recursive_directory_iterator iter(dir_path);
   for (const auto& dir_entry : iter) {
-    if (std::regex_match(dir_entry.path().generic_string(), r)) {
+    if (std::regex_match(dir_entry.path().string(), r)) {
       res.push_back(dir_entry.path().generic_string());
     }
   }

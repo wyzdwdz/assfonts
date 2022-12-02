@@ -75,15 +75,13 @@ int main(int argc, char** argv) {
   auto* p_opt_f = app.add_option("-f,--fontpath", fonts, "Set fonts directory");
   auto* p_opt_d =
       app.add_option("-d,--dbpath", database, "Set fonts database path");
-  auto* p_opt_b =
-      app.add_flag("-b,--build", is_build, "Build or update fonts database");
-  auto* p_opt_n =
-      app.add_flag("-e,--embed-only", is_embed_only, "Do not subset fonts");
-  auto* p_opt_s = app.add_flag("-s,--subset-only", is_subset_only,
-                               "Subset fonts but not embed them into subtitle");
+  app.add_flag("-b,--build", is_build, "Build or update fonts database");
+  app.add_flag("-e,--embed-only", is_embed_only, "Do not subset fonts");
+  app.add_flag("-s,--subset-only", is_subset_only,
+               "Subset fonts but not embed them into subtitle");
   auto* p_opt_v = app.add_option("-v,--verbose", verbose, "Set logging level.");
   app.set_help_flag("");
-  auto* p_opt_h = app.add_flag("-h,--help", is_help, "Get help info");
+  app.add_flag("-h,--help", is_help, "Get help info");
   p_opt_i->type_name("<file>");
   p_opt_o->type_name("<dir>");
   p_opt_f->type_name("<dir>");
@@ -177,12 +175,12 @@ int main(int argc, char** argv) {
   }
 
   if (!fonts.empty()) {
-    fp.LoadFonts(fonts_path.generic_string());
+    fp.LoadFonts(fonts_path.string());
   }
   if (is_build) {
-    fp.SaveDB(db_path.generic_string() + "/fonts.db");
+    fp.SaveDB(db_path.string() + "/fonts.db");
   } else {
-    fp.LoadDB(db_path.generic_string() + "/fonts.db");
+    fp.LoadDB(db_path.string() + "/fonts.db");
   }
 
   if (input.empty()) {
@@ -190,29 +188,29 @@ int main(int argc, char** argv) {
     exit(EXIT_SUCCESS);
   }
 
-  ap.ReadFile(input_path.generic_string());
+  ap.ReadFile(input_path.string());
 
   if (output.empty()) {
     output_path = input_path.parent_path();
   }
 
   if (is_embed_only && is_subset_only) {
-    afe.set_input_ass_path(input_path.generic_string());
-    afe.set_output_dir_path(output_path.generic_string());
+    afe.set_input_ass_path(input_path.string());
+    afe.set_output_dir_path(output_path.string());
     afe.Run(true);
     spdlog::shutdown();
     exit(EXIT_SUCCESS);
   }
 
   if (!is_embed_only) {
-    fs.SetSubfontDir(output_path.generic_string() + "/" +
-                     input_path.stem().generic_string() + "_subsetted");
+    fs.SetSubfontDir(output_path.string() + "/" + input_path.stem().string() +
+                     "_subsetted");
   }
   fs.Run(is_embed_only);
 
   if (!is_subset_only) {
-    afe.set_input_ass_path(input_path.generic_string());
-    afe.set_output_dir_path(output_path.generic_string());
+    afe.set_input_ass_path(input_path.string());
+    afe.set_output_dir_path(output_path.string());
     afe.Run(false);
   }
 

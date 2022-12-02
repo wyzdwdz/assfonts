@@ -34,11 +34,7 @@ extern "C" {
 }
 #endif
 
-#include <spdlog/async.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
-
-#include "error_proxy_sink.h"
 
 namespace ass {
 
@@ -72,7 +68,7 @@ class FontParser {
     long index = 0;
 
     template <class Archive>
-    void serialize(Archive& ar, const unsigned int version) {
+    void serialize(Archive& ar, const unsigned int) {
       ar& families;
       ar& fullnames;
       ar& psnames;

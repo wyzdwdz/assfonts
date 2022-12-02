@@ -452,3 +452,5 @@ _deps
 
 #output directory
 out/
+
+#whitelist
