@@ -22,6 +22,8 @@ Use [vcpkg](https://vcpkg.io/) as package manager
 
 - [CLI11](https://github.com/CLIUtils/CLI11)
 
+- [wxWidgets](https://www.wxwidgets.org/)
+
 ### How to use
 
 ```
