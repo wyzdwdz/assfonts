@@ -47,7 +47,7 @@ void FontSubsetter::SetSubfontDir(const std::string& subfont_dir) {
   subfont_dir_ = subfont_dir;
 }
 
-void FontSubsetter::Run(bool is_no_subset) {
+bool FontSubsetter::Run(bool is_no_subset) {
   if (is_no_subset) {
     bool have_missing = false;
     std::string path;
@@ -87,16 +87,21 @@ void FontSubsetter::Run(bool is_no_subset) {
     }
     if (have_missing) {
       logger_->error("Found missing fonts. Check warning info above.");
+      return false;
     }
-    return;
+    return true;
   }
-  set_subset_font_codepoint_sets();
+  if (!set_subset_font_codepoint_sets()) {
+    return false;
+  }
   for (const auto& subset_font : subset_font_codepoint_sets_) {
     if (!CreateSubfont(subset_font)) {
       logger_->error("Subset failed: \"{}\"[{}]", subset_font.first.path,
                      subset_font.first.index);
+      return false;
     }
   }
+  return true;
 }
 
 bool FontSubsetter::FindFont(
@@ -206,7 +211,7 @@ bool FontSubsetter::FindFont(
   return is_found;
 }
 
-void FontSubsetter::set_subset_font_codepoint_sets() {
+bool FontSubsetter::set_subset_font_codepoint_sets() {
   bool have_missing = false;
   for (const auto& font_set : ap_.font_sets_) {
     FontPath font_path;
@@ -256,7 +261,9 @@ void FontSubsetter::set_subset_font_codepoint_sets() {
   }
   if (have_missing) {
     logger_->error("Found missing fonts. Check warning info above.");
+    return false;
   }
+  return true;
 }
 
 bool FontSubsetter::CreateSubfont(

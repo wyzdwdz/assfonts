@@ -64,7 +64,7 @@ class FontSubsetter {
     spdlog::drop("font_subsetter");
   }
   void SetSubfontDir(const std::string& subfont_dir);
-  void Run(bool is_no_subset);
+  bool Run(bool is_no_subset);
 
  private:
   struct FontPath {
@@ -87,7 +87,7 @@ class FontSubsetter {
       const std::pair<AssParser::FontDesc, std::set<char32_t>> font_set,
       const std::vector<FontParser::FontInfo>& font_list,
       std::string& found_path, long& found_index);
-  void set_subset_font_codepoint_sets();
+  bool set_subset_font_codepoint_sets();
   bool CreateSubfont(
       const std::pair<FontPath, std::set<uint32_t>>& subset_font);
   bool CheckGlyph(std::string font_path, long font_index,

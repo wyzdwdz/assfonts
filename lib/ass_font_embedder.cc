@@ -41,14 +41,17 @@ void AssFontEmbedder::set_output_dir_path(const std::string& output_dir_path) {
   output_dir_path_ = output_dir_path;
 }
 
-void AssFontEmbedder::Run(bool is_clean_only) {
+bool AssFontEmbedder::Run(bool is_clean_only) {
   fs::path input_path(input_ass_path_);
   fs::path output_path(output_dir_path_ + "/" + input_path.stem().string() +
                        ".assfonts" + input_path.extension().string());
   std::string real_input_path;
-  bool have_fonts = CleanFonts();
+  bool have_fonts;
+  if (!CleanFonts(have_fonts)) {
+    return false;
+  }
   if (is_clean_only) {
-    return;
+    return true;
   }
   if (have_fonts) {
     real_input_path = output_dir_path_ + "/" +
@@ -60,13 +63,14 @@ void AssFontEmbedder::Run(bool is_clean_only) {
   std::ifstream input_ass(real_input_path);
   if (!input_ass.is_open()) {
     logger_->error("\"{}\" cannot be opened.", real_input_path);
+    return false;
   }
   std::ofstream output_ass(output_path.string());
   std::string line;
   if (!output_ass.is_open()) {
     input_ass.close();
     logger_->error("\"{}\" cannot be created.", output_path.generic_string());
-    return;
+    return false;
   }
   while (getline(input_ass, line)) {
     if (boost::algorithm::trim_copy(boost::algorithm::to_lower_copy(line)) ==
@@ -106,6 +110,7 @@ void AssFontEmbedder::Run(bool is_clean_only) {
                 output_path.generic_string());
   input_ass.close();
   output_ass.close();
+  return true;
 }
 
 std::string AssFontEmbedder::UUEncode(const char* begin, const char* end,
@@ -150,10 +155,10 @@ std::string AssFontEmbedder::UUEncode(const char* begin, const char* end,
   return ret;
 }
 
-bool AssFontEmbedder::CleanFonts() {
+bool AssFontEmbedder::CleanFonts(bool& have_fonts) {
   std::vector<std::string> output_lines;
   std::string line;
-  bool have_fonts = false;
+  have_fonts = false;
   const std::regex r_chapter_title("\\s*\\[.+\\]\\s*");
   std::smatch sm;
   fs::path input_path(input_ass_path_);
@@ -183,7 +188,7 @@ bool AssFontEmbedder::CleanFonts() {
     if (!os.is_open()) {
       is.close();
       logger_->error("\"{}\" cannot be created.", output_path.generic_string());
-      return have_fonts;
+      return false;
     }
     for (const auto& str : output_lines) {
       os << str;
@@ -191,7 +196,7 @@ bool AssFontEmbedder::CleanFonts() {
     os.close();
   }
   is.close();
-  return have_fonts;
+  return true;
 }
 
 }  // namespace ass

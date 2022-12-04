@@ -1,9 +1,14 @@
 cmake_minimum_required (VERSION 3.20)
 
 set(THIRD_PARTY_LIBS PRIVATE wx::core
-                             wx::base)
+                             wx::base
+                             Boost::boost
+                             Boost::filesystem
+                             Boost::thread
+                             spdlog::spdlog)
 
-set(TARGET_SOURCE PRIVATE gui_frame.cc)
+set(TARGET_SOURCE PRIVATE gui_frame.cc
+                          run.cc)
 
 set(RESOURCE_DIR PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/resource)
 

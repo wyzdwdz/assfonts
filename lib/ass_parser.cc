@@ -29,7 +29,7 @@ namespace fs = boost::filesystem;
 
 namespace ass {
 
-void AssParser::ReadFile(const std::string& ass_file_path) {
+bool AssParser::ReadFile(const std::string& ass_file_path) {
   fs::path ass_path(ass_file_path);
   std::ifstream ass_file(ass_file_path);
   if (ass_file.is_open()) {
@@ -38,16 +38,22 @@ void AssParser::ReadFile(const std::string& ass_file_path) {
     while (getline(ass_file, line)) {
       if (!IsUTF8(line)) {
         logger_->error("Only support UTF-8 subtitle.");
+        return false;
       }
       text_.push_back(line);
     }
   } else {
     logger_->error("\"{}\" cannot be opened.", ass_path.generic_string());
+    return false;
   }
   ass_file.close();
-  ParseAss();
+  if (!ParseAss()) {
+    return false;
+  }
   set_stylename_fontdesc();
-  set_font_sets();
+  if (!set_font_sets()) {
+    return false;
+  }
   std::vector<FontDesc> keys_for_del;
   for (const auto& font_set : font_sets_) {
     if (font_set.second.size() == 0) {
@@ -60,7 +66,9 @@ void AssParser::ReadFile(const std::string& ass_file_path) {
   if (font_sets_.empty()) {
     logger_->error("\"{}\" may not be a legal ASS subtitle file.",
                    ass_path.generic_string());
+    return false;
   }
+  return true;
 }
 
 bool AssParser::IsUTF8(const std::string& line) {
@@ -115,8 +123,8 @@ bool AssParser::FindTitle(const std::string& line, const std::string& title) {
   }
 }
 
-std::vector<std::string> AssParser::ParseLine(const std::string& line,
-                                              const unsigned int num_field) {
+bool AssParser::ParseLine(const std::string& line, const unsigned int num_field,
+                          std::vector<std::string>& res) {
   std::vector<std::string> words;
   std::string word;
   auto ch = line.begin();
@@ -156,13 +164,16 @@ std::vector<std::string> AssParser::ParseLine(const std::string& line,
     logger_->error(
         "\"{}\" is not a legal ASS subtitle file. Incorrect number of field.",
         ass_path_);
+    return false;
   }
-  return words;
+  res = words;
+  return true;
 }
 
-void AssParser::ParseAss() {
+bool AssParser::ParseAss() {
   bool has_style = false;
   bool has_event = false;
+  std::vector<std::string> res;
   auto line = text_.begin();
   while (true) {
     if (line == text_.end()) {
@@ -175,7 +186,10 @@ void AssParser::ParseAss() {
           break;
         }
         if (FindTitle(*line, "Style:")) {
-          styles_.push_back(ParseLine(*line, 23));
+          if (!ParseLine(*line, 23, res)) {
+            return false;
+          }
+          styles_.push_back(res);
         }
       }
       has_style = true;
@@ -187,7 +201,10 @@ void AssParser::ParseAss() {
           break;
         }
         if (FindTitle(*line, "Dialogue:")) {
-          dialogues_.push_back(ParseLine(*line, 10));
+          if (!ParseLine(*line, 10, res)) {
+            return false;
+          }
+          dialogues_.push_back(res);
         }
       }
       has_event = true;
@@ -200,12 +217,15 @@ void AssParser::ParseAss() {
     logger_->error(
         "\"{}\" is not a legal ASS subtitle file. No Style Title found.",
         ass_path_);
+    return false;
   }
   if (!has_event) {
     logger_->error(
         "\"{}\" is not a legal ASS subtitle file. No Event Title found.",
         ass_path_);
+    return false;
   }
+  return true;
 }
 
 void AssParser::set_stylename_fontdesc() {
@@ -237,7 +257,7 @@ void AssParser::set_stylename_fontdesc() {
   }
 }
 
-void AssParser::set_font_sets() {
+bool AssParser::set_font_sets() {
   const std::set<char32_t> empty_set;
   for (const auto& dialogue : dialogues_) {
     FontDesc font_desc_style;
@@ -247,6 +267,7 @@ void AssParser::set_font_sets() {
         font_desc_style = stylename_fontdesc_["Default"];
       } else {
         logger_->error("Style \"{}\" not found.", dialogue[4]);
+        return false;
       }
     } else {
       font_desc_style = stylename_fontdesc_[dialogue[4]];
@@ -277,7 +298,9 @@ void AssParser::set_font_sets() {
           continue;
         } else {
           override = std::u32string(wch + 1, wch + pos);
-          StyleOverride(override, &font_desc, font_desc_style);
+          if (!StyleOverride(override, &font_desc, font_desc_style)) {
+            return false;
+          }
           wch += (pos + 1);
           continue;
         }
@@ -288,9 +311,10 @@ void AssParser::set_font_sets() {
       }
     }
   }
+  return true;
 }
 
-void AssParser::StyleOverride(const std::u32string& code, FontDesc* font_desc,
+bool AssParser::StyleOverride(const std::u32string& code, FontDesc* font_desc,
                               const FontDesc& font_desc_style) {
   auto iter = code.begin();
   size_t pos = 0;
@@ -402,6 +426,7 @@ void AssParser::StyleOverride(const std::u32string& code, FontDesc* font_desc,
           *font_desc = stylename_fontdesc_["Default"];
         } else {
           logger_->error("Style \"{}\" not found.", style_name);
+          return false;
         }
       } else {
         *font_desc = stylename_fontdesc_[style_name];
@@ -410,6 +435,7 @@ void AssParser::StyleOverride(const std::u32string& code, FontDesc* font_desc,
       break;
     }
   }
+  return true;
 }
 
 }  // namespace ass
