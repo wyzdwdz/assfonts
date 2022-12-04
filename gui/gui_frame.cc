@@ -60,7 +60,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   inner_sizer = new wxBoxSizer(wxVERTICAL);
 
   wxFlexGridSizer* top_sizer;
-  top_sizer = new wxFlexGridSizer(4, 3, 0, 0);
+  top_sizer = new wxFlexGridSizer(4, 4, 0, 0);
   top_sizer->SetFlexibleDirection(wxBOTH);
   top_sizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
 
@@ -71,13 +71,18 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 
   input_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
-                     FromDIP(wxSize(600, 50)), wxTE_MULTILINE | wxTE_READONLY);
+                     FromDIP(wxSize(550, 50)), wxTE_MULTILINE | wxTE_READONLY);
   input_text_->DragAcceptFiles(true);
   top_sizer->Add(input_text_, 0, wxALL, 5);
 
   input_button_ = new wxButton(main_panel_, wxID_ANY, _T("..."),
                                wxDefaultPosition, FromDIP(wxSize(30, 30)), 0);
   top_sizer->Add(input_button_, 0, wxALIGN_CENTER | wxALL, 5);
+
+  input_clean_button_ =
+      new wxButton(main_panel_, wxID_ANY, _T("¨w"), wxDefaultPosition,
+                   FromDIP(wxSize(30, 30)), 0);
+  top_sizer->Add(input_clean_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
   output_label_ =
       new wxStaticText(main_panel_, wxID_ANY, _T("Output directory"),
@@ -87,13 +92,18 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 
   output_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
-                     FromDIP(wxSize(600, 50)), wxTE_MULTILINE | wxTE_READONLY);
+                     FromDIP(wxSize(550, 50)), wxTE_MULTILINE | wxTE_READONLY);
   output_text_->DragAcceptFiles(true);
   top_sizer->Add(output_text_, 0, wxALL, 5);
 
   output_button_ = new wxButton(main_panel_, wxID_ANY, _T("..."),
                                 wxDefaultPosition, FromDIP(wxSize(30, 30)), 0);
   top_sizer->Add(output_button_, 0, wxALIGN_CENTER | wxALL, 5);
+
+  output_clean_button_ =
+      new wxButton(main_panel_, wxID_ANY, _T("¨w"), wxDefaultPosition,
+                   FromDIP(wxSize(30, 30)), 0);
+  top_sizer->Add(output_clean_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
   font_label_ = new wxStaticText(main_panel_, wxID_ANY, _T("Font directory"),
                                  wxDefaultPosition, wxDefaultSize, 0);
@@ -102,13 +112,18 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 
   font_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
-                     FromDIP(wxSize(600, 50)), wxTE_MULTILINE | wxTE_READONLY);
+                     FromDIP(wxSize(550, 50)), wxTE_MULTILINE | wxTE_READONLY);
   font_text_->DragAcceptFiles(true);
   top_sizer->Add(font_text_, 0, wxALL, 5);
 
   font_button_ = new wxButton(main_panel_, wxID_ANY, _T("..."),
                               wxDefaultPosition, FromDIP(wxSize(30, 30)), 0);
   top_sizer->Add(font_button_, 0, wxALIGN_CENTER | wxALL, 5);
+
+  font_clean_button_ =
+      new wxButton(main_panel_, wxID_ANY, _T("¨w"), wxDefaultPosition,
+                   FromDIP(wxSize(30, 30)), 0);
+  top_sizer->Add(font_clean_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
   db_label_ = new wxStaticText(main_panel_, wxID_ANY, _T("Database directory"),
                                wxDefaultPosition, wxDefaultSize, 0);
@@ -117,13 +132,18 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 
   db_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, app_path_, wxDefaultPosition,
-                     FromDIP(wxSize(600, 50)), wxTE_MULTILINE | wxTE_READONLY);
+                     FromDIP(wxSize(550, 50)), wxTE_MULTILINE | wxTE_READONLY);
   db_text_->DragAcceptFiles(true);
   top_sizer->Add(db_text_, 0, wxALL, 5);
 
   db_button_ = new wxButton(main_panel_, wxID_ANY, _T("..."), wxDefaultPosition,
                             FromDIP(wxSize(30, 30)), 0);
   top_sizer->Add(db_button_, 0, wxALIGN_CENTER | wxALL, 5);
+
+  db_clean_button_ =
+      new wxButton(main_panel_, wxID_ANY, _T("¨w"), wxDefaultPosition,
+                   FromDIP(wxSize(30, 30)), 0);
+  top_sizer->Add(db_clean_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
   inner_sizer->Add(top_sizer, 1, wxALIGN_CENTER | wxALL, 5);
 
@@ -176,6 +196,15 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
                        this);
   font_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &GuiFrame::OnFindFont, this);
   db_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &GuiFrame::OnFindDB, this);
+
+  input_clean_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED,
+                            [&](wxCommandEvent&) { input_text_->Clear(); });
+  output_clean_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED,
+                             [&](wxCommandEvent&) { output_text_->Clear(); });
+  font_clean_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED,
+                           [&](wxCommandEvent&) { font_text_->Clear(); });
+  db_clean_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED,
+                         [&](wxCommandEvent&) { db_text_->Clear(); });
 
   input_text_->Bind(wxEVT_DROP_FILES, &GuiFrame::OnDropInput, this);
   output_text_->Bind(wxEVT_DROP_FILES, &GuiFrame::OnDropOutput, this);
