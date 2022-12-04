@@ -155,7 +155,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   db_clean_button_ =
       new wxButton(main_panel_, wxID_ANY, _T("¨w"), wxDefaultPosition,
                    FromDIP(wxSize(30, 30)), 0);
-  top_sizer->Add(db_clean_button_, 0, wxALIGN_CENTER | wxALL, 5);
+  top_sizer->Add(db_clean_button_, 0, wxALIGN_CENTER | wxALL, 1);
 
   inner_sizer->Add(top_sizer, 1, wxALIGN_CENTER | wxALL, 5);
 
@@ -167,15 +167,11 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 
   subset_check_ = new wxCheckBox(main_panel_, wxID_ANY, _T("Subset only"),
                                  wxDefaultPosition, wxDefaultSize, 0);
-  checkbox_sizer->Add(subset_check_, 0, wxBOTTOM, 2);
+  checkbox_sizer->Add(subset_check_, 0, wxALL, 5);
 
   embed_check_ = new wxCheckBox(main_panel_, wxID_ANY, _T("Embed only"),
                                 wxDefaultPosition, wxDefaultSize, 0);
-  checkbox_sizer->Add(embed_check_, 0, wxBOTTOM, 5);
-
-  build_button_ = new wxButton(main_panel_, wxID_ANY, _T("Build database"),
-                               wxDefaultPosition, FromDIP(wxSize(100, 40)), 0);
-  checkbox_sizer->Add(build_button_, 0, 0, 5);
+  checkbox_sizer->Add(embed_check_, 0, wxALL, 5);
 
   middle_sizer->Add(checkbox_sizer, 1, wxALIGN_CENTER | wxALL, 5);
 
@@ -185,18 +181,27 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   font.SetPointSize(11);
   font.SetWeight(wxFONTWEIGHT_BOLD);
   run_button_->SetFont(font);
-  middle_sizer->Add(run_button_, 0, wxALIGN_CENTER | wxALL, 5);
+  middle_sizer->Add(run_button_, 0, wxALIGN_CENTER | wxRIGHT, 15);
+
+  wxBoxSizer* button_sizer;
+  button_sizer = new wxBoxSizer(wxVERTICAL);
+
+  build_button_ = new wxButton(main_panel_, wxID_ANY, _T("Build database"),
+                               wxDefaultPosition, FromDIP(wxSize(-1, 30)), 0);
+  button_sizer->Add(build_button_, 0, wxALL | wxEXPAND, 5);
 
   reset_button_ = new wxButton(main_panel_, wxID_ANY, _T("Reset all"),
-                               wxDefaultPosition, FromDIP(wxSize(80, 30)), 0);
-  middle_sizer->Add(reset_button_, 0, wxALIGN_CENTER | wxALL, 10);
+                               wxDefaultPosition, FromDIP(wxSize(-1, 30)), 0);
+  button_sizer->Add(reset_button_, 0, wxALL | wxEXPAND, 5);
+
+  middle_sizer->Add(button_sizer, 1, wxALIGN_CENTER | wxALL, 5);
 
   inner_sizer->Add(middle_sizer, 1, wxALIGN_CENTER | wxALL, 5);
 
   log_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
-                     FromDIP(wxSize(-1, 230)), wxTE_MULTILINE | wxTE_READONLY);
-  inner_sizer->Add(log_text_, 0, wxEXPAND, 5);
+                     FromDIP(wxSize(-1, 210)), wxTE_MULTILINE | wxTE_READONLY);
+  inner_sizer->Add(log_text_, 0, wxEXPAND, 0);
 
   main_panel_->SetSizer(inner_sizer);
   main_panel_->Layout();
