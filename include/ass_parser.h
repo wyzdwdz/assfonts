@@ -44,7 +44,7 @@ class AssParser {
   }
   ~AssParser() { spdlog::drop("ass_parser"); };
 
-  void ReadFile(const std::string& ass_file_path);
+  bool ReadFile(const std::string& ass_file_path);
 
  private:
   struct FontDesc {
@@ -78,12 +78,13 @@ class AssParser {
 
   bool IsUTF8(const std::string& line);
   bool FindTitle(const std::string& line, const std::string& title);
-  std::vector<std::string> ParseLine(const std::string& line,
-                                     const unsigned int num_field);
-  void ParseAss();
+  bool AssParser::ParseLine(const std::string& line,
+                            const unsigned int num_field,
+                            std::vector<std::string>& res);
+  bool ParseAss();
   void set_stylename_fontdesc();
-  void set_font_sets();
-  void StyleOverride(const std::u32string& code, FontDesc* font_desc,
+  bool set_font_sets();
+  bool StyleOverride(const std::u32string& code, FontDesc* font_desc,
                      const FontDesc& font_desc_style);
 
   friend class FontSubsetter;

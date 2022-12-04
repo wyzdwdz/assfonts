@@ -17,14 +17,23 @@
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
-#include "assfonts_gui.h"
+#ifndef ASSFONTS_RUN_H_
+#define ASSFONTS_RUN_H_
 
-#include "gui_frame.h"
+#include <memory>
 
-wxIMPLEMENT_APP(GuiApp);
+#include <boost/filesystem.hpp>
 
-bool GuiApp::OnInit() {
-  GuiFrame* gui_frame = new GuiFrame(nullptr);
-  gui_frame->Show(true);
-  return true;
-}
+#include "wxwidgets_sink.h"
+
+namespace fs = boost::filesystem;
+
+void BuildDB(const fs::path fonts_path, const fs::path db_path,
+             std::shared_ptr<mylog::sinks::wxwidgets_sink_mt> sink);
+
+void Run(const fs::path input_path, const fs::path output_path,
+         const fs::path fonts_path, const fs::path db_path, bool is_subset_only,
+         bool is_embed_only,
+         std::shared_ptr<mylog::sinks::wxwidgets_sink_mt> sink);
+
+#endif

@@ -41,7 +41,7 @@ class AssFontEmbedder {
 
   void set_input_ass_path(const std::string& input_ass_path);
   void set_output_dir_path(const std::string& output_ass_path);
-  void Run(bool is_clean_only);
+  bool Run(bool is_clean_only);
 
  private:
   const FontSubsetter& fs_;
@@ -50,7 +50,7 @@ class AssFontEmbedder {
   std::string output_dir_path_;
   std::string UUEncode(const char* begin, const char* end,
                        bool insert_linebreaks);
-  bool CleanFonts();
+  bool CleanFonts(bool& have_fonts);
 };
 
 };  // namespace ass

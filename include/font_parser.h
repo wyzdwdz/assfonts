@@ -34,6 +34,7 @@ extern "C" {
 }
 #endif
 
+#include <spdlog/async.h>
 #include <spdlog/spdlog.h>
 
 namespace ass {

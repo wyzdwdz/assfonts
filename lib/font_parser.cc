@@ -21,6 +21,7 @@
 
 #include <fstream>
 #include <regex>
+#include <stdexcept>
 #include <thread>
 
 #ifdef __cplusplus
@@ -37,6 +38,7 @@ extern "C" {
 }
 #endif
 
+#include <boost/archive/archive_exception.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/asio.hpp>
@@ -77,9 +79,15 @@ void FontParser::LoadDB(const std::string& db_path) {
   fs::path file_path(db_path);
   std::ifstream db_file(file_path.string(), std::ios::binary);
   if (db_file.is_open()) {
-    boost::archive::binary_iarchive ia(db_file);
     std::vector<FontInfo> tmp_font_list;
-    ia >> font_list_in_db_;
+    try {
+      boost::archive::binary_iarchive ia(db_file);
+      ia >> font_list_in_db_;
+    } catch (const boost::archive::archive_exception&) {
+      logger_->warn("Cannot load fonts database: \"{}\"",
+                     file_path.generic_string());
+      return;
+    }
     db_file.close();
     logger_->info("Load fonts database \"{}\"", file_path.generic_string());
   } else {

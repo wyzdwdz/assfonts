@@ -1,10 +1,17 @@
+Overview of changes leading to v0.2.0
+Tuesday, November 29, 2022
+====================================
+- Add GUI version
+- Rewrite error handling mechanism
+- fix ass parsing bugs
+
+
 Overview of changes leading to v0.1.4
 Tuesday, November 29, 2022
 ====================================
 - Add multithreading support for parsing fonts
 - When parsing fonts, change logger to asynchronous mode
 - Adjust solution structure
-- TODO: GUI
 
 
 Overview of changes leading to v0.1.3

@@ -17,7 +17,6 @@
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
-#include <cstdlib>
 #include <memory>
 #include <string>
 
@@ -33,28 +32,25 @@
 
 #include "ass_font_embedder.h"
 #include "ass_parser.h"
-#include "error_proxy_sink.h"
 #include "font_parser.h"
 #include "font_subsetter.h"
 
-constexpr auto VERSION_MAX = 0;
-constexpr auto VERSION_MID = 1;
-constexpr auto VERSION_MIN = 4;
+constexpr int VERSION_MAX = 0;
+constexpr int VERSION_MID = 2;
+constexpr int VERSION_MIN = 0;
 
 namespace fs = boost::filesystem;
 
 int main(int argc, char** argv) {
   spdlog::init_thread_pool(512, 1);
   auto color_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-  auto error_sink =
-      std::make_shared<mylog::sinks::error_proxy_sink_mt>(color_sink);
-  auto logger = std::make_shared<spdlog::logger>("main", error_sink);
+  auto logger = std::make_shared<spdlog::logger>("main", color_sink);
   spdlog::register_logger(logger);
 
-  ass::AssParser ap(error_sink);
-  ass::FontParser fp(error_sink);
-  ass::FontSubsetter fs(ap, fp, error_sink);
-  ass::AssFontEmbedder afe(fs, error_sink);
+  ass::AssParser ap(color_sink);
+  ass::FontParser fp(color_sink);
+  ass::FontSubsetter fs(ap, fp, color_sink);
+  ass::AssFontEmbedder afe(fs, color_sink);
 
   //spdlog::set_pattern("[%n] [%^%l%$] %v");
   spdlog::set_pattern("[%^%l%$] %v");
@@ -93,6 +89,7 @@ int main(int argc, char** argv) {
         str.pop_back();
         str += ". See --help for more info.";
         logger->error(str);
+        spdlog::shutdown();
         return "";
       });
   CLI11_PARSE(app, argc, argv);
@@ -119,7 +116,7 @@ int main(int argc, char** argv) {
       "  -h, --help                Get help info\n\n", VERSION_MAX, VERSION_MID, VERSION_MIN);
     if (argc == 2) {
       spdlog::shutdown();
-      exit(EXIT_SUCCESS);
+      return 0;
     }
   }
   // clang-format on
@@ -139,6 +136,8 @@ int main(int argc, char** argv) {
       break;
     default:
       logger->error("Wrong verbose level. See --help for more info.");
+      spdlog::shutdown();
+      return 0;
   }
 
   fs::path input_path = fs::system_complete(input);
@@ -148,30 +147,44 @@ int main(int argc, char** argv) {
 
   if (!input.empty() && !fs::is_regular_file(input_path)) {
     logger->error("\"{}\" is not a file. See --help for more info.", input);
+    spdlog::shutdown();
+    return 0;
   }
   if (!output.empty() && !fs::is_directory(output_path)) {
     logger->error(
         "\"{}\" is not a legal directory path. See --help for more info.",
         output);
+    spdlog::shutdown();
+    return 0;
   }
   if (!fonts.empty() && !fs::is_directory(fonts_path)) {
     logger->error(
         "\"{}\" is not a legal directory path. See --help for more info.",
         fonts);
+    spdlog::shutdown();
+    return 0;
   }
   if (!fs::is_directory(db_path)) {
     logger->error(
         "\"{}\" is not a legal directory path. See --help for more info.",
         database);
+    spdlog::shutdown();
+    return 0;
   }
   if (is_build && fonts.empty()) {
     logger->error("No fontpath is found. See --help for more info.");
+    spdlog::shutdown();
+    return 0;
   }
   if (input.empty() && fonts.empty()) {
     logger->error("No input is found. See --help for more info.");
+    spdlog::shutdown();
+    return 0;
   }
   if (input.empty() && !is_build) {
     logger->error("Do nothing. See --help for more info.");
+    spdlog::shutdown();
+    return 0;
   }
 
   if (!fonts.empty()) {
@@ -185,10 +198,13 @@ int main(int argc, char** argv) {
 
   if (input.empty()) {
     spdlog::shutdown();
-    exit(EXIT_SUCCESS);
+    return 0;
   }
 
-  ap.ReadFile(input_path.string());
+  if (!ap.ReadFile(input_path.string())) {
+    spdlog::shutdown();
+    return 0;
+  }
 
   if (output.empty()) {
     output_path = input_path.parent_path();
@@ -197,24 +213,32 @@ int main(int argc, char** argv) {
   if (is_embed_only && is_subset_only) {
     afe.set_input_ass_path(input_path.string());
     afe.set_output_dir_path(output_path.string());
-    afe.Run(true);
+    if (!afe.Run(true)) {
+      spdlog::shutdown();
+      return 0;
+    }
     spdlog::shutdown();
-    exit(EXIT_SUCCESS);
+    return 0;
   }
 
   if (!is_embed_only) {
     fs.SetSubfontDir(output_path.string() + "/" + input_path.stem().string() +
                      "_subsetted");
   }
-  fs.Run(is_embed_only);
+  if (!fs.Run(is_embed_only)) {
+    spdlog::shutdown();
+    return 0;
+  }
 
   if (!is_subset_only) {
     afe.set_input_ass_path(input_path.string());
     afe.set_output_dir_path(output_path.string());
-    afe.Run(false);
+    if (!afe.Run(false)) {
+      spdlog::shutdown();
+      return 0;
+    }
   }
 
-  spdlog::drop("main");
   spdlog::shutdown();
   return 0;
 }

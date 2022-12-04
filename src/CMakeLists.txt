@@ -1,7 +1,10 @@
 ﻿cmake_minimum_required (VERSION 3.20)
 
-set(THIRD_PARTY_LIBS PRIVATE spdlog::spdlog
-                             CLI11::CLI11)
+set(THIRD_PARTY_LIBS PRIVATE Boost::boost 
+                             Boost::filesystem
+                             spdlog::spdlog
+                             CLI11::CLI11
+                             fmt::fmt)
 						  
 add_executable(assfonts assfonts.cc)
 

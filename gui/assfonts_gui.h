@@ -17,14 +17,13 @@
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
-#include "assfonts_gui.h"
+#include <wx/wx.h>
 
-#include "gui_frame.h"
+constexpr int VERSION_MAX = 0;
+constexpr int VERSION_MID = 2;
+constexpr int VERSION_MIN = 0;
 
-wxIMPLEMENT_APP(GuiApp);
-
-bool GuiApp::OnInit() {
-  GuiFrame* gui_frame = new GuiFrame(nullptr);
-  gui_frame->Show(true);
-  return true;
-}
+class GuiApp : public wxApp {
+ public:
+  virtual bool OnInit();
+};
