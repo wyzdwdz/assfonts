@@ -64,17 +64,18 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   top_sizer->SetFlexibleDirection(wxBOTH);
   top_sizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
 
-  input_label_ = new wxStaticText(main_panel_, wxID_ANY, _T("Input ASS file"),
-                                  wxDefaultPosition, wxDefaultSize, 0);
+  input_label_ = new wxStaticText(main_panel_, wxID_ANY, _T("Input\nASS file"),
+                                  wxDefaultPosition, wxDefaultSize,
+                                  wxALIGN_CENTER_HORIZONTAL);
   input_label_->Wrap(-1);
   wxFont font = input_label_->GetFont();
   font.SetWeight(wxFONTWEIGHT_BOLD);
   input_label_->SetFont(font);
-  top_sizer->Add(input_label_, 0, wxALIGN_CENTER | wxALL, 5);
+  top_sizer->Add(input_label_, 0, wxALIGN_CENTER | wxRIGHT, 15);
 
   input_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
-                     FromDIP(wxSize(550, 50)), wxTE_MULTILINE | wxTE_READONLY);
+                     FromDIP(wxSize(580, 50)), wxTE_MULTILINE | wxTE_READONLY);
   input_text_->DragAcceptFiles(true);
   top_sizer->Add(input_text_, 0, wxALL, 5);
 
@@ -87,18 +88,18 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
                    FromDIP(wxSize(30, 30)), 0);
   top_sizer->Add(input_clean_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
-  output_label_ =
-      new wxStaticText(main_panel_, wxID_ANY, _T("Output directory"),
-                       wxDefaultPosition, wxDefaultSize, 0);
+  output_label_ = new wxStaticText(main_panel_, wxID_ANY,
+                                   _T("Output\ndirectory"), wxDefaultPosition,
+                                   wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
   output_label_->Wrap(-1);
   font = input_label_->GetFont();
   font.SetWeight(wxFONTWEIGHT_BOLD);
   output_label_->SetFont(font);
-  top_sizer->Add(output_label_, 0, wxALIGN_CENTER | wxALL, 5);
+  top_sizer->Add(output_label_, 0, wxALIGN_CENTER | wxRIGHT, 15);
 
   output_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
-                     FromDIP(wxSize(550, 50)), wxTE_MULTILINE | wxTE_READONLY);
+                     FromDIP(wxSize(580, 50)), wxTE_MULTILINE | wxTE_READONLY);
   output_text_->DragAcceptFiles(true);
   top_sizer->Add(output_text_, 0, wxALL, 5);
 
@@ -111,17 +112,18 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
                    FromDIP(wxSize(30, 30)), 0);
   top_sizer->Add(output_clean_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
-  font_label_ = new wxStaticText(main_panel_, wxID_ANY, _T("Font directory"),
-                                 wxDefaultPosition, wxDefaultSize, 0);
+  font_label_ = new wxStaticText(main_panel_, wxID_ANY, _T("Font\ndirectory"),
+                                 wxDefaultPosition, wxDefaultSize,
+                                 wxALIGN_CENTER_HORIZONTAL);
   font_label_->Wrap(-1);
   font = input_label_->GetFont();
   font.SetWeight(wxFONTWEIGHT_BOLD);
   font_label_->SetFont(font);
-  top_sizer->Add(font_label_, 0, wxALIGN_CENTER | wxALL, 5);
+  top_sizer->Add(font_label_, 0, wxALIGN_CENTER | wxRIGHT, 15);
 
   font_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
-                     FromDIP(wxSize(550, 50)), wxTE_MULTILINE | wxTE_READONLY);
+                     FromDIP(wxSize(580, 50)), wxTE_MULTILINE | wxTE_READONLY);
   font_text_->DragAcceptFiles(true);
   top_sizer->Add(font_text_, 0, wxALL, 5);
 
@@ -134,17 +136,18 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
                    FromDIP(wxSize(30, 30)), 0);
   top_sizer->Add(font_clean_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
-  db_label_ = new wxStaticText(main_panel_, wxID_ANY, _T("Database directory"),
-                               wxDefaultPosition, wxDefaultSize, 0);
+  db_label_ = new wxStaticText(main_panel_, wxID_ANY, _T("Database\ndirectory"),
+                               wxDefaultPosition, wxDefaultSize,
+                               wxALIGN_CENTER_HORIZONTAL);
   db_label_->Wrap(-1);
   font = input_label_->GetFont();
   font.SetWeight(wxFONTWEIGHT_BOLD);
   db_label_->SetFont(font);
-  top_sizer->Add(db_label_, 0, wxALIGN_CENTER | wxALL, 5);
+  top_sizer->Add(db_label_, 0, wxALIGN_CENTER | wxRIGHT, 15);
 
   db_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, app_path_, wxDefaultPosition,
-                     FromDIP(wxSize(550, 50)), wxTE_MULTILINE | wxTE_READONLY);
+                     FromDIP(wxSize(580, 50)), wxTE_MULTILINE | wxTE_READONLY);
   db_text_->DragAcceptFiles(true);
   top_sizer->Add(db_text_, 0, wxALL, 5);
 
