@@ -2,6 +2,8 @@
 
 Subset fonts and embed them into an ASS subtitle.
 
+(Update v0.2.0 Add GUI version)
+
 ### Build Requirements
 
 Build environment ---- Visual Studio 2022 with MSVC 19.33.31630
