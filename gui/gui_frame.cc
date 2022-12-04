@@ -179,8 +179,12 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 
   middle_sizer->Add(checkbox_sizer, 1, wxALIGN_CENTER | wxALL, 5);
 
-  run_button_ = new wxButton(main_panel_, wxID_ANY, _T("Run"),
+  run_button_ = new wxButton(main_panel_, wxID_ANY, _T("RUN"),
                              wxDefaultPosition, FromDIP(wxSize(70, 70)), 0);
+  font = run_button_->GetFont();
+  font.SetPointSize(11);
+  font.SetWeight(wxFONTWEIGHT_BOLD);
+  run_button_->SetFont(font);
   middle_sizer->Add(run_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
   reset_button_ = new wxButton(main_panel_, wxID_ANY, _T("Reset all"),
