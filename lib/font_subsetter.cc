@@ -70,8 +70,8 @@ bool FontSubsetter::Run(bool is_no_subset) {
       WideCharToMultiByte(CP_ACP, 0, w_fontname.c_str(),
                           static_cast<int>(w_fontname.size()), &fontname[0],
                           static_cast<int>(fontname.size()), NULL, NULL);
-#elif
-      std::string fontname(font_set.first);
+#else
+      std::string fontname(font_set.first.fontname);
 #endif
       if (!FindFont(font_set, fp_.font_list_, path, index) &&
           !FindFont(font_set, fp_.font_list_in_db_, path, index)) {
@@ -233,8 +233,8 @@ bool FontSubsetter::set_subset_font_codepoint_sets() {
     WideCharToMultiByte(CP_ACP, 0, w_fontname.c_str(),
                         static_cast<int>(w_fontname.size()), &fontname[0],
                         static_cast<int>(fontname.size()), NULL, NULL);
-#elif
-    std::string fontname(font_set.first);
+#else
+    std::string fontname(font_set.first.fontname);
 #endif
     if (!FindFont(font_set, fp_.font_list_, font_path.path, font_path.index) &&
         !FindFont(font_set, fp_.font_list_in_db_, font_path.path,

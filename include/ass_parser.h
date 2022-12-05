@@ -78,7 +78,7 @@ class AssParser {
 
   bool IsUTF8(const std::string& line);
   bool FindTitle(const std::string& line, const std::string& title);
-  bool AssParser::ParseLine(const std::string& line,
+  bool ParseLine(const std::string& line,
                             const unsigned int num_field,
                             std::vector<std::string>& res);
   bool ParseAss();
