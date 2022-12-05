@@ -84,7 +84,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   top_sizer->Add(input_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
   input_clean_button_ =
-      new wxButton(main_panel_, wxID_ANY, _T("¨w"), wxDefaultPosition,
+      new wxButton(main_panel_, wxID_ANY, _T("\u2573"), wxDefaultPosition,
                    FromDIP(wxSize(30, 30)), 0);
   top_sizer->Add(input_clean_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
@@ -108,7 +108,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   top_sizer->Add(output_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
   output_clean_button_ =
-      new wxButton(main_panel_, wxID_ANY, _T("¨w"), wxDefaultPosition,
+      new wxButton(main_panel_, wxID_ANY, _T("\u2573"), wxDefaultPosition,
                    FromDIP(wxSize(30, 30)), 0);
   top_sizer->Add(output_clean_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
@@ -132,7 +132,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   top_sizer->Add(font_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
   font_clean_button_ =
-      new wxButton(main_panel_, wxID_ANY, _T("¨w"), wxDefaultPosition,
+      new wxButton(main_panel_, wxID_ANY, _T("\u2573"), wxDefaultPosition,
                    FromDIP(wxSize(30, 30)), 0);
   top_sizer->Add(font_clean_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
@@ -156,7 +156,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   top_sizer->Add(db_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
   db_clean_button_ =
-      new wxButton(main_panel_, wxID_ANY, _T("¨w"), wxDefaultPosition,
+      new wxButton(main_panel_, wxID_ANY, _T("\u2573"), wxDefaultPosition,
                    FromDIP(wxSize(30, 30)), 0);
   top_sizer->Add(db_clean_button_, 0, wxALIGN_CENTER | wxALL, 1);
 
