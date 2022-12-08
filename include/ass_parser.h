@@ -28,6 +28,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include "ass_string.h"
+
 namespace ass {
 
 class AssParser {
@@ -38,13 +40,13 @@ class AssParser {
     spdlog::register_logger(logger_);
   };
   template <typename T>
-  AssParser(const std::string& ass_file_path, std::shared_ptr<T> sink)
+  AssParser(const AString& ass_file_path, std::shared_ptr<T> sink)
       : AssParser(sink) {
     ReadFile(ass_file_path);
   }
   ~AssParser() { spdlog::drop("ass_parser"); };
 
-  bool ReadFile(const std::string& ass_file_path);
+  bool ReadFile(const AString& ass_file_path);
 
  private:
   struct FontDesc {
@@ -68,7 +70,7 @@ class AssParser {
     }
   };
   std::shared_ptr<spdlog::logger> logger_;
-  std::string ass_path_;
+  AString ass_path_;
   std::vector<std::string> text_;
   std::vector<std::vector<std::string>> styles_;
   bool has_default_style_ = false;
@@ -78,9 +80,8 @@ class AssParser {
 
   bool IsUTF8(const std::string& line);
   bool FindTitle(const std::string& line, const std::string& title);
-  bool ParseLine(const std::string& line,
-                            const unsigned int num_field,
-                            std::vector<std::string>& res);
+  bool ParseLine(const std::string& line, const unsigned int num_field,
+                 std::vector<std::string>& res);
   bool ParseAss();
   void set_stylename_fontdesc();
   bool set_font_sets();

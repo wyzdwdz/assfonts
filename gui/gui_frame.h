@@ -24,6 +24,7 @@
 
 #include <spdlog/spdlog.h>
 #include <wx/wx.h>
+#include <boost/thread.hpp>
 
 #include "wxwidgets_sink.h"
 

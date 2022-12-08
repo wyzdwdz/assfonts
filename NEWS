@@ -1,3 +1,10 @@
+Overview of changes leading to v0.2.2 and v0.2.1
+Tuesday, November 29, 2022
+====================================
+- Use wchar_t in Windows, add Unicode filesystem support
+- Add Linux release version
+
+
 Overview of changes leading to v0.2.0
 Tuesday, November 29, 2022
 ====================================

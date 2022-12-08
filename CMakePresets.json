@@ -3,7 +3,6 @@
   "configurePresets": [
     {
       "name": "windows-base",
-      "description": "Target Windows with the Visual Studio development environment.",
       "hidden": true,
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
@@ -16,23 +15,35 @@
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [ "Windows" ]
+        }
       }
     },
     {
       "name": "linux-base",
-      "description": "Target Linux with the Visual Studio development environment.",
       "hidden": true,
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "installDir": "${sourceDir}/out/install/${presetName}",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++"
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++"
       },
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Linux"
+      },
+      "vendor": {
+        "microsoft.com/VisualStudioSettings/CMake/1.0": {
+          "hostOS": [ "Linux" ]
+        },
+        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
+          "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}"
+        }
       }
     },
     {
@@ -47,7 +58,6 @@
     },
     {
       "name": "x64-debug-windows",
-      "description": "Target Windows (64-bit) with the Visual Studio development environment. (Debug)",
       "inherits": [ "windows-base", "VCPKG" ],
       "architecture": {
         "value": "x64",
@@ -61,7 +71,6 @@
     },
     {
       "name": "x64-release-windows",
-      "description": "Target Windows (64-bit) with the Visual Studio development environment. (RelWithDebInfo)",
       "inherits": "x64-debug-windows",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
@@ -70,17 +79,23 @@
       }
     },
     {
-      "name": "x64-release-linux",
-      "description": "Target Linux (64-bit) with the Visual Studio development environment. (RelWithDebInfo)",
+      "name": "x64-debug-linux",
       "inherits": [ "linux-base", "VCPKG" ],
       "architecture": {
         "value": "x64",
         "strategy": "external"
       },
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_BUILD_TYPE": "Debug",
         "VCPKG_TARGET_TRIPLET": "x64-linux",
         "VCPKG_HOST_TRIPLET": "x64-linux"
+      }
+    },
+    {
+      "name": "x64-release-linux",
+      "inherits": "x64-debug-linux",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
       }
     }
   ]

@@ -40,6 +40,7 @@ extern "C" {
 
 #include "ass_parser.h"
 #include "font_parser.h"
+#include "ass_string.h"
 
 namespace ass {
 
@@ -55,7 +56,7 @@ class FontSubsetter {
   };
   template <typename T>
   FontSubsetter(const AssParser& ap, const FontParser& fp,
-                const std::string& subfont_dir, std::shared_ptr<T> sink)
+                const AString& subfont_dir, std::shared_ptr<T> sink)
       : FontSubsetter(sink, ap, fp) {
     SetSubfontDir(subfont_dir);
   };
@@ -63,12 +64,12 @@ class FontSubsetter {
     FT_Done_FreeType(ft_library_);
     spdlog::drop("font_subsetter");
   }
-  void SetSubfontDir(const std::string& subfont_dir);
+  void SetSubfontDir(const AString& subfont_dir);
   bool Run(bool is_no_subset);
 
  private:
   struct FontPath {
-    std::string path;
+    AString path;
     long index = 0;
 
     bool operator<(const FontPath& s) const {
@@ -79,18 +80,18 @@ class FontSubsetter {
   std::shared_ptr<spdlog::logger> logger_;
   const AssParser& ap_;
   const FontParser& fp_;
-  std::string subfont_dir_;
+  AString subfont_dir_;
   std::map<FontPath, std::set<uint32_t>> subset_font_codepoint_sets_;
-  std::vector<std::string> subfonts_path_;
+  std::vector<AString> subfonts_path_;
 
   bool FindFont(
       const std::pair<AssParser::FontDesc, std::set<char32_t>> font_set,
       const std::vector<FontParser::FontInfo>& font_list,
-      std::string& found_path, long& found_index);
+      AString& found_path, long& found_index);
   bool set_subset_font_codepoint_sets();
   bool CreateSubfont(
       const std::pair<FontPath, std::set<uint32_t>>& subset_font);
-  bool CheckGlyph(std::string font_path, long font_index,
+  bool CheckGlyph(AString font_path, long font_index,
                   std::set<char32_t> codepoint_set);
 
   friend class AssFontEmbedder;

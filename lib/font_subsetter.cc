@@ -19,29 +19,23 @@
 
 #include "font_subsetter.h"
 
-#include <algorithm>
 #include <climits>
 #include <fstream>
-#include <locale>
 
-#ifdef _WIN32
-#include <Windows.h>
-#endif
 #include <fmt/core.h>
 #include <harfbuzz/hb-subset.h>
 #include <harfbuzz/hb.h>
-#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
 
 namespace ass {
 
-void FontSubsetter::SetSubfontDir(const std::string& subfont_dir) {
+void FontSubsetter::SetSubfontDir(const AString& subfont_dir) {
   fs::path dir_path(subfont_dir);
   if (!fs::exists(dir_path)) {
-    logger_->info("Create subset fonts directory: \"{}\"",
-                  dir_path.generic_string());
+    logger_->info(_ST("Create subset fonts directory: \"{}\""),
+                  dir_path.generic_path().native());
     fs::create_directory(dir_path);
   }
   subfont_dir_ = subfont_dir;
@@ -50,43 +44,29 @@ void FontSubsetter::SetSubfontDir(const std::string& subfont_dir) {
 bool FontSubsetter::Run(bool is_no_subset) {
   if (is_no_subset) {
     bool have_missing = false;
-    std::string path;
+    AString path;
     long index = 0;
     for (const auto& font_set : ap_.font_sets_) {
 #ifdef _WIN32
-      std::wstring w_fontname;
-      int w_len = MultiByteToWideChar(
-          CP_UTF8, 0, font_set.first.fontname.c_str(),
-          static_cast<int>(font_set.first.fontname.size()), NULL, 0);
-      w_fontname.resize(w_len);
-      MultiByteToWideChar(CP_UTF8, 0, font_set.first.fontname.c_str(),
-                          static_cast<int>(font_set.first.fontname.size()),
-                          &w_fontname[0], static_cast<int>(w_fontname.size()));
-      std::string fontname;
-      int len = WideCharToMultiByte(CP_ACP, 0, w_fontname.c_str(),
-                                    static_cast<int>(w_fontname.size()), NULL,
-                                    0, NULL, NULL);
-      fontname.resize(len);
-      WideCharToMultiByte(CP_ACP, 0, w_fontname.c_str(),
-                          static_cast<int>(w_fontname.size()), &fontname[0],
-                          static_cast<int>(fontname.size()), NULL, NULL);
+      AString fontname = U8ToWide(font_set.first.fontname);
 #else
-      std::string fontname(font_set.first.fontname);
+      AString fontname(font_set.first.fontname);
 #endif
       if (!FindFont(font_set, fp_.font_list_, path, index) &&
           !FindFont(font_set, fp_.font_list_in_db_, path, index)) {
-        logger_->warn("Missing the font: \"{}\" ({},{})", fontname,
+        logger_->warn(_ST("Missing the font: \"{}\" ({},{})"), fontname,
                       font_set.first.bold, font_set.first.italic);
         have_missing = true;
       } else {
-        logger_->info("Found font: \"{}\" ({},{}) --> \"{}\"[{}]", fontname,
-                      font_set.first.bold, font_set.first.italic, path, index);
+        logger_->info(_ST("Found font: \"{}\" ({},{}) --> \"{}\"[{}]"),
+                      fontname, font_set.first.bold, font_set.first.italic,
+                      path, index);
         CheckGlyph(path, index, font_set.second);
       }
       subfonts_path_.push_back(path);
     }
     if (have_missing) {
-      logger_->error("Found missing fonts. Check warning info above.");
+      logger_->error(_ST("Found missing fonts. Check warning info above."));
       return false;
     }
     return true;
@@ -96,7 +76,7 @@ bool FontSubsetter::Run(bool is_no_subset) {
   }
   for (const auto& subset_font : subset_font_codepoint_sets_) {
     if (!CreateSubfont(subset_font)) {
-      logger_->error("Subset failed: \"{}\"[{}]", subset_font.first.path,
+      logger_->error(_ST("Subset failed: \"{}\"[{}]"), subset_font.first.path,
                      subset_font.first.index);
       return false;
     }
@@ -106,26 +86,24 @@ bool FontSubsetter::Run(bool is_no_subset) {
 
 bool FontSubsetter::FindFont(
     const std::pair<AssParser::FontDesc, std::set<char32_t>> font_set,
-    const std::vector<FontParser::FontInfo>& font_list, std::string& found_path,
+    const std::vector<FontParser::FontInfo>& font_list, AString& found_path,
     long& found_index) {
   bool is_found = false;
   unsigned int min_score = UINT_MAX;
   unsigned int score = UINT_MAX;
-  std::string tmp_path;
+  AString tmp_path;
   long tmp_index = 0;
   unsigned int ttf_score = UINT_MAX;
-  std::string ttf_path;
+  AString ttf_path;
   long ttf_index = 0;
   unsigned int otf_score = UINT_MAX;
-  std::string otf_path;
+  AString otf_path;
   long otf_index = 0;
   for (const auto& font : font_list) {
     if (std::find(font.families.begin(), font.families.end(),
                   font_set.first.fontname) != font.families.end()) {
-      if (boost::algorithm::to_lower_copy(
-              font.path.substr(font.path.size() - 4, 4)) == ".otf" ||
-          boost::algorithm::to_lower_copy(
-              font.path.substr(font.path.size() - 4, 4)) == ".otc") {
+      if (ToLower(font.path.substr(font.path.size() - 4, 4)) == _ST(".otf") ||
+          ToLower(font.path.substr(font.path.size() - 4, 4)) == _ST(".otc")) {
         continue;
       }
       score = 0;
@@ -135,10 +113,8 @@ bool FontSubsetter::FindFont(
                           font_set.first.fontname) != font.fullnames.end()) ||
                (std::find(font.psnames.begin(), font.psnames.end(),
                           font_set.first.fontname) != font.psnames.end())) {
-      if (boost::algorithm::to_lower_copy(
-              font.path.substr(font.path.size() - 4, 4)) == ".otf" ||
-          boost::algorithm::to_lower_copy(
-              font.path.substr(font.path.size() - 4, 4)) == ".otc") {
+      if (ToLower(font.path.substr(font.path.size() - 4, 4)) == _ST(".otf") ||
+          ToLower(font.path.substr(font.path.size() - 4, 4)) == _ST(".otc")) {
         continue;
       }
       score = 0;
@@ -165,10 +141,8 @@ bool FontSubsetter::FindFont(
   for (const auto& font : font_list) {
     if (std::find(font.families.begin(), font.families.end(),
                   font_set.first.fontname) != font.families.end()) {
-      if (boost::algorithm::to_lower_copy(
-              font.path.substr(font.path.size() - 4, 4)) == ".ttf" ||
-          boost::algorithm::to_lower_copy(
-              font.path.substr(font.path.size() - 4, 4)) == ".ttc") {
+      if (ToLower(font.path.substr(font.path.size() - 4, 4)) == _ST(".ttf") ||
+          ToLower(font.path.substr(font.path.size() - 4, 4)) == _ST(".ttc")) {
         continue;
       }
       score = 0;
@@ -178,10 +152,8 @@ bool FontSubsetter::FindFont(
                           font_set.first.fontname) != font.fullnames.end()) ||
                (std::find(font.psnames.begin(), font.psnames.end(),
                           font_set.first.fontname) != font.psnames.end())) {
-      if (boost::algorithm::to_lower_copy(
-              font.path.substr(font.path.size() - 4, 4)) == ".ttf" ||
-          boost::algorithm::to_lower_copy(
-              font.path.substr(font.path.size() - 4, 4)) == ".ttc") {
+      if (ToLower(font.path.substr(font.path.size() - 4, 4)) == _ST(".ttf") ||
+          ToLower(font.path.substr(font.path.size() - 4, 4)) == _ST(".ttc")) {
         continue;
       }
       score = 0;
@@ -217,33 +189,18 @@ bool FontSubsetter::set_subset_font_codepoint_sets() {
     FontPath font_path;
     std::set<uint32_t> codepoint_set;
 #ifdef _WIN32
-    std::wstring w_fontname;
-    int w_len = MultiByteToWideChar(
-        CP_UTF8, 0, font_set.first.fontname.c_str(),
-        static_cast<int>(font_set.first.fontname.size()), NULL, 0);
-    w_fontname.resize(w_len);
-    MultiByteToWideChar(CP_UTF8, 0, font_set.first.fontname.c_str(),
-                        static_cast<int>(font_set.first.fontname.size()),
-                        &w_fontname[0], static_cast<int>(w_fontname.size()));
-    std::string fontname;
-    int len = WideCharToMultiByte(CP_ACP, 0, w_fontname.c_str(),
-                                  static_cast<int>(w_fontname.size()), NULL, 0,
-                                  NULL, NULL);
-    fontname.resize(len);
-    WideCharToMultiByte(CP_ACP, 0, w_fontname.c_str(),
-                        static_cast<int>(w_fontname.size()), &fontname[0],
-                        static_cast<int>(fontname.size()), NULL, NULL);
+    AString fontname = U8ToWide(font_set.first.fontname);
 #else
-    std::string fontname(font_set.first.fontname);
+    AString fontname(font_set.first.fontname);
 #endif
     if (!FindFont(font_set, fp_.font_list_, font_path.path, font_path.index) &&
         !FindFont(font_set, fp_.font_list_in_db_, font_path.path,
                   font_path.index)) {
-      logger_->warn("Missing the font: \"{}\" ({},{})", fontname,
+      logger_->warn(_ST("Missing the font: \"{}\" ({},{})"), fontname,
                     font_set.first.bold, font_set.first.italic);
       have_missing = true;
     } else {
-      logger_->info("Found font: \"{}\" ({},{}) --> \"{}\"[{}]", fontname,
+      logger_->info(_ST("Found font: \"{}\" ({},{}) --> \"{}\"[{}]"), fontname,
                     font_set.first.bold, font_set.first.italic, font_path.path,
                     font_path.index);
       CheckGlyph(font_path.path, font_path.index, font_set.second);
@@ -260,7 +217,7 @@ bool FontSubsetter::set_subset_font_codepoint_sets() {
     }
   }
   if (have_missing) {
-    logger_->error("Found missing fonts. Check warning info above.");
+    logger_->error(_ST("Found missing fonts. Check warning info above."));
     return false;
   }
   return true;
@@ -270,20 +227,24 @@ bool FontSubsetter::CreateSubfont(
     const std::pair<FontPath, std::set<uint32_t>>& subset_font) {
   fs::path input_filepath(subset_font.first.path);
   fs::path output_filepath(
-      subfont_dir_ + "/" + input_filepath.stem().string() + "[" +
-      std::to_string(subset_font.first.index) + "]_subset" +
-      ((boost::algorithm ::to_lower_copy(input_filepath.extension().string()) ==
-            ".otf" ||
-        boost::algorithm ::to_lower_copy(input_filepath.extension().string()) ==
-            ".otc")
-           ? ".otf"
-           : ".ttf"));
-  hb_blob_t* hb_blob =
-      hb_blob_create_from_file(input_filepath.string().c_str());
+      subfont_dir_ + _ST("/") + input_filepath.stem().native() + _ST("[") +
+      ToAString(subset_font.first.index) + _ST("]_subset") +
+      ((ToLower(input_filepath.extension().native()) == _ST(".otf") ||
+        ToLower(input_filepath.extension().native()) == _ST(".otc"))
+           ? _ST(".otf")
+           : _ST(".ttf")));
+  std::ifstream is(subset_font.first.path, std::ios::binary);
+  const auto font_size = fs::file_size(subset_font.first.path);
+  std::string font_data(font_size, '\0');
+  is.read(&font_data[0], font_size);
+  hb_blob_t* hb_blob = hb_blob_create_or_fail(
+      &font_data[0], static_cast<unsigned int>(font_size),
+      HB_MEMORY_MODE_READONLY, NULL, NULL);
   hb_face_t* hb_face = hb_face_create(hb_blob, subset_font.first.index);
   FT_Face ft_face;
-  FT_New_Face(ft_library_, subset_font.first.path.c_str(),
-              subset_font.first.index, &ft_face);
+  FT_New_Memory_Face(ft_library_, reinterpret_cast<FT_Byte*>(&font_data[0]),
+                     static_cast<FT_Long>(font_size), subset_font.first.index,
+                     &ft_face);
   const unsigned int num_names = FT_Get_Sfnt_Name_Count(ft_face);
   hb_set_t* langid_set = hb_set_create();
   for (unsigned int i = 0; i < num_names; i++) {
@@ -316,7 +277,7 @@ bool FontSubsetter::CreateSubfont(
   hb_blob_t* subset_blob = hb_face_reference_blob(subset_face);
   unsigned int len = 0;
   const char* subset_data = hb_blob_get_data(subset_blob, &len);
-  std::ofstream subset_file(output_filepath.string(), std::ios::binary);
+  std::ofstream subset_file(output_filepath.native(), std::ios::binary);
   subset_file.write(subset_data, len);
   subset_file.close();
   FT_Done_Face(ft_face);
@@ -327,19 +288,25 @@ bool FontSubsetter::CreateSubfont(
   hb_set_destroy(langid_set);
   hb_set_destroy(codepoint_set);
   hb_subset_input_destroy(input);
+  is.close();
   if (len == 0) {
     return false;
   }
-  subfonts_path_.push_back(output_filepath.string());
+  subfonts_path_.push_back(output_filepath.native());
   return true;
 }
 
-bool FontSubsetter::CheckGlyph(std::string font_path, long font_index,
+bool FontSubsetter::CheckGlyph(AString font_path, long font_index,
                                std::set<char32_t> codepoint_set) {
+  std::vector<uint32_t> missing_codepoints;
   bool have_all_glyph = true;
   FT_Face ft_face;
-  std::vector<uint32_t> missing_codepoints;
-  FT_New_Face(ft_library_, font_path.c_str(), font_index, &ft_face);
+  std::ifstream is(font_path, std::ios::binary);
+  const auto font_size = fs::file_size(font_path);
+  std::string font_data(font_size, '\0');
+  is.read(&font_data[0], font_size);
+  FT_New_Memory_Face(ft_library_, reinterpret_cast<FT_Byte*>(&font_data[0]),
+                     static_cast<FT_Long>(font_size), font_index, &ft_face);
   for (const auto& codepoint : codepoint_set) {
     if (!codepoint) {
       continue;
@@ -351,8 +318,8 @@ bool FontSubsetter::CheckGlyph(std::string font_path, long font_index,
     }
   }
   if (!missing_codepoints.empty()) {
-    logger_->warn("Missing codepoints: {:#06x}",
-                  fmt::join(missing_codepoints, "  "));
+    logger_->warn(_ST("Missing codepoints: {:#06x}"),
+                  fmt::join(missing_codepoints, _ST("  ")));
   }
   FT_Done_Face(ft_face);
   return have_all_glyph;

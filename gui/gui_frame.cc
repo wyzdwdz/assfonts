@@ -19,12 +19,13 @@
 
 #include "gui_frame.h"
 
+#include <string>
+
 #include <spdlog/async.h>
 #include <spdlog/spdlog.h>
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
 #include <boost/filesystem.hpp>
-#include <boost/thread.hpp>
 
 #ifndef _WIN32
 #include "icon.xpm"
@@ -32,6 +33,7 @@
 #include "assfonts_gui.h"
 #include "run.h"
 #include "wxwidgets_sink.h"
+#include "ass_string.h"
 
 namespace fs = boost::filesystem;
 
@@ -248,11 +250,11 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   logger_->info("assfonts-gui v{}.{}.{}", VERSION_MAX, VERSION_MID,
                 VERSION_MIN);
 
-  auto db_path = fs::path(db_text_->GetValue().ToStdString() + "/fonts.db");
+  auto db_path = fs::path(db_text_->GetValue().ToStdWstring() + L"/fonts.db");
   if (fs::is_regular_file(db_path)) {
-    logger_->info("Found fonts database: \"{}\"", db_path.generic_string());
+    logger_->info(_ST("Found fonts database: \"{}\""), db_path.generic_path().native());
   } else {
-    logger_->warn("Fonts database not found.");
+    logger_->warn(_ST("Fonts database not found."));
   }
 }
 
@@ -298,11 +300,11 @@ void GuiFrame::OnFindDB(wxCommandEvent& WXUNUSED(event)) {
   }
   wxString path = open_dir_dialog.GetPath();
   db_text_->ChangeValue(path);
-  auto db_path = fs::path(db_text_->GetValue().ToStdString() + "/fonts.db");
+  auto db_path = fs::path(db_text_->GetValue().ToStdWstring() + L"/fonts.db");
   if (fs::is_regular_file(db_path)) {
-    logger_->info("Found fonts database: \"{}\"", db_path.generic_string());
+    logger_->info(_ST("Found fonts database: \"{}\""), db_path.generic_path().native());
   } else {
-    logger_->warn("Fonts database not found.");
+    logger_->warn(_ST("Fonts database not found."));
   }
 }
 
@@ -342,11 +344,11 @@ void GuiFrame::OnDropDB(wxDropFilesEvent& event) {
     return;
   }
   db_text_->ChangeValue(path[0]);
-  auto db_path = fs::path(db_text_->GetValue().ToStdString() + "/fonts.db");
+  auto db_path = fs::path(db_text_->GetValue().ToStdWstring() + L"/fonts.db");
   if (fs::is_regular_file(db_path)) {
-    logger_->info("Found fonts database: \"{}\"", db_path.generic_string());
+    logger_->info(_ST("Found fonts database: \"{}\""), db_path.generic_path().native());
   } else {
-    logger_->warn("Fonts database not found.");
+    logger_->warn(_ST("Fonts database not found."));
   }
 }
 
@@ -355,24 +357,34 @@ void GuiFrame::OnRun(wxCommandEvent& WXUNUSED(event)) {
     return;
   }
   if (input_text_->IsEmpty()) {
-    logger_->error("No Input ASS file.");
+    logger_->error(_ST("No Input ASS file."));
     return;
   }
   if (output_text_->IsEmpty()) {
-    logger_->error("No Output directory.");
+    logger_->error(_ST("No Output directory."));
     return;
   }
   if (font_text_->IsEmpty() && db_text_->IsEmpty()) {
-    logger_->error("No font directory.");
+    logger_->error(_ST("No font directory."));
     return;
   }
   fs::path input_path =
-      fs::system_complete(input_text_->GetValue().ToStdString());
+      fs::system_complete(input_text_->GetValue().ToStdWstring());
   fs::path output_path =
-      fs::system_complete(output_text_->GetValue().ToStdString());
+      fs::system_complete(output_text_->GetValue().ToStdWstring());
   fs::path fonts_path =
-      fs::system_complete(font_text_->GetValue().ToStdString());
-  fs::path db_path = fs::system_complete(db_text_->GetValue().ToStdString());
+      fs::system_complete(font_text_->GetValue().ToStdWstring());
+  fs::path db_path = fs::system_complete(db_text_->GetValue().ToStdWstring());
+  if (!fs::is_regular_file(input_path)) {
+    logger_->error(_ST("Input ASS file contains no file: \"{}\""),
+                   input_path.generic_path().native());
+    return;
+  }
+  if (!fs::is_directory(output_path)) {
+    logger_->error(_ST("Output directory contains no legal directory: \"{}\""),
+                   output_path.generic_path().native());
+    return;
+  }
   boost::thread thread([=] {
     is_running_ = true;
     Run(input_path, output_path, fonts_path, db_path, subset_check_->GetValue(),
@@ -387,26 +399,40 @@ void GuiFrame::OnBuild(wxCommandEvent& WXUNUSED(event)) {
     return;
   }
   if (font_text_->IsEmpty()) {
-    logger_->error("No Font directory.");
+    logger_->error(_ST("No Font directory."));
     return;
   }
   if (db_text_->IsEmpty()) {
-    logger_->error("No Database directory.");
+    logger_->error(_ST("No Database directory."));
     return;
   }
   fs::path fonts_path =
-      fs::system_complete(font_text_->GetValue().ToStdString());
-  fs::path db_path = fs::system_complete(db_text_->GetValue().ToStdString());
-  logger_->info("Building fonts database.");
+      fs::system_complete(font_text_->GetValue().ToStdWstring());
+  fs::path db_path = fs::system_complete(db_text_->GetValue().ToStdWstring());
+  if (!fs::is_directory(fonts_path)) {
+    logger_->error(_ST("Font directory contains no legal directory: \"{}\""),
+                   fonts_path.generic_path().native());
+    return;
+  }
+  if (!fs::is_directory(db_path)) {
+    logger_->error(_ST("Database directory contains no legal directory: \"{}\""),
+                   db_path.generic_path().native());
+    return;
+  }
+  logger_->info(_ST("Building fonts database."));
   boost::thread thread([=] {
     is_running_ = true;
     BuildDB(fonts_path, db_path, sink_);
+    font_text_->Clear();
     is_running_ = false;
   });
   thread.detach();
 }
 
 void GuiFrame::OnReset(wxCommandEvent& WXUNUSED(event)) {
+  if (is_running_) {
+    return;
+  }
   subset_check_->SetValue(false);
   embed_check_->SetValue(false);
   input_text_->Clear();
@@ -414,12 +440,12 @@ void GuiFrame::OnReset(wxCommandEvent& WXUNUSED(event)) {
   font_text_->Clear();
   db_text_->ChangeValue(app_path_);
   log_text_->Clear();
-  logger_->info("assfonts-gui v{}.{}.{}", VERSION_MAX, VERSION_MID,
+  logger_->info(_ST("assfonts-gui v{}.{}.{}"), VERSION_MAX, VERSION_MID,
                 VERSION_MIN);
-  auto db_path = fs::path(db_text_->GetValue().ToStdString() + "/fonts.db");
+  auto db_path = fs::path(db_text_->GetValue().ToStdWstring() + L"/fonts.db");
   if (fs::is_regular_file(db_path)) {
-    logger_->info("Found fonts database: \"{}\"", db_path.generic_string());
+    logger_->info(_ST("Found fonts database: \"{}\""), db_path.generic_path().native());
   } else {
-    logger_->warn("Fonts database not found.");
+    logger_->warn(_ST("Fonts database not found."));
   }
 }

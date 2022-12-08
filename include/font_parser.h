@@ -37,6 +37,8 @@ extern "C" {
 #include <spdlog/async.h>
 #include <spdlog/spdlog.h>
 
+#include "ass_string.h"
+
 namespace ass {
 
 class FontParser {
@@ -53,9 +55,9 @@ class FontParser {
     LoadFonts(fonts_dir);
   };
   ~FontParser() { spdlog::drop("font_parser"); };
-  void LoadFonts(const std::string& fonts_dir);
-  void SaveDB(const std::string& db_path);
-  void LoadDB(const std::string& db_path);
+  void LoadFonts(const AString& fonts_dir);
+  void SaveDB(const AString& db_path);
+  void LoadDB(const AString& db_path);
   void clean_font_list();
 
  private:
@@ -65,7 +67,7 @@ class FontParser {
     std::vector<std::string> psnames;
     int weight = 400;
     int slant = 0;
-    std::string path;
+    AString path;
     long index = 0;
 
     template <class Archive>
@@ -84,11 +86,11 @@ class FontParser {
   std::mutex mtx_;
   std::vector<FontInfo> font_list_;
   std::vector<FontInfo> font_list_in_db_;
-  std::vector<std::string> fonts_path_;
+  std::vector<AString> fonts_path_;
 
-  std::vector<std::string> FindFileInDir(const std::string& dir,
-                                         const std::string& pattern);
-  void GetFontInfo(const std::string& font_path);
+  std::vector<AString> FindFileInDir(const AString& dir,
+                                     const AString& pattern);
+  void GetFontInfo(const AString& font_path);
   int AssFaceGetWeight(FT_Face face);
 
   friend class FontSubsetter;

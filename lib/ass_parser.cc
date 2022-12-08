@@ -21,7 +21,6 @@
 
 #include <fstream>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/locale.hpp>
 
@@ -29,21 +28,21 @@ namespace fs = boost::filesystem;
 
 namespace ass {
 
-bool AssParser::ReadFile(const std::string& ass_file_path) {
+bool AssParser::ReadFile(const AString& ass_file_path) {
   fs::path ass_path(ass_file_path);
   std::ifstream ass_file(ass_file_path);
   if (ass_file.is_open()) {
     ass_path_ = ass_file_path;
     std::string line;
-    while (getline(ass_file, line)) {
+    while (SafeGetLine(ass_file, line)) {
       if (!IsUTF8(line)) {
-        logger_->error("Only support UTF-8 subtitle.");
+        logger_->error(_ST("Only support UTF-8 subtitle."));
         return false;
       }
       text_.push_back(line);
     }
   } else {
-    logger_->error("\"{}\" cannot be opened.", ass_path.generic_string());
+    logger_->error(_ST("\"{}\" cannot be opened."), ass_path.generic_path().native());
     return false;
   }
   ass_file.close();
@@ -64,8 +63,8 @@ bool AssParser::ReadFile(const std::string& ass_file_path) {
     font_sets_.erase(key_del);
   }
   if (font_sets_.empty()) {
-    logger_->error("\"{}\" may not be a legal ASS subtitle file.",
-                   ass_path.generic_string());
+    logger_->error(_ST("\"{}\" may not be a legal ASS subtitle file."),
+                   ass_path.generic_path().native());
     return false;
   }
   return true;
@@ -115,8 +114,7 @@ bool AssParser::IsUTF8(const std::string& line) {
 }
 
 bool AssParser::FindTitle(const std::string& line, const std::string& title) {
-  if (boost::algorithm::to_lower_copy(line).substr(0, title.size()) ==
-      boost::algorithm::to_lower_copy(title)) {
+  if (ToLower(line).substr(0, title.size()) == ToLower(title)) {
     return true;
   } else {
     return false;
@@ -133,7 +131,7 @@ bool AssParser::ParseLine(const std::string& line, const unsigned int num_field,
     if (*ch != ':') {
       word.push_back(*ch);
     } else {
-      words.push_back(boost::algorithm::trim_copy(word));
+      words.push_back(Trim(word));
       word.clear();
       ++ch;
       break;
@@ -143,7 +141,7 @@ bool AssParser::ParseLine(const std::string& line, const unsigned int num_field,
     if (*ch != ',') {
       word.push_back(*ch);
     } else {
-      words.push_back(boost::algorithm::trim_copy(word));
+      words.push_back(Trim(word));
       word.clear();
       ++field;
       if (field >= num_field - 1) {
@@ -158,11 +156,11 @@ bool AssParser::ParseLine(const std::string& line, const unsigned int num_field,
   if (num_field == 10) {
     words.push_back(word);
   } else {
-    words.push_back(boost::algorithm::trim_copy(word));
+    words.push_back(Trim(word));
   }
   if (field < num_field - 1) {
     logger_->error(
-        "\"{}\" is not a legal ASS subtitle file. Incorrect number of field.",
+        _ST("\"{}\" is not a legal ASS subtitle file. Incorrect number of field."),
         ass_path_);
     return false;
   }
@@ -215,13 +213,13 @@ bool AssParser::ParseAss() {
   }
   if (!has_style) {
     logger_->error(
-        "\"{}\" is not a legal ASS subtitle file. No Style Title found.",
+        _ST("\"{}\" is not a legal ASS subtitle file. No Style Title found."),
         ass_path_);
     return false;
   }
   if (!has_event) {
     logger_->error(
-        "\"{}\" is not a legal ASS subtitle file. No Event Title found.",
+        _ST("\"{}\" is not a legal ASS subtitle file. No Event Title found."),
         ass_path_);
     return false;
   }
@@ -329,9 +327,9 @@ bool AssParser::StyleOverride(const std::u32string& code, FontDesc* font_desc,
         ++iter;
         ++pos;
       }
-      if (!boost::algorithm::trim_copy(font).empty()) {
-        std::string fontname = boost::locale::conv::utf_to_utf<char>(
-            boost::algorithm::trim_copy(font));
+      if (!Trim(font).empty()) {
+        std::string fontname =
+            boost::locale::conv::utf_to_utf<char>(Trim(font));
         if (fontname[0] == '@') {
           fontname.erase(0, 1);
         }
@@ -359,9 +357,8 @@ bool AssParser::StyleOverride(const std::u32string& code, FontDesc* font_desc,
         ++iter;
         ++pos;
       }
-      if (!boost::algorithm::trim_copy(bold).empty()) {
-        int val = std::stoi(boost::locale::conv::utf_to_utf<char>(
-            boost::algorithm::trim_copy(bold)));
+      if (!Trim(bold).empty()) {
+        int val = std::stoi(boost::locale::conv::utf_to_utf<char>(Trim(bold)));
         if (val == 1 || val == -1) {
           val = 700;
         } else if (val <= 0) {
@@ -391,9 +388,9 @@ bool AssParser::StyleOverride(const std::u32string& code, FontDesc* font_desc,
         ++iter;
         ++pos;
       }
-      if (!boost::algorithm::trim_copy(italic).empty()) {
-        int val = std::stoi(boost::locale::conv::utf_to_utf<char>(
-            boost::algorithm::trim_copy(italic)));
+      if (!Trim(italic).empty()) {
+        int val =
+            std::stoi(boost::locale::conv::utf_to_utf<char>(Trim(italic)));
         if (val == 1) {
           val = 100;
         } else if (val <= 0) {
@@ -419,8 +416,8 @@ bool AssParser::StyleOverride(const std::u32string& code, FontDesc* font_desc,
         ++iter;
         ++pos;
       }
-      std::string style_name = boost::locale::conv::utf_to_utf<char>(
-          boost::algorithm::trim_copy(style));
+      std::string style_name =
+          boost::locale::conv::utf_to_utf<char>(Trim(style));
       if (stylename_fontdesc_.find(style_name) == stylename_fontdesc_.end()) {
         if (has_default_style_) {
           *font_desc = stylename_fontdesc_["Default"];
