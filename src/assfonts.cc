@@ -34,7 +34,7 @@
 
 constexpr int VERSION_MAX = 0;
 constexpr int VERSION_MID = 2;
-constexpr int VERSION_MIN = 2;
+constexpr int VERSION_MIN = 3;
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
