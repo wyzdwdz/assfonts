@@ -21,10 +21,10 @@
 
 #include <cmath>
 #include <fstream>
+#include <memory>
 #include <regex>
 #include <stdexcept>
 #include <thread>
-#include <memory>
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,7 +62,6 @@ void FontParser::LoadFonts(const AString& fonts_dir) {
   boost::asio::thread_pool pool(num_thread);
   for (const AString& font_path : fonts_path_) {
     boost::asio::post(pool, [&] { GetFontInfo(font_path); });
-    GetFontInfo(font_path);
   }
   pool.join();
 }
