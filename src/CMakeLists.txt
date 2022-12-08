@@ -2,8 +2,8 @@
 
 set(THIRD_PARTY_LIBS Boost::boost 
                      Boost::filesystem
+                     Boost::program_options
                      spdlog::spdlog
-                     CLI11::CLI11
                      fmt::fmt)
 
 set(TARGET_NAME assfonts)

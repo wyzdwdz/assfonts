@@ -1,4 +1,4 @@
-﻿/*  This file is part of assfonts.
+/*  This file is part of assfonts.
  *
  *  assfonts is free software: you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -17,18 +17,14 @@
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
-#include <memory>
-#include <string>
+#include <exception>
 
 #include <fmt/core.h>
 #include <spdlog/async.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
-#include <CLI/App.hpp>
-#include <CLI/Config.hpp>
-#include <CLI/Formatter.hpp>
-#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
 
 #include "ass_font_embedder.h"
 #include "ass_parser.h"
@@ -40,9 +36,20 @@ constexpr int VERSION_MAX = 0;
 constexpr int VERSION_MID = 2;
 constexpr int VERSION_MIN = 2;
 
+namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
+#ifdef _WIN32
+#define PoStringValue po::wvalue<AString>
+#else
+#define PoStringValue po::value<AString>
+#endif
+
+#ifdef _WIN32
+int wmain(int argc, wchar_t** argv) {
+#else
 int main(int argc, char** argv) {
+#endif
   spdlog::init_thread_pool(512, 1);
   auto color_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
   auto logger = std::make_shared<spdlog::logger>("main", color_sink);
@@ -55,48 +62,38 @@ int main(int argc, char** argv) {
 
   spdlog::set_pattern("[%^%l%$] %v");
 
-  std::string input;
-  std::string output;
-  std::string fonts;
-  std::string database(".");
-  bool is_build = false;
-  bool is_embed_only = false;
-  bool is_subset_only = false;
-  bool is_help = false;
-  int verbose = 3;
-
-  CLI::App app{"Subset fonts and embed them into an ASS subtitle."};
-  auto* p_opt_i = app.add_option("-i,--input,input", input, "Input .ass file");
-  auto* p_opt_o = app.add_option("-o,--output", output, "Output directory");
-  auto* p_opt_f = app.add_option("-f,--fontpath", fonts, "Set fonts directory");
-  auto* p_opt_d =
-      app.add_option("-d,--dbpath", database, "Set fonts database path");
-  app.add_flag("-b,--build", is_build, "Build or update fonts database");
-  app.add_flag("-e,--embed-only", is_embed_only, "Do not subset fonts");
-  app.add_flag("-s,--subset-only", is_subset_only,
-               "Subset fonts but not embed them into subtitle");
-  auto* p_opt_v = app.add_option("-v,--verbose", verbose, "Set logging level.");
-  app.set_help_flag("");
-  app.add_flag("-h,--help", is_help, "Get help info");
-  p_opt_i->type_name("<file>");
-  p_opt_o->type_name("<dir>");
-  p_opt_f->type_name("<dir>");
-  p_opt_d->type_name("<dir>");
-  p_opt_v->type_name("<num>");
-  app.failure_message(
-      [=](const CLI::App* app, const CLI::Error& e) -> std::string {
-        std::string str = CLI::FailureMessage::simple(app, e);
-        str.pop_back();
-        str += ". See --help for more info.";
-        logger->error(str);
-        spdlog::shutdown();
-        return "";
-      });
-  CLI11_PARSE(app, argc, argv);
-
+  po::options_description desc("all options");
   // clang-format off
-  if (is_help) {
-    fmt::print("assfonts v{}.{}.{}\n"
+  desc.add_options()
+    ("input,i",       PoStringValue(),  "Input .ass file")
+    ("output,o",      PoStringValue(),  "Output directory")
+    ("fontpath,f",    PoStringValue(),  "Set fonts directory")
+    ("dbpath,d",      PoStringValue(),  "Set fonts database path")
+    ("build,b",                         "Build or update fonts database")
+    ("embed-only,e",  po::bool_switch()->default_value(false),                 
+                                        "Do not subset fonts")
+    ("subset-only,s", po::bool_switch()->default_value(false),               
+                                        "Subset fonts but not embed them into subtitle")
+    ("verbose,v",     po::value<int>(), "Set logging level.")
+    ("help,h",                          "Get help info");
+  // clang-format on
+  po::variables_map vm;
+  try {
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+  } catch (po::error& e) {
+#ifdef _WIN32
+    logger->error(_ST("{}. See --help for more info."),
+                  ass::U8ToWide(e.what()));
+#else
+    logger->error(_ST("{}. See --help for more info."), e.what());
+#endif
+    spdlog::shutdown();
+    return 0;
+  }
+  po::notify(vm);
+  if (vm.count("help")) {
+    // clang-format off
+    fmt::print(_ST("assfonts v{}.{}.{}\n"
       "Subset fonts and embed them into an ASS subtitle.\n"
       "Usage:     assfonts [options...] [<file>]\n"
       "Examples:  assfonts <file>                  Embed subset fonts into ASS script\n"
@@ -105,84 +102,114 @@ int main(int argc, char** argv) {
       "           assfonts -f <dir> -e -i <file>   Only embed fonts without subset\n"
       "           assfonts -f <dir> -b             Build or update fonts database only\n"
       "Options:\n"
-      "  -i, --input,      <file>  Input .ass file\n"
-      "  -o, --output      <dir>   Output directory    (Default: same directory as input)\n"
-      "  -f, --fontpath    <dir>   Set fonts directory\n"
-      "  -b, --build               Build or update fonts database    (Require --fontpath)\n"
-      "  -d, --dbpath      <dir>   Set fonts database path    (Default: current path)\n"
-      "  -s, --subset-only         Subset fonts but not embed them into subtitle\n"
-      "  -e, --embed-only          Do not subset fonts\n"
-      "  -v, --verbose     <num>   Set logging level (0 to 3), 0 is off    (Default: 3)\n"
-      "  -h, --help                Get help info\n\n", VERSION_MAX, VERSION_MID, VERSION_MIN);
+      "  -i, --input,      <file>   Input .ass file\n"
+      "  -o, --output      <dir>    Output directory  (Default: same directory as input)\n"
+      "  -f, --fontpath    <dir>    Set fonts directory\n"
+      "  -b, --build                Build or update fonts database  (Require --fontpath)\n"
+      "  -d, --dbpath      <dir>    Set fonts database path  (Default: current path)\n"
+      "  -s, --subset-only <bool>   Subset fonts but not embed them into subtitle  (default: False)\n"
+      "  -e, --embed-only  <bool>   Do not subset fonts  (default: False)\n"
+      "  -v, --verbose     <num>    Set logging level (0 to 3), 0 is off  (Default: 3)\n"
+      "  -h, --help                 Get help info\n\n"), VERSION_MAX, VERSION_MID, VERSION_MIN);
+    // clang-format on
     if (argc == 2) {
       spdlog::shutdown();
       return 0;
     }
   }
-  // clang-format on
-
-  switch (verbose) {
-    case 0:
-      spdlog::set_level(spdlog::level::off);
-      break;
-    case 1:
-      spdlog::set_level(spdlog::level::err);
-      break;
-    case 2:
-      spdlog::set_level(spdlog::level::warn);
-      break;
-    case 3:
-      spdlog::set_level(spdlog::level::info);
-      break;
-    default:
-      logger->error("Wrong verbose level. See --help for more info.");
-      spdlog::shutdown();
-      return 0;
+  if (vm.count("verbose")) {
+    switch (vm["verbose"].as<int>()) {
+      case 0:
+        spdlog::set_level(spdlog::level::off);
+        break;
+      case 1:
+        spdlog::set_level(spdlog::level::err);
+        break;
+      case 2:
+        spdlog::set_level(spdlog::level::warn);
+        break;
+      case 3:
+        spdlog::set_level(spdlog::level::info);
+        break;
+      default:
+        logger->error(_ST("Wrong verbose level. See --help for more info."));
+        spdlog::shutdown();
+        return 0;
+    }
   }
 
+  AString input;
+  AString output;
+  AString fonts;
+  AString database(_ST("."));
+  bool is_build = false;
+  bool is_subset_only = false;
+  bool is_embed_only = false;
+  if (vm.count("input")) {
+    input = vm["input"].as<AString>();
+  }
+  if (vm.count("output")) {
+    output = vm["output"].as<AString>();
+  }
+  if (vm.count("fontpath")) {
+    fonts = vm["fontpath"].as<AString>();
+  }
+  if (vm.count("dbpath")) {
+    database = vm["dbpath"].as<AString>();
+  }
+  if (vm.count("build")) {
+    is_build = true;
+  }
+  if (vm.count("subset-only")) {
+    is_subset_only = vm["subset-only"].as<bool>();
+  }
+  if (vm.count("embed-only")) {
+    is_embed_only = vm["embed-only"].as<bool>();
+  }
   fs::path input_path = fs::system_complete(input);
   fs::path output_path = fs::system_complete(output);
   fs::path fonts_path = fs::system_complete(fonts);
   fs::path db_path = fs::system_complete(database);
 
   if (!input.empty() && !fs::is_regular_file(input_path)) {
-    logger->error("\"{}\" is not a file. See --help for more info.", input);
+    logger->error(_ST("\"{}\" is not a file. See --help for more info."),
+                  input);
     spdlog::shutdown();
     return 0;
   }
   if (!output.empty() && !fs::is_directory(output_path)) {
     logger->error(
-       "\"{}\" is not a legal directory path. See --help for more info.",
+        _ST("\"{}\" is not a legal directory path. See --help for more info."),
         output);
     spdlog::shutdown();
     return 0;
   }
   if (!fonts.empty() && !fs::is_directory(fonts_path)) {
     logger->error(
-        "\"{}\" is not a legal directory path. See --help for more info.",
+        _ST("\"{}\" is not a legal directory path. See --help for more info."),
         fonts);
     spdlog::shutdown();
     return 0;
   }
   if (!fs::is_directory(db_path)) {
     logger->error(
-        "\"{}\" is not a legal directory path. See --help for more info.",
+        _ST("\"{}\" is not a legal directory path. See --help for more info."),
         database);
     spdlog::shutdown();
     return 0;
   }
   if (is_build && fonts.empty()) {
-    logger->error("No fontpath is found. See --help for more info.");
+    logger->error(_ST("No fontpath is found. See --help for more info."));
     spdlog::shutdown();
     return 0;
   }
   if (input.empty() && fonts.empty()) {
-    logger->error("No input is found. See --help for more info.");
+    logger->error(_ST("No input is found. See --help for more info."));
     spdlog::shutdown();
     return 0;
   }
   if (input.empty() && !is_build) {
-    logger->error("Do nothing. See --help for more info.");
+    logger->error(_ST("Do nothing. See --help for more info."));
     spdlog::shutdown();
     return 0;
   }

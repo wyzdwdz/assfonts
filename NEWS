@@ -1,12 +1,20 @@
-Overview of changes leading to v0.2.2 and v0.2.1
-Tuesday, November 29, 2022
+Overview of changes leading to v0.2.3
+Tuesday, December 8, 2022
 ====================================
-- Use wchar_t in Windows, add Unicode filesystem support
+- Add Unicode support for Command Line
+- Change command line parser from "CLI11" 
+  to "Boost::program_options"
+
+
+Overview of changes leading to v0.2.2 and v0.2.1
+Tuesday, December 7, 2022
+====================================
+- Use wchar_t in Windows, add Unicode filesystem support for GUI
 - Add Linux release version
 
 
 Overview of changes leading to v0.2.0
-Tuesday, November 29, 2022
+Tuesday, December 4, 2022
 ====================================
 - Add GUI version
 - Rewrite error handling mechanism

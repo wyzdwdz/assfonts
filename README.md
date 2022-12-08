@@ -14,13 +14,11 @@ Use [vcpkg](https://vcpkg.io/) as package manager
 
 - [HarfBuzz](https://github.com/harfbuzz/harfbuzz)
 
-- [Boost](https://www.boost.org/) filesystem locale serialization asio thread
+- [Boost](https://www.boost.org/) filesystem locale serialization asio thread program_options
 
 - [spdlog](https://github.com/gabime/spdlog)
 
 - [fmt](https://github.com/fmtlib/fmt)
-
-- [CLI11](https://github.com/CLIUtils/CLI11)
 
 - [wxWidgets](https://www.wxwidgets.org/)
 
@@ -34,15 +32,15 @@ Examples:  assfonts <file>                  Embed subset fonts into ASS script
            assfonts -f <dir> -e -i <file>   Only embed fonts without subset
            assfonts -f <dir> -b             Build or update fonts database only
 Options:
-  -i, --input,      <file>  Input .ass file
-  -o, --output      <dir>   Output directory    (Default: same directory as input)
-  -f, --fontpath    <dir>   Set fonts directory
-  -b, --build               Build or update fonts database    (Require --fontpath)
-  -d, --dbpath      <dir>   Set fonts database path    (Default: current path)
-  -s, --subset-only         Subset fonts but not embed them into subtitle
-  -e, --embed-only          Do not subset fonts
-  -v, --verbose     <num>   Set logging level (0 to 3), 0 is off    (Default: 3)
-  -h, --help                Get help info
+  -i, --input,      <file>   Input .ass file
+  -o, --output      <dir>    Output directory  (Default: same directory as input)
+  -f, --fontpath    <dir>    Set fonts directory
+  -b, --build                Build or update fonts database  (Require --fontpath)
+  -d, --dbpath      <dir>    Set fonts database path  (Default: current path)
+  -s, --subset-only <bool>   Subset fonts but not embed them into subtitle  (default: False)
+  -e, --embed-only  <bool>   Do not subset fonts  (default: False)
+  -v, --verbose     <num>    Set logging level (0 to 3), 0 is off  (Default: 3)
+  -h, --help                 Get help info
  ```
  
  When you first run this program, it's recommended to initialize font database first `assfonts -f <your_fonts_dir> -b` 
