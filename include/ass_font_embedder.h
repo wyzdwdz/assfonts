@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 
+#include <spdlog/async.h>
 #include <spdlog/spdlog.h>
 
 #include "ass_string.h"
@@ -35,7 +36,8 @@ class AssFontEmbedder {
  public:
   template <typename T>
   AssFontEmbedder(const FontSubsetter& fs, std::shared_ptr<T> sink) : fs_(fs) {
-    logger_ = std::make_shared<spdlog::logger>("ass_font_embedder", sink);
+    logger_ = std::make_shared<spdlog::async_logger>("ass_font_embedder", sink,
+                                                     spdlog::thread_pool());
     spdlog::register_logger(logger_);
   };
   ~AssFontEmbedder() { spdlog::drop("ass_font_embedder"); };

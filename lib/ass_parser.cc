@@ -42,7 +42,8 @@ bool AssParser::ReadFile(const AString& ass_file_path) {
       text_.push_back(line);
     }
   } else {
-    logger_->error(_ST("\"{}\" cannot be opened."), ass_path.generic_path().native());
+    logger_->error(_ST("\"{}\" cannot be opened."),
+                   ass_path.generic_path().native());
     return false;
   }
   ass_file.close();
@@ -71,8 +72,9 @@ bool AssParser::ReadFile(const AString& ass_file_path) {
 }
 
 bool AssParser::IsUTF8(const std::string& line) {
-  if (line.empty())
+  if (line.empty()) {
     return true;
+  }
   const unsigned char* bytes =
       reinterpret_cast<const unsigned char*>(line.c_str());
   unsigned int cp;
@@ -94,12 +96,14 @@ bool AssParser::IsUTF8(const std::string& line) {
       // U+10000 to U+10FFFF
       cp = (*bytes & 0x07u);
       num = 4;
-    } else
+    } else {
       return false;
+    }
     bytes += 1;
     for (int i = 1; i < num; ++i) {
-      if ((*bytes & 0xC0u) != 0x80u)
+      if ((*bytes & 0xC0u) != 0x80u) {
         return false;
+      }
       cp = (cp << 6) | (*bytes & 0x3Fu);
       bytes += 1;
     }
@@ -107,8 +111,9 @@ bool AssParser::IsUTF8(const std::string& line) {
         ((cp <= 0x007Fu) && (num != 1)) ||
         ((cp >= 0x0080u) && (cp <= 0x07FFu) && (num != 2)) ||
         ((cp >= 0x0800u) && (cp <= 0xFFFFu) && (num != 3)) ||
-        ((cp >= 0x10000u) && (cp <= 0x1FFFFFu) && (num != 4)))
+        ((cp >= 0x10000u) && (cp <= 0x1FFFFFu) && (num != 4))) {
       return false;
+    }
   }
   return true;
 }
@@ -159,9 +164,9 @@ bool AssParser::ParseLine(const std::string& line, const unsigned int num_field,
     words.push_back(Trim(word));
   }
   if (field < num_field - 1) {
-    logger_->error(
-        _ST("\"{}\" is not a legal ASS subtitle file. Incorrect number of field."),
-        ass_path_);
+    logger_->error(_ST("\"{}\" is not a legal ASS subtitle file. Incorrect "
+                       "number of field."),
+                   ass_path_);
     return false;
   }
   res = words;

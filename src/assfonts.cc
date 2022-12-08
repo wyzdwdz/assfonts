@@ -28,9 +28,9 @@
 #include "ass_font_embedder.h"
 #include "ass_parser.h"
 #include "ass_string.h"
+#include "fmt_sink.h"
 #include "font_parser.h"
 #include "font_subsetter.h"
-#include "fmt_sink.h"
 
 constexpr int VERSION_MAX = 0;
 constexpr int VERSION_MID = 2;
@@ -52,7 +52,8 @@ int main(int argc, char** argv) {
 #endif
   spdlog::init_thread_pool(512, 1);
   auto fmt_sink = std::make_shared<mylog::sinks::fmt_sink_mt>();
-  auto logger = std::make_shared<spdlog::logger>("main", fmt_sink);
+  auto logger = std::make_shared<spdlog::async_logger>("main", fmt_sink,
+                                                       spdlog::thread_pool());
   spdlog::register_logger(logger);
 
   ass::AssParser ap(fmt_sink);

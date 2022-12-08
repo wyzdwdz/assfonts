@@ -241,9 +241,10 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   build_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &GuiFrame::OnBuild, this);
   reset_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &GuiFrame::OnReset, this);
 
-  spdlog::init_thread_pool(512, 1);
+  spdlog::init_thread_pool(2048, 1);
   sink_ = std::make_shared<mylog::sinks::wxwidgets_sink_mt>(log_text_);
-  logger_ = std::make_shared<spdlog::logger>("main", sink_);
+  logger_ = std::make_shared<spdlog::async_logger>("main", sink_,
+                                                   spdlog::thread_pool());
   logger_->set_pattern("[%^%l%$] %v");
   spdlog::register_logger(logger_);
 
