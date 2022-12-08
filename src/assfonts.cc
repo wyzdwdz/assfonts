@@ -21,7 +21,6 @@
 
 #include <fmt/core.h>
 #include <spdlog/async.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
@@ -31,6 +30,7 @@
 #include "ass_string.h"
 #include "font_parser.h"
 #include "font_subsetter.h"
+#include "fmt_sink.h"
 
 constexpr int VERSION_MAX = 0;
 constexpr int VERSION_MID = 2;
@@ -51,14 +51,14 @@ int wmain(int argc, wchar_t** argv) {
 int main(int argc, char** argv) {
 #endif
   spdlog::init_thread_pool(512, 1);
-  auto color_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-  auto logger = std::make_shared<spdlog::logger>("main", color_sink);
+  auto fmt_sink = std::make_shared<mylog::sinks::fmt_sink_mt>();
+  auto logger = std::make_shared<spdlog::logger>("main", fmt_sink);
   spdlog::register_logger(logger);
 
-  ass::AssParser ap(color_sink);
-  ass::FontParser fp(color_sink);
-  ass::FontSubsetter fs(ap, fp, color_sink);
-  ass::AssFontEmbedder afe(fs, color_sink);
+  ass::AssParser ap(fmt_sink);
+  ass::FontParser fp(fmt_sink);
+  ass::FontSubsetter fs(ap, fp, fmt_sink);
+  ass::AssFontEmbedder afe(fs, fmt_sink);
 
   spdlog::set_pattern("[%^%l%$] %v");
 

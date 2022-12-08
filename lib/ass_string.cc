@@ -60,6 +60,17 @@ std::wstring U8ToWide(const std::string& str) {
                       &w_str[0], static_cast<int>(w_str.size()));
   return w_str;
 }
+
+std::string WideToU8(const std::wstring& w_str) {
+  std::string str;
+  int len =
+      WideCharToMultiByte(CP_UTF8, 0, w_str.c_str(),
+                          static_cast<int>(w_str.size()), NULL, 0, NULL, NULL);
+  str.resize(len);
+  WideCharToMultiByte(CP_UTF8, 0, w_str.c_str(), static_cast<int>(w_str.size()),
+                      &str[0], static_cast<int>(str.size()), NULL, NULL);
+  return str;
+}
 #endif
 
 }  // namespace ass

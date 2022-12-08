@@ -26,7 +26,6 @@
 #include <sstream>
 
 #include <boost/filesystem.hpp>
-#include <boost/locale.hpp>
 
 namespace fs = boost::filesystem;
 
@@ -88,10 +87,13 @@ bool AssFontEmbedder::Run(bool is_clean_only) {
                   "this font may not be loaded by some video players."),
               font_path.generic_path().native());
         }
-        std::wstring w_fontname = font_path.stem().wstring() + L"_0" +
-                                  font_path.extension().wstring();
-        std::string fontname =
-            boost::locale::conv::utf_to_utf<char, wchar_t>(w_fontname);
+        AString a_fontname = font_path.stem().native() + _ST("_0") +
+                           font_path.extension().native();
+#ifdef _WIN32
+        std::string fontname = WideToU8(a_fontname);
+#else 
+        std::string fontname(a_fontname);
+#endif
         std::ifstream is(font, std::ios::binary);
         std::ostringstream ostrm;
         ostrm << is.rdbuf();

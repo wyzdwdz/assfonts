@@ -17,54 +17,54 @@
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
-#ifndef ASSFONTS_WXWIDGETSSINK_H_
-#define ASSFONTS_WXWIDGETSSINK_H_
+#ifndef ASSFONTS_FMTSINK_H_
+#define ASSFONTS_FMTSINK_H_
 
 #include <memory>
 #include <mutex>
-#include <string>
+
+#ifdef _WIN32
+#include <Windows.h>
+#include "ass_string.h"
+#else
+#include <fmt/core.h>
+#endif
 
 #include <spdlog/sinks/base_sink.h>
-#include <wx/wx.h>
-
-#include "ass_string.h"
 
 namespace mylog {
 namespace sinks {
 
 template <typename Mutex>
-class wxwidgets_sink : public spdlog::sinks::base_sink<Mutex> {
+class fmt_sink : public spdlog::sinks::base_sink<Mutex> {
  public:
-  wxwidgets_sink(wxTextCtrl* log_text) : log_text_(log_text){};
+  fmt_sink() = default;
 
  protected:
   void sink_it_(const spdlog::details::log_msg& msg) override {
     spdlog::memory_buf_t formatted;
     formatter_->format(msg, formatted);
 #ifdef _WIN32
-    wxString text(
+    std::wstring text(
         ass::U8ToWide(std::string(formatted.data(), formatted.size())));
+    WriteConsoleW(GetStdHandle(STD_OUTPUT_HANDLE), text.c_str(),
+                  static_cast<DWORD>(text.size()), NULL, NULL);
 #else
-    wxString text(formatted.data(), wxConvUTF8, formatted.size());
+    fmt::print("{}", std::string(formatted.data(), formatted.size()));
 #endif
-    wxMilliSleep(20);
-    *log_text_ << text;
   }
-  void flush_() override {
-    log_text_->Clear();
-  }
+  void flush_() override {}
   void set_formatter_(
       std::unique_ptr<spdlog::formatter> sink_formatter) override {
     formatter_ = std::move(sink_formatter);
   }
 
  private:
-  wxTextCtrl* log_text_;
   std::unique_ptr<spdlog::formatter> formatter_;
 };
 
-using wxwidgets_sink_mt = wxwidgets_sink<std::mutex>;
-using wxwidgets_sink_st = wxwidgets_sink<spdlog::details::null_mutex>;
+using fmt_sink_mt = fmt_sink<std::mutex>;
+using fmt_sink_st = fmt_sink<spdlog::details::null_mutex>;
 
 }  // namespace sinks
 }  // namespace mylog

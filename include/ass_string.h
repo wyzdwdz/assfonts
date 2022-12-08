@@ -89,6 +89,7 @@ std::istream& SafeGetLine(std::istream& is, std::string& t);
 
 #ifdef _WIN32
 std::wstring U8ToWide(const std::string& str);
+std::string WideToU8(const std::wstring& str);
 #endif
 
 }  // namespace ass
