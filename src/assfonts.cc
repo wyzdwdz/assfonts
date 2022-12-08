@@ -32,12 +32,13 @@
 
 #include "ass_font_embedder.h"
 #include "ass_parser.h"
+#include "ass_string.h"
 #include "font_parser.h"
 #include "font_subsetter.h"
 
 constexpr int VERSION_MAX = 0;
 constexpr int VERSION_MID = 2;
-constexpr int VERSION_MIN = 0;
+constexpr int VERSION_MIN = 2;
 
 namespace fs = boost::filesystem;
 
@@ -52,7 +53,6 @@ int main(int argc, char** argv) {
   ass::FontSubsetter fs(ap, fp, color_sink);
   ass::AssFontEmbedder afe(fs, color_sink);
 
-  //spdlog::set_pattern("[%n] [%^%l%$] %v");
   spdlog::set_pattern("[%^%l%$] %v");
 
   std::string input;
@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
   }
   if (!output.empty() && !fs::is_directory(output_path)) {
     logger->error(
-        "\"{}\" is not a legal directory path. See --help for more info.",
+       "\"{}\" is not a legal directory path. See --help for more info.",
         output);
     spdlog::shutdown();
     return 0;
@@ -188,12 +188,12 @@ int main(int argc, char** argv) {
   }
 
   if (!fonts.empty()) {
-    fp.LoadFonts(fonts_path.string());
+    fp.LoadFonts(fonts_path.native());
   }
   if (is_build) {
-    fp.SaveDB(db_path.string() + "/fonts.db");
+    fp.SaveDB(db_path.native() + _ST("/fonts.db"));
   } else {
-    fp.LoadDB(db_path.string() + "/fonts.db");
+    fp.LoadDB(db_path.native() + _ST("/fonts.db"));
   }
 
   if (input.empty()) {
@@ -201,7 +201,7 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  if (!ap.ReadFile(input_path.string())) {
+  if (!ap.ReadFile(input_path.native())) {
     spdlog::shutdown();
     return 0;
   }
@@ -211,8 +211,8 @@ int main(int argc, char** argv) {
   }
 
   if (is_embed_only && is_subset_only) {
-    afe.set_input_ass_path(input_path.string());
-    afe.set_output_dir_path(output_path.string());
+    afe.set_input_ass_path(input_path.native());
+    afe.set_output_dir_path(output_path.native());
     if (!afe.Run(true)) {
       spdlog::shutdown();
       return 0;
@@ -222,8 +222,8 @@ int main(int argc, char** argv) {
   }
 
   if (!is_embed_only) {
-    fs.SetSubfontDir(output_path.string() + "/" + input_path.stem().string() +
-                     "_subsetted");
+    fs.SetSubfontDir(output_path.native() + _ST("/") +
+                     input_path.stem().native() + _ST("_subsetted"));
   }
   if (!fs.Run(is_embed_only)) {
     spdlog::shutdown();
@@ -231,8 +231,8 @@ int main(int argc, char** argv) {
   }
 
   if (!is_subset_only) {
-    afe.set_input_ass_path(input_path.string());
-    afe.set_output_dir_path(output_path.string());
+    afe.set_input_ass_path(input_path.native());
+    afe.set_output_dir_path(output_path.native());
     if (!afe.Run(false)) {
       spdlog::shutdown();
       return 0;

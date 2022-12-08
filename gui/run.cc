@@ -21,14 +21,15 @@
 
 #include "ass_font_embedder.h"
 #include "ass_parser.h"
+#include "ass_string.h"
 #include "font_parser.h"
 #include "font_subsetter.h"
 
 void BuildDB(const fs::path fonts_path, const fs::path db_path,
              std::shared_ptr<mylog::sinks::wxwidgets_sink_mt> sink) {
   ass::FontParser fp(sink);
-  fp.LoadFonts(fonts_path.string());
-  fp.SaveDB(db_path.string() + "/fonts.db");
+  fp.LoadFonts(fonts_path.native());
+  fp.SaveDB(db_path.native() + _ST("/fonts.db"));
 }
 
 void Run(const fs::path input_path, const fs::path output_path,
@@ -40,30 +41,30 @@ void Run(const fs::path input_path, const fs::path output_path,
   ass::FontSubsetter fs(ap, fp, sink);
   ass::AssFontEmbedder afe(fs, sink);
   if (!fonts_path.empty()) {
-    fp.LoadFonts(fonts_path.string());
+    fp.LoadFonts(fonts_path.native());
   }
-  fp.LoadDB(db_path.string() + "/fonts.db");
-  if (!ap.ReadFile(input_path.string())) {
+  fp.LoadDB(db_path.native() + _ST("/fonts.db"));
+  if (!ap.ReadFile(input_path.native())) {
     return;
   }
   if (is_embed_only && is_subset_only) {
-    afe.set_input_ass_path(input_path.string());
-    afe.set_output_dir_path(output_path.string());
+    afe.set_input_ass_path(input_path.native());
+    afe.set_output_dir_path(output_path.native());
     if (!afe.Run(true)) {
       return;
     }
     return;
   }
   if (!is_embed_only) {
-    fs.SetSubfontDir(output_path.string() + "/" + input_path.stem().string() +
-                     "_subsetted");
+    fs.SetSubfontDir(output_path.native() + _ST("/") +
+                     input_path.stem().native() + _ST("_subsetted"));
   }
   if (!fs.Run(is_embed_only)) {
     return;
   }
   if (!is_subset_only) {
-    afe.set_input_ass_path(input_path.string());
-    afe.set_output_dir_path(output_path.string());
+    afe.set_input_ass_path(input_path.native());
+    afe.set_output_dir_path(output_path.native());
     if (!afe.Run(false)) {
       return;
     }

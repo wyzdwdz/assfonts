@@ -19,16 +19,16 @@
 
 #include "font_parser.h"
 
+#include <cmath>
 #include <fstream>
 #include <regex>
 #include <stdexcept>
 #include <thread>
+#include <memory>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include <ft2build.h>
-#include FT_FREETYPE_H
 #include FT_MODULE_H
 #include FT_TYPE1_TABLES_H
 #include FT_SFNT_NAMES_H
@@ -46,53 +46,61 @@ extern "C" {
 #include <boost/locale.hpp>
 #include <boost/serialization/vector.hpp>
 
+#include "ass_freetype.h"
+
 namespace fs = boost::filesystem;
 
 namespace ass {
 
-void FontParser::LoadFonts(const std::string& fonts_dir) {
-  fonts_path_ = FindFileInDir(fonts_dir, ".+\\.(ttf|otf|ttc|otc)$");
+void FontParser::LoadFonts(const AString& fonts_dir) {
+  fonts_path_ = FindFileInDir(fonts_dir, _ST(".+\\.(ttf|otf|ttc|otc)$"));
+  logger_->info(_ST("Found {} font files in \"{}\""), fonts_path_.size(),
+                fonts_dir);
   font_list_.reserve(fonts_path_.size());
-  boost::asio::thread_pool pool(std::thread::hardware_concurrency());
-  for (const std::string& font_path : fonts_path_) {
+  unsigned int num_thread = static_cast<unsigned int>(
+      std::thread::hardware_concurrency() / (1 - 0.8));
+  boost::asio::thread_pool pool(num_thread);
+  for (const AString& font_path : fonts_path_) {
     boost::asio::post(pool, [&] { GetFontInfo(font_path); });
+    GetFontInfo(font_path);
   }
   pool.join();
 }
 
-void FontParser::SaveDB(const std::string& db_path) {
+void FontParser::SaveDB(const AString& db_path) {
   fs::path file_path(db_path);
   if (fs::is_regular_file(file_path)) {
-    logger_->warn("\"{}\" already exists. It will be overwritten.",
-                  file_path.generic_string());
+    logger_->warn(_ST("\"{}\" already exists. It will be overwritten."),
+                  file_path.generic_path().native());
     fs::remove(file_path);
   }
-  std::ofstream db_file(file_path.string(), std::ios::binary);
+  std::ofstream db_file(file_path.native(), std::ios::binary);
   boost::archive::binary_oarchive oa(db_file);
   oa << font_list_;
   db_file.close();
-  logger_->info("Fonts database has been saved in \"{}\"",
-                file_path.generic_string());
+  logger_->info(_ST("Fonts database has been saved in \"{}\""),
+                file_path.generic_path().native());
 }
 
-void FontParser::LoadDB(const std::string& db_path) {
+void FontParser::LoadDB(const AString& db_path) {
   fs::path file_path(db_path);
-  std::ifstream db_file(file_path.string(), std::ios::binary);
+  std::ifstream db_file(file_path.native(), std::ios::binary);
   if (db_file.is_open()) {
     std::vector<FontInfo> tmp_font_list;
     try {
       boost::archive::binary_iarchive ia(db_file);
       ia >> font_list_in_db_;
     } catch (const boost::archive::archive_exception&) {
-      logger_->warn("Cannot load fonts database: \"{}\"",
-                     file_path.generic_string());
+      logger_->warn(_ST("Cannot load fonts database: \"{}\""),
+                    file_path.generic_path().native());
       return;
     }
     db_file.close();
-    logger_->info("Load fonts database \"{}\"", file_path.generic_string());
+    logger_->info(_ST("Load fonts database \"{}\""),
+                  file_path.generic_path().native());
   } else {
-    logger_->warn("Fonts database \"{}\" doesn't exists.",
-                  file_path.generic_string());
+    logger_->warn(_ST("Fonts database \"{}\" doesn't exists."),
+                  file_path.generic_path().native());
   }
 }
 
@@ -100,40 +108,38 @@ void FontParser::clean_font_list() {
   font_list_.clear();
 }
 
-std::vector<std::string> FontParser::FindFileInDir(const std::string& dir,
-                                                   const std::string& pattern) {
-  std::vector<std::string> res;
-  const std::regex r(pattern, std::regex::icase);
+std::vector<AString> FontParser::FindFileInDir(const AString& dir,
+                                               const AString& pattern) {
+  std::vector<AString> res;
+  const std::basic_regex<AChar> r(pattern, std::regex::icase);
   const fs::path dir_path(dir);
   const fs::recursive_directory_iterator iter(dir_path);
   for (const auto& dir_entry : iter) {
-    if (std::regex_match(dir_entry.path().string(), r)) {
-      res.push_back(dir_entry.path().generic_string());
+    if (std::regex_match(dir_entry.path().native(), r)) {
+      res.push_back(dir_entry.path().generic_path().native());
     }
   }
   return res;
 }
 
-void FontParser::GetFontInfo(const std::string& font_path) {
+void FontParser::GetFontInfo(const AString& font_path) {
   std::vector<std::string> families;
   std::vector<std::string> fullnames;
   std::vector<std::string> psnames;
   FontInfo font_info;
   FT_Library ft_library;
   FT_Init_FreeType(&ft_library);
+  FT_StreamRec ft_stream = {};
+  FT_Open_Args open_args = {};
+  NewOpenArgs(font_path, ft_stream, open_args);
   FT_Face ft_face;
-  if (FT_New_Face(ft_library, font_path.c_str(), -1, &ft_face)) {
-    logger_->warn("\"{}\" cannot be opened.", font_path);
+  if (FT_Open_Face(ft_library, &open_args, -1, &ft_face)) {
+    logger_->warn(_ST("\"{}\" cannot be opened."), font_path);
     return;
   }
   const long n_face = ft_face->num_faces;
   for (long face_idx = 0; face_idx < n_face; ++face_idx) {
-    FT_New_Face(ft_library, font_path.c_str(), face_idx, &ft_face);
-    if (!(ft_face->face_flags & FT_FACE_FLAG_SCALABLE)) {
-      logger_->warn("\"{}\"[{}] contains no scalable font face.", font_path,
-                    face_idx);
-      continue;
-    }
+    FT_Open_Face(ft_library, &open_args, face_idx, &ft_face);
     const unsigned int num_names = FT_Get_Sfnt_Name_Count(ft_face);
     for (unsigned int i = 0; i < num_names; i++) {
       FT_SfntName name;
@@ -202,12 +208,12 @@ void FontParser::GetFontInfo(const std::string& font_path) {
     mtx_.lock();
     font_list_.push_back(font_info);
     mtx_.unlock();
-    FT_Done_Face(ft_face);
   }
   if (font_info.families.empty() && font_info.fullnames.empty() &&
       font_info.psnames.empty()) {
-    logger_->warn("\"{}\" has no parsable name.", font_path);
+    logger_->warn(_ST("\"{}\" has no parsable name."), font_path);
   }
+  FT_Done_Face(ft_face);
   FT_Done_FreeType(ft_library);
 }
 

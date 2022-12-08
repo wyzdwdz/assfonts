@@ -21,7 +21,7 @@
 
 constexpr int VERSION_MAX = 0;
 constexpr int VERSION_MID = 2;
-constexpr int VERSION_MIN = 0;
+constexpr int VERSION_MIN = 2;
 
 class GuiApp : public wxApp {
  public:

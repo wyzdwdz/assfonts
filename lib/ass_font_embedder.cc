@@ -25,7 +25,6 @@
 #include <regex>
 #include <sstream>
 
-#include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/locale.hpp>
 
@@ -33,19 +32,20 @@ namespace fs = boost::filesystem;
 
 namespace ass {
 
-void AssFontEmbedder::set_input_ass_path(const std::string& input_ass_path) {
+void AssFontEmbedder::set_input_ass_path(const AString& input_ass_path) {
   input_ass_path_ = input_ass_path;
 }
 
-void AssFontEmbedder::set_output_dir_path(const std::string& output_dir_path) {
+void AssFontEmbedder::set_output_dir_path(const AString& output_dir_path) {
   output_dir_path_ = output_dir_path;
 }
 
 bool AssFontEmbedder::Run(bool is_clean_only) {
   fs::path input_path(input_ass_path_);
-  fs::path output_path(output_dir_path_ + "/" + input_path.stem().string() +
-                       ".assfonts" + input_path.extension().string());
-  std::string real_input_path;
+  fs::path output_path(output_dir_path_ + _ST("/") +
+                       input_path.stem().native() + _ST(".assfonts") +
+                       input_path.extension().native());
+  AString real_input_path;
   bool have_fonts;
   if (!CleanFonts(have_fonts)) {
     return false;
@@ -54,40 +54,42 @@ bool AssFontEmbedder::Run(bool is_clean_only) {
     return true;
   }
   if (have_fonts) {
-    real_input_path = output_dir_path_ + "/" +
-                      input_path.stem().generic_string() + ".cleaned" +
-                      input_path.extension().generic_string();
+    real_input_path = output_dir_path_ + _ST("/") +
+                      input_path.stem().generic_path().native() +
+                      _ST(".cleaned") +
+                      input_path.extension().generic_path().native();
   } else {
-    real_input_path = input_path.generic_string();
+    real_input_path = input_path.generic_path().native();
   }
   std::ifstream input_ass(real_input_path);
   if (!input_ass.is_open()) {
-    logger_->error("\"{}\" cannot be opened.", real_input_path);
+    logger_->error(_ST("\"{}\" cannot be opened."), real_input_path);
     return false;
   }
-  std::ofstream output_ass(output_path.string());
+  std::ofstream output_ass(output_path.native());
   std::string line;
   if (!output_ass.is_open()) {
     input_ass.close();
-    logger_->error("\"{}\" cannot be created.", output_path.generic_string());
+    logger_->error(_ST("\"{}\" cannot be created."),
+                   output_path.generic_path().native());
     return false;
   }
-  while (getline(input_ass, line)) {
-    if (boost::algorithm::trim_copy(boost::algorithm::to_lower_copy(line)) ==
-        "[events]") {
+  while (SafeGetLine(input_ass, line)) {
+    if (Trim(ToLower(line)) == "[events]") {
       output_ass << "[Fonts]";
       for (const auto& font : fs_.subfonts_path_) {
         fs::path font_path(font);
-        if (boost::algorithm::to_lower_copy(font_path.extension().string()) !=
-            ".ttf") {
+        if (ToLower(font_path.extension().native()) != _ST(".ttf")) {
           logger_->warn(
-              "\"{}\" is not a .ttf font. Based on ASS Specs, only Truetype "
-              "fonts can be embedded in ASS scripts. Ignore this error, but "
-              "this font may not be loaded by some video players.",
-              font_path.generic_string());
+              _ST("\"{}\" is not a .ttf font. Based on ASS Specs, only "
+                  "Truetype "
+                  "fonts can be embedded in ASS scripts. Ignore this error, "
+                  "but "
+                  "this font may not be loaded by some video players."),
+              font_path.generic_path().native());
         }
-        std::wstring w_fontname = fs::path(font_path).stem().wstring() + L"_0" +
-                                  fs::path(font_path).extension().wstring();
+        std::wstring w_fontname = font_path.stem().wstring() + L"_0" +
+                                  font_path.extension().wstring();
         std::string fontname =
             boost::locale::conv::utf_to_utf<char, wchar_t>(w_fontname);
         std::ifstream is(font, std::ios::binary);
@@ -106,8 +108,8 @@ bool AssFontEmbedder::Run(bool is_clean_only) {
       output_ass << line << "\n";
     }
   }
-  logger_->info("Create font-embeded subtitle: \"{}\"",
-                output_path.generic_string());
+  logger_->info(_ST("Create font-embeded subtitle: \"{}\""),
+                output_path.generic_path().native());
   input_ass.close();
   output_ass.close();
   return true;
@@ -162,12 +164,11 @@ bool AssFontEmbedder::CleanFonts(bool& have_fonts) {
   const std::regex r_chapter_title("\\s*\\[.+\\]\\s*");
   std::smatch sm;
   fs::path input_path(input_ass_path_);
-  std::ifstream is(input_path.string());
-  while (getline(is, line)) {
-    if (boost::algorithm::trim_copy(boost::algorithm::to_lower_copy(line)) ==
-        "[fonts]") {
+  std::ifstream is(input_path.native());
+  while (SafeGetLine(is, line)) {
+    if (Trim(ToLower(line)) == "[fonts]") {
       have_fonts = true;
-      while (getline(is, line)) {
+      while (SafeGetLine(is, line)) {
         if (std::regex_match(line, sm, r_chapter_title) && sm.size() == 1 &&
             sm.str() == line) {
           output_lines.push_back(line + '\n');
@@ -179,15 +180,18 @@ bool AssFontEmbedder::CleanFonts(bool& have_fonts) {
     }
   }
   if (have_fonts) {
-    fs::path output_path(output_dir_path_ + "/" + input_path.stem().string() +
-                         ".cleaned" + input_path.extension().string());
+    fs::path output_path(output_dir_path_ + _ST("/") +
+                         input_path.stem().native() + _ST(".cleaned") +
+                         input_path.extension().native());
     logger_->info(
-        "Found fonts in \"{}\" Delete them and save new file in \"{}\"",
-        input_path.generic_string(), output_path.generic_string());
-    std::ofstream os(output_path.string());
+        _ST("Found fonts in \"{}\" Delete them and save new file in \"{}\""),
+        input_path.generic_path().native(),
+        output_path.generic_path().native());
+    std::ofstream os(output_path.native());
     if (!os.is_open()) {
       is.close();
-      logger_->error("\"{}\" cannot be created.", output_path.generic_string());
+      logger_->error(_ST("\"{}\" cannot be created."),
+                     output_path.generic_path().native());
       return false;
     }
     for (const auto& str : output_lines) {
