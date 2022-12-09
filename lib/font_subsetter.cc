@@ -63,7 +63,7 @@ bool FontSubsetter::Run(bool is_no_subset) {
                       path, index);
         CheckGlyph(path, index, font_set.second);
       }
-      subfonts_path_.push_back(path);
+      subfonts_path_.emplace_back(path);
     }
     if (have_missing) {
       logger_->error(_ST("Found missing fonts. Check warning info above."));
@@ -292,7 +292,7 @@ bool FontSubsetter::CreateSubfont(
   if (len == 0) {
     return false;
   }
-  subfonts_path_.push_back(output_filepath.native());
+  subfonts_path_.emplace_back(output_filepath.native());
   return true;
 }
 
@@ -312,7 +312,7 @@ bool FontSubsetter::CheckGlyph(AString font_path, long font_index,
       continue;
     }
     if (!FT_Get_Char_Index(ft_face, codepoint)) {
-      missing_codepoints.push_back(codepoint);
+      missing_codepoints.emplace_back(codepoint);
       have_all_glyph = false;
       break;
     }

@@ -29,7 +29,7 @@ extern "C" {
 }
 #endif
 
-#include <ass_string.h>
+#include "ass_string.h"
 
 namespace ass {
 

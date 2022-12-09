@@ -39,7 +39,7 @@ bool AssParser::ReadFile(const AString& ass_file_path) {
         logger_->error(_ST("Only support UTF-8 subtitle."));
         return false;
       }
-      text_.push_back(line);
+      text_.emplace_back(line);
     }
   } else {
     logger_->error(_ST("\"{}\" cannot be opened."),
@@ -57,7 +57,7 @@ bool AssParser::ReadFile(const AString& ass_file_path) {
   std::vector<FontDesc> keys_for_del;
   for (const auto& font_set : font_sets_) {
     if (font_set.second.size() == 0) {
-      keys_for_del.push_back(font_set.first);
+      keys_for_del.emplace_back(font_set.first);
     }
   }
   for (const auto& key_del : keys_for_del) {
@@ -136,7 +136,7 @@ bool AssParser::ParseLine(const std::string& line, const unsigned int num_field,
     if (*ch != ':') {
       word.push_back(*ch);
     } else {
-      words.push_back(Trim(word));
+      words.emplace_back(Trim(word));
       word.clear();
       ++ch;
       break;
@@ -146,7 +146,7 @@ bool AssParser::ParseLine(const std::string& line, const unsigned int num_field,
     if (*ch != ',') {
       word.push_back(*ch);
     } else {
-      words.push_back(Trim(word));
+      words.emplace_back(Trim(word));
       word.clear();
       ++field;
       if (field >= num_field - 1) {
@@ -159,9 +159,9 @@ bool AssParser::ParseLine(const std::string& line, const unsigned int num_field,
     word.push_back(*ch);
   }
   if (num_field == 10) {
-    words.push_back(word);
+    words.emplace_back(word);
   } else {
-    words.push_back(Trim(word));
+    words.emplace_back(Trim(word));
   }
   if (field < num_field - 1) {
     logger_->error(_ST("\"{}\" is not a legal ASS subtitle file. Incorrect "
@@ -192,7 +192,7 @@ bool AssParser::ParseAss() {
           if (!ParseLine(*line, 23, res)) {
             return false;
           }
-          styles_.push_back(res);
+          styles_.emplace_back(res);
         }
       }
       has_style = true;
@@ -207,7 +207,7 @@ bool AssParser::ParseAss() {
           if (!ParseLine(*line, 10, res)) {
             return false;
           }
-          dialogues_.push_back(res);
+          dialogues_.emplace_back(res);
         }
       }
       has_event = true;

@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
   po::variables_map vm;
   try {
     po::store(po::parse_command_line(argc, argv, desc), vm);
-  } catch (po::error& e) {
+  } catch (const po::error& e) {
 #ifdef _WIN32
     logger->error(_ST("{}. See --help for more info."),
                   ass::U8ToWide(e.what()));

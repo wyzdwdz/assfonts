@@ -25,9 +25,6 @@
 #include <cwctype>
 #include <string>
 
-#include <boost/filesystem.hpp>
-#include <boost/locale.hpp>
-
 #ifdef _WIN32
 
 using AChar = wchar_t;
@@ -55,13 +52,7 @@ inline std::string Trim(const std::string& str) {
             res.end());
   return res;
 }
-
-inline std::u32string Trim(const std::u32string& str) {
-  std::string res_u8 = boost::locale::conv::utf_to_utf<char, char32_t>(str);
-  std::u32string res =
-      boost::locale::conv::utf_to_utf<char32_t, char>(Trim(res_u8));
-  return res;
-}
+std::u32string Trim(const std::u32string& str);
 
 inline std::string ToLower(const std::string& str) {
   std::string res = str;

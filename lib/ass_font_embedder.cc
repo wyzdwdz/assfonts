@@ -88,10 +88,10 @@ bool AssFontEmbedder::Run(bool is_clean_only) {
               font_path.generic_path().native());
         }
         AString a_fontname = font_path.stem().native() + _ST("_0") +
-                           font_path.extension().native();
+                             font_path.extension().native();
 #ifdef _WIN32
         std::string fontname = WideToU8(a_fontname);
-#else 
+#else
         std::string fontname(a_fontname);
 #endif
         std::ifstream is(font, std::ios::binary);
@@ -173,12 +173,12 @@ bool AssFontEmbedder::CleanFonts(bool& have_fonts) {
       while (SafeGetLine(is, line)) {
         if (std::regex_match(line, sm, r_chapter_title) && sm.size() == 1 &&
             sm.str() == line) {
-          output_lines.push_back(line + '\n');
+          output_lines.emplace_back(line + '\n');
           break;
         }
       }
     } else {
-      output_lines.push_back(line + '\n');
+      output_lines.emplace_back(line + '\n');
     }
   }
   if (have_fonts) {

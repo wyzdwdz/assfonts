@@ -8,7 +8,7 @@ set(THIRD_PARTY_LIBS Boost::boost
 
 set(TARGET_NAME assfonts)
 						  
-add_executable(${TARGET_NAME} assfonts.cc "fmt_sink.h")
+add_executable(${TARGET_NAME} assfonts.cc)
 
 target_link_libraries(${TARGET_NAME} PRIVATE libassfonts ${THIRD_PARTY_LIBS})
 

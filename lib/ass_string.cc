@@ -25,7 +25,16 @@
 #include <Windows.h>
 #endif
 
+#include <boost/locale.hpp>
+
 namespace ass {
+
+std::u32string Trim(const std::u32string& str) {
+  std::string res_u8 = boost::locale::conv::utf_to_utf<char, char32_t>(str);
+  std::u32string res =
+      boost::locale::conv::utf_to_utf<char32_t, char>(Trim(res_u8));
+  return res;
+}
 
 std::istream& SafeGetLine(std::istream& is, std::string& t) {
   t.clear();

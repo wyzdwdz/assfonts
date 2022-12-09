@@ -18,6 +18,7 @@
  */
 
 #include <wx/wx.h>
+#include <wx/setup.h>
 
 constexpr int VERSION_MAX = 0;
 constexpr int VERSION_MID = 2;

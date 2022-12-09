@@ -19,11 +19,10 @@
 
 #include "font_parser.h"
 
-#include <cmath>
+#include <exception>
 #include <fstream>
 #include <memory>
 #include <regex>
-#include <stdexcept>
 #include <thread>
 
 #ifdef __cplusplus
@@ -57,8 +56,7 @@ void FontParser::LoadFonts(const AString& fonts_dir) {
   logger_->info(_ST("Found {} font files in \"{}\""), fonts_path_.size(),
                 fonts_dir);
   font_list_.reserve(fonts_path_.size());
-  unsigned int num_thread = static_cast<unsigned int>(
-      std::thread::hardware_concurrency() / (1 - 0.8));
+  unsigned int num_thread = std::thread::hardware_concurrency() + 1; 
   boost::asio::thread_pool pool(num_thread);
   for (const AString& font_path : fonts_path_) {
     boost::asio::post(pool, [&] { GetFontInfo(font_path); });
@@ -85,7 +83,6 @@ void FontParser::LoadDB(const AString& db_path) {
   fs::path file_path(db_path);
   std::ifstream db_file(file_path.native(), std::ios::binary);
   if (db_file.is_open()) {
-    std::vector<FontInfo> tmp_font_list;
     try {
       boost::archive::binary_iarchive ia(db_file);
       ia >> font_list_in_db_;
@@ -115,7 +112,7 @@ std::vector<AString> FontParser::FindFileInDir(const AString& dir,
   const fs::recursive_directory_iterator iter(dir_path);
   for (const auto& dir_entry : iter) {
     if (std::regex_match(dir_entry.path().native(), r)) {
-      res.push_back(dir_entry.path().generic_path().native());
+      res.emplace_back(dir_entry.path().generic_path().native());
     }
   }
   return res;
@@ -172,18 +169,18 @@ void FontParser::GetFontInfo(const AString& font_path) {
         case TT_NAME_ID_FONT_FAMILY:
           if (std::find(families.begin(), families.end(), buf) ==
               families.end()) {
-            families.push_back(buf);
+            families.emplace_back(buf);
           }
           break;
         case TT_NAME_ID_FULL_NAME:
           if (std::find(fullnames.begin(), fullnames.end(), buf) ==
               fullnames.end()) {
-            fullnames.push_back(buf);
+            fullnames.emplace_back(buf);
           }
           break;
         case TT_NAME_ID_PS_NAME:
           if (std::find(psnames.begin(), psnames.end(), buf) == psnames.end()) {
-            psnames.push_back(buf);
+            psnames.emplace_back(buf);
           }
           break;
         default:
@@ -204,9 +201,8 @@ void FontParser::GetFontInfo(const AString& font_path) {
     font_info.psnames = psnames;
     font_info.path = font_path;
     font_info.index = face_idx;
-    mtx_.lock();
-    font_list_.push_back(font_info);
-    mtx_.unlock();
+    std::lock_guard<std::mutex> lock(mtx_);
+    font_list_.emplace_back(font_info);
   }
   if (font_info.families.empty() && font_info.fullnames.empty() &&
       font_info.psnames.empty()) {
