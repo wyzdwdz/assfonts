@@ -1,3 +1,11 @@
+Overview of changes leading to v0.2.4
+Tuesday, December 15, 2022
+====================================
+- Implement thread pool by our own
+- Fix bugs of "Clean Fonts" function
+- Add error handling of font files searching
+
+
 Overview of changes leading to v0.2.3
 Tuesday, December 8, 2022
 ====================================
