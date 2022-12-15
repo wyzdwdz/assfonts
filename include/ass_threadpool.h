@@ -13,23 +13,45 @@
  *
  *  You should have received a copy of the GNU General Public
  *  License along with assfonts. If not, see <https://www.gnu.org/licenses/>.
- *
+ *  
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
-#ifndef ASSFONTS_ASSFONTSGUI_H_
-#define ASSFONTS_ASSFONTSGUI_H_
+#ifndef ASSFONTS_ASSTHREADPOOL_H_
+#define ASSFONTS_ASSTHREADPOOL_H_
 
-#include <wx/setup.h>
-#include <wx/wx.h>
+#include <functional>
+#include <queue>
+#include <vector>
 
-constexpr int VERSION_MAX = 0;
-constexpr int VERSION_MID = 2;
-constexpr int VERSION_MIN = 3;
+#include <boost/thread.hpp>
 
-class GuiApp : public wxApp {
+namespace ass {
+
+class ThreadPool {
  public:
-  virtual bool OnInit();
+  ThreadPool(const unsigned int num) {
+    threads_.resize(num);
+    for (unsigned int i = 0; i < num; ++i) {
+      threads_[i] = boost::thread([this]() { RunJobs(); });
+    }
+  }
+  ThreadPool() : ThreadPool(boost::thread::hardware_concurrency()) {}
+  ~ThreadPool() = default;
+
+  void LoadJob(const std::function<void()>& job);
+  void Join();
+
+ private:
+  std::vector<boost::thread> threads_;
+  std::queue<std::function<void()>> jobs_;
+  boost::mutex mtx_;
+  boost::condition_variable mtx_condition_;
+  bool should_stop_ = false;
+
+  void RunJobs();
 };
+
+}  // namespace ass
 
 #endif

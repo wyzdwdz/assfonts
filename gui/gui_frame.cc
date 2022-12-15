@@ -26,6 +26,7 @@
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
 #include <boost/filesystem.hpp>
+#include <boost/thread.hpp>
 
 #ifndef _WIN32
 #include "icon.xpm"

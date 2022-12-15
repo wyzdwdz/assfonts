@@ -218,6 +218,7 @@ int main(int argc, char** argv) {
   if (!fonts.empty()) {
     fp.LoadFonts(fonts_path.native());
   }
+
   if (is_build) {
     fp.SaveDB(db_path.native() + _ST("/fonts.db"));
   } else {

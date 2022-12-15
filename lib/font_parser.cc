@@ -23,7 +23,6 @@
 #include <fstream>
 #include <memory>
 #include <regex>
-#include <thread>
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,12 +39,13 @@ extern "C" {
 #include <boost/archive/archive_exception.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
-#include <boost/asio.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/locale.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/thread.hpp>
 
 #include "ass_freetype.h"
+#include "ass_threadpool.h"
 
 namespace fs = boost::filesystem;
 
@@ -56,15 +56,21 @@ void FontParser::LoadFonts(const AString& fonts_dir) {
   logger_->info(_ST("Found {} font files in \"{}\""), fonts_path_.size(),
                 fonts_dir);
   font_list_.reserve(fonts_path_.size());
-  unsigned int num_thread = std::thread::hardware_concurrency() + 1; 
-  boost::asio::thread_pool pool(num_thread);
+  unsigned int num_thread = boost::thread::hardware_concurrency() + 1;
+  ThreadPool pool(num_thread);
+  std::vector<std::vector<FontInfo>> font_list_thread;
+  font_list_thread.resize(num_thread);
   for (const AString& font_path : fonts_path_) {
-    boost::asio::post(pool, [&] { GetFontInfo(font_path); });
+    pool.LoadJob([&]() { GetFontInfo(font_path); });
   }
-  pool.join();
+  pool.Join();
 }
 
 void FontParser::SaveDB(const AString& db_path) {
+  if (font_list_.size() == 0) {
+    logger_->warn(_ST("No font is found. Nothing to save."));
+    return;
+  }
   fs::path file_path(db_path);
   if (fs::is_regular_file(file_path)) {
     logger_->warn(_ST("\"{}\" already exists. It will be overwritten."),
@@ -110,10 +116,16 @@ std::vector<AString> FontParser::FindFileInDir(const AString& dir,
   const std::basic_regex<AChar> r(pattern, std::regex::icase);
   const fs::path dir_path(dir);
   const fs::recursive_directory_iterator iter(dir_path);
-  for (const auto& dir_entry : iter) {
-    if (std::regex_match(dir_entry.path().native(), r)) {
-      res.emplace_back(dir_entry.path().generic_path().native());
+  try {
+    for (const auto& dir_entry : iter) {
+      if (std::regex_match(dir_entry.path().native(), r)) {
+        res.emplace_back(dir_entry.path().generic_path().native());
+      }
     }
+  } catch (const fs::filesystem_error& e) {
+    logger_->warn("Failed in searching font files. Error code: {}", e.what());
+    res.clear();
+    return res;
   }
   return res;
 }
@@ -201,7 +213,7 @@ void FontParser::GetFontInfo(const AString& font_path) {
     font_info.psnames = psnames;
     font_info.path = font_path;
     font_info.index = face_idx;
-    std::lock_guard<std::mutex> lock(mtx_);
+    boost::lock_guard<boost::mutex> lock(mtx_);
     font_list_.emplace_back(font_info);
   }
   if (font_info.families.empty() && font_info.fullnames.empty() &&

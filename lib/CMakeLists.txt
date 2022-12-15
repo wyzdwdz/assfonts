@@ -7,7 +7,7 @@ set(THIRD_PARTY_LIBS harfbuzz-subset
                      Boost::filesystem
                      Boost::locale
                      Boost::serialization
-                     Boost::system
+                     Boost::thread
                      spdlog::spdlog
                      fmt::fmt)
 
@@ -16,7 +16,8 @@ set(TARGET_SOURCES font_parser.cc
                    font_subsetter.cc
                    ass_font_embedder.cc
                    ass_string.cc
-                   ass_freetype.cc)
+                   ass_freetype.cc
+                   ass_threadpool.cc)
 
 set(TARGET_NAME libassfonts)
 						  
@@ -30,7 +31,3 @@ target_include_directories(${TARGET_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include
 target_sources(${TARGET_NAME} PRIVATE ${TARGET_SOURCES})
 
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_link_options(${TARGET_NAME} PRIVATE -pthread)
-endif()

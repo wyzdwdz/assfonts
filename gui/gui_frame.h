@@ -17,14 +17,13 @@
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
-#ifndef ASSFONTS_ASSFONTSGUI_H_
-#define ASSFONTS_ASSFONTSGUI_H_
+#ifndef ASSFONTS_GUIFRAME_H_
+#define ASSFONTS_GUIFRAME_H_
 
 #include <memory>
 
 #include <spdlog/spdlog.h>
 #include <wx/wx.h>
-#include <boost/thread.hpp>
 
 #include "wxwidgets_sink.h"
 

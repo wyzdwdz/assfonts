@@ -79,13 +79,11 @@ bool AssFontEmbedder::Run(bool is_clean_only) {
       for (const auto& font : fs_.subfonts_path_) {
         fs::path font_path(font);
         if (ToLower(font_path.extension().native()) != _ST(".ttf")) {
-          logger_->warn(
-              _ST("\"{}\" is not a .ttf font. Based on ASS Specs, only "
-                  "Truetype "
-                  "fonts can be embedded in ASS scripts. Ignore this error, "
-                  "but "
-                  "this font may not be loaded by some video players."),
-              font_path.generic_path().native());
+          logger_->warn(_ST("\"{}\" is not a .ttf font. Based on ASS Specs, "
+                            "only Truetype fonts can be embedded in ASS "
+                            "scripts. Ignore this error, but this font may not "
+                            "be loaded by some video players."),
+                        font_path.generic_path().native());
         }
         AString a_fontname = font_path.stem().native() + _ST("_0") +
                              font_path.extension().native();
@@ -163,7 +161,9 @@ bool AssFontEmbedder::CleanFonts(bool& have_fonts) {
   std::vector<std::string> output_lines;
   std::string line;
   have_fonts = false;
-  const std::regex r_chapter_title("\\s*\\[.+\\]\\s*");
+  const std::regex r_chapter_title(
+      "^\\s*\\[(Script Info|v4 Styles|v4+ Styles|Events|Graphics)\\]\\s*$",
+      std::regex::icase);
   std::smatch sm;
   fs::path input_path(input_ass_path_);
   std::ifstream is(input_path.native());
@@ -171,8 +171,7 @@ bool AssFontEmbedder::CleanFonts(bool& have_fonts) {
     if (Trim(ToLower(line)) == "[fonts]") {
       have_fonts = true;
       while (SafeGetLine(is, line)) {
-        if (std::regex_match(line, sm, r_chapter_title) && sm.size() == 1 &&
-            sm.str() == line) {
+        if (std::regex_match(line, sm, r_chapter_title)) {
           output_lines.emplace_back(line + '\n');
           break;
         }

@@ -453,4 +453,7 @@ _deps
 #output directory
 out/
 
+#build directory
+build/
+
 #whitelist

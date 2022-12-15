@@ -11,7 +11,7 @@ set(VCPKG_INCLUDE_DIR ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include)
 
 find_package(harfbuzz CONFIG REQUIRED)
 find_package(freetype CONFIG REQUIRED)
-find_package(Boost REQUIRED filesystem locale serialization system thread program_options)
+find_package(Boost REQUIRED filesystem locale serialization thread program_options)
 find_package(spdlog CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(wxWidgets CONFIG REQUIRED)

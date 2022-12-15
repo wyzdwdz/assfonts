@@ -14,7 +14,7 @@ Use [vcpkg](https://vcpkg.io/) as package manager
 
 - [HarfBuzz](https://github.com/harfbuzz/harfbuzz)
 
-- [Boost](https://www.boost.org/) filesystem locale serialization asio thread program_options
+- [Boost](https://www.boost.org/) filesystem locale serialization thread program_options
 
 - [spdlog](https://github.com/gabime/spdlog)
 
