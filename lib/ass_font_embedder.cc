@@ -31,49 +31,26 @@ namespace fs = boost::filesystem;
 
 namespace ass {
 
-void AssFontEmbedder::set_input_ass_path(const AString& input_ass_path) {
-  input_ass_path_ = input_ass_path;
-}
-
 void AssFontEmbedder::set_output_dir_path(const AString& output_dir_path) {
   output_dir_path_ = output_dir_path;
 }
 
-bool AssFontEmbedder::Run(bool is_clean_only) {
-  fs::path input_path(input_ass_path_);
+bool AssFontEmbedder::Run() {
+  fs::path input_path(fs_.ap_.get_ass_path());
   fs::path output_path(output_dir_path_ + _ST("/") +
                        input_path.stem().native() + _ST(".assfonts") +
                        input_path.extension().native());
-  AString real_input_path;
-  bool have_fonts;
-  if (!CleanFonts(have_fonts)) {
-    return false;
-  }
-  if (is_clean_only) {
-    return true;
-  }
-  if (have_fonts) {
-    real_input_path = output_dir_path_ + _ST("/") +
-                      input_path.stem().generic_path().native() +
-                      _ST(".cleaned") +
-                      input_path.extension().generic_path().native();
-  } else {
-    real_input_path = input_path.generic_path().native();
-  }
-  std::ifstream input_ass(real_input_path);
-  if (!input_ass.is_open()) {
-    logger_->error(_ST("\"{}\" cannot be opened."), real_input_path);
-    return false;
-  }
+  std::string buf_u8;
   std::ofstream output_ass(output_path.native());
-  std::string line;
   if (!output_ass.is_open()) {
-    input_ass.close();
     logger_->error(_ST("\"{}\" cannot be created."),
                    output_path.generic_path().native());
     return false;
   }
-  while (SafeGetLine(input_ass, line)) {
+  auto text = fs_.ap_.get_text();
+  size_t num_line = 0;
+  for (const auto& line : text) {
+    ++num_line;
     if (Trim(ToLower(line)) == "[events]") {
       output_ass << "[Fonts]";
       for (const auto& font : fs_.subfonts_path_) {
@@ -98,20 +75,20 @@ bool AssFontEmbedder::Run(bool is_clean_only) {
         std::string font_data(ostrm.str());
         std::string uu_str = UUEncode(
             font_data.c_str(), font_data.c_str() + font_data.size(), true);
-        output_ass << "\nfontname: " << fontname << "\n";
+        output_ass << "\nfontname: " << fontname << '\n';
         output_ass << uu_str;
         ostrm.clear();
-        is.close();
       }
-      output_ass << "\n\n" << line << "\n";
+      output_ass << "\n\n" << line;
     } else {
-      output_ass << line << "\n";
+      output_ass << line;
+    }
+    if (num_line != text.size()) {
+      output_ass << '\n';
     }
   }
   logger_->info(_ST("Create font-embeded subtitle: \"{}\""),
                 output_path.generic_path().native());
-  input_ass.close();
-  output_ass.close();
   return true;
 }
 
@@ -155,53 +132,6 @@ std::string AssFontEmbedder::UUEncode(const char* begin, const char* end,
     }
   }
   return ret;
-}
-
-bool AssFontEmbedder::CleanFonts(bool& have_fonts) {
-  std::vector<std::string> output_lines;
-  std::string line;
-  have_fonts = false;
-  const std::regex r_chapter_title(
-      "^\\s*\\[(Script Info|v4 Styles|v4+ Styles|Events|Graphics)\\]\\s*$",
-      std::regex::icase);
-  std::smatch sm;
-  fs::path input_path(input_ass_path_);
-  std::ifstream is(input_path.native());
-  while (SafeGetLine(is, line)) {
-    if (Trim(ToLower(line)) == "[fonts]") {
-      have_fonts = true;
-      while (SafeGetLine(is, line)) {
-        if (std::regex_match(line, sm, r_chapter_title)) {
-          output_lines.emplace_back(line + '\n');
-          break;
-        }
-      }
-    } else {
-      output_lines.emplace_back(line + '\n');
-    }
-  }
-  if (have_fonts) {
-    fs::path output_path(output_dir_path_ + _ST("/") +
-                         input_path.stem().native() + _ST(".cleaned") +
-                         input_path.extension().native());
-    logger_->info(
-        _ST("Found fonts in \"{}\" Delete them and save new file in \"{}\""),
-        input_path.generic_path().native(),
-        output_path.generic_path().native());
-    std::ofstream os(output_path.native());
-    if (!os.is_open()) {
-      is.close();
-      logger_->error(_ST("\"{}\" cannot be created."),
-                     output_path.generic_path().native());
-      return false;
-    }
-    for (const auto& str : output_lines) {
-      os << str;
-    }
-    os.close();
-  }
-  is.close();
-  return true;
 }
 
 }  // namespace ass

@@ -12,8 +12,7 @@ set(TARGET_SOURCE PRIVATE gui_frame.cc
 
 set(RESOURCE_DIR PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/resource)
 
-set(INCLUDE_DIR PRIVATE ${PROJECT_SOURCE_DIR}/include
-                        ${VCPKG_INCLUDE_DIR}
+set(INCLUDE_DIR PRIVATE ${VCPKG_INCLUDE_DIR}
                         ${RESOURCE_DIR})
 
 if(WIN32)

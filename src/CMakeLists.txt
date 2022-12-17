@@ -12,7 +12,6 @@ add_executable(${TARGET_NAME} assfonts.cc)
 
 target_link_libraries(${TARGET_NAME} PRIVATE libassfonts ${THIRD_PARTY_LIBS})
 
-target_include_directories(${TARGET_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include
-                                                  ${VCPKG_INCLUDE_DIR})
+target_include_directories(${TARGET_NAME} PRIVATE ${VCPKG_INCLUDE_DIR})
 
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})

@@ -48,7 +48,11 @@ class AssParser {
   }
   ~AssParser() { spdlog::drop("ass_parser"); };
 
+  void set_output_dir_path(const AString& output_dir_path);
   bool ReadFile(const AString& ass_file_path);
+  bool get_has_fonts() const;
+  std::vector<std::string> get_text() const;
+  AString get_ass_path() const;
 
  private:
   struct FontDesc {
@@ -73,14 +77,16 @@ class AssParser {
   };
   std::shared_ptr<spdlog::logger> logger_;
   AString ass_path_;
+  AString output_dir_path_;
   std::vector<std::string> text_;
   std::vector<std::vector<std::string>> styles_;
   bool has_default_style_ = false;
+  bool has_fonts_ = false;
   std::vector<std::vector<std::string>> dialogues_;
   std::map<FontDesc, std::set<char32_t>> font_sets_;
   std::map<std::string, FontDesc> stylename_fontdesc_;
 
-  bool IsUTF8(const std::string& line);
+  bool GetUTF8(const std::ifstream& is, std::string& res);
   bool FindTitle(const std::string& line, const std::string& title);
   bool ParseLine(const std::string& line, const unsigned int num_field,
                  std::vector<std::string>& res);
@@ -89,6 +95,7 @@ class AssParser {
   bool set_font_sets();
   bool StyleOverride(const std::u32string& code, FontDesc* font_desc,
                      const FontDesc& font_desc_style);
+  void CleanFonts();
 
   friend class FontSubsetter;
 };

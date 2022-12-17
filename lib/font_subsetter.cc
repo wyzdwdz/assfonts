@@ -32,12 +32,6 @@ namespace fs = boost::filesystem;
 namespace ass {
 
 void FontSubsetter::SetSubfontDir(const AString& subfont_dir) {
-  fs::path dir_path(subfont_dir);
-  if (!fs::exists(dir_path)) {
-    logger_->info(_ST("Create subset fonts directory: \"{}\""),
-                  dir_path.generic_path().native());
-    fs::create_directory(dir_path);
-  }
   subfont_dir_ = subfont_dir;
 }
 
@@ -73,6 +67,12 @@ bool FontSubsetter::Run(bool is_no_subset) {
   }
   if (!set_subset_font_codepoint_sets()) {
     return false;
+  }
+  fs::path dir_path(subfont_dir_);
+  if (!fs::exists(dir_path)) {
+    logger_->info(_ST("Create subset fonts directory: \"{}\""),
+                  dir_path.generic_path().native());
+    fs::create_directory(dir_path);
   }
   for (const auto& subset_font : subset_font_codepoint_sets_) {
     if (!CreateSubfont(subset_font)) {
@@ -279,7 +279,6 @@ bool FontSubsetter::CreateSubfont(
   const char* subset_data = hb_blob_get_data(subset_blob, &len);
   std::ofstream subset_file(output_filepath.native(), std::ios::binary);
   subset_file.write(subset_data, len);
-  subset_file.close();
   FT_Done_Face(ft_face);
   hb_blob_destroy(subset_blob);
   hb_blob_destroy(hb_blob);
@@ -288,7 +287,6 @@ bool FontSubsetter::CreateSubfont(
   hb_set_destroy(langid_set);
   hb_set_destroy(codepoint_set);
   hb_subset_input_destroy(input);
-  is.close();
   if (len == 0) {
     return false;
   }

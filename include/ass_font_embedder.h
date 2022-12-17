@@ -42,18 +42,15 @@ class AssFontEmbedder {
   };
   ~AssFontEmbedder() { spdlog::drop("ass_font_embedder"); };
 
-  void set_input_ass_path(const AString& input_ass_path);
   void set_output_dir_path(const AString& output_ass_path);
-  bool Run(bool is_clean_only);
+  bool Run();
 
  private:
   const FontSubsetter& fs_;
   std::shared_ptr<spdlog::logger> logger_;
-  AString input_ass_path_;
   AString output_dir_path_;
   std::string UUEncode(const char* begin, const char* end,
                        bool insert_linebreaks);
-  bool CleanFonts(bool& have_fonts);
 };
 
 };  // namespace ass

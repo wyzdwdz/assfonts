@@ -1,9 +1,8 @@
 ﻿cmake_minimum_required (VERSION 3.21)
 
-project ("assfonts")
+project (assfonts CXX)
 
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -11,7 +10,8 @@ set(VCPKG_INCLUDE_DIR ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include)
 
 find_package(harfbuzz CONFIG REQUIRED)
 find_package(freetype CONFIG REQUIRED)
-find_package(Boost REQUIRED filesystem locale serialization thread program_options)
+find_package(Boost REQUIRED filesystem serialization thread program_options)
+find_package(Iconv REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(wxWidgets CONFIG REQUIRED)
@@ -26,18 +26,19 @@ target_link_libraries(harfbuzz-subset INTERFACE $<$<NOT:$<CONFIG:DEBUG>>:${HARFB
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     if(CMAKE_BUILD_TYPE MATCHES "Debug")
-        SET(COMPILE_OPTIONS /Od /W4 /WX /MDd /D_WIN32_WINNT=0x0601)
+        SET(COMPILE_OPTIONS /Od /W4 /MDd /D_WIN32_WINNT=0x0601)
     elseif(CMAKE_BUILD_TYPE MATCHES "Release")
         SET(COMPILE_OPTIONS /O2 /W4 /WX /MT /D_WIN32_WINNT=0x0601)
     endif()
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     if(CMAKE_BUILD_TYPE MATCHES "Debug")
-        SET(COMPILE_OPTIONS -O0 -Wall -Werror)
+        SET(COMPILE_OPTIONS -O0 -Wall)
     elseif(CMAKE_BUILD_TYPE MATCHES "Release")
         SET(COMPILE_OPTIONS -O2 -Wall -Werror)
     endif()
 endif()
 
+add_subdirectory(${PROJECT_SOURCE_DIR}/3rdparty/compact_enc_det)
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 add_subdirectory(${PROJECT_SOURCE_DIR}/gui)

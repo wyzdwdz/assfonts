@@ -36,6 +36,8 @@ template <typename Mutex>
 class wxwidgets_sink : public spdlog::sinks::base_sink<Mutex> {
  public:
   wxwidgets_sink(wxTextCtrl* log_text) : log_text_(log_text){};
+  wxwidgets_sink(const wxwidgets_sink&) = delete;
+  wxwidgets_sink& operator=(const wxwidgets_sink&) = delete;
 
  protected:
   void sink_it_(const spdlog::details::log_msg& msg) override {

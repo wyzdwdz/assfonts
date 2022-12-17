@@ -39,6 +39,8 @@ template <typename Mutex>
 class fmt_sink : public spdlog::sinks::base_sink<Mutex> {
  public:
   fmt_sink() = default;
+  fmt_sink(const fmt_sink&) = delete;
+  fmt_sink& operator=(const fmt_sink&) = delete;
 
  protected:
   void sink_it_(const spdlog::details::log_msg& msg) override {

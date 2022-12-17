@@ -40,7 +40,6 @@ extern "C" {
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/locale.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/thread.hpp>
 
@@ -80,7 +79,6 @@ void FontParser::SaveDB(const AString& db_path) {
   std::ofstream db_file(file_path.native(), std::ios::binary);
   boost::archive::binary_oarchive oa(db_file);
   oa << font_list_;
-  db_file.close();
   logger_->info(_ST("Fonts database has been saved in \"{}\""),
                 file_path.generic_path().native());
 }
@@ -97,7 +95,6 @@ void FontParser::LoadDB(const AString& db_path) {
                     file_path.generic_path().native());
       return;
     }
-    db_file.close();
     logger_->info(_ST("Load fonts database \"{}\""),
                   file_path.generic_path().native());
   } else {
@@ -151,9 +148,8 @@ void FontParser::GetFontInfo(const AString& font_path) {
     const unsigned int num_names = FT_Get_Sfnt_Name_Count(ft_face);
     for (unsigned int i = 0; i < num_names; i++) {
       FT_SfntName name;
-      std::u16string wbuf;
+      std::string wbuf;
       std::string buf;
-      char16_t wch = 0;
       if (FT_Get_Sfnt_Name(ft_face, i, &name)) {
         continue;
       }
@@ -165,15 +161,10 @@ void FontParser::GetFontInfo(const AString& font_path) {
       if (!(name.platform_id == TT_PLATFORM_MICROSOFT)) {
         continue;
       }
-      if (name.string_len % 2 != 0) {
+      wbuf = std::string(reinterpret_cast<char*>(name.string), name.string_len);
+      if (!IconvConvert(wbuf, buf, "UTF-16BE", "UTF-8")) {
         continue;
       }
-      for (unsigned int p_str = 0; p_str < name.string_len / 2; ++p_str) {
-        wch = *(name.string + p_str * 2) << 8;
-        wch |= *(name.string + p_str * 2 + 1);
-        wbuf.push_back(wch);
-      }
-      buf = boost::locale::conv::utf_to_utf<char>(wbuf);
       if (buf.empty()) {
         continue;
       }

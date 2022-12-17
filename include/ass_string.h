@@ -20,9 +20,7 @@
 #ifndef ASSFONTS_ASSSTRING_H_
 #define ASSFONTS_ASSSTRING_H_
 
-#include <algorithm>
-#include <cctype>
-#include <cwctype>
+#include <iostream>
 #include <string>
 
 #ifdef _WIN32
@@ -39,49 +37,41 @@ using AString = std::string;
 
 #endif
 
+inline bool is_big_endian() {
+  union {
+    uint32_t i;
+    char c[4];
+  } uni = {0x01020304};
+  return uni.c[0] == 1;
+}
+
+static const bool IS_BIG_ENDIAN = is_big_endian();
+
 namespace ass {
 
-inline std::string Trim(const std::string& str) {
-  std::string res = str;
-  res.erase(res.begin(),
-            std::find_if(res.begin(), res.end(),
-                         [](unsigned char ch) { return !std::isspace(ch); }));
-  res.erase(std::find_if(res.rbegin(), res.rend(),
-                         [](unsigned char ch) { return !std::isspace(ch); })
-                .base(),
-            res.end());
-  return res;
-}
+std::string Trim(const std::string& str);
 std::u32string Trim(const std::u32string& str);
 
-inline std::string ToLower(const std::string& str) {
-  std::string res = str;
-  std::transform(res.begin(), res.end(), res.begin(),
-                 [](unsigned char c) { return std::tolower(c); });
-  return res;
-}
+std::string ToLower(const std::string& str);
+std::wstring ToLower(const std::wstring& str);
 
-inline std::wstring ToLower(const std::wstring& str) {
-  std::wstring res = str;
-  std::transform(res.begin(), res.end(), res.begin(),
-                 [](wchar_t c) { return std::towlower(c); });
-  return res;
-}
-
-inline AString ToAString(const long i) {
-#ifdef _WIN32
-  return std::to_wstring(i);
-#else
-  return std::to_string(i);
-#endif
-}
+AString ToAString(const long i);
 
 std::istream& SafeGetLine(std::istream& is, std::string& t);
+
+bool IconvConvert(const std::string& in, std::string& out,
+                  const std::string& from_code, const std::string& to_code);
+
+std::u32string U8ToU32(const std::string& str_u8);
+std::string U32ToU8(const std::u32string& str_u32);
 
 #ifdef _WIN32
 std::wstring U8ToWide(const std::string& str);
 std::string WideToU8(const std::wstring& str);
 #endif
+
+int StringToInt(const std::string& str);
+int StringToInt(const std::u32string& str_u32);
 
 }  // namespace ass
 

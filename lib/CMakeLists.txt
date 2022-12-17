@@ -5,11 +5,12 @@ set(THIRD_PARTY_LIBS harfbuzz-subset
                      freetype 
                      Boost::boost 
                      Boost::filesystem
-                     Boost::locale
                      Boost::serialization
                      Boost::thread
+                     Iconv::Iconv
                      spdlog::spdlog
-                     fmt::fmt)
+                     fmt::fmt
+                     ced)
 
 set(TARGET_SOURCES font_parser.cc
                    ass_parser.cc
@@ -25,8 +26,8 @@ add_library(${TARGET_NAME} STATIC)
 
 target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS})
 
-target_include_directories(${TARGET_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include
-                                                  ${VCPKG_INCLUDE_DIR})
+target_include_directories(${TARGET_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(${TARGET_NAME} PRIVATE ${VCPKG_INCLUDE_DIR})
 
 target_sources(${TARGET_NAME} PRIVATE ${TARGET_SOURCES})
 

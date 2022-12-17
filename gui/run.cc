@@ -40,6 +40,7 @@ void Run(const fs::path input_path, const fs::path output_path,
   ass::FontParser fp(sink);
   ass::FontSubsetter fs(ap, fp, sink);
   ass::AssFontEmbedder afe(fs, sink);
+  ap.set_output_dir_path(output_path.native());
   if (!fonts_path.empty()) {
     fp.LoadFonts(fonts_path.native());
   }
@@ -48,11 +49,6 @@ void Run(const fs::path input_path, const fs::path output_path,
     return;
   }
   if (is_embed_only && is_subset_only) {
-    afe.set_input_ass_path(input_path.native());
-    afe.set_output_dir_path(output_path.native());
-    if (!afe.Run(true)) {
-      return;
-    }
     return;
   }
   if (!is_embed_only) {
@@ -63,9 +59,8 @@ void Run(const fs::path input_path, const fs::path output_path,
     return;
   }
   if (!is_subset_only) {
-    afe.set_input_ass_path(input_path.native());
     afe.set_output_dir_path(output_path.native());
-    if (!afe.Run(false)) {
+    if (!afe.Run()) {
       return;
     }
   }

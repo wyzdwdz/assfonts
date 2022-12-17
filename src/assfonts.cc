@@ -230,24 +230,19 @@ int main(int argc, char** argv) {
     return 0;
   }
 
+  ap.set_output_dir_path(output_path.native());
   if (!ap.ReadFile(input_path.native())) {
+    spdlog::shutdown();
+    return 0;
+  }
+
+  if (is_embed_only && is_subset_only) {
     spdlog::shutdown();
     return 0;
   }
 
   if (output.empty()) {
     output_path = input_path.parent_path();
-  }
-
-  if (is_embed_only && is_subset_only) {
-    afe.set_input_ass_path(input_path.native());
-    afe.set_output_dir_path(output_path.native());
-    if (!afe.Run(true)) {
-      spdlog::shutdown();
-      return 0;
-    }
-    spdlog::shutdown();
-    return 0;
   }
 
   if (!is_embed_only) {
@@ -260,9 +255,8 @@ int main(int argc, char** argv) {
   }
 
   if (!is_subset_only) {
-    afe.set_input_ass_path(input_path.native());
     afe.set_output_dir_path(output_path.native());
-    if (!afe.Run(false)) {
+    if (!afe.Run()) {
       spdlog::shutdown();
       return 0;
     }
