@@ -1,3 +1,14 @@
+Overview of changes leading to v0.2.5
+Tuesday, December 18, 2022
+====================================
+- Implement locale string recoder based on libiconv to replace 
+  Boost.locale
+- Add new feature: file encoding detection to handle
+  non-UTF8 files
+- Fix ASS parsing bugs
+- GUI can accpet multiple input files now
+
+
 Overview of changes leading to v0.2.4
 Tuesday, December 15, 2022
 ====================================

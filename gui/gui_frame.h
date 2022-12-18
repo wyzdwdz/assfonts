@@ -66,6 +66,7 @@ class GuiFrame : public wxFrame {
   std::shared_ptr<spdlog::logger> logger_;
   bool is_running_ = false;
   wxString app_path_;
+  wxArrayString input_paths_;
 
   void OnFindInput(wxCommandEvent& WXUNUSED(event));
   void OnFindOutput(wxCommandEvent& WXUNUSED(event));

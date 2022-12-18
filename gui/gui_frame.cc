@@ -20,6 +20,7 @@
 #include "gui_frame.h"
 
 #include <string>
+#include <vector>
 
 #include <spdlog/async.h>
 #include <spdlog/spdlog.h>
@@ -266,15 +267,22 @@ GuiFrame::~GuiFrame() {
 }
 
 void GuiFrame::OnFindInput(wxCommandEvent& WXUNUSED(event)) {
-  wxFileDialog open_file_dialog(this, _T("Open ASS file"), "", "",
-                                _T("ASS file (*.ass)|*.ass"),
-                                wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+  wxFileDialog open_file_dialog(
+      this, _T("Open ASS file"), "", "", _T("ASS file (*.ass)|*.[aA][sS][sS]"),
+      wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE);
   if (open_file_dialog.ShowModal() == wxID_CANCEL) {
     return;
   }
-  wxString path = open_file_dialog.GetPath();
+  input_paths_.clear();
+  open_file_dialog.GetPaths(input_paths_);
   wxString dir = open_file_dialog.GetDirectory();
-  input_text_->ChangeValue(path);
+  input_text_->Clear();
+  input_paths_.Sort();
+  size_t cnt = input_paths_.GetCount();
+  for (size_t i = 0; i < cnt - 1; ++i) {
+    *input_text_ << input_paths_[i] << _T('\n');
+  }
+  *input_text_ << input_paths_[cnt - 1];
   output_text_->ChangeValue(dir);
 }
 
@@ -314,16 +322,33 @@ void GuiFrame::OnFindDB(wxCommandEvent& WXUNUSED(event)) {
 
 void GuiFrame::OnDropInput(wxDropFilesEvent& event) {
   wxString* path = event.GetFiles();
-  if (!wxFileExists(path[0])) {
+  size_t cnt = event.GetNumberOfFiles();
+  wxArrayString input_paths_backup = input_paths_;
+  input_paths_.clear();
+  for (size_t i = 0; i < cnt; ++i) {
+    if (!wxFileExists(path[i])) {
+      continue;
+    }
+    wxFileName filename = wxFileName(path[i]);
+    wxString ext = filename.GetExt();
+    if (!filename.GetExt().IsSameAs("ass", false)) {
+      continue;
+    }
+    input_paths_.push_back(path[i]);
+  }
+  if (input_paths_.IsEmpty()) {
+    input_paths_ = input_paths_backup;
     return;
   }
-  wxFileName first_filename = wxFileName(path[0]);
-  wxString ext = first_filename.GetExt();
-  if (!first_filename.GetExt().IsSameAs("ass", false)) {
-    return;
+  input_text_->Clear();
+  input_paths_.Sort();
+  cnt = input_paths_.GetCount();
+  for (size_t i = 0; i < cnt - 1; ++i) {
+    *input_text_ << input_paths_[i] << _T('\n');
   }
-  input_text_->ChangeValue(path[0]);
-  output_text_->ChangeValue(first_filename.GetPath());
+  *input_text_ << input_paths_[cnt - 1];
+  wxFileName filename = wxFileName(input_paths_[0]);
+  output_text_->ChangeValue(filename.GetPath());
 }
 
 void GuiFrame::OnDropOutput(wxDropFilesEvent& event) {
@@ -361,7 +386,7 @@ void GuiFrame::OnRun(wxCommandEvent& WXUNUSED(event)) {
   if (is_running_) {
     return;
   }
-  if (input_text_->IsEmpty()) {
+  if (input_text_->IsEmpty() || input_paths_.IsEmpty()) {
     logger_->error(_ST("No Input ASS file."));
     return;
   }
@@ -373,27 +398,21 @@ void GuiFrame::OnRun(wxCommandEvent& WXUNUSED(event)) {
     logger_->error(_ST("No font directory."));
     return;
   }
-  fs::path input_path =
-      fs::system_complete(input_text_->GetValue().ToStdWstring());
+  std::vector<fs::path> input_paths;
+  for (const auto& input_path : input_paths_) {
+    input_paths.emplace_back(fs::system_complete(input_path.ToStdWstring()));
+  }
   fs::path output_path =
       fs::system_complete(output_text_->GetValue().ToStdWstring());
   fs::path fonts_path =
       fs::system_complete(font_text_->GetValue().ToStdWstring());
   fs::path db_path = fs::system_complete(db_text_->GetValue().ToStdWstring());
-  if (!fs::is_regular_file(input_path)) {
-    logger_->error(_ST("Input ASS file contains no file: \"{}\""),
-                   input_path.generic_path().native());
-    return;
-  }
-  if (!fs::is_directory(output_path)) {
-    logger_->error(_ST("Output directory contains no legal directory: \"{}\""),
-                   output_path.generic_path().native());
-    return;
-  }
   boost::thread thread([=] {
     is_running_ = true;
-    Run(input_path, output_path, fonts_path, db_path, subset_check_->GetValue(),
-        embed_check_->GetValue(), sink_);
+    for (const auto& input_path : input_paths) {
+      Run(input_path, output_path, fonts_path, db_path,
+          subset_check_->GetValue(), embed_check_->GetValue(), sink_);
+    }
     is_running_ = false;
   });
   thread.detach();
@@ -414,17 +433,6 @@ void GuiFrame::OnBuild(wxCommandEvent& WXUNUSED(event)) {
   fs::path fonts_path =
       fs::system_complete(font_text_->GetValue().ToStdWstring());
   fs::path db_path = fs::system_complete(db_text_->GetValue().ToStdWstring());
-  if (!fs::is_directory(fonts_path)) {
-    logger_->error(_ST("Font directory contains no legal directory: \"{}\""),
-                   fonts_path.generic_path().native());
-    return;
-  }
-  if (!fs::is_directory(db_path)) {
-    logger_->error(
-        _ST("Database directory contains no legal directory: \"{}\""),
-        db_path.generic_path().native());
-    return;
-  }
   logger_->info(_ST("Building fonts database."));
   boost::thread thread([=] {
     is_running_ = true;

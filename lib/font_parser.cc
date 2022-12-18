@@ -158,7 +158,7 @@ void FontParser::GetFontInfo(const AString& font_path) {
           name.name_id != TT_NAME_ID_PS_NAME) {
         continue;
       }
-      if (!(name.platform_id == TT_PLATFORM_MICROSOFT)) {
+      if (name.platform_id != TT_PLATFORM_MICROSOFT) {
         continue;
       }
       wbuf = std::string(reinterpret_cast<char*>(name.string), name.string_len);
