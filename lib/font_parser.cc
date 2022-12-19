@@ -57,8 +57,6 @@ void FontParser::LoadFonts(const AString& fonts_dir) {
   font_list_.reserve(fonts_path_.size());
   unsigned int num_thread = boost::thread::hardware_concurrency() + 1;
   ThreadPool pool(num_thread);
-  std::vector<std::vector<FontInfo>> font_list_thread;
-  font_list_thread.resize(num_thread);
   for (const AString& font_path : fonts_path_) {
     pool.LoadJob([&]() { GetFontInfo(font_path); });
   }
