@@ -32,7 +32,7 @@ void BuildDB(const fs::path fonts_path, const fs::path db_path,
   fp.SaveDB(db_path.native() + _ST("/fonts.db"));
 }
 
-void Run(const fs::path input_path, const fs::path output_path,
+void Run(const std::vector<fs::path> input_paths, const fs::path output_path,
          const fs::path fonts_path, const fs::path db_path, bool is_subset_only,
          bool is_embed_only,
          std::shared_ptr<mylog::sinks::wxwidgets_sink_mt> sink) {
@@ -45,23 +45,28 @@ void Run(const fs::path input_path, const fs::path output_path,
     fp.LoadFonts(fonts_path.native());
   }
   fp.LoadDB(db_path.native() + _ST("/fonts.db"));
-  if (!ap.ReadFile(input_path.native())) {
-    return;
-  }
-  if (is_embed_only && is_subset_only) {
-    return;
-  }
-  if (!is_embed_only) {
-    fs.SetSubfontDir(output_path.native() + _ST("/") +
-                     input_path.stem().native() + _ST("_subsetted"));
-  }
-  if (!fs.Run(is_embed_only)) {
-    return;
-  }
-  if (!is_subset_only) {
-    afe.set_output_dir_path(output_path.native());
-    if (!afe.Run()) {
+  for (const auto& input_path : input_paths) {
+    if (!ap.ReadFile(input_path.native())) {
       return;
     }
+    if (is_embed_only && is_subset_only) {
+      return;
+    }
+    if (!is_embed_only) {
+      fs.SetSubfontDir(output_path.native() + _ST("/") +
+                       input_path.stem().native() + _ST("_subsetted"));
+    }
+    if (!fs.Run(is_embed_only)) {
+      return;
+    }
+    if (!is_subset_only) {
+      afe.set_output_dir_path(output_path.native());
+      if (!afe.Run()) {
+        return;
+      }
+    }
+    ap.Clear();
+    fs.Clear();
+    afe.Clear();
   }
 }

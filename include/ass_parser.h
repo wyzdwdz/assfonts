@@ -20,6 +20,7 @@
 #ifndef ASSFONTS_ASSPARSER_H_
 #define ASSFONTS_ASSPARSER_H_
 
+#include <fstream>
 #include <map>
 #include <memory>
 #include <set>
@@ -53,6 +54,7 @@ class AssParser {
   bool get_has_fonts() const;
   std::vector<std::string> get_text() const;
   AString get_ass_path() const;
+  void Clear();
 
  private:
   struct FontDesc {

@@ -21,6 +21,7 @@
 #define ASSFONTS_RUN_H_
 
 #include <memory>
+#include <vector>
 
 #include <boost/filesystem.hpp>
 
@@ -31,7 +32,7 @@ namespace fs = boost::filesystem;
 void BuildDB(const fs::path fonts_path, const fs::path db_path,
              std::shared_ptr<mylog::sinks::wxwidgets_sink_mt> sink);
 
-void Run(const fs::path input_path, const fs::path output_path,
+void Run(const std::vector<fs::path> input_paths, const fs::path output_path,
          const fs::path fonts_path, const fs::path db_path, bool is_subset_only,
          bool is_embed_only,
          std::shared_ptr<mylog::sinks::wxwidgets_sink_mt> sink);

@@ -68,6 +68,7 @@ class FontSubsetter {
   }
   void SetSubfontDir(const AString& subfont_dir);
   bool Run(bool is_no_subset);
+  void Clear();
 
  private:
   struct FontPath {

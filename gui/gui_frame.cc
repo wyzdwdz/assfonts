@@ -68,7 +68,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   top_sizer->SetFlexibleDirection(wxBOTH);
   top_sizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_SPECIFIED);
 
-  input_label_ = new wxStaticText(main_panel_, wxID_ANY, _T("Input\nASS file"),
+  input_label_ = new wxStaticText(main_panel_, wxID_ANY, _T("Input\nASS files"),
                                   wxDefaultPosition, wxDefaultSize,
                                   wxALIGN_CENTER_HORIZONTAL);
   input_label_->Wrap(-1);
@@ -268,7 +268,8 @@ GuiFrame::~GuiFrame() {
 
 void GuiFrame::OnFindInput(wxCommandEvent& WXUNUSED(event)) {
   wxFileDialog open_file_dialog(
-      this, _T("Open ASS file"), "", "", _T("ASS file (*.ass)|*.[aA][sS][sS]"),
+      this, _T("Open ASS files"), "", "",
+      _T("ASS files (*.ass *.ssa)|*.aas;*.ssa;*.AAS;*.SSA"),
       wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE);
   if (open_file_dialog.ShowModal() == wxID_CANCEL) {
     return;
@@ -331,7 +332,8 @@ void GuiFrame::OnDropInput(wxDropFilesEvent& event) {
     }
     wxFileName filename = wxFileName(path[i]);
     wxString ext = filename.GetExt();
-    if (!filename.GetExt().IsSameAs("ass", false)) {
+    if (!filename.GetExt().IsSameAs("ass", false) &&
+        !filename.GetExt().IsSameAs("ssa", false)) {
       continue;
     }
     input_paths_.push_back(path[i]);
@@ -409,10 +411,8 @@ void GuiFrame::OnRun(wxCommandEvent& WXUNUSED(event)) {
   fs::path db_path = fs::system_complete(db_text_->GetValue().ToStdWstring());
   boost::thread thread([=] {
     is_running_ = true;
-    for (const auto& input_path : input_paths) {
-      Run(input_path, output_path, fonts_path, db_path,
-          subset_check_->GetValue(), embed_check_->GetValue(), sink_);
-    }
+    Run(input_paths, output_path, fonts_path, db_path,
+        subset_check_->GetValue(), embed_check_->GetValue(), sink_);
     is_running_ = false;
   });
   thread.detach();

@@ -84,6 +84,12 @@ bool FontSubsetter::Run(bool is_no_subset) {
   return true;
 }
 
+void FontSubsetter::Clear() {
+  subfont_dir_.clear();
+  subset_font_codepoint_sets_.clear();
+  subfonts_path_.clear();
+}
+
 bool FontSubsetter::FindFont(
     const std::pair<AssParser::FontDesc, std::set<char32_t>> font_set,
     const std::vector<FontParser::FontInfo>& font_list, AString& found_path,

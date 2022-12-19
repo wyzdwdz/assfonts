@@ -20,7 +20,6 @@
 #include "ass_parser.h"
 
 #include <exception>
-#include <fstream>
 #include <sstream>
 
 #include <compact_enc_det/compact_enc_det.h>
@@ -104,6 +103,18 @@ AString AssParser::get_ass_path() const {
   return ass_path_;
 }
 
+void AssParser::Clear() {
+  ass_path_.clear();
+  output_dir_path_.clear();
+  text_.clear();
+  styles_.clear();
+  has_default_style_ = false;
+  has_fonts_ = false;
+  dialogues_.clear();
+  font_sets_.clear();
+  stylename_fontdesc_.clear();
+}
+
 bool AssParser::GetUTF8(const std::ifstream& is, std::string& res) {
   std::stringstream sstream;
   sstream << is.rdbuf();
@@ -168,11 +179,7 @@ bool AssParser::ParseLine(const std::string& line, const unsigned int num_field,
   for (; ch != line.end(); ++ch) {
     word.push_back(*ch);
   }
-  if (num_field == 10) {
-    words.emplace_back(word);
-  } else {
-    words.emplace_back(Trim(word));
-  }
+  words.emplace_back(word);
   if (field < num_field - 1) {
     logger_->error(_ST("Failed to parse \"{}\". Incorrect number of field."),
                    ass_path_);
@@ -198,7 +205,7 @@ bool AssParser::ParseAss() {
           break;
         }
         if (FindTitle(*line, "Style:")) {
-          if (!ParseLine(*line, 23, res)) {
+          if (!ParseLine(*line, 10, res)) {
             return false;
           }
           styles_.emplace_back(res);

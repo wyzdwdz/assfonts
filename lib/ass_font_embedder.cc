@@ -92,6 +92,10 @@ bool AssFontEmbedder::Run() {
   return true;
 }
 
+void AssFontEmbedder::Clear() {
+  output_dir_path_.clear();
+}
+
 std::string AssFontEmbedder::UUEncode(const char* begin, const char* end,
                                       bool insert_linebreaks) {
   // Copyright (c) 2013, Thomas Goyne <plorkyeran@aegisub.org>

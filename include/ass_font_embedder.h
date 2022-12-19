@@ -44,6 +44,7 @@ class AssFontEmbedder {
 
   void set_output_dir_path(const AString& output_ass_path);
   bool Run();
+  void Clear();
 
  private:
   const FontSubsetter& fs_;
