@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 3.21)
 
+set(TARGET_NAME assfonts_gui)
+
 set(THIRD_PARTY_LIBS PRIVATE wx::core
                              wx::base
                              Boost::boost
@@ -12,15 +14,7 @@ set(TARGET_SOURCE PRIVATE gui_frame.cc
 
 set(RESOURCE_DIR PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/resource)
 
-set(INCLUDE_DIR PRIVATE ${VCPKG_INCLUDE_DIR}
-                        ${RESOURCE_DIR})
-
-if(WIN32)
-    LIST(APPEND TARGET_SOURCE ${RESOURCE_DIR}/assfonts_gui.rc
-                              ${RESOURCE_DIR}/wx_dpi_aware.manifest)
-endif()
-
-set(TARGET_NAME assfonts_gui)
+set(INCLUDE_DIR PRIVATE ${RESOURCE_DIR})
 
 if(WIN32)						  
     add_executable(${TARGET_NAME} WIN32 assfonts_gui.cc)
@@ -28,14 +22,14 @@ else()
     add_executable(${TARGET_NAME} assfonts_gui.cc)
 endif()
 
-target_link_libraries(${TARGET_NAME} PRIVATE libassfonts ${THIRD_PARTY_LIBS})
-
-target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDE_DIR})
-
 target_sources(${TARGET_NAME} PRIVATE ${TARGET_SOURCE})
 
-target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
+target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} libassfonts)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_link_options(${TARGET_NAME} PRIVATE -no-pie)
+target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDE_DIR}
+                                                  ${PROJECT_SOURCE_DIR}/include
+                                                  ${THIRD_PARTY_INCLUDE_DIRS})
+
+if(CMAKE_BUILD_TYPE MATCHES "Release")
+    install(TARGETS ${TARGET_NAME})
 endif()

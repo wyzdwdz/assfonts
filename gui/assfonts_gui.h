@@ -20,8 +20,11 @@
 #ifndef ASSFONTS_ASSFONTSGUI_H_
 #define ASSFONTS_ASSFONTSGUI_H_
 
-#include <wx/setup.h>
-#include <wx/wx.h>
+#include <wx/wxprec.h>
+
+#ifndef WX_PRECOMP
+    #include <wx/wx.h>
+#endif
 
 constexpr int VERSION_MAX = 0;
 constexpr int VERSION_MID = 2;

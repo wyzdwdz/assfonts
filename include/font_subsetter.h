@@ -29,7 +29,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include <ft2build.h>
+#include <freetype2/ft2build.h>
 #include FT_FREETYPE_H
 #include FT_SFNT_NAMES_H
 #ifdef __cplusplus

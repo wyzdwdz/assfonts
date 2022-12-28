@@ -448,7 +448,18 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 
-
+#conan.gitignore
+CMakeCache.txt
+CMakeFiles/
+Makefile
+bin/
+cmake_install.cmake
+conan.lock
+conanbuildinfo.cmake
+conanbuildinfo.txt
+conaninfo.txt
+graph_info.json
+CMakeUserPresets.json
 
 #output directory
 out/

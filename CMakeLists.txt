@@ -1,28 +1,27 @@
 ﻿cmake_minimum_required (VERSION 3.21)
 
-project (assfonts CXX)
+project (assfonts CXX C)
 
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(VCPKG_INCLUDE_DIR ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include)
+add_subdirectory(${PROJECT_SOURCE_DIR}/3rdparty)
 
-find_package(harfbuzz CONFIG REQUIRED)
-find_package(freetype CONFIG REQUIRED)
-find_package(Boost REQUIRED filesystem serialization thread program_options)
+find_package(harfbuzz REQUIRED)
+find_package(freetype REQUIRED)
+find_package(Boost REQUIRED)
 find_package(Iconv REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
-find_package(fmt CONFIG REQUIRED)
-find_package(wxWidgets CONFIG REQUIRED)
+find_package(spdlog REQUIRED)
+find_package(fmt REQUIRED)
 
-add_library(harfbuzz-subset INTERFACE IMPORTED PRIVATE)
-find_library(HARFBUZZ_SUBSET_LIBRARY_DEBUG NAMES harfbuzz-subset PATHS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug" PATH_SUFFIXES lib NO_DEFAULT_PATH REQUIRED)
-if(HARFBUZZ_SUBSET_LIBRARY_DEBUG)
-    target_link_libraries(harfbuzz-subset INTERFACE $<$<CONFIG:DEBUG>:${HARFBUZZ_SUBSET_LIBRARY_DEBUG}>)
-endif()
-find_library(HARFBUZZ_SUBSET_LIBRARY_RELEASE NAMES harfbuzz-subset PATHS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}" PATH_SUFFIXES lib NO_DEFAULT_PATH REQUIRED)
-target_link_libraries(harfbuzz-subset INTERFACE $<$<NOT:$<CONFIG:DEBUG>>:${HARFBUZZ_SUBSET_LIBRARY_RELEASE}>)
+set(THIRD_PARTY_INCLUDE_DIRS ${harfbuzz_INCLUDE_DIR}
+                             ${freetype_INCLUDE_DIR}
+                             ${Boost_INCLUDE_DIR}
+                             ${Iconv_INCLUDE_DIR}
+                             ${spdlog_INCLUDE_DIR}
+                             ${fmt_INCLUDE_DIR})
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     if(CMAKE_BUILD_TYPE MATCHES "Debug")
@@ -38,8 +37,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif()
 endif()
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/3rdparty/compact_enc_det)
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
 add_subdirectory(${PROJECT_SOURCE_DIR}/gui)
-#add_subdirectory(${PROJECT_SOURCE_DIR}/test)
+# add_subdirectory(${PROJECT_SOURCE_DIR}/test)

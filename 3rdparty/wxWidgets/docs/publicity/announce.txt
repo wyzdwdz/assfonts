@@ -1,0 +1,39 @@
+September 09, 2022 -- The wxWidgets team is pleased to announce a new
+major release of our open source framework for the development of native
+cross-platform applications in C++.
+
+wxWidgets 3.2.1 is part of the API and ABI-stable 3.2.x release series and is
+now available from
+
+    https://www.wxwidgets.org/downloads/
+
+and
+
+    https://github.com/wxWidgets/wxWidgets/releases/v3.2.1
+
+Coming soon after 3.2.0, this is mostly a bug fix release, with just one
+noteworthy new feature: the addition of wxFileDialog::AddShortcut() function.
+However it fixes some important regressions and other problems:
+
+- Fix crash in applications calling g_log_set_writer_func() with recent glib.
+- Several fixes to alpha channel handling in wxMSW bitmaps.
+- Generate key and focus events for wxSearchCtrl in wxOSX.
+- Fix creating wxRadioBox without any items in wxOSX.
+- Fix regression with AUI floating pane positioning.
+- Avoid new warnings given by gcc 12.
+- Fix building with MSVS 2022 standard-conforming preprocessor.
+- Work around MSVS 2022 optimizer bug that broke wxImage resizing.
+- NetBSD build fixes.
+
+Please see the full change log for more details:
+
+https://raw.githubusercontent.com/wxWidgets/wxWidgets/v3.2.1/docs/changes.txt
+
+This release is API and ABI-compatible with 3.2.0, so the existing
+applications don't even need to be rebuilt to profit from all the fixes
+above if they use shared/dynamic libraries. And if they do need to be
+recompiled, this can be done without any changes to the code.
+
+We hope that you will enjoy using the new release!
+
+Vadim Zeitlin, on behalf of wxWidgets development team.

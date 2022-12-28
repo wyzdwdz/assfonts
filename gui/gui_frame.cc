@@ -84,12 +84,12 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   top_sizer->Add(input_text_, 0, wxALL, 5);
 
   input_button_ = new wxButton(main_panel_, wxID_ANY, _T("..."),
-                               wxDefaultPosition, FromDIP(wxSize(30, 30)), 0);
+                               wxDefaultPosition, FromDIP(wxSize(35, 35)), 0);
   top_sizer->Add(input_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
   input_clean_button_ =
       new wxButton(main_panel_, wxID_ANY, _T("\u2715"), wxDefaultPosition,
-                   FromDIP(wxSize(30, 30)), 0);
+                   FromDIP(wxSize(35, 35)), 0);
   top_sizer->Add(input_clean_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
   output_label_ = new wxStaticText(main_panel_, wxID_ANY,
@@ -108,12 +108,12 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   top_sizer->Add(output_text_, 0, wxALL, 5);
 
   output_button_ = new wxButton(main_panel_, wxID_ANY, _T("..."),
-                                wxDefaultPosition, FromDIP(wxSize(30, 30)), 0);
+                                wxDefaultPosition, FromDIP(wxSize(35, 35)), 0);
   top_sizer->Add(output_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
   output_clean_button_ =
       new wxButton(main_panel_, wxID_ANY, _T("\u2715"), wxDefaultPosition,
-                   FromDIP(wxSize(30, 30)), 0);
+                   FromDIP(wxSize(35, 35)), 0);
   top_sizer->Add(output_clean_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
   font_label_ = new wxStaticText(main_panel_, wxID_ANY, _T("Font\ndirectory"),
@@ -132,12 +132,12 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   top_sizer->Add(font_text_, 0, wxALL, 5);
 
   font_button_ = new wxButton(main_panel_, wxID_ANY, _T("..."),
-                              wxDefaultPosition, FromDIP(wxSize(30, 30)), 0);
+                              wxDefaultPosition, FromDIP(wxSize(35, 35)), 0);
   top_sizer->Add(font_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
   font_clean_button_ =
       new wxButton(main_panel_, wxID_ANY, _T("\u2715"), wxDefaultPosition,
-                   FromDIP(wxSize(30, 30)), 0);
+                   FromDIP(wxSize(35, 35)), 0);
   top_sizer->Add(font_clean_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
   db_label_ = new wxStaticText(main_panel_, wxID_ANY, _T("Database\ndirectory"),
@@ -156,12 +156,12 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   top_sizer->Add(db_text_, 0, wxALL, 5);
 
   db_button_ = new wxButton(main_panel_, wxID_ANY, _T("..."), wxDefaultPosition,
-                            FromDIP(wxSize(30, 30)), 0);
+                            FromDIP(wxSize(35, 35)), 0);
   top_sizer->Add(db_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
   db_clean_button_ =
       new wxButton(main_panel_, wxID_ANY, _T("\u2715"), wxDefaultPosition,
-                   FromDIP(wxSize(30, 30)), 0);
+                   FromDIP(wxSize(35, 35)), 0);
   top_sizer->Add(db_clean_button_, 0, wxALIGN_CENTER | wxALL, 1);
 
   inner_sizer->Add(top_sizer, 1, wxALIGN_CENTER | wxALL, 5);

@@ -23,7 +23,11 @@
 #include <memory>
 
 #include <spdlog/spdlog.h>
-#include <wx/wx.h>
+#include <wx/wxprec.h>
+
+#ifndef WX_PRECOMP
+    #include <wx/wx.h>
+#endif
 
 #include "wxwidgets_sink.h"
 

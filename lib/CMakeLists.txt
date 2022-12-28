@@ -1,7 +1,6 @@
 ﻿cmake_minimum_required (VERSION 3.21)
 
-set(THIRD_PARTY_LIBS harfbuzz-subset
-                     harfbuzz
+set(THIRD_PARTY_LIBS harfbuzz::harfbuzz
                      freetype 
                      Boost::boost 
                      Boost::filesystem
@@ -26,8 +25,8 @@ add_library(${TARGET_NAME} STATIC)
 
 target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS})
 
-target_include_directories(${TARGET_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
-target_include_directories(${TARGET_NAME} PRIVATE ${VCPKG_INCLUDE_DIR})
+target_include_directories(${TARGET_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include
+                                          PRIVATE ${THIRD_PARTY_INCLUDE_DIRS})
 
 target_sources(${TARGET_NAME} PRIVATE ${TARGET_SOURCES})
 
