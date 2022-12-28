@@ -36,7 +36,7 @@ class GuiFrame : public wxFrame {
   GuiFrame(wxWindow* parent, wxWindowID id = wxID_ANY,
            const wxString& title = wxEmptyString,
            const wxPoint& pos = wxDefaultPosition,
-           const wxSize& size = wxSize(800, 600),
+           const wxSize& size = wxDefaultSize,
            long style = wxDEFAULT_FRAME_STYLE | wxTAB_TRAVERSAL);
 
   ~GuiFrame();

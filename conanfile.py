@@ -1,5 +1,28 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
+from conan.tools.cmake.utils import is_multi_configuration
+from conans.errors import ConanException
+
+
+class _CMake(CMake):
+    def install(self, build_type=None, component=None):
+        bt = build_type or self._conanfile.settings.get_safe("build_type")
+        if not bt:
+            raise ConanException("build_type setting should be defined.")
+        is_multi = is_multi_configuration(self._generator)
+        build_config = "--config {}".format(bt) if bt and is_multi else ""
+
+        build_folder = '"{}"'.format(self._conanfile.build_folder)
+        arg_list = ["--install", build_folder, build_config]
+
+        arg_list.append("--component")
+        arg_list.append(component)
+        print(arg_list)
+
+        arg_list = " ".join(filter(None, arg_list))
+        command = "%s %s" % (self._cmake_program, arg_list)
+        self._conanfile.output.info("CMake command: %s" % command)
+        self._conanfile.run(command)
 
 
 class AssfontsConan(ConanFile):
@@ -37,7 +60,7 @@ class AssfontsConan(ConanFile):
 
                        "fmt:shared": False}
 
-    def configure(self):
+    def config_options(self):
         if self.settings.os == 'Windows':
             self.options["harfbuzz"].with_directwrite = False
 
@@ -58,13 +81,11 @@ class AssfontsConan(ConanFile):
         dp.generate()
         tc = CMakeToolchain(self)
         tc.generate()
-        
+
     def build(self):
-        cmake = CMake(self)
+        cmake = _CMake(self)
         cmake.configure()
         cmake.build(target="assfonts")
         cmake.build(target="assfonts_gui")
-
-    def package(self):
-        cmake = CMake(self)
-        cmake.install()
+        cmake.install(component="assfonts")
+        cmake.install(component="assfonts_gui")

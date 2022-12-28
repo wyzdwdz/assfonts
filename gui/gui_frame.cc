@@ -45,9 +45,11 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   wxFileName f(wxStandardPaths::Get().GetExecutablePath());
   app_path_ = f.GetPath();
 
-  wxSize frame_size = FromDIP(wxSize(800, 600));
+  this->SetTitle(_T("assfonts"));
+
+  wxSize frame_size = FromDIP(wxSize(800, 680));
   this->SetSize(frame_size);
-  this->SetMaxSize(frame_size);
+  this->SetMaxSize(FromDIP(wxSize(800, -1)));
   this->SetMinSize(frame_size);
   this->SetTitle(_T("assfonts"));
 
@@ -164,7 +166,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
                    FromDIP(wxSize(35, 35)), 0);
   top_sizer->Add(db_clean_button_, 0, wxALIGN_CENTER | wxALL, 1);
 
-  inner_sizer->Add(top_sizer, 1, wxALIGN_CENTER | wxALL, 5);
+  inner_sizer->Add(top_sizer, 0, wxALIGN_CENTER | wxALL, 5);
 
   wxBoxSizer* middle_sizer;
   middle_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -201,14 +203,14 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
                                wxDefaultPosition, FromDIP(wxSize(-1, 30)), 0);
   button_sizer->Add(reset_button_, 0, wxALL | wxEXPAND, 5);
 
-  middle_sizer->Add(button_sizer, 1, wxALIGN_CENTER | wxALL, 5);
+  middle_sizer->Add(button_sizer, 1, wxALIGN_CENTER | wxALL, 10);
 
-  inner_sizer->Add(middle_sizer, 1, wxALIGN_CENTER | wxALL, 5);
+  inner_sizer->Add(middle_sizer, 0, wxALIGN_CENTER | wxALL, 5);
 
   log_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
-                     FromDIP(wxSize(-1, 210)), wxTE_MULTILINE | wxTE_READONLY);
-  inner_sizer->Add(log_text_, 0, wxEXPAND, 0);
+                     wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+  inner_sizer->Add(log_text_, 1, wxEXPAND, 0);
 
   main_panel_->SetSizer(inner_sizer);
   main_panel_->Layout();

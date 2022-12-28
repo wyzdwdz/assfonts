@@ -17,6 +17,7 @@ target_include_directories(${TARGET_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include
 
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
 
-if(CMAKE_BUILD_TYPE MATCHES "Release")
-    install(TARGETS ${TARGET_NAME})
+if(UNIX)
+    include(GNUInstallDirs)
 endif()
+install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ${TARGET_NAME})

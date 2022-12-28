@@ -29,7 +29,15 @@ target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} libassfonts)
 target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDE_DIR}
                                                   ${PROJECT_SOURCE_DIR}/include
                                                   ${THIRD_PARTY_INCLUDE_DIRS})
+                                                  
 
-if(CMAKE_BUILD_TYPE MATCHES "Release")
-    install(TARGETS ${TARGET_NAME})
+target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
+
+if(UNIX)
+    target_link_options(${TARGET_NAME} PRIVATE -no-pie)
 endif()
+
+if(UNIX)
+    include(GNUInstallDirs)
+endif()
+install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ${TARGET_NAME})
