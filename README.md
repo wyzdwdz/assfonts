@@ -25,7 +25,7 @@ Build environment ---- Conan version 1.56.0
 ### How to build
 
 ```
-conan install . -s=missing
+conan install . -b=missing -s build_type=Release
 conan build .
 ```
 
