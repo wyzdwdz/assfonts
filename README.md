@@ -6,9 +6,7 @@ Subset fonts and embed them into an ASS subtitle.
 
 ### Build Requirements
 
-Build environment ---- Visual Studio 2022 with MSVC 19.33.31630
-
-Use [vcpkg](https://vcpkg.io/) as package manager
+Build environment ---- Conan version 1.56.0
 
 - [FreeType](http://freetype.org/)
 
@@ -23,6 +21,13 @@ Use [vcpkg](https://vcpkg.io/) as package manager
 - [fmt](https://github.com/fmtlib/fmt)
 
 - [wxWidgets](https://www.wxwidgets.org/)
+
+### How to build
+
+```
+conan install . -s=missing
+conan build .
+```
 
 ### How to use
 
