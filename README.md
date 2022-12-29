@@ -25,7 +25,7 @@ Build environment ---- Conan version 1.56.0
 ### How to build
 
 ```
-conan install . -b=missing -s build_type=Release
+conan install . -b=missing -s build_type=Release -c tools.cmake.cmaketoolchain.presets:max_schema_version=2
 conan build .
 ```
 
