@@ -13,7 +13,8 @@ add_executable(${TARGET_NAME} assfonts.cc)
 target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} libassfonts)
 
 target_include_directories(${TARGET_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include
-                                          PRIVATE ${THIRD_PARTY_INCLUDE_DIRS})
+                                                  ${PROJECT_BINARY_DIR}/include
+                                                  ${THIRD_PARTY_INCLUDE_DIRS})
 
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
 

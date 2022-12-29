@@ -32,9 +32,7 @@
 #include "font_parser.h"
 #include "font_subsetter.h"
 
-constexpr int VERSION_MAX = 0;
-constexpr int VERSION_MID = 2;
-constexpr int VERSION_MIN = 6;
+#include "ver.h"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
@@ -111,7 +109,7 @@ int main(int argc, char** argv) {
       "  -s, --subset-only <bool>   Subset fonts but not embed them into subtitle  (default: False)\n"
       "  -e, --embed-only  <bool>   Do not subset fonts  (default: False)\n"
       "  -v, --verbose     <num>    Set logging level (0 to 3), 0 is off  (Default: 3)\n"
-      "  -h, --help                 Get help info\n\n"), VERSION_MAX, VERSION_MID, VERSION_MIN);
+      "  -h, --help                 Get help info\n\n"), VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
     // clang-format on
     if (argc == 2) {
       spdlog::shutdown();

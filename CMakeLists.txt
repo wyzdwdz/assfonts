@@ -18,6 +18,12 @@ find_package(Iconv REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
 
+# set(VERSION_MAJOR 0)
+# set(VERSION_MINOR 0)
+# set(VERSION_PATCH 0)
+
+configure_file(${PROJECT_SOURCE_DIR}/include/ver.h.in ${PROJECT_BINARY_DIR}/include/ver.h)
+
 set(THIRD_PARTY_INCLUDE_DIRS ${harfbuzz_INCLUDE_DIR}
                              ${freetype_INCLUDE_DIR}
                              ${Boost_INCLUDE_DIR}

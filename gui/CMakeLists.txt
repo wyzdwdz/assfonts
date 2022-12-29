@@ -32,6 +32,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} libassfonts)
 
 target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDE_DIR}
                                                   ${PROJECT_SOURCE_DIR}/include
+                                                  ${PROJECT_BINARY_DIR}/include
                                                   ${THIRD_PARTY_INCLUDE_DIRS})
                                                   
 

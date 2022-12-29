@@ -37,6 +37,8 @@
 #include "run.h"
 #include "wxwidgets_sink.h"
 
+#include "ver.h"
+
 namespace fs = boost::filesystem;
 
 GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
@@ -252,8 +254,8 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   logger_->set_pattern("[%^%l%$] %v");
   spdlog::register_logger(logger_);
 
-  logger_->info("assfonts-gui v{}.{}.{}", VERSION_MAX, VERSION_MID,
-                VERSION_MIN);
+  logger_->info("assfonts-gui v{}.{}.{}", VERSION_MAJOR, VERSION_MINOR,
+                VERSION_PATCH);
 
   auto db_path = fs::path(db_text_->GetValue().ToStdWstring() + L"/fonts.db");
   if (fs::is_regular_file(db_path)) {
@@ -458,8 +460,8 @@ void GuiFrame::OnReset(wxCommandEvent& WXUNUSED(event)) {
   font_text_->Clear();
   db_text_->ChangeValue(app_path_);
   log_text_->Clear();
-  logger_->info(_ST("assfonts-gui v{}.{}.{}"), VERSION_MAX, VERSION_MID,
-                VERSION_MIN);
+  logger_->info(_ST("assfonts-gui v{}.{}.{}"), VERSION_MAJOR, VERSION_MINOR,
+                VERSION_PATCH);
   auto db_path = fs::path(db_text_->GetValue().ToStdWstring() + L"/fonts.db");
   if (fs::is_regular_file(db_path)) {
     logger_->info(_ST("Found fonts database: \"{}\""),
