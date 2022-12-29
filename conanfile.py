@@ -46,6 +46,7 @@ class AssfontsConan(ConanFile):
 
     default_options = {"harfbuzz:shared": False,
                        "harfbuzz:with_subset": True,
+                       "harfbuzz:with_glib": False,
 
                        "freetype:shared": False,
                        "freetype:subpixel": False,
@@ -68,7 +69,7 @@ class AssfontsConan(ConanFile):
             self.options["spdlog"].wchar_support = True
 
         elif self.settings.os == 'Linux':
-            self.options["harfbuzz"].with_glib = False
+            pass
 
         elif self.settings.os == 'Macos':
             self.options["harfbuzz"].with_uniscribe = False

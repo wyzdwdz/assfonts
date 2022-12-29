@@ -2,19 +2,24 @@ cmake_minimum_required (VERSION 3.21)
 
 set(TARGET_NAME assfonts_gui)
 
-set(THIRD_PARTY_LIBS PRIVATE wx::core
-                             wx::base
-                             Boost::boost
-                             Boost::filesystem
-                             Boost::thread
-                             spdlog::spdlog)
+set(THIRD_PARTY_LIBS wx::core
+                     wx::base
+                     Boost::boost
+                     Boost::filesystem
+                     Boost::thread
+                     spdlog::spdlog)
 
-set(TARGET_SOURCE PRIVATE gui_frame.cc
-                          run.cc)
+set(TARGET_SOURCE gui_frame.cc
+                  run.cc)
 
-set(RESOURCE_DIR PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/resource)
+set(RESOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/resource)
 
-set(INCLUDE_DIR PRIVATE ${RESOURCE_DIR})
+if(WIN32)
+    LIST(APPEND TARGET_SOURCE ${RESOURCE_DIR}/assfonts_gui.rc
+                              ${RESOURCE_DIR}/wx_dpi_aware.manifest)
+endif()
+
+set(INCLUDE_DIR ${RESOURCE_DIR})
 
 if(WIN32)						  
     add_executable(${TARGET_NAME} WIN32 assfonts_gui.cc)
