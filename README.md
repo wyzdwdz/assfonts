@@ -6,7 +6,7 @@ Subset fonts and embed them into an ASS subtitle.
 
 ### Build Requirements
 
-Build environment ---- Conan version 1.56.0
+Package Manager ---- Conan version 1.56.0
 
 - [FreeType](http://freetype.org/)
 
@@ -19,8 +19,6 @@ Build environment ---- Conan version 1.56.0
 - [spdlog](https://github.com/gabime/spdlog)
 
 - [fmt](https://github.com/fmtlib/fmt)
-
-- [wxWidgets](https://www.wxwidgets.org/)
 
 ### How to build
 
