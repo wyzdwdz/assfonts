@@ -165,7 +165,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
                    FromDIP(wxSize(35, 35)), 0);
   top_sizer->Add(db_clean_button_, 0, wxALIGN_CENTER | wxALL, FromDIP(5));
 
-  inner_sizer->Add(top_sizer, 0, wxALIGN_CENTER | wxBOTTOM, FromDIP(15));
+  inner_sizer->Add(top_sizer, 0, wxALIGN_CENTER | wxALL, FromDIP(15));
 
   wxBoxSizer* middle_sizer;
   middle_sizer = new wxBoxSizer(wxHORIZONTAL);
