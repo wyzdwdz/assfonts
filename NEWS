@@ -1,3 +1,10 @@
+Overview of changes leading to v0.2.7
+Tuesday, December 29, 2022
+====================================
+- Fix some GUI layout bugs
+- Replace C++ package manager from "vcpkg" to "conan"
+
+
 Overview of changes leading to v0.2.6
 Tuesday, December 19, 2022
 ====================================
