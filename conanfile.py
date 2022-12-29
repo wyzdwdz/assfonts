@@ -47,6 +47,7 @@ class AssfontsConan(ConanFile):
     default_options = {"harfbuzz:shared": False,
                        "harfbuzz:with_subset": True,
                        "harfbuzz:with_glib": False,
+                       "harfbuzz:with_freetype": False,
 
                        "freetype:shared": False,
                        "freetype:subpixel": False,
