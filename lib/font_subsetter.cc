@@ -19,6 +19,7 @@
 
 #include "font_subsetter.h"
 
+#include <algorithm>
 #include <climits>
 #include <fstream>
 
