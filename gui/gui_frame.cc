@@ -271,7 +271,9 @@ GuiFrame::~GuiFrame() {
 void GuiFrame::OnFindInput(wxCommandEvent& WXUNUSED(event)) {
   wxFileDialog open_file_dialog(
       this, _T("Open ASS files"), "", "",
-      _T("ASS files (*.ass *.ssa)|*.aas;*.ssa;*.AAS;*.SSA"),
+      _T("ASS files (*.ass *.ssa)|")
+      _T("*.ass;*.Ass;*.aSs;*.asS;*.ASs;*.AsS;*.aSS;*.ASS;")
+      _T("*.ssa;*.Ssa;*.sSa;*.ssA;*.SSa;*.SsA;*.sSA;*.SSA"),
       wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE);
   if (open_file_dialog.ShowModal() == wxID_CANCEL) {
     return;
