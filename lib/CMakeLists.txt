@@ -5,7 +5,6 @@ set(THIRD_PARTY_LIBS harfbuzz::harfbuzz
                      Boost::boost 
                      Boost::filesystem
                      Boost::serialization
-                     Boost::thread
                      Iconv::Iconv
                      spdlog::spdlog
                      fmt::fmt
@@ -29,5 +28,9 @@ target_include_directories(${TARGET_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include
                                           PRIVATE ${THIRD_PARTY_INCLUDE_DIRS})
 
 target_sources(${TARGET_NAME} PRIVATE ${TARGET_SOURCES})
+
+if(UNIX)
+    target_link_options(${TARGET_NAME} PRIVATE -pthread)
+endif()
 
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})

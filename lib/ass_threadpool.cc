@@ -22,14 +22,14 @@
 namespace ass {
 
 void ThreadPool::LoadJob(const std::function<void()>& job) {
-  boost::unique_lock<boost::mutex> lock(mtx_);
+  std::unique_lock<std::mutex> lock(mtx_);
   jobs_.push(job);
   lock.unlock();
   mtx_condition_.notify_one();
 }
 
 void ThreadPool::Join() {
-  boost::unique_lock<boost::mutex> lock(mtx_);
+  std::unique_lock<std::mutex> lock(mtx_);
   should_stop_ = true;
   lock.unlock();
   mtx_condition_.notify_all();
@@ -41,7 +41,7 @@ void ThreadPool::Join() {
 void ThreadPool::RunJobs() {
   std::function<void()> job;
   while (true) {
-    boost::unique_lock<boost::mutex> lock(mtx_);
+    std::unique_lock<std::mutex> lock(mtx_);
     mtx_condition_.wait(lock,
                         [this] { return !jobs_.empty() || should_stop_; });
     if (should_stop_ && jobs_.empty()) {

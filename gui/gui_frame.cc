@@ -20,6 +20,7 @@
 #include "gui_frame.h"
 
 #include <string>
+#include <thread>
 #include <vector>
 
 #include <spdlog/async.h>
@@ -27,7 +28,6 @@
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
 #include <boost/filesystem.hpp>
-#include <boost/thread.hpp>
 
 #ifndef _WIN32
 #include "icon.xpm"
@@ -164,9 +164,9 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   db_clean_button_ =
       new wxButton(main_panel_, wxID_ANY, _T("\u2715"), wxDefaultPosition,
                    FromDIP(wxSize(35, 35)), 0);
-  top_sizer->Add(db_clean_button_, 0, wxALIGN_CENTER | wxALL, 1);
+  top_sizer->Add(db_clean_button_, 0, wxALIGN_CENTER | wxALL, 5);
 
-  inner_sizer->Add(top_sizer, 0, wxALIGN_CENTER | wxALL, 5);
+  inner_sizer->Add(top_sizer, 0, wxALIGN_CENTER | wxBOTTOM, 25);
 
   wxBoxSizer* middle_sizer;
   middle_sizer = new wxBoxSizer(wxHORIZONTAL);
@@ -176,13 +176,13 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 
   subset_check_ = new wxCheckBox(main_panel_, wxID_ANY, _T("Subset only"),
                                  wxDefaultPosition, wxDefaultSize, 0);
-  checkbox_sizer->Add(subset_check_, 0, wxALL, 5);
+  checkbox_sizer->Add(subset_check_, 0, wxALL, 15);
 
   embed_check_ = new wxCheckBox(main_panel_, wxID_ANY, _T("Embed only"),
                                 wxDefaultPosition, wxDefaultSize, 0);
-  checkbox_sizer->Add(embed_check_, 0, wxALL, 5);
+  checkbox_sizer->Add(embed_check_, 0, wxALL, 15);
 
-  middle_sizer->Add(checkbox_sizer, 1, wxALIGN_CENTER | wxALL, 5);
+  middle_sizer->Add(checkbox_sizer, 0, wxALIGN_CENTER | wxRIGHT, 15);
 
   run_button_ = new wxButton(main_panel_, wxID_ANY, _T("RUN"),
                              wxDefaultPosition, FromDIP(wxSize(70, 70)), 0);
@@ -203,9 +203,9 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
                                wxDefaultPosition, FromDIP(wxSize(-1, 30)), 0);
   button_sizer->Add(reset_button_, 0, wxALL | wxEXPAND, 5);
 
-  middle_sizer->Add(button_sizer, 1, wxALIGN_CENTER | wxALL, 10);
+  middle_sizer->Add(button_sizer, 0, wxALIGN_CENTER | wxLEFT, 15);
 
-  inner_sizer->Add(middle_sizer, 0, wxALIGN_CENTER | wxALL, 5);
+  inner_sizer->Add(middle_sizer, 0, wxALIGN_CENTER | wxBOTTOM, 25);
 
   log_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
@@ -411,7 +411,7 @@ void GuiFrame::OnRun(wxCommandEvent& WXUNUSED(event)) {
   fs::path fonts_path =
       fs::system_complete(font_text_->GetValue().ToStdWstring());
   fs::path db_path = fs::system_complete(db_text_->GetValue().ToStdWstring());
-  boost::thread thread([=] {
+  std::thread thread([=] {
     is_running_ = true;
     Run(input_paths, output_path, fonts_path, db_path,
         subset_check_->GetValue(), embed_check_->GetValue(), sink_);
@@ -436,7 +436,7 @@ void GuiFrame::OnBuild(wxCommandEvent& WXUNUSED(event)) {
       fs::system_complete(font_text_->GetValue().ToStdWstring());
   fs::path db_path = fs::system_complete(db_text_->GetValue().ToStdWstring());
   logger_->info(_ST("Building fonts database."));
-  boost::thread thread([=] {
+  std::thread thread([=] {
     is_running_ = true;
     BuildDB(fonts_path, db_path, sink_);
     font_text_->Clear();

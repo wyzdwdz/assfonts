@@ -6,7 +6,6 @@ set(THIRD_PARTY_LIBS wx::core
                      wx::base
                      Boost::boost
                      Boost::filesystem
-                     Boost::thread
                      spdlog::spdlog)
 
 set(TARGET_SOURCE gui_frame.cc
@@ -39,7 +38,7 @@ target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDE_DIR}
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
 
 if(UNIX)
-    target_link_options(${TARGET_NAME} PRIVATE -no-pie)
+    target_link_options(${TARGET_NAME} PRIVATE -no-pie -pthread)
 endif()
 
 if(UNIX)

@@ -12,7 +12,7 @@ Build environment ---- Conan version 1.56.0
 
 - [HarfBuzz](https://github.com/harfbuzz/harfbuzz)
 
-- [Boost](https://www.boost.org/) filesystem serialization thread program_options
+- [Boost](https://www.boost.org/) filesystem serialization program_options
 
 - [libiconv](https://www.gnu.org/software/libiconv/)
 

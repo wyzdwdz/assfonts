@@ -20,11 +20,12 @@
 #ifndef ASSFONTS_ASSTHREADPOOL_H_
 #define ASSFONTS_ASSTHREADPOOL_H_
 
+#include <condition_variable>
 #include <functional>
+#include <mutex>
 #include <queue>
+#include <thread>
 #include <vector>
-
-#include <boost/thread.hpp>
 
 namespace ass {
 
@@ -33,20 +34,20 @@ class ThreadPool {
   ThreadPool(const unsigned int num) {
     threads_.resize(num);
     for (unsigned int i = 0; i < num; ++i) {
-      threads_[i] = boost::thread([this]() { RunJobs(); });
+      threads_[i] = std::thread([this]() { RunJobs(); });
     }
   }
-  ThreadPool() : ThreadPool(boost::thread::hardware_concurrency()) {}
+  ThreadPool() : ThreadPool(std::thread::hardware_concurrency()) {}
   ~ThreadPool() = default;
 
   void LoadJob(const std::function<void()>& job);
   void Join();
 
  private:
-  std::vector<boost::thread> threads_;
+  std::vector<std::thread> threads_;
   std::queue<std::function<void()>> jobs_;
-  boost::mutex mtx_;
-  boost::condition_variable mtx_condition_;
+  std::mutex mtx_;
+  std::condition_variable mtx_condition_;
   bool should_stop_ = false;
 
   void RunJobs();

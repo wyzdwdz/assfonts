@@ -21,6 +21,7 @@
 #define ASSFONTS_FONTPARSER_H_
 
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -35,7 +36,6 @@ extern "C" {
 
 #include <spdlog/async.h>
 #include <spdlog/spdlog.h>
-#include <boost/thread.hpp>
 
 #include "ass_string.h"
 
@@ -84,7 +84,7 @@ class FontParser {
   };
 
   std::shared_ptr<spdlog::logger> logger_;
-  boost::mutex mtx_;
+  std::mutex mtx_;
   std::vector<FontInfo> font_list_;
   std::vector<FontInfo> font_list_in_db_;
   std::vector<AString> fonts_path_;

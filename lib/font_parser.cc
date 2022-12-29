@@ -23,6 +23,7 @@
 #include <fstream>
 #include <memory>
 #include <regex>
+#include <thread>
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,7 +42,6 @@ extern "C" {
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/serialization/vector.hpp>
-#include <boost/thread.hpp>
 
 #include "ass_freetype.h"
 #include "ass_threadpool.h"
@@ -55,7 +55,7 @@ void FontParser::LoadFonts(const AString& fonts_dir) {
   logger_->info(_ST("Found {} font files in \"{}\""), fonts_path_.size(),
                 fonts_dir);
   font_list_.reserve(fonts_path_.size());
-  unsigned int num_thread = boost::thread::hardware_concurrency() + 1;
+  unsigned int num_thread = std::thread::hardware_concurrency() + 1;
   ThreadPool pool(num_thread);
   for (const AString& font_path : fonts_path_) {
     pool.LoadJob([&]() { GetFontInfo(font_path); });
@@ -202,7 +202,7 @@ void FontParser::GetFontInfo(const AString& font_path) {
     font_info.psnames = psnames;
     font_info.path = font_path;
     font_info.index = face_idx;
-    boost::lock_guard<boost::mutex> lock(mtx_);
+    std::lock_guard<std::mutex> lock(mtx_);
     font_list_.emplace_back(font_info);
   }
   if (font_info.families.empty() && font_info.fullnames.empty() &&
