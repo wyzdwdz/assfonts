@@ -41,7 +41,4 @@ if(UNIX)
     target_link_options(${TARGET_NAME} PRIVATE -no-pie -pthread)
 endif()
 
-if(UNIX)
-    include(GNUInstallDirs)
-endif()
 install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ${TARGET_NAME})
