@@ -48,11 +48,8 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   app_path_ = f.GetPath();
 
   this->SetTitle(_T("assfonts"));
-
-  wxSize frame_size = FromDIP(wxSize(800, 680));
-  this->SetSize(frame_size);
+  this->SetMinSize(FromDIP(wxSize(800, 700)));
   this->SetMaxSize(FromDIP(wxSize(800, -1)));
-  this->SetMinSize(frame_size);
   this->SetTitle(_T("assfonts"));
 
 #ifdef _WIN32
@@ -79,7 +76,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   wxFont font = input_label_->GetFont();
   font.SetWeight(wxFONTWEIGHT_BOLD);
   input_label_->SetFont(font);
-  top_sizer->Add(input_label_, 0, wxALIGN_CENTER | wxRIGHT, FromDIP(15));
+  top_sizer->Add(input_label_, 0, wxALIGN_CENTER | wxALL, FromDIP(10));
 
   input_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
@@ -103,7 +100,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   font = input_label_->GetFont();
   font.SetWeight(wxFONTWEIGHT_BOLD);
   output_label_->SetFont(font);
-  top_sizer->Add(output_label_, 0, wxALIGN_CENTER | wxRIGHT, FromDIP(15));
+  top_sizer->Add(output_label_, 0, wxALIGN_CENTER | wxALL, FromDIP(10));
 
   output_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
@@ -127,7 +124,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   font = input_label_->GetFont();
   font.SetWeight(wxFONTWEIGHT_BOLD);
   font_label_->SetFont(font);
-  top_sizer->Add(font_label_, 0, wxALIGN_CENTER | wxRIGHT, FromDIP(15));
+  top_sizer->Add(font_label_, 0, wxALIGN_CENTER | wxALL, FromDIP(10));
 
   font_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
@@ -151,7 +148,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   font = input_label_->GetFont();
   font.SetWeight(wxFONTWEIGHT_BOLD);
   db_label_->SetFont(font);
-  top_sizer->Add(db_label_, 0, wxALIGN_CENTER | wxRIGHT, FromDIP(15));
+  top_sizer->Add(db_label_, 0, wxALIGN_CENTER | wxALL, FromDIP(10));
 
   db_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, app_path_, wxDefaultPosition,
@@ -178,11 +175,11 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 
   subset_check_ = new wxCheckBox(main_panel_, wxID_ANY, _T("Subset only"),
                                  wxDefaultPosition, wxDefaultSize, 0);
-  checkbox_sizer->Add(subset_check_, 0, wxALL, FromDIP(10));
+  checkbox_sizer->Add(subset_check_, 1, wxALL, FromDIP(10));
 
   embed_check_ = new wxCheckBox(main_panel_, wxID_ANY, _T("Embed only"),
                                 wxDefaultPosition, wxDefaultSize, 0);
-  checkbox_sizer->Add(embed_check_, 0, wxALL, FromDIP(10));
+  checkbox_sizer->Add(embed_check_, 1, wxALL, FromDIP(10));
 
   middle_sizer->Add(checkbox_sizer, 0, wxALIGN_CENTER | wxRIGHT, FromDIP(15));
 
@@ -199,11 +196,11 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 
   build_button_ = new wxButton(main_panel_, wxID_ANY, _T("Build database"),
                                wxDefaultPosition, FromDIP(wxSize(-1, 30)), 0);
-  button_sizer->Add(build_button_, 0, wxALL | wxEXPAND, FromDIP(5));
+  button_sizer->Add(build_button_, 1, wxALL | wxEXPAND, FromDIP(5));
 
   reset_button_ = new wxButton(main_panel_, wxID_ANY, _T("Reset all"),
                                wxDefaultPosition, FromDIP(wxSize(-1, 30)), 0);
-  button_sizer->Add(reset_button_, 0, wxALL | wxEXPAND, FromDIP(5));
+  button_sizer->Add(reset_button_, 1, wxALL | wxEXPAND, FromDIP(5));
 
   middle_sizer->Add(button_sizer, 0, wxALIGN_CENTER | wxLEFT, FromDIP(15));
 
