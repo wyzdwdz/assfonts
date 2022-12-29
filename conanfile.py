@@ -14,9 +14,10 @@ class _CMake(CMake):
 
         build_folder = '"{}"'.format(self._conanfile.build_folder)
         arg_list = ["--install", build_folder, build_config]
-
-        arg_list.append("--component")
-        arg_list.append(component)
+        
+        if component is not None:
+            arg_list.append("--component")
+            arg_list.append(component)
 
         arg_list = " ".join(filter(None, arg_list))
         command = "%s %s" % (self._cmake_program, arg_list)
