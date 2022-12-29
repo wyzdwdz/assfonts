@@ -17,7 +17,6 @@ class _CMake(CMake):
 
         arg_list.append("--component")
         arg_list.append(component)
-        print(arg_list)
 
         arg_list = " ".join(filter(None, arg_list))
         command = "%s %s" % (self._cmake_program, arg_list)
