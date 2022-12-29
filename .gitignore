@@ -468,4 +468,4 @@ out/
 build/
 
 #whitelist
-!/3rdparty/**/*.*
+!3rdparty/**/*.*
