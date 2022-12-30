@@ -38,10 +38,7 @@ extern "C" {
 }
 #endif
 
-#include <boost/archive/archive_exception.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/serialization/vector.hpp>
+#include <nlohmann/json.hpp>
 
 #include "ass_freetype.h"
 #include "ass_threadpool.h"
@@ -72,32 +69,62 @@ void FontParser::SaveDB(const AString& db_path) {
   if (fs::is_regular_file(file_path)) {
     logger_->warn(_ST("\"{}\" already exists. It will be overwritten."),
                   file_path.native());
-    fs::remove(file_path);
   }
-  std::ofstream db_file(file_path.native(), std::ios::binary);
-  boost::archive::binary_oarchive oa(db_file);
-  oa << font_list_;
+  std::ofstream db_file(file_path.native());
+  nlohmann::ordered_json json;
+  for (const FontInfo& font : font_list_) {
+    nlohmann::ordered_json js_font;
+    js_font["families"] = font.families;
+    js_font["fullnames"] = font.fullnames;
+    js_font["psnames"] = font.psnames;
+    js_font["weight"] = font.weight;
+    js_font["slant"] = font.slant;
+#ifdef _WIN32
+    js_font["path"] = WideToU8(font.path);
+#else
+    js_font["path"] = font.path;
+#endif
+    js_font["index"] = font.index;
+    json.emplace_back(js_font);
+  }
+  db_file << json.dump(4);
   logger_->info(_ST("Fonts database has been saved in \"{}\""),
                 file_path.native());
 }
 
 void FontParser::LoadDB(const AString& db_path) {
   fs::path file_path(db_path);
-  std::ifstream db_file(file_path.native(), std::ios::binary);
-  if (db_file.is_open()) {
-    try {
-      boost::archive::binary_iarchive ia(db_file);
-      ia >> font_list_in_db_;
-    } catch (const boost::archive::archive_exception&) {
-      logger_->warn(_ST("Cannot load fonts database: \"{}\""),
-                    file_path.native());
-      return;
-    }
-    logger_->info(_ST("Load fonts database \"{}\""), file_path.native());
-  } else {
+  std::ifstream db_file(file_path.native());
+  if (!db_file.is_open()) {
     logger_->warn(_ST("Fonts database \"{}\" doesn't exists."),
                   file_path.native());
+    return;
   }
+  try {
+    nlohmann::json json;
+    json << db_file;
+    for (const nlohmann::json js_font : json) {
+      FontInfo font;
+      font.families = js_font["families"];
+      font.fullnames = js_font["fullnames"];
+      font.psnames = js_font["psnames"];
+      font.weight = js_font["weight"];
+      font.slant = js_font["slant"];
+#ifdef _WIN32
+      font.path = U8ToWide(js_font["path"]);
+#else
+      font.path = js_font["path"];
+#endif
+      font.index = js_font["index"];
+      font_list_in_db_.emplace_back(font);
+    }
+  } catch (const nlohmann::json::exception&) {
+    logger_->warn(_ST("Cannot load fonts database: \"{}\""),
+                  file_path.native());
+    font_list_in_db_.clear();
+    return;
+  }
+  logger_->info(_ST("Load fonts database \"{}\""), file_path.native());
 }
 
 void FontParser::clean_font_list() {

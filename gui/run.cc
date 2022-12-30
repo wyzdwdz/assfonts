@@ -29,7 +29,8 @@ void BuildDB(const fs::path fonts_path, const fs::path db_path,
              std::shared_ptr<mylog::sinks::wxwidgets_sink_mt> sink) {
   ass::FontParser fp(sink);
   fp.LoadFonts(fonts_path.native());
-  fp.SaveDB(db_path.native() + _ST("/fonts.db"));
+  fp.SaveDB(db_path.native() + fs::path::preferred_separator +
+            _ST("fonts.json"));
 }
 
 void Run(const std::vector<fs::path> input_paths, const fs::path output_path,
@@ -44,7 +45,8 @@ void Run(const std::vector<fs::path> input_paths, const fs::path output_path,
   if (!fonts_path.empty()) {
     fp.LoadFonts(fonts_path.native());
   }
-  fp.LoadDB(db_path.native() + _ST("/fonts.db"));
+  fp.LoadDB(db_path.native() + fs::path::preferred_separator +
+            _ST("fonts.json"));
   for (const auto& input_path : input_paths) {
     if (!ap.ReadFile(input_path.native())) {
       return;
@@ -53,7 +55,7 @@ void Run(const std::vector<fs::path> input_paths, const fs::path output_path,
       return;
     }
     if (!is_embed_only) {
-      fs.SetSubfontDir(output_path.native() + _ST("/") +
+      fs.SetSubfontDir(output_path.native() + fs::path::preferred_separator +
                        input_path.stem().native() + _ST("_subsetted"));
     }
     if (!fs.Run(is_embed_only)) {

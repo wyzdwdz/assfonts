@@ -8,7 +8,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/3rdparty)
 
 find_package(harfbuzz REQUIRED)
 find_package(freetype REQUIRED)
-find_package(Boost REQUIRED)
+find_package(nlohmann_json REQUIRED)
 find_package(Iconv REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
@@ -22,7 +22,7 @@ configure_file(${PROJECT_SOURCE_DIR}/include/ver.h.in ${PROJECT_BINARY_DIR}/incl
 
 set(THIRD_PARTY_INCLUDE_DIRS ${harfbuzz_INCLUDE_DIR}
                              ${freetype_INCLUDE_DIR}
-                             ${Boost_INCLUDE_DIR}
+                             ${nlohmann_json_INCLUDE_DIR}
                              ${Iconv_INCLUDE_DIR}
                              ${spdlog_INCLUDE_DIR}
                              ${fmt_INCLUDE_DIR}

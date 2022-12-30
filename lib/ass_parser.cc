@@ -454,7 +454,7 @@ void AssParser::CleanFonts() {
     return;
   }
   fs::path input_path(ass_path_);
-  fs::path output_path(output_dir_path_ + _ST("/") +
+  fs::path output_path(output_dir_path_ + fs::path::preferred_separator +
                        input_path.stem().native() + _ST(".cleaned") +
                        input_path.extension().native());
   logger_->info(

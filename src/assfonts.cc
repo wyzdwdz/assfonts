@@ -17,10 +17,12 @@
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
+#include <cstdlib>
 #include <filesystem>
 #include <memory>
 #include <string>
 #include <system_error>
+#include <vector>
 
 #include <fmt/core.h>
 #include <spdlog/async.h>
@@ -41,7 +43,21 @@
 namespace fs = std::filesystem;
 
 #ifdef _WIN32
-int wmain(int argc, wchar_t** argv) {
+int wmain(int argc, wchar_t** wargv) {
+  std::vector<std::wstring> v_wstr;
+  std::vector<std::string> v_str;
+  char** argv = static_cast<char**>(
+      malloc(sizeof(char*) * (static_cast<unsigned long long>(argc) + 1)));
+  for (int i = 0; i < argc; ++i) {
+    v_wstr.emplace_back(std::wstring(wargv[i]));
+  }
+  for (const std::wstring& wstr : v_wstr) {
+    v_str.emplace_back(ass::WideToU8(wstr));
+  }
+  for (int i = 0; i < argc; ++i) {
+    argv[i] = const_cast<char*>(v_str[i].c_str());
+  }
+  argv[argc] = NULL;
 #else
 int main(int argc, char** argv) {
 #endif
@@ -96,6 +112,9 @@ int main(int argc, char** argv) {
         return "";
       });
   CLI11_PARSE(app, argc, argv);
+#ifdef _WIN32
+  free(argv);
+#endif
 
   if (is_help) {
     // clang-format off
@@ -143,51 +162,58 @@ int main(int argc, char** argv) {
       return 0;
   }
 
+#ifdef _WIN32
+  std::error_code ec;
+  fs::path input_path = fs::absolute(ass::U8ToWide(input), ec);
+  fs::path output_path = fs::absolute(ass::U8ToWide(output), ec);
+  fs::path fonts_path = fs::absolute(ass::U8ToWide(fonts), ec);
+  fs::path db_path = fs::absolute(ass::U8ToWide(database), ec);
+#else
   std::error_code ec;
   fs::path input_path = fs::absolute(input, ec);
   fs::path output_path = fs::absolute(output, ec);
   fs::path fonts_path = fs::absolute(fonts, ec);
   fs::path db_path = fs::absolute(database, ec);
+#endif
 
   if (!input.empty() && !fs::is_regular_file(input_path)) {
-    logger->error(_ST("\"{}\" is not a file. See --help for more info."),
-                  input);
+    logger->error("\"{}\" is not a file. See --help for more info.", input);
     spdlog::shutdown();
     return 0;
   }
   if (!output.empty() && !fs::is_directory(output_path)) {
     logger->error(
-        _ST("\"{}\" is not a legal directory path. See --help for more info."),
+        "\"{}\" is not a legal directory path. See --help for more info.",
         output);
     spdlog::shutdown();
     return 0;
   }
   if (!fonts.empty() && !fs::is_directory(fonts_path)) {
     logger->error(
-        _ST("\"{}\" is not a legal directory path. See --help for more info."),
+        "\"{}\" is not a legal directory path. See --help for more info.",
         fonts);
     spdlog::shutdown();
     return 0;
   }
   if (!fs::is_directory(db_path)) {
     logger->error(
-        _ST("\"{}\" is not a legal directory path. See --help for more info."),
+        "\"{}\" is not a legal directory path. See --help for more info.",
         database);
     spdlog::shutdown();
     return 0;
   }
   if (is_build && fonts.empty()) {
-    logger->error(_ST("No fontpath is found. See --help for more info."));
+    logger->error("No fontpath is found. See --help for more info.");
     spdlog::shutdown();
     return 0;
   }
   if (input.empty() && fonts.empty()) {
-    logger->error(_ST("No input is found. See --help for more info."));
+    logger->error("No input is found. See --help for more info.");
     spdlog::shutdown();
     return 0;
   }
   if (input.empty() && !is_build) {
-    logger->error(_ST("Do nothing. See --help for more info."));
+    logger->error("Do nothing. See --help for more info.");
     spdlog::shutdown();
     return 0;
   }
@@ -197,9 +223,11 @@ int main(int argc, char** argv) {
   }
 
   if (is_build) {
-    fp.SaveDB(db_path.native() + _ST("/fonts.db"));
+    fp.SaveDB(db_path.native() + fs::path::preferred_separator +
+              _ST("fonts.json"));
   } else {
-    fp.LoadDB(db_path.native() + _ST("/fonts.db"));
+    fp.LoadDB(db_path.native() + fs::path::preferred_separator +
+              _ST("fonts.json"));
   }
 
   if (input.empty()) {
@@ -223,7 +251,7 @@ int main(int argc, char** argv) {
   }
 
   if (!is_embed_only) {
-    fs.SetSubfontDir(output_path.native() + _ST("/") +
+    fs.SetSubfontDir(output_path.native() + fs::path::preferred_separator +
                      input_path.stem().native() + _ST("_subsetted"));
   }
   if (!fs.Run(is_embed_only)) {

@@ -12,13 +12,15 @@ Package Manager ---- Conan version 1.56.0
 
 - [HarfBuzz](https://github.com/harfbuzz/harfbuzz)
 
-- [Boost](https://www.boost.org/) serialization program_options
+- [nlohmann_json](https://github.com/nlohmann/json)
 
 - [libiconv](https://www.gnu.org/software/libiconv/)
 
 - [spdlog](https://github.com/gabime/spdlog)
 
 - [fmt](https://github.com/fmtlib/fmt)
+
+- [CLI11](https://github.com/CLIUtils/CLI11)
 
 ### How to build
 

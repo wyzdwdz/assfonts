@@ -36,7 +36,7 @@ void AssFontEmbedder::set_output_dir_path(const AString& output_dir_path) {
 
 bool AssFontEmbedder::Run() {
   fs::path input_path(fs_.ap_.get_ass_path());
-  fs::path output_path(output_dir_path_ + _ST("/") +
+  fs::path output_path(output_dir_path_ + fs::path::preferred_separator +
                        input_path.stem().native() + _ST(".assfonts") +
                        input_path.extension().native());
   std::string buf_u8;

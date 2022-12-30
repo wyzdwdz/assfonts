@@ -234,7 +234,8 @@ bool FontSubsetter::CreateSubfont(
     const std::pair<FontPath, std::set<uint32_t>>& subset_font) {
   fs::path input_filepath(subset_font.first.path);
   fs::path output_filepath(
-      subfont_dir_ + _ST("/") + input_filepath.stem().native() + _ST("[") +
+      subfont_dir_ + fs::path::preferred_separator +
+      input_filepath.stem().native() + _ST("[") +
       ToAString(subset_font.first.index) + _ST("]_subset") +
       ((ToLower(input_filepath.extension().native()) == _ST(".otf") ||
         ToLower(input_filepath.extension().native()) == _ST(".otc"))

@@ -40,7 +40,7 @@
 
 #include "ver.h"
 
-#ifdef __WIN32
+#ifdef _WIN32
 #define ToAString() ToStdWstring()
 #else
 #define ToAString() ToStdString(wxConvUTF8)
@@ -261,7 +261,8 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   logger_->info("assfonts-gui v{}.{}.{}", VERSION_MAJOR, VERSION_MINOR,
                 VERSION_PATCH);
 
-  auto db_path = fs::path(db_text_->GetValue().ToAString() + _ST("/fonts.db"));
+  auto db_path = fs::path(db_text_->GetValue().ToAString() +
+                          fs::path::preferred_separator + _ST("fonts.db"));
   if (fs::is_regular_file(db_path)) {
     logger_->info(_ST("Found fonts database: \"{}\""), db_path.native());
   } else {
@@ -321,7 +322,8 @@ void GuiFrame::OnFindDB(wxCommandEvent& WXUNUSED(event)) {
   }
   wxString path = open_dir_dialog.GetPath();
   db_text_->ChangeValue(path);
-  auto db_path = fs::path(db_text_->GetValue().ToAString() + _ST("/fonts.db"));
+  auto db_path = fs::path(db_text_->GetValue().ToAString() +
+                          fs::path::preferred_separator + _ST("fonts.db"));
   if (fs::is_regular_file(db_path)) {
     logger_->info(_ST("Found fonts database: \"{}\""), db_path.native());
   } else {
@@ -383,7 +385,8 @@ void GuiFrame::OnDropDB(wxDropFilesEvent& event) {
     return;
   }
   db_text_->ChangeValue(path[0]);
-  auto db_path = fs::path(db_text_->GetValue().ToAString() + _ST("/fonts.db"));
+  auto db_path = fs::path(db_text_->GetValue().ToAString() +
+                          fs::path::preferred_separator + _ST("fonts.db"));
   if (fs::is_regular_file(db_path)) {
     logger_->info(_ST("Found fonts database: \"{}\""), db_path.native());
   } else {
@@ -462,7 +465,8 @@ void GuiFrame::OnReset(wxCommandEvent& WXUNUSED(event)) {
   log_text_->Clear();
   logger_->info(_ST("assfonts-gui v{}.{}.{}"), VERSION_MAJOR, VERSION_MINOR,
                 VERSION_PATCH);
-  auto db_path = fs::path(db_text_->GetValue().ToAString() + _ST("/fonts.db"));
+  auto db_path = fs::path(db_text_->GetValue().ToAString() +
+                          fs::path::preferred_separator + _ST("fonts.db"));
   if (fs::is_regular_file(db_path)) {
     logger_->info(_ST("Found fonts database: \"{}\""), db_path.native());
   } else {
