@@ -20,6 +20,7 @@
 #include "font_parser.h"
 
 #include <exception>
+#include <filesystem>
 #include <fstream>
 #include <memory>
 #include <regex>
@@ -40,13 +41,12 @@ extern "C" {
 #include <boost/archive/archive_exception.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/serialization/vector.hpp>
 
 #include "ass_freetype.h"
 #include "ass_threadpool.h"
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace ass {
 
@@ -71,14 +71,14 @@ void FontParser::SaveDB(const AString& db_path) {
   fs::path file_path(db_path);
   if (fs::is_regular_file(file_path)) {
     logger_->warn(_ST("\"{}\" already exists. It will be overwritten."),
-                  file_path.generic_path().native());
+                  file_path.native());
     fs::remove(file_path);
   }
   std::ofstream db_file(file_path.native(), std::ios::binary);
   boost::archive::binary_oarchive oa(db_file);
   oa << font_list_;
   logger_->info(_ST("Fonts database has been saved in \"{}\""),
-                file_path.generic_path().native());
+                file_path.native());
 }
 
 void FontParser::LoadDB(const AString& db_path) {
@@ -90,14 +90,13 @@ void FontParser::LoadDB(const AString& db_path) {
       ia >> font_list_in_db_;
     } catch (const boost::archive::archive_exception&) {
       logger_->warn(_ST("Cannot load fonts database: \"{}\""),
-                    file_path.generic_path().native());
+                    file_path.native());
       return;
     }
-    logger_->info(_ST("Load fonts database \"{}\""),
-                  file_path.generic_path().native());
+    logger_->info(_ST("Load fonts database \"{}\""), file_path.native());
   } else {
     logger_->warn(_ST("Fonts database \"{}\" doesn't exists."),
-                  file_path.generic_path().native());
+                  file_path.native());
   }
 }
 
@@ -114,7 +113,7 @@ std::vector<AString> FontParser::FindFileInDir(const AString& dir,
   try {
     for (const auto& dir_entry : iter) {
       if (std::regex_match(dir_entry.path().native(), r)) {
-        res.emplace_back(dir_entry.path().generic_path().native());
+        res.emplace_back(dir_entry.path().native());
       }
     }
   } catch (const fs::filesystem_error& e) {

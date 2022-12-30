@@ -21,14 +21,14 @@
 
 #include <algorithm>
 #include <climits>
+#include <filesystem>
 #include <fstream>
 
 #include <fmt/core.h>
 #include <harfbuzz/hb-subset.h>
 #include <harfbuzz/hb.h>
-#include <boost/filesystem.hpp>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace ass {
 
@@ -72,7 +72,7 @@ bool FontSubsetter::Run(bool is_no_subset) {
   fs::path dir_path(subfont_dir_);
   if (!fs::exists(dir_path)) {
     logger_->info(_ST("Create subset fonts directory: \"{}\""),
-                  dir_path.generic_path().native());
+                  dir_path.native());
     fs::create_directory(dir_path);
   }
   for (const auto& subset_font : subset_font_codepoint_sets_) {

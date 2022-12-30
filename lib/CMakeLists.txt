@@ -2,8 +2,6 @@
 
 set(THIRD_PARTY_LIBS harfbuzz::harfbuzz
                      freetype 
-                     Boost::boost 
-                     Boost::filesystem
                      Boost::serialization
                      Iconv::Iconv
                      spdlog::spdlog
@@ -34,3 +32,5 @@ if(UNIX)
 endif()
 
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
+
+target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})

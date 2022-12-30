@@ -42,7 +42,8 @@ class AssfontsConan(ConanFile):
                 "boost/1.80.0",
                 "libiconv/1.17",
                 "spdlog/1.11.0",
-                "fmt/9.1.0"]
+                "fmt/9.1.0",
+                "cli11/2.3.1"]
 
     default_options = {"harfbuzz:shared": False,
                        "harfbuzz:with_subset": True,
@@ -56,11 +57,8 @@ class AssfontsConan(ConanFile):
                        "freetype:with_png": False,
                        "freetype:with_zlib": False,
 
-                       "boost:without_filesystem": False,
                        "boost:without_serialization": False,
-                       "boost:without_program_options": False,
-                       "boost:without_atomic": False,
-                       "boost:without_system": False,
+                       "boost:without_atomic": True,
                        "boost:without_chrono": True,
                        "boost:without_container": True,
                        "boost:without_context": True,
@@ -69,6 +67,7 @@ class AssfontsConan(ConanFile):
                        "boost:without_date_time": True,
                        "boost:without_exception": True,
                        "boost:without_fiber": True,
+                       "boost:without_filesystem": True,
                        "boost:without_graph": True,
                        "boost:without_graph_parallel": True,
                        "boost:without_iostreams": True,
@@ -78,10 +77,12 @@ class AssfontsConan(ConanFile):
                        "boost:without_math": True,
                        "boost:without_mpi": True,
                        "boost:without_nowide": True,
+                       "boost:without_program_options": True,
                        "boost:without_python": True,
                        "boost:without_random": True,
                        "boost:without_regex": True,
                        "boost:without_stacktrace": True,
+                       "boost:without_system": True,
                        "boost:without_test": True,
                        "boost:without_thread": True,
                        "boost:without_timer": True,

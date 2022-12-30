@@ -20,13 +20,13 @@
 #include "ass_parser.h"
 
 #include <exception>
+#include <filesystem>
 #include <sstream>
 
 #include <compact_enc_det/compact_enc_det.h>
 #include <util/encodings/encodings.h>
-#include <boost/filesystem.hpp>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace ass {
 
@@ -62,8 +62,7 @@ bool AssParser::ReadFile(const AString& ass_file_path) {
       }
     }
   } else {
-    logger_->error(_ST("\"{}\" cannot be opened."),
-                   ass_path.generic_path().native());
+    logger_->error(_ST("\"{}\" cannot be opened."), ass_path.native());
     return false;
   }
   if (!ParseAss()) {
@@ -84,7 +83,7 @@ bool AssParser::ReadFile(const AString& ass_file_path) {
   }
   if (font_sets_.empty()) {
     logger_->error(_ST("Failed to parse \"{}\". It may have format error."),
-                   ass_path.generic_path().native());
+                   ass_path.native());
     return false;
   }
   CleanFonts();
@@ -460,7 +459,7 @@ void AssParser::CleanFonts() {
                        input_path.extension().native());
   logger_->info(
       _ST("Found fonts in \"{}\". Delete them and save new file in \"{}\""),
-      input_path.generic_path().native(), output_path.generic_path().native());
+      input_path.native(), output_path.native());
   std::ofstream os(output_path.native());
   size_t num_line = 0;
   for (const auto& line : text_) {

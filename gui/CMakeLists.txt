@@ -4,8 +4,6 @@ set(TARGET_NAME assfonts_gui)
 
 set(THIRD_PARTY_LIBS wx::core
                      wx::base
-                     Boost::boost
-                     Boost::filesystem
                      spdlog::spdlog)
 
 set(TARGET_SOURCE gui_frame.cc
@@ -41,5 +39,7 @@ target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
 if(UNIX)
     target_link_options(${TARGET_NAME} PRIVATE -no-pie -pthread)
 endif()
+
+target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})
 
 install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ${TARGET_NAME})

@@ -28,7 +28,7 @@
 #include <wx/wxprec.h>
 
 #ifndef WX_PRECOMP
-    #include <wx/wx.h>
+#include <wx/wx.h>
 #endif
 
 #include "ass_string.h"
@@ -56,9 +56,7 @@ class wxwidgets_sink : public spdlog::sinks::base_sink<Mutex> {
     wxMilliSleep(20);
     *log_text_ << text;
   }
-  void flush_() override {
-    log_text_->Clear();
-  }
+  void flush_() override { log_text_->Clear(); }
   void set_formatter_(
       std::unique_ptr<spdlog::formatter> sink_formatter) override {
     formatter_ = std::move(sink_formatter);

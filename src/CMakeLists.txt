@@ -1,8 +1,6 @@
 ﻿cmake_minimum_required (VERSION 3.16)
 
-set(THIRD_PARTY_LIBS Boost::boost 
-                     Boost::filesystem
-                     Boost::program_options
+set(THIRD_PARTY_LIBS CLI11::CLI11
                      spdlog::spdlog
                      fmt::fmt)
 
@@ -17,5 +15,7 @@ target_include_directories(${TARGET_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include
                                                   ${THIRD_PARTY_INCLUDE_DIRS})
 
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
+
+target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})
 
 install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ${TARGET_NAME})

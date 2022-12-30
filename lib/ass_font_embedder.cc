@@ -20,14 +20,13 @@
 #include "ass_font_embedder.h"
 
 #include <algorithm>
+#include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <regex>
 #include <sstream>
 
-#include <boost/filesystem.hpp>
-
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace ass {
 
@@ -43,8 +42,7 @@ bool AssFontEmbedder::Run() {
   std::string buf_u8;
   std::ofstream output_ass(output_path.native());
   if (!output_ass.is_open()) {
-    logger_->error(_ST("\"{}\" cannot be created."),
-                   output_path.generic_path().native());
+    logger_->error(_ST("\"{}\" cannot be created."), output_path.native());
     return false;
   }
   auto text = fs_.ap_.get_text();
@@ -60,7 +58,7 @@ bool AssFontEmbedder::Run() {
                             "only Truetype fonts can be embedded in ASS "
                             "scripts. Ignore this error, but this font may not "
                             "be loaded by some video players."),
-                        font_path.generic_path().native());
+                        font_path.native());
         }
         AString a_fontname = font_path.stem().native() + _ST("_0") +
                              font_path.extension().native();
@@ -88,7 +86,7 @@ bool AssFontEmbedder::Run() {
     }
   }
   logger_->info(_ST("Create font-embeded subtitle: \"{}\""),
-                output_path.generic_path().native());
+                output_path.native());
   return true;
 }
 

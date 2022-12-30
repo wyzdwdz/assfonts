@@ -20,14 +20,13 @@
 #ifndef ASSFONTS_RUN_H_
 #define ASSFONTS_RUN_H_
 
+#include <filesystem>
 #include <memory>
 #include <vector>
 
-#include <boost/filesystem.hpp>
-
 #include "wxwidgets_sink.h"
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 void BuildDB(const fs::path fonts_path, const fs::path db_path,
              std::shared_ptr<mylog::sinks::wxwidgets_sink_mt> sink);
