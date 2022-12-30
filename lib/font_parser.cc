@@ -102,8 +102,8 @@ void FontParser::LoadDB(const AString& db_path) {
   }
   try {
     nlohmann::json json;
-    json << db_file;
-    for (const nlohmann::json js_font : json) {
+    db_file >> json;
+    for (const nlohmann::json& js_font : json) {
       FontInfo font;
       font.families = js_font["families"];
       font.fullnames = js_font["fullnames"];
