@@ -262,7 +262,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
                 VERSION_PATCH);
 
   auto db_path = fs::path(db_text_->GetValue().ToAString() +
-                          fs::path::preferred_separator + _ST("fonts.db"));
+                          fs::path::preferred_separator + _ST("fonts.json"));
   if (fs::is_regular_file(db_path)) {
     logger_->info(_ST("Found fonts database: \"{}\""), db_path.native());
   } else {
@@ -323,7 +323,7 @@ void GuiFrame::OnFindDB(wxCommandEvent& WXUNUSED(event)) {
   wxString path = open_dir_dialog.GetPath();
   db_text_->ChangeValue(path);
   auto db_path = fs::path(db_text_->GetValue().ToAString() +
-                          fs::path::preferred_separator + _ST("fonts.db"));
+                          fs::path::preferred_separator + _ST("fonts.json"));
   if (fs::is_regular_file(db_path)) {
     logger_->info(_ST("Found fonts database: \"{}\""), db_path.native());
   } else {
@@ -386,7 +386,7 @@ void GuiFrame::OnDropDB(wxDropFilesEvent& event) {
   }
   db_text_->ChangeValue(path[0]);
   auto db_path = fs::path(db_text_->GetValue().ToAString() +
-                          fs::path::preferred_separator + _ST("fonts.db"));
+                          fs::path::preferred_separator + _ST("fonts.json"));
   if (fs::is_regular_file(db_path)) {
     logger_->info(_ST("Found fonts database: \"{}\""), db_path.native());
   } else {
@@ -466,7 +466,7 @@ void GuiFrame::OnReset(wxCommandEvent& WXUNUSED(event)) {
   logger_->info(_ST("assfonts-gui v{}.{}.{}"), VERSION_MAJOR, VERSION_MINOR,
                 VERSION_PATCH);
   auto db_path = fs::path(db_text_->GetValue().ToAString() +
-                          fs::path::preferred_separator + _ST("fonts.db"));
+                          fs::path::preferred_separator + _ST("fonts.json"));
   if (fs::is_regular_file(db_path)) {
     logger_->info(_ST("Found fonts database: \"{}\""), db_path.native());
   } else {

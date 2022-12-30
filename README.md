@@ -51,7 +51,7 @@ Options:
  ```
  
  When you first run this program, it's recommended to initialize font database first `assfonts -f <your_fonts_dir> -b` 
- If database path is not specified, it will be saved in `<your_current_working_directory>/fonts.db`
+ If database path is not specified, it will be saved in `<your_current_working_directory>/fonts.json`
  
  **Caution!** According [ASS Specs](http://moodub.free.fr/video/ass-specs.doc), only Truetype fonts can be embedded into ASS Script. 
  This program will ignore this rule and embed non-ttf fonts in by force. Some video players may not load these fonts correctly.
