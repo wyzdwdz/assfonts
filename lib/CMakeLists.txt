@@ -16,7 +16,7 @@ set(TARGET_SOURCES font_parser.cc
                    ass_freetype.cc
                    ass_threadpool.cc)
 
-set(TARGET_NAME assfonts)
+set(TARGET_NAME libassfonts)
 						  
 add_library(${TARGET_NAME} STATIC EXCLUDE_FROM_ALL)
 
@@ -34,3 +34,5 @@ endif()
 target_compile_options(${TARGET_NAME} BEFORE PRIVATE ${COMPILE_OPTIONS})
 
 target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})
+
+set_target_properties(${TARGET_NAME} PROPERTIES PREFIX "")

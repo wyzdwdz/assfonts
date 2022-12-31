@@ -19,7 +19,7 @@ set(INCLUDE_DIR ${RESOURCE_DIR})
 
 add_library(run STATIC EXCLUDE_FROM_ALL run.cc)
 
-target_link_libraries(run PRIVATE assfonts ${THIRD_PARTY_LIBS})
+target_link_libraries(run PRIVATE libassfonts ${THIRD_PARTY_LIBS})
 
 target_include_directories(run PRIVATE ${PROJECT_SOURCE_DIR}/include
                                        ${THIRD_PARTY_INCLUDE_DIRS})
@@ -52,4 +52,7 @@ endif()
 
 target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})
 
-install(TARGETS ${TARGET_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT ${TARGET_NAME})
+install(TARGETS ${TARGET_NAME} RUNTIME 
+        DESTINATION ${CMAKE_INSTALL_BINDIR} 
+        CONFIGURATIONS Release
+        COMPONENT ${TARGET_NAME})
