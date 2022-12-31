@@ -45,6 +45,6 @@ endif()
 set(CXX_STD_VER cxx_std_17)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
-add_subdirectory(${PROJECT_SOURCE_DIR}/src)
+add_subdirectory(${PROJECT_SOURCE_DIR}/cli)
 add_subdirectory(${PROJECT_SOURCE_DIR}/gui)
 # add_subdirectory(${PROJECT_SOURCE_DIR}/test)

@@ -6,8 +6,7 @@ set(THIRD_PARTY_LIBS wx::core
                      wx::base
                      spdlog::spdlog)
 
-set(TARGET_SOURCE gui_frame.cc
-                  run.cc)
+set(TARGET_SOURCE gui_frame.cc)
 
 set(RESOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/resource)
 
@@ -18,6 +17,17 @@ endif()
 
 set(INCLUDE_DIR ${RESOURCE_DIR})
 
+add_library(run STATIC EXCLUDE_FROM_ALL run.cc)
+
+target_link_libraries(run PRIVATE assfonts ${THIRD_PARTY_LIBS})
+
+target_include_directories(run PRIVATE ${PROJECT_SOURCE_DIR}/include
+                                       ${THIRD_PARTY_INCLUDE_DIRS})
+
+target_compile_options(run BEFORE PRIVATE ${COMPILE_OPTIONS})
+
+target_compile_features(run PRIVATE ${CXX_STD_VER})
+
 if(WIN32)						  
     add_executable(${TARGET_NAME} WIN32 assfonts_gui.cc)
 else()
@@ -26,7 +36,7 @@ endif()
 
 target_sources(${TARGET_NAME} PRIVATE ${TARGET_SOURCE})
 
-target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} libassfonts)
+target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} run)
 
 target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDE_DIR}
                                                   ${PROJECT_SOURCE_DIR}/include
@@ -34,10 +44,10 @@ target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDE_DIR}
                                                   ${THIRD_PARTY_INCLUDE_DIRS})
                                                   
 
-target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
+target_compile_options(${TARGET_NAME} BEFORE PRIVATE ${COMPILE_OPTIONS})
 
 if(UNIX)
-    target_link_options(${TARGET_NAME} PRIVATE -no-pie -pthread)
+    target_link_options(${TARGET_NAME} BEFORE PRIVATE -no-pie -pthread)
 endif()
 
 target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})
