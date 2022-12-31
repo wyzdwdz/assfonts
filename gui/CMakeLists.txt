@@ -24,7 +24,7 @@ target_link_libraries(run PRIVATE libassfonts ${THIRD_PARTY_LIBS})
 target_include_directories(run PRIVATE ${PROJECT_SOURCE_DIR}/include
                                        ${THIRD_PARTY_INCLUDE_DIRS})
 
-target_compile_options(run BEFORE PRIVATE ${COMPILE_OPTIONS})
+target_compile_options(run PRIVATE ${COMPILE_OPTIONS})
 
 target_compile_features(run PRIVATE ${CXX_STD_VER})
 
@@ -44,10 +44,10 @@ target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDE_DIR}
                                                   ${THIRD_PARTY_INCLUDE_DIRS})
                                                   
 
-target_compile_options(${TARGET_NAME} BEFORE PRIVATE ${COMPILE_OPTIONS})
+target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
 
 if(UNIX)
-    target_link_options(${TARGET_NAME} BEFORE PRIVATE -no-pie -pthread)
+    target_link_options(${TARGET_NAME} PRIVATE -no-pie -pthread)
 endif()
 
 target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})

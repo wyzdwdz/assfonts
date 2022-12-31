@@ -28,10 +28,10 @@ target_include_directories(${TARGET_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include
                                           PRIVATE ${THIRD_PARTY_INCLUDE_DIRS})
 
 if(UNIX)
-    target_link_options(${TARGET_NAME} BEFORE PRIVATE -pthread)
+    target_link_options(${TARGET_NAME} PRIVATE -pthread)
 endif()
 
-target_compile_options(${TARGET_NAME} BEFORE PRIVATE ${COMPILE_OPTIONS})
+target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
 
 target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})
 

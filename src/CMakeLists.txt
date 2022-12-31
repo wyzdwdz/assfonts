@@ -14,7 +14,7 @@ target_include_directories(${TARGET_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include
                                                   ${PROJECT_BINARY_DIR}/include
                                                   ${THIRD_PARTY_INCLUDE_DIRS})
 
-target_compile_options(${TARGET_NAME} BEFORE PRIVATE ${COMPILE_OPTIONS})
+target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
 
 target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})
 
