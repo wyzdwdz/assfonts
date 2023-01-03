@@ -210,7 +210,9 @@ bool FontSubsetter::set_subset_font_codepoint_sets() {
       logger_->info(_ST("Found font: \"{}\" ({},{}) --> \"{}\"[{}]"), fontname,
                     font_set.first.bold, font_set.first.italic, font_path.path,
                     font_path.index);
-      CheckGlyph(font_path.path, font_path.index, font_set.second);
+      if (!CheckGlyph(font_path.path, font_path.index, font_set.second)) {
+        return false;
+      }
     }
     for (const char32_t& wch : font_set.second) {
       codepoint_set.insert(static_cast<uint32_t>(wch));
@@ -305,9 +307,12 @@ bool FontSubsetter::CreateSubfont(
 bool FontSubsetter::CheckGlyph(AString font_path, long font_index,
                                std::set<char32_t> codepoint_set) {
   std::vector<uint32_t> missing_codepoints;
-  bool have_all_glyph = true;
   FT_Face ft_face;
   std::ifstream is(font_path, std::ios::binary);
+  if (!is.is_open()) {
+    logger_->error(_ST("\"{}\" is inaccessible."), font_path);
+    return false;
+  }
   const auto font_size = fs::file_size(font_path);
   std::string font_data(font_size, '\0');
   is.read(&font_data[0], font_size);
@@ -319,7 +324,6 @@ bool FontSubsetter::CheckGlyph(AString font_path, long font_index,
     }
     if (!FT_Get_Char_Index(ft_face, codepoint)) {
       missing_codepoints.emplace_back(codepoint);
-      have_all_glyph = false;
       break;
     }
   }
@@ -328,7 +332,7 @@ bool FontSubsetter::CheckGlyph(AString font_path, long font_index,
                   fmt::join(missing_codepoints, _ST("  ")));
   }
   FT_Done_Face(ft_face);
-  return have_all_glyph;
+  return true;
 }
 
 }  // namespace ass
