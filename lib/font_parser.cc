@@ -71,6 +71,10 @@ void FontParser::SaveDB(const AString& db_path) {
                   file_path.native());
   }
   std::ofstream db_file(file_path.native());
+  if (!db_file.is_open()) {
+    logger_->warn(_ST("\"{}\" is inaccessible."), file_path.native());
+    return;
+  }
   nlohmann::ordered_json json;
   for (const FontInfo& font : font_list_) {
     nlohmann::ordered_json js_font;
