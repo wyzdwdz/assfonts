@@ -432,15 +432,19 @@ bool AssParser::StyleOverride(const std::u32string& code, FontDesc* font_desc,
         ++pos;
       }
       std::string style_name = U32ToU8(Trim(style));
-      if (stylename_fontdesc_.find(style_name) == stylename_fontdesc_.end()) {
-        if (has_default_style_) {
-          *font_desc = stylename_fontdesc_["Default"];
+      if (!style_name.empty()) {
+        if (stylename_fontdesc_.find(style_name) == stylename_fontdesc_.end()) {
+          if (has_default_style_) {
+            *font_desc = stylename_fontdesc_["Default"];
+          } else {
+            logger_->error("Style \"{}\" not found.", style_name);
+            return false;
+          }
         } else {
-          logger_->error("Style \"{}\" not found.", style_name);
-          return false;
+          *font_desc = stylename_fontdesc_[style_name];
         }
       } else {
-        *font_desc = stylename_fontdesc_[style_name];
+        *font_desc = font_desc_style;
       }
     } else {
       break;
