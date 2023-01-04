@@ -20,6 +20,8 @@ Package Manager ---- Conan version 1.56.0
 
 - [CLI11](https://github.com/CLIUtils/CLI11)
 
+- [pcre2](https://www.pcre.org/)
+
 ### How to build
 
 ```
