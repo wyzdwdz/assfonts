@@ -36,7 +36,6 @@ extern "C" {
 }
 #endif
 
-#include <spdlog/async.h>
 #include <spdlog/spdlog.h>
 
 #include "ass_parser.h"
@@ -51,8 +50,7 @@ class FontSubsetter {
   FontSubsetter(const AssParser& ap, const FontParser& fp,
                 std::shared_ptr<T> sink)
       : ap_(ap), fp_(fp) {
-    logger_ = std::make_shared<spdlog::async_logger>("font_subsetter", sink,
-                                                     spdlog::thread_pool());
+    logger_ = std::make_shared<spdlog::logger>("font_subsetter", sink);
     spdlog::register_logger(logger_);
     FT_Init_FreeType(&ft_library_);
   };

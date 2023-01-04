@@ -21,10 +21,13 @@
 #define ASSFONTS_WXWIDGETSSINK_H_
 
 #include <memory>
-#include <mutex>
 #include <string>
 
-#include <spdlog/sinks/base_sink.h>
+#include <spdlog/details/log_msg.h>
+#include <spdlog/formatter.h>
+#include <spdlog/pattern_formatter.h>
+#include <spdlog/sinks/sink.h>
+#include <spdlog/spdlog.h>
 #include <wx/wxprec.h>
 
 #ifndef WX_PRECOMP
@@ -36,15 +39,14 @@
 namespace mylog {
 namespace sinks {
 
-template <typename Mutex>
-class wxwidgets_sink : public spdlog::sinks::base_sink<Mutex> {
+class WxSink : public wxTextCtrl, public spdlog::sinks::sink {
  public:
-  wxwidgets_sink(wxTextCtrl* log_text) : log_text_(log_text){};
-  wxwidgets_sink(const wxwidgets_sink&) = delete;
-  wxwidgets_sink& operator=(const wxwidgets_sink&) = delete;
+  WxSink(wxWindow* parent)
+      : wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition,
+                   wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY | wxTE_RICH){};
 
  protected:
-  void sink_it_(const spdlog::details::log_msg& msg) override {
+  void log(const spdlog::details::log_msg& msg) {
     spdlog::memory_buf_t formatted;
     formatter_->format(msg, formatted);
 #ifdef _WIN32
@@ -54,30 +56,42 @@ class wxwidgets_sink : public spdlog::sinks::base_sink<Mutex> {
     wxString text(formatted.data(), wxConvUTF8, formatted.size());
 #endif
     if (msg.level == spdlog::level::info) {
-      log_text_->SetDefaultStyle(wxTextAttr(wxNullColour));
+      SetDefaultStyle(wxTextAttr(wxNullColour));
     } else if (msg.level == spdlog::level::warn) {
-      log_text_->SetDefaultStyle(wxTextAttr(*wxBLUE));
+      SetDefaultStyle(wxTextAttr(*wxGREEN));
     } else if (msg.level == spdlog::level::err) {
-      log_text_->SetDefaultStyle(wxTextAttr(*wxRED));
+      SetDefaultStyle(wxTextAttr(*wxRED));
     } else {
-      log_text_->SetDefaultStyle(wxTextAttr(wxNullColour));
+      SetDefaultStyle(wxTextAttr(wxNullColour));
     }
-    wxMilliSleep(20);
-    *log_text_ << text;
+    AppendText(text);
   }
-  void flush_() override { log_text_->Clear(); }
-  void set_formatter_(
-      std::unique_ptr<spdlog::formatter> sink_formatter) override {
+  void flush() { Clear(); }
+  void set_pattern(const std::string& pattern){};
+  void set_formatter(std::unique_ptr<spdlog::formatter> sink_formatter) {
     formatter_ = std::move(sink_formatter);
+  }
+  void set_level(spdlog::level::level_enum log_level) {
+    level_.store(log_level, std::memory_order_relaxed);
+  }
+  spdlog::level::level_enum level() const {
+    return static_cast<spdlog::level::level_enum>(
+        level_.load(std::memory_order_relaxed));
+  }
+  bool should_log(spdlog::level::level_enum msg_level) const {
+    return msg_level >= level_.load(std::memory_order_relaxed);
   }
 
  private:
-  wxTextCtrl* log_text_;
+  spdlog::level_t level_{spdlog::level::trace};
   std::unique_ptr<spdlog::formatter> formatter_;
 };
 
-using wxwidgets_sink_mt = wxwidgets_sink<std::mutex>;
-using wxwidgets_sink_st = wxwidgets_sink<spdlog::details::null_mutex>;
+using wxwidgets_sink = WxSink;
+
+struct WxSinkDeleter {
+  void operator()(mylog::sinks::WxSink* p) const {};
+};
 
 }  // namespace sinks
 }  // namespace mylog

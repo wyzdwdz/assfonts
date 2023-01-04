@@ -25,8 +25,6 @@
 #include <thread>
 #include <vector>
 
-#include <spdlog/async.h>
-#include <spdlog/spdlog.h>
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
 
@@ -197,7 +195,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
                                 wxDefaultPosition, wxDefaultSize, 0);
   checkbox_sizer->Add(embed_check_, 1, wxALL, FromDIP(10));
 
-  middle_sizer->Add(checkbox_sizer, 0, wxALIGN_CENTER | wxRIGHT, FromDIP(10));
+  middle_sizer->Add(checkbox_sizer, 0, wxALIGN_CENTER | wxALL, FromDIP(10));
 
   run_button_ = new wxButton(main_panel_, wxID_ANY, _T("RUN"),
                              wxDefaultPosition, FromDIP(wxSize(70, 70)), 0);
@@ -205,7 +203,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   font.SetPointSize(11);
   font.SetWeight(wxFONTWEIGHT_BOLD);
   run_button_->SetFont(font);
-  middle_sizer->Add(run_button_, 0, wxALIGN_CENTER | wxRIGHT, FromDIP(30));
+  middle_sizer->Add(run_button_, 1, wxALIGN_CENTER | wxALL, FromDIP(5));
 
   wxBoxSizer* button_sizer;
   button_sizer = new wxBoxSizer(wxVERTICAL);
@@ -218,14 +216,14 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
                                wxDefaultPosition, FromDIP(wxSize(-1, 30)), 0);
   button_sizer->Add(reset_button_, 1, wxALL | wxEXPAND, FromDIP(5));
 
-  middle_sizer->Add(button_sizer, 0, wxALIGN_CENTER | wxRIGHT, FromDIP(105));
+  middle_sizer->Add(button_sizer, 0, wxALIGN_CENTER | wxLEFT, FromDIP(20));
+
+  middle_sizer->Add(0, 0, 1, wxALIGN_CENTER | wxALL, FromDIP(5));
 
   inner_sizer->Add(middle_sizer, 0, wxALIGN_CENTER | wxALL, FromDIP(15));
 
-  log_text_ =
-      new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
-                     wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY | wxTE_RICH);
-  inner_sizer->Add(log_text_, 1, wxEXPAND, 0);
+  sink_ = std::make_shared<mylog::sinks::wxwidgets_sink>(main_panel_);
+  inner_sizer->Add(sink_.get(), 1, wxEXPAND, 0);
 
   main_panel_->SetSizer(inner_sizer);
   main_panel_->Layout();
@@ -265,10 +263,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   hdr_low_check_->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED,
                        &GuiFrame::OnLowCheckClick, this);
 
-  spdlog::init_thread_pool(2048, 1);
-  sink_ = std::make_shared<mylog::sinks::wxwidgets_sink_mt>(log_text_);
-  logger_ = std::make_shared<spdlog::async_logger>("main", sink_,
-                                                   spdlog::thread_pool());
+  logger_ = std::make_shared<spdlog::logger>("main", sink_);
   logger_->set_pattern("[%^%l%$] %v");
   spdlog::register_logger(logger_);
 
@@ -484,7 +479,7 @@ void GuiFrame::OnReset(wxCommandEvent& WXUNUSED(event)) {
   output_text_->Clear();
   font_text_->Clear();
   db_text_->ChangeValue(app_path_);
-  log_text_->Clear();
+  sink_.get()->Clear();
   logger_->info(_ST("assfonts-gui v{}.{}.{}"), VERSION_MAJOR, VERSION_MINOR,
                 VERSION_PATCH);
   auto db_path = fs::path(db_text_->GetValue().ToAString() +

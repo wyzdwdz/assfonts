@@ -27,7 +27,6 @@
 #include <string>
 #include <vector>
 
-#include <spdlog/async.h>
 #include <spdlog/spdlog.h>
 
 #include "ass_string.h"
@@ -38,8 +37,7 @@ class AssParser {
  public:
   template <typename T>
   AssParser(std::shared_ptr<T> sink) {
-    logger_ = std::make_shared<spdlog::async_logger>("ass_parser", sink,
-                                                     spdlog::thread_pool());
+    logger_ = std::make_shared<spdlog::logger>("ass_parser", sink);
     spdlog::register_logger(logger_);
   };
   template <typename T>

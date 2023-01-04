@@ -84,7 +84,6 @@ int main(int argc, char** argv) {
   bool is_help = false;
   int verbose = 3;
   unsigned int brightness = 203;
-  bool is_recolor = false;
 
   CLI::App app{"Subset fonts and embed them into an ASS subtitle."};
   auto* p_opt_i = app.add_option("-i,--input,input", input, "Input .ass file");

@@ -34,7 +34,6 @@ extern "C" {
 }
 #endif
 
-#include <spdlog/async.h>
 #include <spdlog/spdlog.h>
 
 #include "ass_string.h"
@@ -45,8 +44,7 @@ class FontParser {
  public:
   template <typename T>
   FontParser(std::shared_ptr<T> sink) {
-    logger_ = std::make_shared<spdlog::async_logger>("font_parser", sink,
-                                                     spdlog::thread_pool());
+    logger_ = std::make_shared<spdlog::logger>("font_parser", sink);
     spdlog::register_logger(logger_);
   };
   template <typename T>
