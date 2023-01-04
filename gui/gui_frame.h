@@ -61,6 +61,8 @@ class GuiFrame : public wxFrame {
   wxButton* db_clean_button_;
   wxCheckBox* subset_check_;
   wxCheckBox* embed_check_;
+  wxCheckBox* hdr_high_check_;
+  wxCheckBox* hdr_low_check_;
   wxButton* build_button_;
   wxButton* run_button_;
   wxButton* reset_button_;
@@ -83,6 +85,8 @@ class GuiFrame : public wxFrame {
   void OnRun(wxCommandEvent& WXUNUSED(event));
   void OnBuild(wxCommandEvent& WXUNUSED(event));
   void OnReset(wxCommandEvent& WXUNUSED(event));
+  void OnHighCheckClick(wxCommandEvent& WXUNUSED(event));
+  void OnLowCheckClick(wxCommandEvent& WXUNUSED(event));
 };
 
 #endif

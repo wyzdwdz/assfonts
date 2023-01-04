@@ -53,6 +53,15 @@ class wxwidgets_sink : public spdlog::sinks::base_sink<Mutex> {
 #else
     wxString text(formatted.data(), wxConvUTF8, formatted.size());
 #endif
+    if (msg.level == spdlog::level::info) {
+      log_text_->SetDefaultStyle(wxTextAttr(wxNullColour));
+    } else if (msg.level == spdlog::level::warn) {
+      log_text_->SetDefaultStyle(wxTextAttr(*wxBLUE));
+    } else if (msg.level == spdlog::level::err) {
+      log_text_->SetDefaultStyle(wxTextAttr(*wxRED));
+    } else {
+      log_text_->SetDefaultStyle(wxTextAttr(wxNullColour));
+    }
     wxMilliSleep(20);
     *log_text_ << text;
   }

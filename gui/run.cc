@@ -34,8 +34,8 @@ void BuildDB(const fs::path fonts_path, const fs::path db_path,
 }
 
 void Run(const std::vector<fs::path> input_paths, const fs::path output_path,
-         const fs::path fonts_path, const fs::path db_path, bool is_subset_only,
-         bool is_embed_only,
+         const fs::path fonts_path, const fs::path db_path,
+         const unsigned int brightness, bool is_subset_only, bool is_embed_only,
          std::shared_ptr<mylog::sinks::wxwidgets_sink_mt> sink) {
   ass::AssParser ap(sink);
   ass::FontParser fp(sink);
@@ -47,7 +47,16 @@ void Run(const std::vector<fs::path> input_paths, const fs::path output_path,
   }
   fp.LoadDB(db_path.native() + fs::path::preferred_separator +
             _ST("fonts.json"));
-  for (const auto& input_path : input_paths) {
+  for (fs::path input_path : input_paths) {
+    if (brightness != 0) {
+      if (!ap.Recolorize(input_path.native(), brightness)) {
+        return;
+      }
+      input_path =
+          fs::path(output_path.native() + fs::path::preferred_separator +
+                   input_path.stem().native() + _ST(".hdr") +
+                   input_path.extension().native());
+    }
     if (!ap.ReadFile(input_path.native())) {
       return;
     }

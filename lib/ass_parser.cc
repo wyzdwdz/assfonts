@@ -23,6 +23,7 @@
 #include <filesystem>
 #include <sstream>
 
+#include <asshdr/ass_recolorize.h>
 #include <compact_enc_det/compact_enc_det.h>
 #include <util/encodings/encodings.h>
 
@@ -100,6 +101,35 @@ std::vector<std::string> AssParser::get_text() const {
 
 AString AssParser::get_ass_path() const {
   return ass_path_;
+}
+
+bool AssParser::Recolorize(const AString& ass_file_path,
+                           const unsigned int& brightness) {
+  fs::path ass_path(ass_file_path);
+  std::ifstream ass_file(ass_file_path, std::ios::binary);
+  std::string buf_u8;
+  if (!ass_file.is_open()) {
+    logger_->error(_ST("\"{}\" cannot be opened."), ass_path.native());
+    return false;
+  }
+  if (!GetUTF8(ass_file, buf_u8)) {
+    return false;
+  }
+  unsigned int out_size = buf_u8.size() * 2;
+  std::unique_ptr<char> out_text(new char[out_size]);
+  if (!asshdr::AssRecolor(buf_u8.c_str(), buf_u8.size(), out_text.get(),
+                          out_size, brightness)) {
+    logger_->error(_ST("Recolor failed: {}"), ass_path.native());
+    return false;
+  }
+  fs::path output_file_path = fs::path(
+      output_dir_path_ + fs::path::preferred_separator +
+      ass_path.stem().native() + _ST(".hdr") + ass_path.extension().native());
+  std::ofstream os(output_file_path.native());
+  os << std::string(out_text.get(), out_size);
+  logger_->info(_ST("Recolored ass file has been saved in \"{}\""),
+                output_file_path.native());
+  return true;
 }
 
 void AssParser::Clear() {

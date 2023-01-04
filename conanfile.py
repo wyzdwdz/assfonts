@@ -27,7 +27,7 @@ class _CMake(CMake):
 
 class AssfontsConan(ConanFile):
     name = "assfonts"
-    version = "0.2.7"
+    version = "0.3.0"
 
     license = "GNU General Public License v2.0"
     author = "wyzdwdz"
@@ -43,7 +43,8 @@ class AssfontsConan(ConanFile):
                 "libiconv/1.17",
                 "spdlog/1.11.0",
                 "fmt/9.1.0",
-                "cli11/2.3.1"]
+                "cli11/2.3.1",
+                "pcre2/10.42"]
 
     default_options = {"harfbuzz:shared": False,
                        "harfbuzz:with_subset": True,
@@ -61,7 +62,17 @@ class AssfontsConan(ConanFile):
 
                        "spdlog:shared": False,
 
-                       "fmt:shared": False}
+                       "fmt:shared": False,
+                       
+                       "pcre2:build_pcre2_16": False,
+                       "pcre2:build_pcre2_32": False,
+                       "pcre2:build_pcre2_8": True,
+                       "pcre2:build_pcre2grep": False,
+                       "pcre2:grep_support_callout_fork": False,
+                       "pcre2:shared": False,
+                       "pcre2:support_jit": True,
+                       "pcre2:with_bzip2": False,
+                       "pcre2:with_zlib": False}
 
     def config_options(self):
         if self.settings.os == 'Windows':

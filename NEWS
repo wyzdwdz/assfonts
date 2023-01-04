@@ -1,3 +1,16 @@
+Overview of changes leading to v0.3.0
+Wednesday, Janurary 4, 2023
+====================================
+- Fix ass parsing bugs
+- Replace serialization library from "Boost.serialization"
+  to "nlohmann_json". Now font library is saved in "fonts.json"
+  instead of "fonts.db"
+- Replace filesystem library from "Boost.filesystem" to
+  "std::filesystem" (Use C++17 feature)
+- Add new feature "asshdr". It can recolorize the subtitle in
+  order to fit HDR contents
+
+
 Overview of changes leading to v0.2.7
 Thursday, December 29, 2022
 ====================================
@@ -88,7 +101,7 @@ Saturday, November 26, 2022
 - Change command line option -n,--no-subset to -e,--embed-only
   But its function has no change
 - Add INFO loggings about creating new folder and new files
-- Add new function "CleanFonts"
+- Add new feature "CleanFonts"
   When detected [Fonts] in input file, create non-fonts version "xxx.cleaned.ass"
 - Change new file's suffix name: xxx_assfonts.ass --> xxx.assfonts.ass
 - Add version info in help

@@ -83,6 +83,8 @@ int main(int argc, char** argv) {
   bool is_subset_only = false;
   bool is_help = false;
   int verbose = 3;
+  unsigned int brightness = 203;
+  bool is_recolor = false;
 
   CLI::App app{"Subset fonts and embed them into an ASS subtitle."};
   auto* p_opt_i = app.add_option("-i,--input,input", input, "Input .ass file");
@@ -90,6 +92,8 @@ int main(int argc, char** argv) {
   auto* p_opt_f = app.add_option("-f,--fontpath", fonts, "Set fonts directory");
   auto* p_opt_d =
       app.add_option("-d,--dbpath", database, "Set fonts database path");
+  auto* p_opt_l = app.add_option("-l,--luminance", brightness,
+                                 "Set brightness for HDR contents");
   app.add_flag("-b,--build", is_build, "Build or update fonts database");
   app.add_flag("-e,--embed-only", is_embed_only, "Do not subset fonts");
   app.add_flag("-s,--subset-only", is_subset_only,
@@ -101,6 +105,9 @@ int main(int argc, char** argv) {
   p_opt_o->type_name("<dir>");
   p_opt_f->type_name("<dir>");
   p_opt_d->type_name("<dir>");
+  p_opt_l->type_name("<num>");
+  p_opt_l->expected(0, 1);
+  p_opt_l->check(CLI::Range(0, 1000));
   p_opt_v->type_name("<num>");
   app.failure_message(
       [=](const CLI::App* app, const CLI::Error& e) -> std::string {
@@ -126,6 +133,7 @@ int main(int argc, char** argv) {
       "           assfonts -o <dir> -s -i <file>   Only subset fonts but not embed\n"
       "           assfonts -f <dir> -e -i <file>   Only embed fonts without subset\n"
       "           assfonts -f <dir> -b             Build or update fonts database only\n"
+      "           assfonts -l <num> -i <file>      Recolorize the subtitle for HDR contents\n"
       "Options:\n"
       "  -i, --input,      <file>   Input .ass file\n"
       "  -o, --output      <dir>    Output directory  (Default: same directory as input)\n"
@@ -134,6 +142,7 @@ int main(int argc, char** argv) {
       "  -d, --dbpath      <dir>    Set fonts database path  (Default: current path)\n"
       "  -s, --subset-only <bool>   Subset fonts but not embed them into subtitle  (default: False)\n"
       "  -e, --embed-only  <bool>   Do not subset fonts  (default: False)\n"
+      "  -l, --luminance   <num>    Set subtitle brightness for HDR contents  (default: 203)\n"
       "  -v, --verbose     <num>    Set logging level (0 to 3), 0 is off  (Default: 3)\n"
       "  -h, --help                 Get help info\n\n"), VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
     // clang-format on
@@ -235,7 +244,22 @@ int main(int argc, char** argv) {
     return 0;
   }
 
+  if (output.empty()) {
+    output_path = input_path.parent_path();
+  }
+
   ap.set_output_dir_path(output_path.native());
+
+  if (!p_opt_l->empty()) {
+    if (!ap.Recolorize(input_path.native(), brightness)) {
+      spdlog::shutdown();
+      return 0;
+    }
+    input_path = fs::path(output_path.native() + fs::path::preferred_separator +
+                          input_path.stem().native() + _ST(".hdr") +
+                          input_path.extension().native());
+  }
+
   if (!ap.ReadFile(input_path.native())) {
     spdlog::shutdown();
     return 0;
@@ -244,10 +268,6 @@ int main(int argc, char** argv) {
   if (is_embed_only && is_subset_only) {
     spdlog::shutdown();
     return 0;
-  }
-
-  if (output.empty()) {
-    output_path = input_path.parent_path();
   }
 
   if (!is_embed_only) {

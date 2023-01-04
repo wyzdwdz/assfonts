@@ -173,23 +173,31 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
                    FromDIP(wxSize(35, 35)), 0);
   top_sizer->Add(db_clean_button_, 0, wxALIGN_CENTER | wxALL, FromDIP(5));
 
-  inner_sizer->Add(top_sizer, 0, wxALIGN_CENTER | wxALL, FromDIP(15));
+  inner_sizer->Add(top_sizer, 0, wxALIGN_CENTER | wxTOP, FromDIP(10));
 
   wxBoxSizer* middle_sizer;
   middle_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-  wxBoxSizer* checkbox_sizer;
-  checkbox_sizer = new wxBoxSizer(wxVERTICAL);
+  wxFlexGridSizer* checkbox_sizer;
+  checkbox_sizer = new wxFlexGridSizer(2, 2, 0, 0);
+
+  hdr_high_check_ = new wxCheckBox(main_panel_, wxID_ANY, _T("HDR High"),
+                                   wxDefaultPosition, wxDefaultSize, 0);
+  checkbox_sizer->Add(hdr_high_check_, 1, wxALL, FromDIP(10));
 
   subset_check_ = new wxCheckBox(main_panel_, wxID_ANY, _T("Subset only"),
                                  wxDefaultPosition, wxDefaultSize, 0);
   checkbox_sizer->Add(subset_check_, 1, wxALL, FromDIP(10));
 
+  hdr_low_check_ = new wxCheckBox(main_panel_, wxID_ANY, _T("HDR Low"),
+                                  wxDefaultPosition, wxDefaultSize, 0);
+  checkbox_sizer->Add(hdr_low_check_, 1, wxALL, FromDIP(10));
+
   embed_check_ = new wxCheckBox(main_panel_, wxID_ANY, _T("Embed only"),
                                 wxDefaultPosition, wxDefaultSize, 0);
   checkbox_sizer->Add(embed_check_, 1, wxALL, FromDIP(10));
 
-  middle_sizer->Add(checkbox_sizer, 0, wxALIGN_CENTER | wxRIGHT, FromDIP(15));
+  middle_sizer->Add(checkbox_sizer, 0, wxALIGN_CENTER | wxRIGHT, FromDIP(10));
 
   run_button_ = new wxButton(main_panel_, wxID_ANY, _T("RUN"),
                              wxDefaultPosition, FromDIP(wxSize(70, 70)), 0);
@@ -197,7 +205,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   font.SetPointSize(11);
   font.SetWeight(wxFONTWEIGHT_BOLD);
   run_button_->SetFont(font);
-  middle_sizer->Add(run_button_, 0, wxALIGN_CENTER | wxRIGHT, FromDIP(15));
+  middle_sizer->Add(run_button_, 0, wxALIGN_CENTER | wxRIGHT, FromDIP(30));
 
   wxBoxSizer* button_sizer;
   button_sizer = new wxBoxSizer(wxVERTICAL);
@@ -210,13 +218,13 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
                                wxDefaultPosition, FromDIP(wxSize(-1, 30)), 0);
   button_sizer->Add(reset_button_, 1, wxALL | wxEXPAND, FromDIP(5));
 
-  middle_sizer->Add(button_sizer, 0, wxALIGN_CENTER | wxLEFT, FromDIP(15));
+  middle_sizer->Add(button_sizer, 0, wxALIGN_CENTER | wxRIGHT, FromDIP(105));
 
-  inner_sizer->Add(middle_sizer, 0, wxALIGN_CENTER | wxBOTTOM, FromDIP(15));
+  inner_sizer->Add(middle_sizer, 0, wxALIGN_CENTER | wxALL, FromDIP(15));
 
   log_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
-                     wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+                     wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY | wxTE_RICH);
   inner_sizer->Add(log_text_, 1, wxEXPAND, 0);
 
   main_panel_->SetSizer(inner_sizer);
@@ -251,6 +259,11 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   run_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &GuiFrame::OnRun, this);
   build_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &GuiFrame::OnBuild, this);
   reset_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &GuiFrame::OnReset, this);
+
+  hdr_high_check_->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED,
+                        &GuiFrame::OnHighCheckClick, this);
+  hdr_low_check_->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED,
+                       &GuiFrame::OnLowCheckClick, this);
 
   spdlog::init_thread_pool(2048, 1);
   sink_ = std::make_shared<mylog::sinks::wxwidgets_sink_mt>(log_text_);
@@ -421,7 +434,13 @@ void GuiFrame::OnRun(wxCommandEvent& WXUNUSED(event)) {
   fs::path db_path = fs::absolute(db_text_->GetValue().ToAString(), ec);
   std::thread thread([=] {
     is_running_ = true;
-    Run(input_paths, output_path, fonts_path, db_path,
+    unsigned int brightness = 0;
+    if (hdr_high_check_->GetValue()) {
+      brightness = 203;
+    } else if (hdr_low_check_->GetValue()) {
+      brightness = 100;
+    }
+    Run(input_paths, output_path, fonts_path, db_path, brightness,
         subset_check_->GetValue(), embed_check_->GetValue(), sink_);
     is_running_ = false;
   });
@@ -459,6 +478,8 @@ void GuiFrame::OnReset(wxCommandEvent& WXUNUSED(event)) {
   }
   subset_check_->SetValue(false);
   embed_check_->SetValue(false);
+  hdr_high_check_->SetValue(false);
+  hdr_low_check_->SetValue(false);
   input_text_->Clear();
   output_text_->Clear();
   font_text_->Clear();
@@ -472,5 +493,17 @@ void GuiFrame::OnReset(wxCommandEvent& WXUNUSED(event)) {
     logger_->info(_ST("Found fonts database: \"{}\""), db_path.native());
   } else {
     logger_->warn(_ST("Fonts database not found."));
+  }
+}
+
+void GuiFrame::OnHighCheckClick(wxCommandEvent& WXUNUSED(event)) {
+  if (hdr_high_check_->GetValue() == true) {
+    hdr_low_check_->SetValue(false);
+  }
+}
+
+void GuiFrame::OnLowCheckClick(wxCommandEvent& WXUNUSED(event)) {
+  if (hdr_low_check_->GetValue() == true) {
+    hdr_high_check_->SetValue(false);
   }
 }

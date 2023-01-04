@@ -54,6 +54,7 @@ class AssParser {
   bool get_has_fonts() const;
   std::vector<std::string> get_text() const;
   AString get_ass_path() const;
+  bool Recolorize(const AString& ass_file_path, const unsigned int& brightness);
   void Clear();
 
  private:

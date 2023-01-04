@@ -6,7 +6,8 @@ set(THIRD_PARTY_LIBS harfbuzz::harfbuzz
                      Iconv::Iconv
                      spdlog::spdlog
                      fmt::fmt
-                     ced)
+                     ced
+                     libasshdr)
 
 set(TARGET_SOURCES font_parser.cc
                    ass_parser.cc

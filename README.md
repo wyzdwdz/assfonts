@@ -2,8 +2,6 @@
 
 Subset fonts and embed them into an ASS subtitle.
 
-(Update v0.2.0 Add GUI version)
-
 ### Build Requirements
 
 Package Manager ---- Conan version 1.56.0
@@ -38,6 +36,7 @@ Examples:  assfonts <file>                  Embed subset fonts into ASS script
            assfonts -o <dir> -s -i <file>   Only subset fonts but not embed
            assfonts -f <dir> -e -i <file>   Only embed fonts without subset
            assfonts -f <dir> -b             Build or update fonts database only
+           assfonts -l <num> -i <file>      Recolorize the subtitle for HDR contents
 Options:
   -i, --input,      <file>   Input .ass file
   -o, --output      <dir>    Output directory  (Default: same directory as input)
@@ -46,6 +45,7 @@ Options:
   -d, --dbpath      <dir>    Set fonts database path  (Default: current path)
   -s, --subset-only <bool>   Subset fonts but not embed them into subtitle  (default: False)
   -e, --embed-only  <bool>   Do not subset fonts  (default: False)
+  -l, --luminance   <num>    Set subtitle brightness for HDR contents  (default: 203)
   -v, --verbose     <num>    Set logging level (0 to 3), 0 is off  (Default: 3)
   -h, --help                 Get help info
  ```

@@ -11,4 +11,5 @@ set(wxBUILD_MONOLITHIC OFF)
 set(wxUSE_STL ON)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/3rdparty/compact_enc_det)
+add_subdirectory(${PROJECT_SOURCE_DIR}/3rdparty/asshdr)
 add_subdirectory(${PROJECT_SOURCE_DIR}/3rdparty/wxWidgets)
