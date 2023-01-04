@@ -43,7 +43,9 @@ class WxSink : public wxTextCtrl, public spdlog::sinks::sink {
  public:
   WxSink(wxWindow* parent)
       : wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition,
-                   wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY | wxTE_RICH){};
+                   wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY | wxTE_RICH) {
+    SetBackgroundColour(*wxWHITE);
+  };
 
  protected:
   void log(const spdlog::details::log_msg& msg) {
@@ -56,17 +58,19 @@ class WxSink : public wxTextCtrl, public spdlog::sinks::sink {
     wxString text(formatted.data(), wxConvUTF8, formatted.size());
 #endif
     if (msg.level == spdlog::level::info) {
-      SetDefaultStyle(wxTextAttr(wxNullColour));
+      SetDefaultStyle(wxTextAttr(*wxBLACK));
     } else if (msg.level == spdlog::level::warn) {
-      SetDefaultStyle(wxTextAttr(*wxGREEN));
+      SetDefaultStyle(wxTextAttr(*wxBLUE));
     } else if (msg.level == spdlog::level::err) {
       SetDefaultStyle(wxTextAttr(*wxRED));
     } else {
-      SetDefaultStyle(wxTextAttr(wxNullColour));
+      SetDefaultStyle(wxTextAttr(*wxBLACK));
     }
     AppendText(text);
   }
-  void flush() { Clear(); }
+  void flush() {
+    Clear();
+  }
   void set_pattern(const std::string& pattern){};
   void set_formatter(std::unique_ptr<spdlog::formatter> sink_formatter) {
     formatter_ = std::move(sink_formatter);
