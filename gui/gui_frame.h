@@ -66,8 +66,9 @@ class GuiFrame : public wxFrame {
   wxButton* build_button_;
   wxButton* run_button_;
   wxButton* reset_button_;
+  wxTextCtrl* log_text_;
 
-  std::shared_ptr<mylog::sinks::wxwidgets_sink> sink_;
+  std::shared_ptr<mylog::sinks::wxwidgets_sink_mt> sink_;
   std::shared_ptr<spdlog::logger> logger_;
   bool is_running_ = false;
   wxString app_path_;

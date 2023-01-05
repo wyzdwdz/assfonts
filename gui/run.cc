@@ -26,7 +26,7 @@
 #include "font_subsetter.h"
 
 void BuildDB(const fs::path fonts_path, const fs::path db_path,
-             std::shared_ptr<mylog::sinks::wxwidgets_sink> sink) {
+             std::shared_ptr<mylog::sinks::wxwidgets_sink_mt> sink) {
   ass::FontParser fp(sink);
   fp.LoadFonts(fonts_path.native());
   fp.SaveDB(db_path.native() + fs::path::preferred_separator +
@@ -36,7 +36,7 @@ void BuildDB(const fs::path fonts_path, const fs::path db_path,
 void Run(const std::vector<fs::path> input_paths, const fs::path output_path,
          const fs::path fonts_path, const fs::path db_path,
          const unsigned int brightness, bool is_subset_only, bool is_embed_only,
-         std::shared_ptr<mylog::sinks::wxwidgets_sink> sink) {
+         std::shared_ptr<mylog::sinks::wxwidgets_sink_mt> sink) {
   ass::AssParser ap(sink);
   ass::FontParser fp(sink);
   ass::FontSubsetter fs(ap, fp, sink);

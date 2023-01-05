@@ -223,8 +223,10 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 
   inner_sizer->Add(middle_sizer, 0, wxALIGN_CENTER | wxALL, FromDIP(15));
 
-  sink_ = std::make_shared<mylog::sinks::wxwidgets_sink>(main_panel_);
-  inner_sizer->Add(sink_.get(), 1, wxEXPAND, 0);
+  log_text_ =
+      new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
+                     wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY | wxTE_RICH);
+  inner_sizer->Add(log_text_, 1, wxEXPAND, 0);
 
   main_panel_->SetSizer(inner_sizer);
   main_panel_->Layout();
@@ -264,6 +266,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   hdr_low_check_->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED,
                        &GuiFrame::OnLowCheckClick, this);
 
+  sink_ = std::make_shared<mylog::sinks::wxwidgets_sink_mt>(log_text_);
   logger_ = std::make_shared<spdlog::logger>("main", sink_);
   logger_->set_pattern("[%^%l%$] %v");
   spdlog::register_logger(logger_);
@@ -476,7 +479,7 @@ void GuiFrame::OnReset(wxCommandEvent& WXUNUSED(event)) {
   output_text_->Clear();
   font_text_->Clear();
   db_text_->ChangeValue(app_path_);
-  sink_.get()->Clear();
+  log_text_->Clear();
   logger_->info(_ST("assfonts-gui v{}.{}.{}"), VERSION_MAJOR, VERSION_MINOR,
                 VERSION_PATCH);
   auto db_path = fs::path(db_text_->GetValue().ToAString() +

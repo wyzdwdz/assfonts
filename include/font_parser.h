@@ -82,7 +82,8 @@ class FontParser {
   };
 
   std::shared_ptr<spdlog::logger> logger_;
-  std::mutex mtx_;
+  std::mutex font_list_mtx_;
+  std::mutex logger_mtx_;
   std::vector<FontInfo> font_list_;
   std::vector<FontInfo> font_list_in_db_;
   std::vector<AString> fonts_path_;
