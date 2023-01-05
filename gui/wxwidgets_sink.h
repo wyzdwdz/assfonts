@@ -69,7 +69,11 @@ class wxwidgets_sink : public spdlog::sinks::base_sink<Mutex> {
     wxPostEvent(log_text_, event);
   }
 
-  void flush_() override { log_text_->Clear(); }
+  void flush_() override {
+    wxCommandEvent event(SPDLOG_EVT);
+    event.SetInt(10);
+    wxPostEvent(log_text_, event);
+  }
 
   void set_formatter_(
       std::unique_ptr<spdlog::formatter> sink_formatter) override {

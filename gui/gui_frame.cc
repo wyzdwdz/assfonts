@@ -508,6 +508,10 @@ void GuiFrame::OnReset(wxCommandEvent& WXUNUSED(event)) {
 }
 
 void GuiFrame::OnAppendLog(wxCommandEvent& event) {
+  if (event.GetInt() == 10) {
+    log_text_->Clear();
+    return;
+  }
   if (event.GetInt() == 0) {
     log_text_->SetDefaultStyle(wxTextAttr(wxNullColour));
   } else if (event.GetInt() == 1) {
