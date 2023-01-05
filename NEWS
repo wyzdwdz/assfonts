@@ -1,5 +1,5 @@
 Overview of changes leading to v0.3.0
-Wednesday, Janurary 4, 2023
+Thursday, January 5, 2023
 ====================================
 - Fix ass parsing bugs
 - Replace serialization library from "Boost.serialization"
@@ -9,6 +9,7 @@ Wednesday, Janurary 4, 2023
   "std::filesystem" (Use C++17 feature)
 - Add new feature "asshdr". It can recolorize the subtitle in
   order to fit HDR contents
+- GUI colored logs
 
 
 Overview of changes leading to v0.2.7
