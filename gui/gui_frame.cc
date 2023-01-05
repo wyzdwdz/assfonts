@@ -88,8 +88,6 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
                      FromDIP(wxSize(580, 50)), wxTE_MULTILINE | wxTE_READONLY);
   input_text_->DragAcceptFiles(true);
-  input_text_->SetBackgroundColour(*wxWHITE);
-  input_text_->SetDefaultStyle(*wxBLACK);
   top_sizer->Add(input_text_, 0, wxALL, FromDIP(5));
 
   input_button_ = new wxButton(main_panel_, wxID_ANY, _T("..."),
@@ -114,8 +112,6 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
                      FromDIP(wxSize(580, 50)), wxTE_MULTILINE | wxTE_READONLY);
   output_text_->DragAcceptFiles(true);
-  output_text_->SetBackgroundColour(*wxWHITE);
-  output_text_->SetDefaultStyle(*wxBLACK);
   top_sizer->Add(output_text_, 0, wxALL, FromDIP(5));
 
   output_button_ = new wxButton(main_panel_, wxID_ANY, _T("..."),
@@ -140,8 +136,6 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
                      FromDIP(wxSize(580, 50)), wxTE_MULTILINE | wxTE_READONLY);
   font_text_->DragAcceptFiles(true);
-  font_text_->SetBackgroundColour(*wxWHITE);
-  font_text_->SetDefaultStyle(*wxBLACK);
   top_sizer->Add(font_text_, 0, wxALL, FromDIP(5));
 
   font_button_ = new wxButton(main_panel_, wxID_ANY, _T("..."),
@@ -163,11 +157,10 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   top_sizer->Add(db_label_, 0, wxALIGN_CENTER | wxALL, FromDIP(10));
 
   db_text_ =
-      new wxTextCtrl(main_panel_, wxID_ANY, app_path_, wxDefaultPosition,
+      new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
                      FromDIP(wxSize(580, 50)), wxTE_MULTILINE | wxTE_READONLY);
   db_text_->DragAcceptFiles(true);
-  db_text_->SetBackgroundColour(*wxWHITE);
-  db_text_->SetDefaultStyle(*wxBLACK);
+  db_text_->SetValue(app_path_);
   top_sizer->Add(db_text_, 0, wxALL, FromDIP(5));
 
   db_button_ = new wxButton(main_panel_, wxID_ANY, _T("..."), wxDefaultPosition,
@@ -285,10 +278,6 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   } else {
     logger_->warn(_ST("Fonts database not found."));
   }
-}
-
-GuiFrame::~GuiFrame() {
-  spdlog::shutdown();
 }
 
 void GuiFrame::OnFindInput(wxCommandEvent& WXUNUSED(event)) {

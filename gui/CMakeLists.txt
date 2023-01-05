@@ -6,7 +6,8 @@ set(THIRD_PARTY_LIBS wx::core
                      wx::base
                      spdlog::spdlog)
 
-set(TARGET_SOURCE gui_frame.cc)
+set(TARGET_SOURCE gui_frame.cc
+                  wxwidgets_sink.cc)
 
 set(RESOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/resource)
 

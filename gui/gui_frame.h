@@ -39,7 +39,7 @@ class GuiFrame : public wxFrame {
            const wxSize& size = wxDefaultSize,
            long style = wxDEFAULT_FRAME_STYLE | wxTAB_TRAVERSAL);
 
-  ~GuiFrame();
+  ~GuiFrame() = default;
 
  private:
   wxPanel* main_panel_;
