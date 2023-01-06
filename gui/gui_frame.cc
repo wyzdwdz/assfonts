@@ -230,7 +230,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   main_panel_->Layout();
   inner_sizer->Fit(main_panel_);
 
-  this->Layout();
+  //this->Layout();
 
   wxSize best_size = FromDIP(DoGetBestSize());
   this->SetSize(wxSize(best_size.GetX(), FromDIP(800)));
