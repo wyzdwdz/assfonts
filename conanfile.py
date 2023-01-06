@@ -47,45 +47,48 @@ class AssfontsConan(ConanFile):
                 "pcre2/10.42"]
 
     default_options = {"harfbuzz:shared": False,
-                       "harfbuzz:with_subset": True,
-                       "harfbuzz:with_glib": False,
                        "harfbuzz:with_freetype": False,
+                       "harfbuzz:with_icu": False,
+                       "harfbuzz:with_glib": False,
+                       "harfbuzz:with_subset": True,
 
                        "freetype:shared": False,
-                       "freetype:subpixel": False,
-                       "freetype:with_brotli": False,
-                       "freetype:with_bzip2": False,
                        "freetype:with_png": False,
                        "freetype:with_zlib": False,
+                       "freetype:with_bzip2": False,
+                       "freetype:with_brotli": False,
+                       "freetype:subpixel": False,
 
                        "libiconv:shared": False,
 
                        "spdlog:shared": False,
+                       "spdlog:header_only": False,
+                       "spdlog:no_exceptions": False,
 
+                       "fmt:header_only": False,
                        "fmt:shared": False,
-                       
+
                        "pcre2:shared": False,
                        "pcre2:build_pcre2_8": True,
                        "pcre2:build_pcre2_16": False,
                        "pcre2:build_pcre2_32": False,
-                       "pcre2:with_zlib": False,
-                       "pcre2:with_bzip2": False,
-                       "pcre2:support_jit": True,
-                       "pcre2:grep_support_callout_fork": False,
-                       "pcre2:build_pcre2grep": False}
+                       "pcre2:build_pcre2grep": False,
+                       "pcre2:support_jit": True}
 
     def config_options(self):
         if self.settings.os == 'Windows':
+            self.options["harfbuzz"].with_gdi = False
+            self.options["harfbuzz"].with_uniscribe = False
             self.options["harfbuzz"].with_directwrite = False
 
-            self.options["spdlog"].wchar_filenames = True
             self.options["spdlog"].wchar_support = True
+            self.options["spdlog"].wchar_filenames = True
 
         elif self.settings.os == 'Linux':
             pass
 
         elif self.settings.os == 'Macos':
-            self.options["harfbuzz"].with_uniscribe = False
+            pass
 
     def layout(self):
         cmake_layout(self)
