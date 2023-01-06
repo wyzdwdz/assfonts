@@ -140,8 +140,8 @@ std::vector<AString> FontParser::FindFileInDir(const AString& dir,
   std::vector<AString> res;
   const std::basic_regex<AChar> r(pattern, std::regex::icase);
   const fs::path dir_path(dir);
-  const fs::recursive_directory_iterator iter(dir_path);
   try {
+    const fs::recursive_directory_iterator iter(dir_path);
     for (const auto& dir_entry : iter) {
       if (std::regex_match(dir_entry.path().native(), r)) {
         res.emplace_back(dir_entry.path().native());
