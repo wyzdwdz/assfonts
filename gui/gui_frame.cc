@@ -57,7 +57,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   this->SetTitle(_T("assfonts"));
   this->SetSize(FromDIP(wxSize(800, 700)));
   this->SetMinSize(FromDIP(wxSize(800, 700)));
-  this->SetMaxSize(FromDIP(wxSize(800, -1)));
+  //this->SetMaxSize(FromDIP(wxSize(800, -1)));
   this->SetTitle(_T("assfonts"));
 
 #ifdef _WIN32
