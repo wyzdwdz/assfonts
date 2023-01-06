@@ -77,10 +77,10 @@ class AssfontsConan(ConanFile):
                        "pcre2:support_jit": True}
 
     def system_requirements(self):
-        Apt(self).install(["build-essential", "libgtk-3-dev"])
-        Yum(self).install(["gcc", "gcc-c++", "make", "gtk3-devel"])
-        PacMan(self).install(["base-devel", "gtk3"])
-        Zypper(self).install(["devel_basis", "gtk3-devel"])
+        Apt(self).install_substitutes(["build-essential", "libgtk-3-dev"])
+        Yum(self).install_substitutes(["gcc", "gcc-c++", "make", "gtk3-devel"])
+        PacMan(self).install_substitutes(["base-devel", "gtk3"])
+        Zypper(self).install_substitutes(["devel_basis", "gtk3-devel"])
 
     def config_options(self):
         if self.settings.os == 'Windows':
