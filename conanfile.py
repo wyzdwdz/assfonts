@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
 from conan.tools.cmake.utils import is_multi_configuration
+from conan.tools.system.package_manager import Apt, Yum, PacMan, Zypper
 from conans.errors import ConanException
 
 
@@ -74,6 +75,12 @@ class AssfontsConan(ConanFile):
                        "pcre2:build_pcre2_32": False,
                        "pcre2:build_pcre2grep": False,
                        "pcre2:support_jit": True}
+
+    def system_requirements(self):
+        Apt(self).install(["build-essential", "libgtk-3-dev"])
+        Yum(self).install(["gcc", "gcc-c++", "make", "gtk3-devel"])
+        PacMan(self).install(["base-devel", "gtk3"])
+        Zypper(self).install(["devel_basis", "gtk3-devel"])
 
     def config_options(self):
         if self.settings.os == 'Windows':

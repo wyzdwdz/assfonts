@@ -55,10 +55,6 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   app_path_ = f.GetPath();
 
   this->SetTitle(_T("assfonts"));
-  this->SetSize(FromDIP(wxSize(800, 700)));
-  this->SetMinSize(FromDIP(wxSize(800, 700)));
-  //this->SetMaxSize(FromDIP(wxSize(800, -1)));
-  this->SetTitle(_T("assfonts"));
 
 #ifdef _WIN32
   wxIcon icon = wxICON(icon_resource);
@@ -235,6 +231,11 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   inner_sizer->Fit(main_panel_);
 
   this->Layout();
+
+  wxSize best_size = FromDIP(DoGetBestSize());
+  this->SetSize(wxSize(best_size.GetX(), FromDIP(800)));
+  this->SetMinSize(wxSize(best_size.GetX(), FromDIP(800)));
+  this->SetMaxSize(wxSize(best_size.GetX(), -1));
 
   this->Centre(wxBOTH);
 
