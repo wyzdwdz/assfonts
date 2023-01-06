@@ -68,11 +68,11 @@ class AssfontsConan(ConanFile):
                        "pcre2:build_pcre2_8": True,
                        "pcre2:build_pcre2_16": False,
                        "pcre2:build_pcre2_32": False,
-                       "pcre2:build_pcre2grep": False,
                        "pcre2:with_zlib": False,
                        "pcre2:with_bzip2": False,
                        "pcre2:support_jit": True,
-                       "pcre2:grep_support_callout_fork": False}
+                       "pcre2:grep_support_callout_fork": False,
+                       "pcre2:build_pcre2grep": False}
 
     def config_options(self):
         if self.settings.os == 'Windows':
