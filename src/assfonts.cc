@@ -25,6 +25,7 @@
 #include <vector>
 
 #include <fmt/core.h>
+#include <spdlog/async.h>
 #include <spdlog/spdlog.h>
 #include <CLI/App.hpp>
 #include <CLI/Config.hpp>
@@ -60,8 +61,10 @@ int wmain(int argc, wchar_t** wargv) {
 #else
 int main(int argc, char** argv) {
 #endif
+  spdlog::init_thread_pool(512, 1);
   auto fmt_sink = std::make_shared<mylog::sinks::fmt_sink_mt>();
-  auto logger = std::make_shared<spdlog::logger>("main", fmt_sink);
+  auto logger = std::make_shared<spdlog::async_logger>("main", fmt_sink,
+                                                       spdlog::thread_pool());
   spdlog::register_logger(logger);
 
   ass::AssParser ap(fmt_sink);
@@ -111,6 +114,7 @@ int main(int argc, char** argv) {
         str.pop_back();
         str += ". See --help for more info.";
         logger->error(str);
+        spdlog::shutdown();
         return "";
       });
   CLI11_PARSE(app, argc, argv);
@@ -142,6 +146,7 @@ int main(int argc, char** argv) {
       "  -h, --help                 Get help info\n\n"), VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
     // clang-format on
     if (argc == 2) {
+      spdlog::shutdown();
       return 0;
     }
   }
@@ -161,6 +166,7 @@ int main(int argc, char** argv) {
       break;
     default:
       logger->error("Wrong verbose level. See --help for more info.");
+      spdlog::shutdown();
       return 0;
   }
 
@@ -180,32 +186,38 @@ int main(int argc, char** argv) {
 
   if (!input.empty() && !fs::is_regular_file(input_path)) {
     logger->error("\"{}\" is not a file. See --help for more info.", input);
+    spdlog::shutdown();
     return 0;
   }
   if (!output.empty() && !fs::is_directory(output_path)) {
     logger->error(
         "\"{}\" is not a legal directory path. See --help for more info.",
         output);
+    spdlog::shutdown();
     return 0;
   }
   if (!fonts.empty() && !fs::is_directory(fonts_path)) {
     logger->error(
         "\"{}\" is not a legal directory path. See --help for more info.",
         fonts);
+    spdlog::shutdown();
     return 0;
   }
   if (!fs::is_directory(db_path)) {
     logger->error(
         "\"{}\" is not a legal directory path. See --help for more info.",
         database);
+    spdlog::shutdown();
     return 0;
   }
   if (is_build && fonts.empty()) {
     logger->error("No fontpath is found. See --help for more info.");
+    spdlog::shutdown();
     return 0;
   }
   if (input.empty() && fonts.empty()) {
     logger->error("No input is found. See --help for more info.");
+    spdlog::shutdown();
     return 0;
   }
   if (input.empty() && !is_build) {
@@ -226,6 +238,7 @@ int main(int argc, char** argv) {
   }
 
   if (input.empty()) {
+    spdlog::shutdown();
     return 0;
   }
 
@@ -237,6 +250,7 @@ int main(int argc, char** argv) {
 
   if (!p_opt_l->empty()) {
     if (!ap.Recolorize(input_path.native(), brightness)) {
+      spdlog::shutdown();
       return 0;
     }
     input_path = fs::path(output_path.native() + fs::path::preferred_separator +
@@ -245,10 +259,12 @@ int main(int argc, char** argv) {
   }
 
   if (!ap.ReadFile(input_path.native())) {
+    spdlog::shutdown();
     return 0;
   }
 
   if (is_embed_only && is_subset_only) {
+    spdlog::shutdown();
     return 0;
   }
 
@@ -257,15 +273,18 @@ int main(int argc, char** argv) {
                      input_path.stem().native() + _ST("_subsetted"));
   }
   if (!fs.Run(is_embed_only)) {
+    spdlog::shutdown();
     return 0;
   }
 
   if (!is_subset_only) {
     afe.set_output_dir_path(output_path.native());
     if (!afe.Run()) {
+      spdlog::shutdown();
       return 0;
     }
   }
 
+  spdlog::shutdown();
   return 0;
 }

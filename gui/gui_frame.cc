@@ -19,6 +19,8 @@
 
 #include "gui_frame.h"
 
+#include <array>
+#include <cmath>
 #include <filesystem>
 #include <string>
 #include <system_error>
@@ -244,13 +246,14 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   db_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &GuiFrame::OnFindDB, this);
 
   input_clean_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED,
-                            [&](wxCommandEvent&) { input_text_->Clear(); });
-  output_clean_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED,
-                             [&](wxCommandEvent&) { output_text_->Clear(); });
+                            [this](wxCommandEvent&) { input_text_->Clear(); });
+  output_clean_button_->Bind(
+      wxEVT_COMMAND_BUTTON_CLICKED,
+      [this](wxCommandEvent&) { output_text_->Clear(); });
   font_clean_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED,
-                           [&](wxCommandEvent&) { font_text_->Clear(); });
+                           [this](wxCommandEvent&) { font_text_->Clear(); });
   db_clean_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED,
-                         [&](wxCommandEvent&) { db_text_->Clear(); });
+                         [this](wxCommandEvent&) { db_text_->Clear(); });
 
   input_text_->Bind(wxEVT_DROP_FILES, &GuiFrame::OnDropInput, this);
   output_text_->Bind(wxEVT_DROP_FILES, &GuiFrame::OnDropOutput, this);
@@ -261,13 +264,20 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   build_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &GuiFrame::OnBuild, this);
   reset_button_->Bind(wxEVT_COMMAND_BUTTON_CLICKED, &GuiFrame::OnReset, this);
 
-  hdr_high_check_->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED,
-                        &GuiFrame::OnHighCheckClick, this);
-  hdr_low_check_->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED,
-                       &GuiFrame::OnLowCheckClick, this);
+  hdr_high_check_->Bind(
+      wxEVT_COMMAND_CHECKBOX_CLICKED,
+      [this](wxCommandEvent&) { hdr_low_check_->SetValue(false); });
+  hdr_low_check_->Bind(wxEVT_COMMAND_CHECKBOX_CLICKED, [this](wxCommandEvent&) {
+    hdr_high_check_->SetValue(false);
+  });
 
+  SetColours();
+  log_text_->Bind(SPDLOG_EVT, &GuiFrame::OnAppendLog, this);
+
+  spdlog::init_thread_pool(512, 1);
   sink_ = std::make_shared<mylog::sinks::wxwidgets_sink_mt>(log_text_);
-  logger_ = std::make_shared<spdlog::logger>("main", sink_);
+  logger_ = std::make_shared<spdlog::async_logger>("main", sink_,
+                                                   spdlog::thread_pool());
   logger_->set_pattern("[%^%l%$] %v");
   spdlog::register_logger(logger_);
 
@@ -281,6 +291,10 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   } else {
     logger_->warn(_ST("Fonts database not found."));
   }
+}
+
+GuiFrame::~GuiFrame() {
+  spdlog::shutdown();
 }
 
 void GuiFrame::OnFindInput(wxCommandEvent& WXUNUSED(event)) {
@@ -427,7 +441,7 @@ void GuiFrame::OnRun(wxCommandEvent& WXUNUSED(event)) {
   fs::path output_path = fs::absolute(output_text_->GetValue().ToAString(), ec);
   fs::path fonts_path = fs::absolute(font_text_->GetValue().ToAString(), ec);
   fs::path db_path = fs::absolute(db_text_->GetValue().ToAString(), ec);
-  std::thread thread([=] {
+  std::thread thread([this, input_paths, output_path, fonts_path, db_path] {
     is_running_ = true;
     unsigned int brightness = 0;
     if (hdr_high_check_->GetValue()) {
@@ -435,8 +449,10 @@ void GuiFrame::OnRun(wxCommandEvent& WXUNUSED(event)) {
     } else if (hdr_low_check_->GetValue()) {
       brightness = 100;
     }
+    bool is_subset_only = subset_check_->GetValue();
+    bool is_embed_only = subset_check_->GetValue();
     Run(input_paths, output_path, fonts_path, db_path, brightness,
-        subset_check_->GetValue(), embed_check_->GetValue(), sink_);
+        is_subset_only, is_embed_only, sink_);
     is_running_ = false;
   });
   thread.detach();
@@ -458,7 +474,7 @@ void GuiFrame::OnBuild(wxCommandEvent& WXUNUSED(event)) {
   fs::path fonts_path = fs::absolute(font_text_->GetValue().ToAString(), ec);
   fs::path db_path = fs::absolute(db_text_->GetValue().ToAString(), ec);
   logger_->info(_ST("Building fonts database."));
-  std::thread thread([=] {
+  std::thread thread([this, fonts_path, db_path]() {
     is_running_ = true;
     BuildDB(fonts_path, db_path, sink_);
     font_text_->Clear();
@@ -491,14 +507,44 @@ void GuiFrame::OnReset(wxCommandEvent& WXUNUSED(event)) {
   }
 }
 
-void GuiFrame::OnHighCheckClick(wxCommandEvent& WXUNUSED(event)) {
-  if (hdr_high_check_->GetValue() == true) {
-    hdr_low_check_->SetValue(false);
+void GuiFrame::OnAppendLog(wxCommandEvent& event) {
+  if (event.GetInt() == 0) {
+    log_text_->SetDefaultStyle(wxTextAttr(wxNullColour));
+  } else if (event.GetInt() == 1) {
+    log_text_->SetDefaultStyle(wxTextAttr(warn_colour_));
+  } else if (event.GetInt() == 2) {
+    log_text_->SetDefaultStyle(wxTextAttr(err_colour_));
+  } else {
+    log_text_->SetDefaultStyle(wxTextAttr(wxNullColour));
   }
+  log_text_->AppendText(event.GetString());
 }
 
-void GuiFrame::OnLowCheckClick(wxCommandEvent& WXUNUSED(event)) {
-  if (hdr_low_check_->GetValue() == true) {
-    hdr_high_check_->SetValue(false);
+void GuiFrame::SetColours() {
+  wxColour background_colour = log_text_->GetBackgroundColour();
+  std::array<double, 3> rgb;
+  rgb[0] = background_colour.GetRed() / 255.0;
+  rgb[1] = background_colour.GetGreen() / 255.0;
+  rgb[2] = background_colour.GetBlue() / 255.0;
+  for (double& v : rgb) {
+    if (v <= 0.04045) {
+      v = v / 12.92;
+    } else {
+      v = std::pow(((v + 0.055) / 1.055), 2.4);
+    }
+  }
+  double Y = 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
+  double L;
+  if (Y <= (216.0 / 24389.0)) {
+    L = Y * (24389.0 / 27.0);
+  } else {
+    L = std::pow(Y, (1.0 / 3.0)) * 116.0 - 16.0;
+  }
+  if (L > 50.0) {
+    warn_colour_ = *wxBLUE;
+    err_colour_ = *wxRED;
+  } else {
+    warn_colour_ = *wxYELLOW;
+    err_colour_ = *wxCYAN;
   }
 }

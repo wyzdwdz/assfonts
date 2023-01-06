@@ -28,12 +28,13 @@
 
 namespace fs = std::filesystem;
 
-void BuildDB(const fs::path fonts_path, const fs::path db_path,
-             std::shared_ptr<mylog::sinks::wxwidgets_sink_mt> sink);
+void BuildDB(const fs::path& fonts_path, const fs::path& db_path,
+             const std::shared_ptr<mylog::sinks::wxwidgets_sink_mt>& sink);
 
-void Run(const std::vector<fs::path> input_paths, const fs::path output_path,
-         const fs::path fonts_path, const fs::path db_path,
-         const unsigned int brightness, bool is_subset_only, bool is_embed_only,
-         std::shared_ptr<mylog::sinks::wxwidgets_sink_mt> sink);
+void Run(const std::vector<fs::path>& input_paths, const fs::path& output_path,
+         const fs::path& fonts_path, const fs::path& db_path,
+         const unsigned int& brightness, const bool& is_subset_only,
+         const bool& is_embed_only,
+         const std::shared_ptr<mylog::sinks::wxwidgets_sink_mt>& sink);
 
 #endif

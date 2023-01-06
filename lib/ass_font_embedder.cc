@@ -51,14 +51,12 @@ bool AssFontEmbedder::Run() {
     ++num_line;
     if (Trim(ToLower(line)) == "[events]") {
       output_ass << "[Fonts]";
+      bool has_none_ttf = false;
       for (const auto& font : fs_.subfonts_path_) {
         fs::path font_path(font);
         if (ToLower(font_path.extension().native()) != _ST(".ttf")) {
-          logger_->warn(_ST("\"{}\" is not a .ttf font. Based on ASS Specs, "
-                            "only Truetype fonts can be embedded in ASS "
-                            "scripts. Ignore this error, but this font may not "
-                            "be loaded by some video players."),
-                        font_path.native());
+          logger_->warn(_ST("\"{}\" is not a .ttf font."), font_path.native());
+          has_none_ttf = true;
         }
         AString a_fontname = font_path.stem().native() + _ST("_0") +
                              font_path.extension().native();
@@ -78,6 +76,13 @@ bool AssFontEmbedder::Run() {
         ostrm.clear();
       }
       output_ass << "\n\n" << line;
+      if (has_none_ttf) {
+        logger_->warn(
+            _ST("Found non-TTF fonts. Check the warnings above. Based on ASS "
+                "Specs, only Truetype fonts can be embedded in ASS scripts. "
+                "Ignore this error, but these fonts may not be loaded by some "
+                "video players."));
+      }
     } else {
       output_ass << line;
     }

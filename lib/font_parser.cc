@@ -55,7 +55,7 @@ void FontParser::LoadFonts(const AString& fonts_dir) {
   unsigned int num_thread = std::thread::hardware_concurrency() + 1;
   ThreadPool pool(num_thread);
   for (const AString& font_path : fonts_path_) {
-    pool.LoadJob([&]() { GetFontInfo(font_path); });
+    pool.LoadJob([this, font_path]() { GetFontInfo(font_path); });
   }
   pool.Join();
 }
@@ -156,7 +156,6 @@ std::vector<AString> FontParser::FindFileInDir(const AString& dir,
 }
 
 void FontParser::GetFontInfo(const AString& font_path) {
-  std::unique_lock<std::mutex> logger_lock(logger_mtx_, std::defer_lock);
   std::vector<std::string> families;
   std::vector<std::string> fullnames;
   std::vector<std::string> psnames;
@@ -168,9 +167,7 @@ void FontParser::GetFontInfo(const AString& font_path) {
   NewOpenArgs(font_path, ft_stream, open_args);
   FT_Face ft_face;
   if (FT_Open_Face(ft_library, &open_args, -1, &ft_face)) {
-    logger_lock.lock();
     logger_->warn(_ST("\"{}\" cannot be opened."), font_path);
-    logger_lock.unlock();
     return;
   }
   const long n_face = ft_face->num_faces;
@@ -235,20 +232,18 @@ void FontParser::GetFontInfo(const AString& font_path) {
     font_info.psnames = psnames;
     font_info.path = font_path;
     font_info.index = face_idx;
-    std::lock_guard font_list_lock(font_list_mtx_);
+    std::lock_guard font_list_lock(mtx_);
     font_list_.emplace_back(font_info);
   }
   if (font_info.families.empty() && font_info.fullnames.empty() &&
       font_info.psnames.empty()) {
-    logger_lock.lock();
     logger_->warn(_ST("\"{}\" has no parsable name."), font_path);
-    logger_lock.unlock();
   }
   FT_Done_Face(ft_face);
   FT_Done_FreeType(ft_library);
 }
 
-int FontParser::AssFaceGetWeight(FT_Face face) {
+int FontParser::AssFaceGetWeight(const FT_Face& face) {
   /*
  * Copyright (C) 2006 Evgeniy Stepanov <eugeni.stepanov@gmail.com>
  *

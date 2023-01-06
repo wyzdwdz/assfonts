@@ -176,7 +176,8 @@ bool AssParser::FindTitle(const std::string& line, const std::string& title) {
   }
 }
 
-bool AssParser::ParseLine(const std::string& line, const unsigned int num_field,
+bool AssParser::ParseLine(const std::string& line,
+                          const unsigned int& num_field,
                           std::vector<std::string>& res) {
   std::vector<std::string> words;
   std::string word;
@@ -343,7 +344,7 @@ bool AssParser::set_font_sets() {
           continue;
         } else {
           override = std::u32string(wch + 1, wch + pos);
-          if (!StyleOverride(override, &font_desc, font_desc_style)) {
+          if (!StyleOverride(override, font_desc, font_desc_style)) {
             return false;
           }
           wch += (pos + 1);
@@ -359,7 +360,7 @@ bool AssParser::set_font_sets() {
   return true;
 }
 
-bool AssParser::StyleOverride(const std::u32string& code, FontDesc* font_desc,
+bool AssParser::StyleOverride(const std::u32string& code, FontDesc& font_desc,
                               const FontDesc& font_desc_style) {
   auto iter = code.begin();
   size_t pos = 0;
@@ -379,9 +380,9 @@ bool AssParser::StyleOverride(const std::u32string& code, FontDesc* font_desc,
         if (fontname[0] == '@') {
           fontname.erase(0, 1);
         }
-        font_desc->fontname = fontname;
+        font_desc.fontname = fontname;
       } else {
-        font_desc->fontname = font_desc_style.fontname;
+        font_desc.fontname = font_desc_style.fontname;
       }
     } else {
       break;
@@ -410,9 +411,9 @@ bool AssParser::StyleOverride(const std::u32string& code, FontDesc* font_desc,
         } else if (val <= 0) {
           val = 400;
         }
-        font_desc->bold = val;
+        font_desc.bold = val;
       } else {
-        font_desc->bold = font_desc_style.bold;
+        font_desc.bold = font_desc_style.bold;
       }
     } else {
       break;
@@ -441,9 +442,9 @@ bool AssParser::StyleOverride(const std::u32string& code, FontDesc* font_desc,
         } else if (val <= 0) {
           val = 0;
         }
-        font_desc->italic = val;
+        font_desc.italic = val;
       } else {
-        font_desc->italic = font_desc_style.italic;
+        font_desc.italic = font_desc_style.italic;
       }
     } else {
       break;
@@ -465,16 +466,16 @@ bool AssParser::StyleOverride(const std::u32string& code, FontDesc* font_desc,
       if (!style_name.empty()) {
         if (stylename_fontdesc_.find(style_name) == stylename_fontdesc_.end()) {
           if (has_default_style_) {
-            *font_desc = stylename_fontdesc_["Default"];
+            font_desc = stylename_fontdesc_["Default"];
           } else {
             logger_->error("Style \"{}\" not found.", style_name);
             return false;
           }
         } else {
-          *font_desc = stylename_fontdesc_[style_name];
+          font_desc = stylename_fontdesc_[style_name];
         }
       } else {
-        *font_desc = font_desc_style;
+        font_desc = font_desc_style;
       }
     } else {
       break;

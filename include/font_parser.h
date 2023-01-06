@@ -34,6 +34,7 @@ extern "C" {
 }
 #endif
 
+#include <spdlog/async.h>
 #include <spdlog/spdlog.h>
 
 #include "ass_string.h"
@@ -44,7 +45,8 @@ class FontParser {
  public:
   template <typename T>
   FontParser(std::shared_ptr<T> sink) {
-    logger_ = std::make_shared<spdlog::logger>("font_parser", sink);
+    logger_ = std::make_shared<spdlog::async_logger>("font_parser", sink,
+                                                     spdlog::thread_pool());
     spdlog::register_logger(logger_);
   };
   template <typename T>
@@ -81,9 +83,8 @@ class FontParser {
     }
   };
 
-  std::shared_ptr<spdlog::logger> logger_;
-  std::mutex font_list_mtx_;
-  std::mutex logger_mtx_;
+  std::shared_ptr<spdlog::async_logger> logger_;
+  std::mutex mtx_;
   std::vector<FontInfo> font_list_;
   std::vector<FontInfo> font_list_in_db_;
   std::vector<AString> fonts_path_;
@@ -91,7 +92,7 @@ class FontParser {
   std::vector<AString> FindFileInDir(const AString& dir,
                                      const AString& pattern);
   void GetFontInfo(const AString& font_path);
-  int AssFaceGetWeight(FT_Face face);
+  int AssFaceGetWeight(const FT_Face& face);
 
   friend class FontSubsetter;
 };

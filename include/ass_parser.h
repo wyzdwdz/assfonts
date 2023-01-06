@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 
+#include <spdlog/async.h>
 #include <spdlog/spdlog.h>
 
 #include "ass_string.h"
@@ -37,7 +38,8 @@ class AssParser {
  public:
   template <typename T>
   AssParser(std::shared_ptr<T> sink) {
-    logger_ = std::make_shared<spdlog::logger>("ass_parser", sink);
+    logger_ = std::make_shared<spdlog::async_logger>("ass_parser", sink,
+                                                     spdlog::thread_pool());
     spdlog::register_logger(logger_);
   };
   template <typename T>
@@ -76,7 +78,7 @@ class AssParser {
       return false;
     }
   };
-  std::shared_ptr<spdlog::logger> logger_;
+  std::shared_ptr<spdlog::async_logger> logger_;
   AString ass_path_;
   AString output_dir_path_;
   std::vector<std::string> text_;
@@ -89,12 +91,12 @@ class AssParser {
 
   bool GetUTF8(const std::ifstream& is, std::string& res);
   bool FindTitle(const std::string& line, const std::string& title);
-  bool ParseLine(const std::string& line, const unsigned int num_field,
+  bool ParseLine(const std::string& line, const unsigned int& num_field,
                  std::vector<std::string>& res);
   bool ParseAss();
   void set_stylename_fontdesc();
   bool set_font_sets();
-  bool StyleOverride(const std::u32string& code, FontDesc* font_desc,
+  bool StyleOverride(const std::u32string& code, FontDesc& font_desc,
                      const FontDesc& font_desc_style);
   void CleanFonts();
 

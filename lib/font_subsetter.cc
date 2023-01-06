@@ -36,7 +36,7 @@ void FontSubsetter::SetSubfontDir(const AString& subfont_dir) {
   subfont_dir_ = subfont_dir;
 }
 
-bool FontSubsetter::Run(bool is_no_subset) {
+bool FontSubsetter::Run(const bool& is_no_subset) {
   if (is_no_subset) {
     bool have_missing = false;
     AString path;
@@ -92,7 +92,7 @@ void FontSubsetter::Clear() {
 }
 
 bool FontSubsetter::FindFont(
-    const std::pair<AssParser::FontDesc, std::set<char32_t>> font_set,
+    const std::pair<AssParser::FontDesc, std::set<char32_t>>& font_set,
     const std::vector<FontParser::FontInfo>& font_list, AString& found_path,
     long& found_index) {
   bool is_found = false;
@@ -304,8 +304,8 @@ bool FontSubsetter::CreateSubfont(
   return true;
 }
 
-bool FontSubsetter::CheckGlyph(AString font_path, long font_index,
-                               std::set<char32_t> codepoint_set) {
+bool FontSubsetter::CheckGlyph(const AString& font_path, const long& font_index,
+                               const std::set<char32_t>& codepoint_set) {
   std::vector<uint32_t> missing_codepoints;
   FT_Face ft_face;
   std::ifstream is(font_path, std::ios::binary);

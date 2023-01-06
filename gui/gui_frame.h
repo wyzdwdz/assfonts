@@ -22,6 +22,7 @@
 
 #include <memory>
 
+#include <spdlog/async.h>
 #include <spdlog/spdlog.h>
 #include <wx/wxprec.h>
 
@@ -38,8 +39,7 @@ class GuiFrame : public wxFrame {
            const wxPoint& pos = wxDefaultPosition,
            const wxSize& size = wxDefaultSize,
            long style = wxDEFAULT_FRAME_STYLE | wxTAB_TRAVERSAL);
-
-  ~GuiFrame() = default;
+  ~GuiFrame();
 
  private:
   wxPanel* main_panel_;
@@ -69,10 +69,13 @@ class GuiFrame : public wxFrame {
   wxTextCtrl* log_text_;
 
   std::shared_ptr<mylog::sinks::wxwidgets_sink_mt> sink_;
-  std::shared_ptr<spdlog::logger> logger_;
+  std::shared_ptr<spdlog::async_logger> logger_;
   bool is_running_ = false;
   wxString app_path_;
   wxArrayString input_paths_;
+
+  wxColour warn_colour_;
+  wxColour err_colour_;
 
   void OnFindInput(wxCommandEvent& WXUNUSED(event));
   void OnFindOutput(wxCommandEvent& WXUNUSED(event));
@@ -85,8 +88,9 @@ class GuiFrame : public wxFrame {
   void OnRun(wxCommandEvent& WXUNUSED(event));
   void OnBuild(wxCommandEvent& WXUNUSED(event));
   void OnReset(wxCommandEvent& WXUNUSED(event));
-  void OnHighCheckClick(wxCommandEvent& WXUNUSED(event));
-  void OnLowCheckClick(wxCommandEvent& WXUNUSED(event));
+  void OnAppendLog(wxCommandEvent& event);
+
+  void SetColours();
 };
 
 #endif

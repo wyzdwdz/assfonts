@@ -36,6 +36,7 @@ extern "C" {
 }
 #endif
 
+#include <spdlog/async.h>
 #include <spdlog/spdlog.h>
 
 #include "ass_parser.h"
@@ -50,7 +51,8 @@ class FontSubsetter {
   FontSubsetter(const AssParser& ap, const FontParser& fp,
                 std::shared_ptr<T> sink)
       : ap_(ap), fp_(fp) {
-    logger_ = std::make_shared<spdlog::logger>("font_subsetter", sink);
+    logger_ = std::make_shared<spdlog::async_logger>("font_subsetter", sink,
+                                                     spdlog::thread_pool());
     spdlog::register_logger(logger_);
     FT_Init_FreeType(&ft_library_);
   };
@@ -65,7 +67,7 @@ class FontSubsetter {
     spdlog::drop("font_subsetter");
   }
   void SetSubfontDir(const AString& subfont_dir);
-  bool Run(bool is_no_subset);
+  bool Run(const bool& is_no_subset);
   void Clear();
 
  private:
@@ -78,7 +80,7 @@ class FontSubsetter {
     }
   };
   FT_Library ft_library_;
-  std::shared_ptr<spdlog::logger> logger_;
+  std::shared_ptr<spdlog::async_logger> logger_;
   const AssParser& ap_;
   const FontParser& fp_;
   AString subfont_dir_;
@@ -86,14 +88,14 @@ class FontSubsetter {
   std::vector<AString> subfonts_path_;
 
   bool FindFont(
-      const std::pair<AssParser::FontDesc, std::set<char32_t>> font_set,
+      const std::pair<AssParser::FontDesc, std::set<char32_t>>& font_set,
       const std::vector<FontParser::FontInfo>& font_list, AString& found_path,
       long& found_index);
   bool set_subset_font_codepoint_sets();
   bool CreateSubfont(
       const std::pair<FontPath, std::set<uint32_t>>& subset_font);
-  bool CheckGlyph(AString font_path, long font_index,
-                  std::set<char32_t> codepoint_set);
+  bool CheckGlyph(const AString& font_path, const long& font_index,
+                  const std::set<char32_t>& codepoint_set);
 
   friend class AssFontEmbedder;
 };

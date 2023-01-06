@@ -20,8 +20,6 @@
 #ifndef ASSFONTS_WXWIDGETSSINK_H_
 #define ASSFONTS_WXWIDGETSSINK_H_
 
-#include <array>
-#include <cmath>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -35,13 +33,15 @@
 
 #include "ass_string.h"
 
+wxDEFINE_EVENT(SPDLOG_EVT, wxCommandEvent);
+
 namespace mylog {
 namespace sinks {
 
 template <typename Mutex>
 class wxwidgets_sink : public spdlog::sinks::base_sink<Mutex> {
  public:
-  wxwidgets_sink(wxTextCtrl* log_text) : log_text_(log_text) { SetColours(); };
+  wxwidgets_sink(wxTextCtrl* log_text) : log_text_(log_text){};
   wxwidgets_sink(const wxwidgets_sink&) = delete;
   wxwidgets_sink& operator=(const wxwidgets_sink&) = delete;
 
@@ -55,21 +55,21 @@ class wxwidgets_sink : public spdlog::sinks::base_sink<Mutex> {
 #else
     wxString text(formatted.data(), wxConvUTF8, formatted.size());
 #endif
+    wxCommandEvent event(SPDLOG_EVT);
     if (msg.level == spdlog::level::info) {
-      log_text_->SetDefaultStyle(wxTextAttr(wxNullColour));
+      event.SetInt(0);
     } else if (msg.level == spdlog::level::warn) {
-      log_text_->SetDefaultStyle(wxTextAttr(warn_colour_));
+      event.SetInt(1);
     } else if (msg.level == spdlog::level::err) {
-      log_text_->SetDefaultStyle(wxTextAttr(err_colour_));
+      event.SetInt(2);
     } else {
-      log_text_->SetDefaultStyle(wxTextAttr(wxNullColour));
+      event.SetInt(3);
     }
-    log_text_->AppendText(text);
+    event.SetString(text);
+    wxPostEvent(log_text_, event);
   }
 
-  void flush_() override {
-    log_text_->Clear();
-  }
+  void flush_() override { log_text_->Clear(); }
 
   void set_formatter_(
       std::unique_ptr<spdlog::formatter> sink_formatter) override {
@@ -79,37 +79,6 @@ class wxwidgets_sink : public spdlog::sinks::base_sink<Mutex> {
  private:
   wxTextCtrl* log_text_;
   std::unique_ptr<spdlog::formatter> formatter_;
-  wxColour warn_colour_;
-  wxColour err_colour_;
-
-  void SetColours() {
-    wxColour background_colour = log_text_->GetBackgroundColour();
-    std::array<double, 3> rgb;
-    rgb[0] = background_colour.GetRed() / 255.0;
-    rgb[1] = background_colour.GetGreen() / 255.0;
-    rgb[2] = background_colour.GetBlue() / 255.0;
-    for (double& v : rgb) {
-      if (v <= 0.04045) {
-        v = v / 12.92;
-      } else {
-        v = std::pow(((v + 0.055) / 1.055), 2.4);
-      }
-    }
-    double Y = 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
-    double L;
-    if (Y <= (216.0 / 24389.0)) {
-      L = Y * (24389.0 / 27.0);
-    } else {
-      L = std::pow(Y, (1.0 / 3.0)) * 116.0 - 16.0;
-    }
-    if (L > 50.0) {
-      warn_colour_ = *wxBLUE;
-      err_colour_ = *wxRED;
-    } else {
-      warn_colour_ = *wxYELLOW;
-      err_colour_ = *wxCYAN;
-    }
-  }
 };
 
 using wxwidgets_sink_mt = wxwidgets_sink<std::mutex>;
