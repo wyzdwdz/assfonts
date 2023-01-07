@@ -25,6 +25,7 @@ wxIMPLEMENT_APP(GuiApp);
 
 bool GuiApp::OnInit() {
   GuiFrame* gui_frame = new GuiFrame(nullptr);
+  gui_frame->CenterOnScreen(wxBOTH);
   gui_frame->Show(true);
   return true;
 }
