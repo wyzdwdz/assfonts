@@ -88,7 +88,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 
   input_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
-                     wxDefaultSize, wxTE_MULTILINE);
+                     wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
   input_text_->DragAcceptFiles(true);
   first_line_sizer->Add(input_text_, 90, wxEXPAND | wxLEFT | wxRIGHT,
                         FromDIP(10));
@@ -122,7 +122,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 
   output_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
-                     wxDefaultSize, wxTE_MULTILINE);
+                     wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
   output_text_->DragAcceptFiles(true);
   second_line_sizer->Add(output_text_, 90, wxEXPAND | wxLEFT | wxRIGHT,
                          FromDIP(10));
@@ -154,8 +154,9 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   font_label_->SetFont(font);
   third_line_sizer->Add(font_label_, 10, wxALIGN_CENTER | wxALL, FromDIP(10));
 
-  font_text_ = new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString,
-                              wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
+  font_text_ =
+      new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
+                     wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
   font_text_->DragAcceptFiles(true);
   third_line_sizer->Add(font_text_, 90, wxEXPAND | wxLEFT | wxRIGHT,
                         FromDIP(10));
@@ -186,8 +187,9 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   db_label_->SetFont(font);
   fourth_line_sizer->Add(db_label_, 10, wxALIGN_CENTER | wxALL, FromDIP(10));
 
-  db_text_ = new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString,
-                            wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE);
+  db_text_ =
+      new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
+                     wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
   db_text_->DragAcceptFiles(true);
   db_text_->SetValue(app_path_);
   fourth_line_sizer->Add(db_text_, 90, wxEXPAND | wxLEFT | wxRIGHT,
@@ -291,7 +293,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 
   log_text_ =
       new wxTextCtrl(main_panel_, wxID_ANY, wxEmptyString, wxDefaultPosition,
-                     wxDefaultSize, wxTE_MULTILINE | wxTE_RICH);
+                     wxDefaultSize, wxTE_MULTILINE | wxTE_RICH | wxTE_READONLY);
   bottom_sizer->Add(log_text_, 1, wxEXPAND, FromDIP(5));
 
   main_sizer->Add(bottom_sizer, 1, wxEXPAND | wxTOP, FromDIP(10));
