@@ -42,13 +42,13 @@ void Run(const std::vector<fs::path>& input_paths, const fs::path& output_path,
   ass::FontParser fp(sink);
   ass::FontSubsetter fs(ap, fp, sink);
   ass::AssFontEmbedder afe(fs, sink);
-  ap.set_output_dir_path(output_path.native());
   if (!fonts_path.empty()) {
     fp.LoadFonts(fonts_path.native());
   }
   fp.LoadDB(db_path.native() + fs::path::preferred_separator +
             _ST("fonts.json"));
   for (fs::path input_path : input_paths) {
+    ap.set_output_dir_path(output_path.native());
     if (brightness != 0) {
       if (!ap.Recolorize(input_path.native(), brightness)) {
         return;
@@ -62,7 +62,10 @@ void Run(const std::vector<fs::path>& input_paths, const fs::path& output_path,
       return;
     }
     if (is_embed_only && is_subset_only) {
-      return;
+      ap.Clear();
+      fs.Clear();
+      afe.Clear();
+      continue;
     }
     if (!is_embed_only) {
       fs.SetSubfontDir(output_path.native() + fs::path::preferred_separator +
