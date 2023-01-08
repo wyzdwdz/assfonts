@@ -117,7 +117,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   second_line_sizer = new wxBoxSizer(wxHORIZONTAL);
 
   output_label_ = new wxStaticText(main_panel_, wxID_ANY,
-                                   wxT("Input\nASS files"), wxDefaultPosition,
+                                   wxT("Output\ndirectory"), wxDefaultPosition,
                                    wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
   output_label_->Wrap(-1);
   font = output_label_->GetFont();
@@ -154,7 +154,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   wxBoxSizer* third_line_sizer;
   third_line_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-  font_label_ = new wxStaticText(main_panel_, wxID_ANY, wxT("Input\nASS files"),
+  font_label_ = new wxStaticText(main_panel_, wxID_ANY, wxT("Font\ndirectory"),
                                  wxDefaultPosition, wxDefaultSize,
                                  wxALIGN_CENTER_HORIZONTAL);
   font_label_->Wrap(-1);
@@ -192,7 +192,7 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   wxBoxSizer* fourth_line_sizer;
   fourth_line_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-  db_label_ = new wxStaticText(main_panel_, wxID_ANY, wxT("Input\nASS files"),
+  db_label_ = new wxStaticText(main_panel_, wxID_ANY, wxT("Database\ndirectory"),
                                wxDefaultPosition, wxDefaultSize,
                                wxALIGN_CENTER_HORIZONTAL);
   db_label_->Wrap(-1);
