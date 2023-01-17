@@ -21,6 +21,7 @@
 #define ASSFONTS_GUIFRAME_H_
 
 #include <memory>
+#include <thread>
 
 #include <spdlog/async.h>
 #include <spdlog/spdlog.h>
@@ -76,6 +77,9 @@ class GuiFrame : public wxFrame {
 
   wxColour warn_colour_;
   wxColour err_colour_;
+
+  std::thread build_thread_;
+  std::thread run_thread_;
 
   void OnFindInput(wxCommandEvent& WXUNUSED(event));
   void OnFindOutput(wxCommandEvent& WXUNUSED(event));

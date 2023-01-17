@@ -24,7 +24,6 @@
 #include <filesystem>
 #include <string>
 #include <system_error>
-#include <thread>
 #include <vector>
 
 #include <wx/filename.h>
@@ -192,9 +191,9 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   wxBoxSizer* fourth_line_sizer;
   fourth_line_sizer = new wxBoxSizer(wxHORIZONTAL);
 
-  db_label_ = new wxStaticText(main_panel_, wxID_ANY, wxT("Database\ndirectory"),
-                               wxDefaultPosition, wxDefaultSize,
-                               wxALIGN_CENTER_HORIZONTAL);
+  db_label_ = new wxStaticText(main_panel_, wxID_ANY,
+                               wxT("Database\ndirectory"), wxDefaultPosition,
+                               wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
   db_label_->Wrap(-1);
   font = db_label_->GetFont();
   font.SetWeight(wxFONTWEIGHT_BOLD);
@@ -386,6 +385,8 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 }
 
 GuiFrame::~GuiFrame() {
+  run_thread_.join();
+  build_thread_.join();
   spdlog::shutdown();
 }
 
@@ -547,7 +548,7 @@ void GuiFrame::OnRun(wxCommandEvent& WXUNUSED(event)) {
         is_subset_only, is_embed_only, sink_);
     is_running_ = false;
   });
-  thread.detach();
+  run_thread_ = std::move(thread);
 }
 
 void GuiFrame::OnBuild(wxCommandEvent& WXUNUSED(event)) {
@@ -572,7 +573,7 @@ void GuiFrame::OnBuild(wxCommandEvent& WXUNUSED(event)) {
     font_text_->Clear();
     is_running_ = false;
   });
-  thread.detach();
+  build_thread_ = std::move(thread);
 }
 
 void GuiFrame::OnReset(wxCommandEvent& WXUNUSED(event)) {
