@@ -385,8 +385,12 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
 }
 
 GuiFrame::~GuiFrame() {
-  run_thread_.join();
-  build_thread_.join();
+  if (run_thread_.joinable()) {
+    run_thread_.join();
+  }
+  if (build_thread_.joinable()) {
+    build_thread_.join();
+  }
   spdlog::shutdown();
 }
 
