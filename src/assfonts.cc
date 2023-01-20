@@ -46,8 +46,7 @@ namespace fs = std::filesystem;
 int wmain(int argc, wchar_t** wargv) {
   std::vector<std::wstring> v_wstr;
   std::vector<std::string> v_str;
-  std::unique_ptr<char*[]> argv(
-      new char*[static_cast<unsigned long long>(argc) + 1]);
+  auto argv = std::make_unique<char*[]>(static_cast<size_t>(argc) + 1);
   for (int i = 0; i < argc; ++i) {
     v_wstr.emplace_back(std::wstring(wargv[i]));
   }
