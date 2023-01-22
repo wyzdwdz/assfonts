@@ -538,20 +538,24 @@ void GuiFrame::OnRun(wxCommandEvent& WXUNUSED(event)) {
   fs::path output_path = fs::absolute(output_text_->GetValue().ToAString(), ec);
   fs::path fonts_path = fs::absolute(font_text_->GetValue().ToAString(), ec);
   fs::path db_path = fs::absolute(db_text_->GetValue().ToAString(), ec);
-  std::thread thread([this, input_paths, output_path, fonts_path, db_path] {
-    is_running_ = true;
-    unsigned int brightness = 0;
-    if (hdr_high_check_->GetValue()) {
-      brightness = 203;
-    } else if (hdr_low_check_->GetValue()) {
-      brightness = 100;
-    }
-    bool is_subset_only = subset_check_->GetValue();
-    bool is_embed_only = subset_check_->GetValue();
-    Run(input_paths, output_path, fonts_path, db_path, brightness,
-        is_subset_only, is_embed_only, sink_);
-    is_running_ = false;
-  });
+  unsigned int brightness = 0;
+  if (hdr_high_check_->GetValue()) {
+    brightness = 203;
+  } else if (hdr_low_check_->GetValue()) {
+    brightness = 100;
+  }
+  std::thread thread(
+      [this, input_paths, output_path, fonts_path, db_path, brightness] {
+        is_running_ = true;
+        bool is_subset_only = subset_check_->GetValue();
+        bool is_embed_only = subset_check_->GetValue();
+        Run(input_paths, output_path, fonts_path, db_path, brightness,
+            is_subset_only, is_embed_only, sink_);
+        is_running_ = false;
+      });
+  if (run_thread_.joinable()) {
+    run_thread_.join();
+  }
   run_thread_ = std::move(thread);
 }
 
@@ -577,6 +581,9 @@ void GuiFrame::OnBuild(wxCommandEvent& WXUNUSED(event)) {
     font_text_->Clear();
     is_running_ = false;
   });
+  if (build_thread_.joinable()) {
+    build_thread_.join();
+  }
   build_thread_ = std::move(thread);
 }
 
