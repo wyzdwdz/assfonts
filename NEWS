@@ -1,3 +1,11 @@
+Overview of changes leading to v0.3.2
+Wednesday, January 25, 2022
+====================================
+- Fix GUI bugs
+- Add multi-inputs for CLI program
+- Decrease memory leaking possibility
+
+
 Overview of changes leading to v0.3.1
 Sunday, January 8, 2022
 ====================================

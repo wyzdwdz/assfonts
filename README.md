@@ -32,24 +32,24 @@ conan build .
 ### How to use
 
 ```
-Usage:     assfonts [options...] [<file>]
-Examples:  assfonts <file>                  Embed subset fonts into ASS script
-           assfonts -i <file>               Same as above
-           assfonts -o <dir> -s -i <file>   Only subset fonts but not embed
-           assfonts -f <dir> -e -i <file>   Only embed fonts without subset
-           assfonts -f <dir> -b             Build or update fonts database only
-           assfonts -l <num> -i <file>      Recolorize the subtitle for HDR contents
+Usage:     assfonts [options...] [<files>]
+Examples:  assfonts <files>                  Embed subset fonts into ASS script
+           assfonts -i <files>               Same as above
+           assfonts -o <dir> -s -i <files>   Only subset fonts but not embed
+           assfonts -f <dir> -e -i <files>   Only embed fonts without subset
+           assfonts -f <dir> -b              Build or update fonts database only
+           assfonts -l <num> -i <files>      Recolorize the subtitle for HDR contents
 Options:
-  -i, --input,      <file>   Input .ass file
-  -o, --output      <dir>    Output directory  (Default: same directory as input)
-  -f, --fontpath    <dir>    Set fonts directory
-  -b, --build                Build or update fonts database  (Require --fontpath)
-  -d, --dbpath      <dir>    Set fonts database path  (Default: current path)
-  -s, --subset-only <bool>   Subset fonts but not embed them into subtitle  (default: False)
-  -e, --embed-only  <bool>   Do not subset fonts  (default: False)
-  -l, --luminance   <num>    Set subtitle brightness for HDR contents  (default: 203)
-  -v, --verbose     <num>    Set logging level (0 to 3), 0 is off  (Default: 3)
-  -h, --help                 Get help info
+  -i, --input,      <files>   Input .ass file
+  -o, --output      <dir>     Output directory  (Default: same directory as input)
+  -f, --fontpath    <dir>     Set fonts directory
+  -b, --build                 Build or update fonts database  (Require --fontpath)
+  -d, --dbpath      <dir>     Set fonts database path  (Default: current path)
+  -s, --subset-only <bool>    Subset fonts but not embed them into subtitle  (default: False)
+  -e, --embed-only  <bool>    Do not subset fonts  (default: False)
+  -l, --luminance   <num>     Set subtitle brightness for HDR contents  (default: 203)
+  -v, --verbose     <num>     Set logging level (0 to 3), 0 is off  (Default: 3)
+  -h, --help                  Get help info
  ```
  
  When you first run this program, it's recommended to initialize font database first `assfonts -f <your_fonts_dir> -b` 

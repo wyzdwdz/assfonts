@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 
   spdlog::set_pattern("[%^%l%$] %v");
 
-  std::string input;
+  std::vector<std::string> inputs;
   std::string output;
   std::string fonts;
   std::string database(".");
@@ -85,7 +85,8 @@ int main(int argc, char** argv) {
   unsigned int brightness = 203;
 
   CLI::App app{"Subset fonts and embed them into an ASS subtitle."};
-  auto* p_opt_i = app.add_option("-i,--input,input", input, "Input .ass file");
+  auto* p_opt_i =
+      app.add_option("-i,--input,input", inputs, "Input .ass files");
   auto* p_opt_o = app.add_option("-o,--output", output, "Output directory");
   auto* p_opt_f = app.add_option("-f,--fontpath", fonts, "Set fonts directory");
   auto* p_opt_d =
@@ -126,24 +127,24 @@ int main(int argc, char** argv) {
     // clang-format off
       fmt::print(_ST("assfonts v{}.{}.{}\n"
       "Subset fonts and embed them into an ASS subtitle.\n"
-      "Usage:     assfonts [options...] [<file>]\n"
-      "Examples:  assfonts <file>                  Embed subset fonts into ASS script\n"
-      "           assfonts -i <file>               Same as above\n"
-      "           assfonts -o <dir> -s -i <file>   Only subset fonts but not embed\n"
-      "           assfonts -f <dir> -e -i <file>   Only embed fonts without subset\n"
-      "           assfonts -f <dir> -b             Build or update fonts database only\n"
-      "           assfonts -l <num> -i <file>      Recolorize the subtitle for HDR contents\n"
+      "Usage:     assfonts [options...] [<files>]\n"
+      "Examples:  assfonts <files>                  Embed subset fonts into ASS script\n"
+      "           assfonts -i <files>               Same as above\n"
+      "           assfonts -o <dir> -s -i <files>   Only subset fonts but not embed\n"
+      "           assfonts -f <dir> -e -i <files>   Only embed fonts without subset\n"
+      "           assfonts -f <dir> -b              Build or update fonts database only\n"
+      "           assfonts -l <num> -i <files>      Recolorize the subtitle for HDR contents\n"
       "Options:\n"
-      "  -i, --input,      <file>   Input .ass file\n"
-      "  -o, --output      <dir>    Output directory  (Default: same directory as input)\n"
-      "  -f, --fontpath    <dir>    Set fonts directory\n"
-      "  -b, --build                Build or update fonts database  (Require --fontpath)\n"
-      "  -d, --dbpath      <dir>    Set fonts database path  (Default: current path)\n"
-      "  -s, --subset-only <bool>   Subset fonts but not embed them into subtitle  (default: False)\n"
-      "  -e, --embed-only  <bool>   Do not subset fonts  (default: False)\n"
-      "  -l, --luminance   <num>    Set subtitle brightness for HDR contents  (default: 203)\n"
-      "  -v, --verbose     <num>    Set logging level (0 to 3), 0 is off  (Default: 3)\n"
-      "  -h, --help                 Get help info\n\n"), VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+      "  -i, --input,      <files>   Input .ass files\n"
+      "  -o, --output      <dir>     Output directory  (Default: same directory as input)\n"
+      "  -f, --fontpath    <dir>     Set fonts directory\n"
+      "  -b, --build                 Build or update fonts database  (Require --fontpath)\n"
+      "  -d, --dbpath      <dir>     Set fonts database path  (Default: current path)\n"
+      "  -s, --subset-only <bool>    Subset fonts but not embed them into subtitle  (default: False)\n"
+      "  -e, --embed-only  <bool>    Do not subset fonts  (default: False)\n"
+      "  -l, --luminance   <num>     Set subtitle brightness for HDR contents  (default: 203)\n"
+      "  -v, --verbose     <num>     Set logging level (0 to 3), 0 is off  (Default: 3)\n"
+      "  -h, --help                  Get help info\n\n"), VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
     // clang-format on
     if (argc == 2) {
       spdlog::shutdown();
@@ -170,119 +171,132 @@ int main(int argc, char** argv) {
       return 0;
   }
 
+  if (inputs.empty()) {
+    std::string empty_input;
+    inputs.push_back(empty_input);
+  }
+
+  for (const auto& input : inputs) {
 #ifdef _WIN32
-  std::error_code ec;
-  fs::path input_path = fs::absolute(ass::U8ToWide(input), ec);
-  fs::path output_path = fs::absolute(ass::U8ToWide(output), ec);
-  fs::path fonts_path = fs::absolute(ass::U8ToWide(fonts), ec);
-  fs::path db_path = fs::absolute(ass::U8ToWide(database), ec);
+    std::error_code ec;
+    fs::path input_path = fs::absolute(ass::U8ToWide(input), ec);
+    fs::path output_path = fs::absolute(ass::U8ToWide(output), ec);
+    fs::path fonts_path = fs::absolute(ass::U8ToWide(fonts), ec);
+    fs::path db_path = fs::absolute(ass::U8ToWide(database), ec);
 #else
-  std::error_code ec;
-  fs::path input_path = fs::absolute(input, ec);
-  fs::path output_path = fs::absolute(output, ec);
-  fs::path fonts_path = fs::absolute(fonts, ec);
-  fs::path db_path = fs::absolute(database, ec);
+    std::error_code ec;
+    fs::path input_path = fs::absolute(input, ec);
+    fs::path output_path = fs::absolute(output, ec);
+    fs::path fonts_path = fs::absolute(fonts, ec);
+    fs::path db_path = fs::absolute(database, ec);
 #endif
 
-  if (!input.empty() && !fs::is_regular_file(input_path)) {
-    logger->error("\"{}\" is not a file. See --help for more info.", input);
-    spdlog::shutdown();
-    return 0;
-  }
-  if (!output.empty() && !fs::is_directory(output_path)) {
-    logger->error(
-        "\"{}\" is not a legal directory path. See --help for more info.",
-        output);
-    spdlog::shutdown();
-    return 0;
-  }
-  if (!fonts.empty() && !fs::is_directory(fonts_path)) {
-    logger->error(
-        "\"{}\" is not a legal directory path. See --help for more info.",
-        fonts);
-    spdlog::shutdown();
-    return 0;
-  }
-  if (!fs::is_directory(db_path)) {
-    logger->error(
-        "\"{}\" is not a legal directory path. See --help for more info.",
-        database);
-    spdlog::shutdown();
-    return 0;
-  }
-  if (is_build && fonts.empty()) {
-    logger->error("No fontpath is found. See --help for more info.");
-    spdlog::shutdown();
-    return 0;
-  }
-  if (input.empty() && fonts.empty()) {
-    logger->error("No input is found. See --help for more info.");
-    spdlog::shutdown();
-    return 0;
-  }
-  if (input.empty() && !is_build) {
-    logger->error("Do nothing. See --help for more info.");
-    return 0;
-  }
-
-  if (!fonts.empty()) {
-    fp.LoadFonts(fonts_path.native());
-  }
-
-  if (is_build) {
-    fp.SaveDB(db_path.native() + fs::path::preferred_separator +
-              _ST("fonts.json"));
-  } else {
-    fp.LoadDB(db_path.native() + fs::path::preferred_separator +
-              _ST("fonts.json"));
-  }
-
-  if (input.empty()) {
-    spdlog::shutdown();
-    return 0;
-  }
-
-  if (output.empty()) {
-    output_path = input_path.parent_path();
-  }
-
-  ap.set_output_dir_path(output_path.native());
-
-  if (!p_opt_l->empty()) {
-    if (!ap.Recolorize(input_path.native(), brightness)) {
+    if (!input.empty() && !fs::is_regular_file(input_path)) {
+      logger->error("\"{}\" is not a file. See --help for more info.", input);
       spdlog::shutdown();
       return 0;
     }
-    input_path = fs::path(output_path.native() + fs::path::preferred_separator +
-                          input_path.stem().native() + _ST(".hdr") +
-                          input_path.extension().native());
-  }
-
-  if (!ap.ReadFile(input_path.native())) {
-    spdlog::shutdown();
-    return 0;
-  }
-
-  if (is_embed_only && is_subset_only) {
-    spdlog::shutdown();
-    return 0;
-  }
-
-  if (!is_embed_only) {
-    fs.SetSubfontDir(output_path.native() + fs::path::preferred_separator +
-                     input_path.stem().native() + _ST("_subsetted"));
-  }
-  if (!fs.Run(is_embed_only)) {
-    spdlog::shutdown();
-    return 0;
-  }
-
-  if (!is_subset_only) {
-    afe.set_output_dir_path(output_path.native());
-    if (!afe.Run()) {
+    if (!output.empty() && !fs::is_directory(output_path)) {
+      logger->error(
+          "\"{}\" is not a legal directory path. See --help for more info.",
+          output);
       spdlog::shutdown();
       return 0;
     }
+    if (!fonts.empty() && !fs::is_directory(fonts_path)) {
+      logger->error(
+          "\"{}\" is not a legal directory path. See --help for more info.",
+          fonts);
+      spdlog::shutdown();
+      return 0;
+    }
+    if (!fs::is_directory(db_path)) {
+      logger->error(
+          "\"{}\" is not a legal directory path. See --help for more info.",
+          database);
+      spdlog::shutdown();
+      return 0;
+    }
+    if (is_build && fonts.empty()) {
+      logger->error("No fontpath is found. See --help for more info.");
+      spdlog::shutdown();
+      return 0;
+    }
+    if (input.empty() && fonts.empty()) {
+      logger->error("No input is found. See --help for more info.");
+      spdlog::shutdown();
+      return 0;
+    }
+    if (input.empty() && !is_build) {
+      logger->error("Do nothing. See --help for more info.");
+      return 0;
+    }
+
+    if (!fonts.empty()) {
+      fp.LoadFonts(fonts_path.native());
+    }
+
+    if (is_build) {
+      fp.SaveDB(db_path.native() + fs::path::preferred_separator +
+                _ST("fonts.json"));
+    } else {
+      fp.LoadDB(db_path.native() + fs::path::preferred_separator +
+                _ST("fonts.json"));
+    }
+
+    if (input.empty()) {
+      spdlog::shutdown();
+      return 0;
+    }
+
+    if (output.empty()) {
+      output_path = input_path.parent_path();
+    }
+
+    ap.set_output_dir_path(output_path.native());
+
+    if (!p_opt_l->empty()) {
+      if (!ap.Recolorize(input_path.native(), brightness)) {
+        spdlog::shutdown();
+        return 0;
+      }
+      input_path =
+          fs::path(output_path.native() + fs::path::preferred_separator +
+                   input_path.stem().native() + _ST(".hdr") +
+                   input_path.extension().native());
+    }
+
+    if (!ap.ReadFile(input_path.native())) {
+      spdlog::shutdown();
+      return 0;
+    }
+
+    if (is_embed_only && is_subset_only) {
+      spdlog::shutdown();
+      return 0;
+    }
+
+    if (!is_embed_only) {
+      fs.SetSubfontDir(output_path.native() + fs::path::preferred_separator +
+                       input_path.stem().native() + _ST("_subsetted"));
+    }
+    if (!fs.Run(is_embed_only)) {
+      spdlog::shutdown();
+      return 0;
+    }
+
+    if (!is_subset_only) {
+      afe.set_output_dir_path(output_path.native());
+      if (!afe.Run()) {
+        spdlog::shutdown();
+        return 0;
+      }
+    }
+
+    ap.Clear();
+    fp.clean_font_list();
+    fs.Clear();
+    afe.Clear();
   }
 
   spdlog::shutdown();
