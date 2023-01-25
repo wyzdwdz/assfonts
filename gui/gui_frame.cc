@@ -548,7 +548,7 @@ void GuiFrame::OnRun(wxCommandEvent& WXUNUSED(event)) {
       [this, input_paths, output_path, fonts_path, db_path, brightness] {
         is_running_ = true;
         bool is_subset_only = subset_check_->GetValue();
-        bool is_embed_only = subset_check_->GetValue();
+        bool is_embed_only = embed_check_->GetValue();
         Run(input_paths, output_path, fonts_path, db_path, brightness,
             is_subset_only, is_embed_only, sink_);
         is_running_ = false;
