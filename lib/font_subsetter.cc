@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <climits>
+#include <exception>
 #include <filesystem>
 #include <fstream>
 
@@ -73,7 +74,13 @@ bool FontSubsetter::Run(const bool& is_no_subset) {
   if (!fs::exists(dir_path)) {
     logger_->info(_ST("Create subset fonts directory: \"{}\""),
                   dir_path.native());
-    fs::create_directory(dir_path);
+    try {
+      fs::create_directory(dir_path);
+    } catch (const fs::filesystem_error& e) {
+      logger_->error("Create subset fonts directory failed. Error code: {}",
+                     e.what());
+      return false;
+    }
   }
   for (const auto& subset_font : subset_font_codepoint_sets_) {
     if (!CreateSubfont(subset_font)) {
