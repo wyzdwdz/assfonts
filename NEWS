@@ -1,5 +1,12 @@
+Overview of changes leading to v0.3.3
+Monday, February 20, 2023
+====================================
+- Fix exception handling bugs
+- Add GUI help text
+
+
 Overview of changes leading to v0.3.2
-Wednesday, January 25, 2022
+Wednesday, January 25, 2023
 ====================================
 - Fix GUI bugs
 - Add multi-inputs for CLI program
@@ -7,7 +14,7 @@ Wednesday, January 25, 2022
 
 
 Overview of changes leading to v0.3.1
-Sunday, January 8, 2022
+Sunday, January 8, 2023
 ====================================
 - Rewrite GUI Layout
 - Fix multi-input bug
