@@ -112,7 +112,9 @@ class AssfontsConan(ConanFile):
     def build(self):
         cmake = _CMake(self)
         cmake.configure()
-        cmake.build(target="assfonts")
-        cmake.build(target="assfonts_gui")
-        cmake.install(component="assfonts")
-        cmake.install(component="assfonts_gui")
+        #cmake.build(target="assfonts/strip")
+        #cmake.build(target="assfonts_gui/strip")
+        #cmake.install(component="assfonts")
+        #cmake.install(component="assfonts_gui")
+        cmake.build()
+        cmake.install()
