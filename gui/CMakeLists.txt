@@ -46,8 +46,8 @@ target_include_directories(${TARGET_NAME} PRIVATE ${INCLUDE_DIR}
 
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
 
-if(UNIX)
-    target_link_options(${TARGET_NAME} PRIVATE -no-pie -pthread)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_link_options(${TARGET_NAME} PRIVATE -no-pie -pthread -s)
 endif()
 
 target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})

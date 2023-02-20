@@ -28,7 +28,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS})
 target_include_directories(${TARGET_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include
                                           PRIVATE ${THIRD_PARTY_INCLUDE_DIRS})
 
-if(UNIX)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_link_options(${TARGET_NAME} PRIVATE -pthread)
 endif()
 

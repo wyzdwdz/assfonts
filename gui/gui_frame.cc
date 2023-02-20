@@ -244,12 +244,16 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
                                    wxDefaultPosition, wxDefaultSize, 0);
   hdr_high_check_->SetMinSize(FromDIP(wxSize(-1, 20)));
   hdr_high_check_->SetMaxSize(FromDIP(wxSize(-1, 20)));
+  hdr_high_check_->SetToolTip(
+      wxT("Lower subtitle brightness to 203 nit for HDR content"));
   middle_left_left_sizer->Add(hdr_high_check_, 0, wxALL | wxEXPAND, FromDIP(5));
 
   hdr_low_check_ = new wxCheckBox(main_panel_, wxID_ANY, wxT("HDR Low"),
                                   wxDefaultPosition, wxDefaultSize, 0);
   hdr_low_check_->SetMinSize(FromDIP(wxSize(-1, 20)));
   hdr_low_check_->SetMaxSize(FromDIP(wxSize(-1, 20)));
+  hdr_low_check_->SetToolTip(
+      wxT("Lower subtitle brightness to 100 nit for HDR content"));
   middle_left_left_sizer->Add(hdr_low_check_, 0, wxALL | wxEXPAND, FromDIP(5));
 
   middle_left_sizer->Add(middle_left_left_sizer, 1, 0, FromDIP(5));
@@ -261,12 +265,16 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
                                  wxDefaultPosition, wxDefaultSize, 0);
   subset_check_->SetMinSize(FromDIP(wxSize(-1, 20)));
   subset_check_->SetMaxSize(FromDIP(wxSize(-1, 20)));
+  subset_check_->SetToolTip(
+      wxT("Subset fonts but not embed them into subtitle"));
   middle_middle_right_sizer->Add(subset_check_, 0, wxALL, FromDIP(5));
 
   embed_check_ = new wxCheckBox(main_panel_, wxID_ANY, wxT("Embed only"),
                                 wxDefaultPosition, wxDefaultSize, 0);
   embed_check_->SetMinSize(FromDIP(wxSize(-1, 20)));
   embed_check_->SetMaxSize(FromDIP(wxSize(-1, 20)));
+  embed_check_->SetToolTip(
+      wxT("Embed fonts into subtitle but not subset them"));
   middle_middle_right_sizer->Add(embed_check_, 0, wxALL, FromDIP(5));
 
   middle_left_sizer->Add(middle_middle_right_sizer, 1, 0, FromDIP(5));
@@ -297,12 +305,14 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
                                wxDefaultPosition, wxDefaultSize, 0);
   build_button_->SetMinSize(FromDIP(wxSize(-1, 30)));
   build_button_->SetMaxSize(FromDIP(wxSize(-1, 30)));
+  build_button_->SetToolTip(wxT("Build fonts database"));
   middle_right_sizer->Add(build_button_, 1, wxALL | wxEXPAND, FromDIP(5));
 
   reset_button_ = new wxButton(main_panel_, wxID_ANY, wxT(" Reset all "),
                                wxDefaultPosition, wxDefaultSize, 0);
   reset_button_->SetMinSize(FromDIP(wxSize(-1, 30)));
   reset_button_->SetMaxSize(FromDIP(wxSize(-1, 30)));
+  reset_button_->SetToolTip(wxT("Initialize all settings"));
   middle_right_sizer->Add(reset_button_, 1, wxALL | wxEXPAND, FromDIP(5));
 
   middle_inner_sizer->Add(middle_right_sizer, 10, wxALL, FromDIP(5));
