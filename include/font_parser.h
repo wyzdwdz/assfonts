@@ -70,17 +70,6 @@ class FontParser {
     int slant = 0;
     AString path;
     long index = 0;
-
-    template <class Archive>
-    void serialize(Archive& ar, const unsigned int) {
-      ar& families;
-      ar& fullnames;
-      ar& psnames;
-      ar& weight;
-      ar& slant;
-      ar& path;
-      ar& index;
-    }
   };
 
   std::shared_ptr<spdlog::async_logger> logger_;
