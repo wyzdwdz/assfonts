@@ -4,7 +4,7 @@ Subset fonts and embed them into an ASS subtitle.
 
 ### Build Requirements
 
-Package Manager ---- Conan version 1.56.0
+Package Manager ---- Conan version 1.57.0
 
 - [FreeType](http://freetype.org/)
 
