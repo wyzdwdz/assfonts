@@ -8,6 +8,7 @@ set(wxUSE_GUI ON)
 set(wxBUILD_COMPATIBILITY 3.0)
 set(wxBUILD_PRECOMP ON)
 set(wxBUILD_MONOLITHIC OFF)
+set(wxUSE_LIBTIFF OFF)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/3rdparty/compact_enc_det EXCLUDE_FROM_ALL)
 add_subdirectory(${PROJECT_SOURCE_DIR}/3rdparty/asshdr EXCLUDE_FROM_ALL)
