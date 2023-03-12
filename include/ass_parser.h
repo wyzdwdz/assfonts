@@ -78,14 +78,27 @@ class AssParser {
       return false;
     }
   };
+
+  struct TextInfo {
+    unsigned int line_num = 0;
+    std::string text;
+  };
+
+  struct DialogueInfo {
+    unsigned int line_num = 0;
+    std::vector<std::string> dialogue;
+  };
+
   std::shared_ptr<spdlog::async_logger> logger_;
   AString ass_path_;
   AString output_dir_path_;
-  std::vector<std::string> text_;
+  // std::vector<std::string> text_;
+  std::vector<TextInfo> text_;
   std::vector<std::vector<std::string>> styles_;
   bool has_default_style_ = false;
   bool has_fonts_ = false;
-  std::vector<std::vector<std::string>> dialogues_;
+  // std::vector<std::vector<std::string>> dialogues_;
+  std::vector<DialogueInfo> dialogues_;
   std::map<FontDesc, std::set<char32_t>> font_sets_;
   std::map<std::string, FontDesc> stylename_fontdesc_;
 
@@ -97,7 +110,8 @@ class AssParser {
   void set_stylename_fontdesc();
   bool set_font_sets();
   bool StyleOverride(const std::u32string& code, FontDesc& font_desc,
-                     const FontDesc& font_desc_style);
+                     const FontDesc& font_desc_style,
+                     const unsigned int& line_num);
   void CleanFonts();
 
   friend class FontSubsetter;

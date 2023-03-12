@@ -1,9 +1,14 @@
+Overview of changes leading to v0.3.4
+Saturday, March 11, 2023
+====================================
+- Reduce the message level from ERROR to WARNING when "Style"
+  is not found
+
 Overview of changes leading to v0.3.3
 Monday, February 20, 2023
 ====================================
 - Fix exception handling bugs
 - Add GUI help text
-
 
 Overview of changes leading to v0.3.2
 Wednesday, January 25, 2023

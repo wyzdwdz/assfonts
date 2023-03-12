@@ -39,6 +39,7 @@ bool AssParser::ReadFile(const AString& ass_file_path) {
   fs::path ass_path(ass_file_path);
   std::ifstream ass_file(ass_file_path, std::ios::binary);
   std::string buf_u8;
+  unsigned int line_num = 0;
   if (ass_file.is_open()) {
     if (!GetUTF8(ass_file, buf_u8)) {
       return false;
@@ -47,19 +48,23 @@ bool AssParser::ReadFile(const AString& ass_file_path) {
     std::istringstream isstream(buf_u8);
     std::string line;
     while (SafeGetLine(isstream, line)) {
+      ++line_num;
       if (Trim(ToLower(line)) == "[fonts]") {
         has_fonts_ = true;
         while (SafeGetLine(isstream, line)) {
+          ++line_num;
           std::string tmp = Trim(ToLower(line));
           if (tmp == "[events]" || tmp == "[script info]" ||
               tmp == "[v4 styles]" || tmp == "[v4+ styles]" ||
               tmp == "[graphics]") {
-            text_.emplace_back(line);
+            TextInfo text_info = {line_num, line};
+            text_.emplace_back(text_info);
             break;
           }
         }
       } else {
-        text_.emplace_back(line);
+        TextInfo text_info = {line_num, line};
+        text_.emplace_back(text_info);
       }
     }
   } else {
@@ -83,7 +88,7 @@ bool AssParser::ReadFile(const AString& ass_file_path) {
     font_sets_.erase(key_del);
   }
   if (font_sets_.empty()) {
-    logger_->error(_ST("Failed to parse \"{}\". It may have format error."),
+    logger_->error(_ST("Failed to parse \"{}\". Format error."),
                    ass_path.native());
     return false;
   }
@@ -96,7 +101,11 @@ bool AssParser::get_has_fonts() const {
 }
 
 std::vector<std::string> AssParser::get_text() const {
-  return text_;
+  std::vector<std::string> text;
+  for (const TextInfo& t : text_) {
+    text.emplace_back(t.text);
+  }
+  return text;
 }
 
 AString AssParser::get_ass_path() const {
@@ -228,14 +237,15 @@ bool AssParser::ParseAss() {
     if (line == text_.end()) {
       break;
     }
-    if (FindTitle(*line, "[V4+ Styles]") || FindTitle(*line, "[V4 Styles]")) {
+    if (FindTitle((*line).text, "[V4+ Styles]") ||
+        FindTitle((*line).text, "[V4 Styles]")) {
       ++line;
       for (; line != text_.end(); ++line) {
-        if (FindTitle(*line, "[")) {
+        if (FindTitle((*line).text, "[")) {
           break;
         }
-        if (FindTitle(*line, "Style:")) {
-          if (!ParseLine(*line, 10, res)) {
+        if (FindTitle((*line).text, "Style:")) {
+          if (!ParseLine((*line).text, 10, res)) {
             return false;
           }
           styles_.emplace_back(res);
@@ -243,17 +253,18 @@ bool AssParser::ParseAss() {
       }
       has_style = true;
     }
-    if (FindTitle(*line, "[Events]")) {
+    if (FindTitle((*line).text, "[Events]")) {
       ++line;
       for (; line != text_.end(); ++line) {
-        if (FindTitle(*line, "[")) {
+        if (FindTitle((*line).text, "[")) {
           break;
         }
-        if (FindTitle(*line, "Dialogue:")) {
-          if (!ParseLine(*line, 10, res)) {
+        if (FindTitle((*line).text, "Dialogue:")) {
+          if (!ParseLine((*line).text, 10, res)) {
             return false;
           }
-          dialogues_.emplace_back(res);
+          DialogueInfo dialogue_info = {(*line).line_num, res};
+          dialogues_.emplace_back(dialogue_info);
         }
       }
       has_event = true;
@@ -309,20 +320,22 @@ bool AssParser::set_font_sets() {
   for (const auto& dialogue : dialogues_) {
     FontDesc font_desc_style;
     FontDesc font_desc;
-    if (stylename_fontdesc_.find(dialogue[4]) == stylename_fontdesc_.end()) {
+    if (stylename_fontdesc_.find(dialogue.dialogue[4]) ==
+        stylename_fontdesc_.end()) {
       if (has_default_style_) {
         font_desc_style = stylename_fontdesc_["Default"];
       } else {
-        logger_->error("Style \"{}\" not found.", dialogue[4]);
-        return false;
+        logger_->warn("Style \"{}\" not found. (Line {})", dialogue.dialogue[4],
+                      dialogue.line_num);
+        font_desc_style.fontname = "";
       }
     } else {
-      font_desc_style = stylename_fontdesc_[dialogue[4]];
+      font_desc_style = stylename_fontdesc_[dialogue.dialogue[4]];
     }
     if (font_sets_.find(font_desc_style) == font_sets_.end()) {
       font_sets_[font_desc_style] = empty_set;
     }
-    std::u32string w_dialogue = U8ToU32(dialogue[10]);
+    std::u32string w_dialogue = U8ToU32(dialogue.dialogue[10]);
     auto wch = w_dialogue.begin();
     font_desc = font_desc_style;
     while (true) {
@@ -339,12 +352,15 @@ bool AssParser::set_font_sets() {
         std::u32string override(wch, w_dialogue.end());
         auto pos = override.find(U'}', 0);
         if (pos == std::u32string::npos) {
-          font_sets_[font_desc].insert(*wch);
+          if (!font_desc_style.fontname.empty()) {
+            font_sets_[font_desc].insert(*wch);
+          }
           ++wch;
           continue;
         } else {
           override = std::u32string(wch + 1, wch + pos);
-          if (!StyleOverride(override, font_desc, font_desc_style)) {
+          if (!StyleOverride(override, font_desc, font_desc_style,
+                             dialogue.line_num)) {
             return false;
           }
           wch += (pos + 1);
@@ -352,7 +368,9 @@ bool AssParser::set_font_sets() {
         }
       }
       if (wch != w_dialogue.end()) {
-        font_sets_[font_desc].insert(*wch);
+        if (!font_desc_style.fontname.empty()) {
+          font_sets_[font_desc].insert(*wch);
+        }
         ++wch;
       }
     }
@@ -361,7 +379,8 @@ bool AssParser::set_font_sets() {
 }
 
 bool AssParser::StyleOverride(const std::u32string& code, FontDesc& font_desc,
-                              const FontDesc& font_desc_style) {
+                              const FontDesc& font_desc_style,
+                              const unsigned int& line_num) {
   auto iter = code.begin();
   size_t pos = 0;
   while (true) {
@@ -468,8 +487,9 @@ bool AssParser::StyleOverride(const std::u32string& code, FontDesc& font_desc,
           if (has_default_style_) {
             font_desc = stylename_fontdesc_["Default"];
           } else {
-            logger_->error("Style \"{}\" not found.", style_name);
-            return false;
+            logger_->warn("Style \"{}\" not found. (Line {})", style_name,
+                          line_num);
+            font_desc.fontname = "";
           }
         } else {
           font_desc = stylename_fontdesc_[style_name];
@@ -499,7 +519,7 @@ void AssParser::CleanFonts() {
   size_t num_line = 0;
   for (const auto& line : text_) {
     ++num_line;
-    os << line;
+    os << line.text;
     if (num_line != text_.size()) {
       os << '\n';
     }
