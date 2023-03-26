@@ -345,7 +345,11 @@ bool AssParser::set_font_sets() {
       if (*wch == U'\\') {
         if ((wch + 1) != w_dialogue.end() &&
             (*(wch + 1) == U'h' || *(wch + 1) == U'n' || *(wch + 1) == U'N')) {
-          wch = wch + 2;
+          if ((wch + 2) != w_dialogue.end()) {
+            wch = wch + 2;
+          } else {
+            break;
+          }
         }
       }
       if (*wch == U'{') {
