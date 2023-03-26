@@ -36,6 +36,7 @@ extern "C" {
 }
 #endif
 
+#include <harfbuzz/hb-subset.h>
 #include <spdlog/async.h>
 #include <spdlog/spdlog.h>
 
@@ -96,6 +97,7 @@ class FontSubsetter {
       const std::pair<FontPath, std::set<uint32_t>>& subset_font);
   bool CheckGlyph(const AString& font_path, const long& font_index,
                   const std::set<char32_t>& codepoint_set);
+  void KeepEverything(hb_subset_input_t* input);
 
   friend class AssFontEmbedder;
 };
