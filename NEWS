@@ -1,8 +1,10 @@
 Overview of changes leading to v0.3.4
-Saturday, March 11, 2023
+Sunday, March 26, 2023
 ====================================
 - Reduce the message level from ERROR to WARNING when "Style"
   is not found
+- Fix AssParser out of boundry bug
+- Fix bug: xysubfilter will fallback fullwidth characters
 
 Overview of changes leading to v0.3.3
 Monday, February 20, 2023

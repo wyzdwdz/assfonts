@@ -28,8 +28,7 @@
 #include <fmt/core.h>
 
 static const std::u32string ADDITIONAL_CODEPOINTS =
-    U"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.:,;'\"(!?)"
-    U"+-*/=";
+    U"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 namespace fs = std::filesystem;
 
