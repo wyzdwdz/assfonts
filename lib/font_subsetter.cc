@@ -26,6 +26,7 @@
 #include <fstream>
 
 #include <fmt/core.h>
+#include <harfbuzz/hb-subset.h>
 
 static const std::u32string ADDITIONAL_CODEPOINTS =
     U"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -266,13 +267,12 @@ bool FontSubsetter::CreateSubfont(
     hb_set_add(codepoint_set, codepoint);
   }
   hb_subset_input_t* input = hb_subset_input_create_or_fail();
-  KeepEverything(input);
   hb_set_t* input_codepoints =
       hb_subset_input_set(input, HB_SUBSET_SETS_UNICODE);
-  hb_set_t* input_glyphs =
-      hb_subset_input_set(input, HB_SUBSET_SETS_GLYPH_INDEX);
-  hb_set_clear(input_codepoints);
-  hb_set_clear(input_glyphs);
+  hb_set_t* input_namelangid =
+      hb_subset_input_set(input, HB_SUBSET_SETS_NAME_LANG_ID);
+  hb_set_clear(input_namelangid);
+  hb_set_invert(input_namelangid);
   hb_set_union(input_codepoints, codepoint_set);
   hb_face_t* subset_face = hb_subset_or_fail(hb_face, input);
   if (subset_face == nullptr) {
@@ -330,50 +330,6 @@ bool FontSubsetter::CheckGlyph(const AString& font_path, const long& font_index,
   }
   FT_Done_Face(ft_face);
   return true;
-}
-
-void FontSubsetter::KeepEverything(hb_subset_input_t* input) {
-  /*
- * Copyright © 2018  Google, Inc.
- *
- *  This is part of HarfBuzz, a text shaping library.
- *
- * Permission is hereby granted, without written agreement and without
- * license or royalty fees, to use, copy, modify, and distribute this
- * software and its documentation for any purpose, provided that the
- * above copyright notice and the following two paragraphs appear in
- * all copies of this software.
- *
- * IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE TO ANY PARTY FOR
- * DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
- * ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
- * IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
- * DAMAGE.
- *
- * THE COPYRIGHT HOLDER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
- * BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- * FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
- * ON AN "AS IS" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO
- * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
- *
- * Google Author(s): Garret Rieger, Rod Sheeter, Behdad Esfahbod
- */
-  const hb_subset_sets_t indices[] = {HB_SUBSET_SETS_UNICODE,
-                                      HB_SUBSET_SETS_GLYPH_INDEX,
-                                      HB_SUBSET_SETS_NAME_ID,
-                                      HB_SUBSET_SETS_NAME_LANG_ID,
-                                      HB_SUBSET_SETS_LAYOUT_FEATURE_TAG,
-                                      HB_SUBSET_SETS_LAYOUT_SCRIPT_TAG};
-  for (auto idx : indices) {
-    hb_set_t* set = hb_subset_input_set(input, idx);
-    hb_set_clear(set);
-    hb_set_invert(set);
-  }
-  hb_set_clear(hb_subset_input_set(input, HB_SUBSET_SETS_DROP_TABLE_TAG));
-  hb_subset_input_set_flags(
-      input, HB_SUBSET_FLAGS_NOTDEF_OUTLINE | HB_SUBSET_FLAGS_GLYPH_NAMES |
-                 HB_SUBSET_FLAGS_NO_PRUNE_UNICODE_RANGES |
-                 HB_SUBSET_FLAGS_PASSTHROUGH_UNRECOGNIZED);
 }
 
 }  // namespace ass

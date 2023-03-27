@@ -28,7 +28,7 @@ class _CMake(CMake):
 
 class AssfontsConan(ConanFile):
     name = "assfonts"
-    version = "0.3.4"
+    version = "0.3.5"
 
     license = "GNU General Public License v2.0"
     author = "wyzdwdz"
