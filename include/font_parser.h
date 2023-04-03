@@ -70,6 +70,7 @@ class FontParser {
     int slant = 0;
     AString path;
     long index = 0;
+    std::string hash;
   };
 
   std::shared_ptr<spdlog::async_logger> logger_;
@@ -82,6 +83,7 @@ class FontParser {
                                      const AString& pattern);
   void GetFontInfo(const AString& font_path);
   int AssFaceGetWeight(const FT_Face& face);
+  bool ExistInDB(const AString& font_path, std::string& hash);
 
   friend class FontSubsetter;
 };

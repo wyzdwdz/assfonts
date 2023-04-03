@@ -28,6 +28,8 @@
 void BuildDB(const fs::path& fonts_path, const fs::path& db_path,
              const std::shared_ptr<mylog::sinks::wxwidgets_sink_mt>& sink) {
   ass::FontParser fp(sink);
+  fp.LoadDB(db_path.native() + fs::path::preferred_separator +
+            _ST("fonts.json"));
   fp.LoadFonts(fonts_path.native());
   fp.SaveDB(db_path.native() + fs::path::preferred_separator +
             _ST("fonts.json"));

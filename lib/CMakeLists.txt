@@ -6,6 +6,7 @@ set(THIRD_PARTY_LIBS harfbuzz::harfbuzz
                      Iconv::Iconv
                      spdlog::spdlog
                      fmt::fmt
+                     cryptopp::cryptopp
                      ced
                      libasshdr)
 

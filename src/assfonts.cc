@@ -233,6 +233,8 @@ int main(int argc, char** argv) {
     }
 
     if (!fonts.empty()) {
+      fp.LoadDB(db_path.native() + fs::path::preferred_separator +
+                _ST("fonts.json"));
       fp.LoadFonts(fonts_path.native());
     }
 

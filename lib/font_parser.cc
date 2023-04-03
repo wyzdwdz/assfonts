@@ -38,6 +38,10 @@ extern "C" {
 }
 #endif
 
+#include <crypt.h>
+#include <cryptopp/blake2.h>
+#include <cryptopp/files.h>
+#include <cryptopp/hex.h>
 #include <nlohmann/json.hpp>
 
 #include "ass_freetype.h"
@@ -89,6 +93,7 @@ void FontParser::SaveDB(const AString& db_path) {
     js_font["path"] = font.path;
 #endif
     js_font["index"] = font.index;
+    js_font["hash"] = font.hash;
     json.emplace_back(js_font);
   }
   db_file << json.dump(4);
@@ -120,6 +125,7 @@ void FontParser::LoadDB(const AString& db_path) {
       font.path = js_font["path"];
 #endif
       font.index = js_font["index"];
+      font.hash = js_font["hash"];
       font_list_in_db_.emplace_back(font);
     }
   } catch (const nlohmann::json::exception&) {
@@ -156,6 +162,10 @@ std::vector<AString> FontParser::FindFileInDir(const AString& dir,
 }
 
 void FontParser::GetFontInfo(const AString& font_path) {
+  std::string hash;
+  if (ExistInDB(font_path, hash)) {
+    return;
+  }
   std::vector<std::string> families;
   std::vector<std::string> fullnames;
   std::vector<std::string> psnames;
@@ -232,6 +242,7 @@ void FontParser::GetFontInfo(const AString& font_path) {
     font_info.psnames = psnames;
     font_info.path = font_path;
     font_info.index = face_idx;
+    font_info.hash = hash;
     std::lock_guard font_list_lock(mtx_);
     font_list_.emplace_back(font_info);
   }
@@ -272,6 +283,43 @@ int FontParser::AssFaceGetWeight(const FT_Face& face) {
     return os2->usWeightClass;
   else
     return 300 * !!(face->style_flags & FT_STYLE_FLAG_BOLD) + 400;
+}
+
+bool FontParser::ExistInDB(const AString& font_path, std::string& hash) {
+  std::vector<std::vector<FontInfo>::iterator> iters_found;
+  for (auto iter = font_list_in_db_.begin(); iter != font_list_in_db_.end();
+       ++iter) {
+    iter = std::find_if(iter, font_list_in_db_.end(),
+                        [&font_path](const FontInfo& x) {
+                          if (x.path == font_path) {
+                            return true;
+                          } else {
+                            return false;
+                          }
+                        });
+    if (iter != font_list_in_db_.end()) {
+      iters_found.emplace_back(iter);
+    }
+  }
+  if (iters_found.empty()) {
+    return false;
+  }
+  fs::path font(font_path);
+  std::ifstream font_file(font, std::ios::binary);
+  CryptoPP::BLAKE2b blake2b_hash;
+  CryptoPP::FileSource font_source(
+      font_file, true,
+      new CryptoPP::HashFilter(
+          blake2b_hash,
+          new CryptoPP::HexEncoder(new CryptoPP::StringSink(hash))));
+  if (iters_found[0]->hash == hash) {
+    return true;
+  } else {
+    for(auto iter: iters_found) {
+      font_list_in_db_.erase(iter);
+    }
+    return false;
+  }
 }
 
 }  // namespace ass
