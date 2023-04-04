@@ -29,7 +29,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#ifdef _WIN32
+#include <Windows.h>
+#else
 #include <sys/stat.h>
+#endif
 
 #include FT_MODULE_H
 #include FT_TYPE1_TABLES_H
@@ -45,6 +49,8 @@ extern "C" {
 #include "ass_freetype.h"
 #include "ass_threadpool.h"
 
+constexpr int MAX_TCHAR = 128;
+
 namespace fs = std::filesystem;
 
 namespace ass {
@@ -54,7 +60,7 @@ void FontParser::LoadFonts(const AString& fonts_dir) {
   logger_->info(_ST("Found {} font files in \"{}\". Parsing font files."),
                 fonts_path_.size(), fonts_dir);
   font_list_.reserve(fonts_path_.size());
-  unsigned int num_thread = std::thread::hardware_concurrency() + 1;
+  unsigned int num_thread = std::thread::hardware_concurrency() * 2;
   ThreadPool pool(num_thread);
   for (const AString& font_path : fonts_path_) {
     pool.LoadJob([this, font_path]() { GetFontInfo(font_path); });
@@ -294,6 +300,9 @@ bool FontParser::ExistInDB(
     std::vector<std::unordered_multimap<AString, FontInfo>::iterator>&
         iters_found) {
   last_write_time = GetLastWriteTime(font_path);
+  if (last_write_time.empty()) {
+    return false;
+  }
   auto iter_pair = font_list_in_db_.equal_range(font_path);
   for (auto iter = iter_pair.first; iter != iter_pair.second; ++iter) {
     iters_found.emplace_back(iter);
@@ -310,17 +319,39 @@ bool FontParser::ExistInDB(
 
 std::string FontParser::GetLastWriteTime(const AString& font_path) {
 #ifdef _WIN32
-  auto buffer = std::make_unique<struct _stat>();
-  _wstat(font_path.c_str(), buffer.get());
+  FILETIME file_time;
+  SYSTEMTIME system_time;
+  HANDLE file_handle =
+      CreateFileW(font_path.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL,
+                  OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  if (file_handle == INVALID_HANDLE_VALUE) {
+    return std::string();
+  }
+  TCHAR date[MAX_TCHAR], time[MAX_TCHAR];
+  if (!GetFileTime(file_handle, NULL, NULL, &file_time)) {
+    return std::string();
+  }
+  FileTimeToSystemTime(&file_time, &system_time);
+  if (!GetDateFormat(LOCALE_SYSTEM_DEFAULT, NULL, &system_time,
+                     "yyyy'-'MM'-'dd", date, MAX_TCHAR)) {
+    return std::string();
+  }
+  if (!GetTimeFormat(LOCALE_SYSTEM_DEFAULT, NULL, &system_time, "HH':'mm':'ss",
+                     time, MAX_TCHAR)) {
+    return std::string();
+  }
+  return "UTC " + std::string(date) + " " + std::string(time);
 #else
   auto buffer = std::make_unique<struct stat>();
-  stat(font_path.c_str(), buffer.get());
-#endif
+  if (stat(font_path.c_str(), buffer.get())) {
+    return std::string();
+  }
   std::stringstream ss;
   auto gmt_time = std::gmtime(&buffer->st_mtime);
   auto last_write_time = std::put_time(gmt_time, "UTC %Y-%m-%d %H:%M:%S");
   ss << last_write_time;
   return ss.str();
+#endif
 }
 
 }  // namespace ass
