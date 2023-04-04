@@ -60,7 +60,7 @@ void FontParser::LoadFonts(const AString& fonts_dir) {
   logger_->info(_ST("Found {} font files in \"{}\". Parsing font files."),
                 fonts_path_.size(), fonts_dir);
   font_list_.reserve(fonts_path_.size());
-  unsigned int num_thread = std::thread::hardware_concurrency();
+  unsigned int num_thread = std::thread::hardware_concurrency() + 1;
   ThreadPool pool(num_thread);
   for (const AString& font_path : fonts_path_) {
     pool.LoadJob([this, font_path]() { GetFontInfo(font_path); });
