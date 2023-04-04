@@ -19,7 +19,6 @@
 
 #include "font_parser.h"
 
-#include <chrono>
 #include <exception>
 #include <filesystem>
 #include <fstream>
@@ -318,7 +317,9 @@ std::string FontParser::GetLastWriteTime(const AString& font_path) {
   stat(font_path.c_str(), buffer.get());
 #endif
   std::stringstream ss;
-  ss << buffer->st_mtime;
+  auto gmt_time = std::gmtime(&buffer->st_mtime);
+  auto last_write_time = std::put_time(gmt_time, "UTC %Y-%m-%d %H:%M:%S");
+  ss << last_write_time;
   return ss.str();
 }
 
