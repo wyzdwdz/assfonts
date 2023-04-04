@@ -66,13 +66,13 @@ class wxwidgets_sink : public spdlog::sinks::base_sink<Mutex> {
       event.SetInt(3);
     }
     event.SetString(text);
-    wxPostEvent(log_text_, event);
+    wxQueueEvent(log_text_, event.Clone());
   }
 
   void flush_() override {
     wxCommandEvent event(SPDLOG_EVT);
     event.SetInt(10);
-    wxPostEvent(log_text_, event);
+    wxQueueEvent(log_text_, event.Clone());
   }
 
   void set_formatter_(

@@ -80,7 +80,7 @@ bool AssFontEmbedder::Run() {
         logger_->warn(
             _ST("Found non-TTF fonts. Check the warnings above. Based on ASS "
                 "Specs, only Truetype fonts can be embedded in ASS scripts. "
-                "Ignore this error, but these fonts may not be loaded by some "
+                "Ignored this error, but these fonts may not be loaded by some "
                 "video players."));
       }
     } else {

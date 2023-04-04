@@ -19,16 +19,19 @@
 
 #include "font_parser.h"
 
+#include <chrono>
 #include <exception>
 #include <filesystem>
 #include <fstream>
-#include <memory>
 #include <regex>
+#include <sstream>
 #include <thread>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+#include <sys/stat.h>
+
 #include FT_MODULE_H
 #include FT_TYPE1_TABLES_H
 #include FT_SFNT_NAMES_H
@@ -38,10 +41,6 @@ extern "C" {
 }
 #endif
 
-#include <crypt.h>
-#include <cryptopp/blake2.h>
-#include <cryptopp/files.h>
-#include <cryptopp/hex.h>
 #include <nlohmann/json.hpp>
 
 #include "ass_freetype.h"
@@ -53,8 +52,8 @@ namespace ass {
 
 void FontParser::LoadFonts(const AString& fonts_dir) {
   fonts_path_ = FindFileInDir(fonts_dir, _ST(".+\\.(ttf|otf|ttc|otc)$"));
-  logger_->info(_ST("Found {} font files in \"{}\""), fonts_path_.size(),
-                fonts_dir);
+  logger_->info(_ST("Found {} font files in \"{}\". Parsing font files."),
+                fonts_path_.size(), fonts_dir);
   font_list_.reserve(fonts_path_.size());
   unsigned int num_thread = std::thread::hardware_concurrency() + 1;
   ThreadPool pool(num_thread);
@@ -80,20 +79,20 @@ void FontParser::SaveDB(const AString& db_path) {
     return;
   }
   nlohmann::ordered_json json;
-  for (const FontInfo& font : font_list_) {
+  for (const auto& font : font_list_) {
     nlohmann::ordered_json js_font;
-    js_font["families"] = font.families;
-    js_font["fullnames"] = font.fullnames;
-    js_font["psnames"] = font.psnames;
-    js_font["weight"] = font.weight;
-    js_font["slant"] = font.slant;
+    js_font["families"] = font.second.families;
+    js_font["fullnames"] = font.second.fullnames;
+    js_font["psnames"] = font.second.psnames;
+    js_font["weight"] = font.second.weight;
+    js_font["slant"] = font.second.slant;
 #ifdef _WIN32
-    js_font["path"] = WideToU8(font.path);
+    js_font["path"] = WideToU8(font.first);
 #else
-    js_font["path"] = font.path;
+    js_font["path"] = font.first;
 #endif
-    js_font["index"] = font.index;
-    js_font["hash"] = font.hash;
+    js_font["index"] = font.second.index;
+    js_font["last_write_time"] = font.second.last_write_time;
     json.emplace_back(js_font);
   }
   db_file << json.dump(4);
@@ -113,20 +112,20 @@ void FontParser::LoadDB(const AString& db_path) {
     nlohmann::json json;
     db_file >> json;
     for (const nlohmann::json& js_font : json) {
-      FontInfo font;
-      font.families = js_font["families"];
-      font.fullnames = js_font["fullnames"];
-      font.psnames = js_font["psnames"];
-      font.weight = js_font["weight"];
-      font.slant = js_font["slant"];
+      std::pair<AString, FontInfo> font;
+      font.second.families = js_font["families"];
+      font.second.fullnames = js_font["fullnames"];
+      font.second.psnames = js_font["psnames"];
+      font.second.weight = js_font["weight"];
+      font.second.slant = js_font["slant"];
 #ifdef _WIN32
-      font.path = U8ToWide(js_font["path"]);
+      font.first = U8ToWide(js_font["path"]);
 #else
-      font.path = js_font["path"];
+      font.first = js_font["path"];
 #endif
-      font.index = js_font["index"];
-      font.hash = js_font["hash"];
-      font_list_in_db_.emplace_back(font);
+      font.second.index = js_font["index"];
+      font.second.last_write_time = js_font["last_write_time"];
+      font_list_in_db_.emplace(font);
     }
   } catch (const nlohmann::json::exception&) {
     logger_->warn(_ST("Cannot load fonts database: \"{}\""),
@@ -162,14 +161,19 @@ std::vector<AString> FontParser::FindFileInDir(const AString& dir,
 }
 
 void FontParser::GetFontInfo(const AString& font_path) {
-  std::string hash;
-  if (ExistInDB(font_path, hash)) {
+  std::pair<AString, FontInfo> font_info;
+  std::string last_write_time;
+  std::vector<std::unordered_multimap<AString, FontInfo>::iterator> iters_found;
+  if (ExistInDB(font_path, last_write_time, iters_found)) {
+    for (const auto& iter : iters_found) {
+      std::lock_guard font_list_lock(mtx_);
+      font_list_.emplace(*iter);
+    }
     return;
   }
   std::vector<std::string> families;
   std::vector<std::string> fullnames;
   std::vector<std::string> psnames;
-  FontInfo font_info;
   FT_Library ft_library;
   FT_Init_FreeType(&ft_library);
   FT_StreamRec ft_stream = {};
@@ -231,23 +235,24 @@ void FontParser::GetFontInfo(const AString& font_path) {
     if (families.empty() && fullnames.empty() && psnames.empty()) {
       continue;
     }
-    font_info.slant = 110 * !!(ft_face->style_flags & FT_STYLE_FLAG_ITALIC);
-    font_info.weight = AssFaceGetWeight(ft_face);
-    if (font_info.slant < 0 || font_info.slant > 110)
-      font_info.slant = 0;
-    if (font_info.weight < 100 || font_info.weight > 900)
-      font_info.weight = 400;
-    font_info.families = families;
-    font_info.fullnames = fullnames;
-    font_info.psnames = psnames;
-    font_info.path = font_path;
-    font_info.index = face_idx;
-    font_info.hash = hash;
+    font_info.second.slant =
+        110 * !!(ft_face->style_flags & FT_STYLE_FLAG_ITALIC);
+    font_info.second.weight = AssFaceGetWeight(ft_face);
+    if (font_info.second.slant < 0 || font_info.second.slant > 110)
+      font_info.second.slant = 0;
+    if (font_info.second.weight < 100 || font_info.second.weight > 900)
+      font_info.second.weight = 400;
+    font_info.second.families = families;
+    font_info.second.fullnames = fullnames;
+    font_info.second.psnames = psnames;
+    font_info.first = font_path;
+    font_info.second.index = face_idx;
+    font_info.second.last_write_time = last_write_time;
     std::lock_guard font_list_lock(mtx_);
-    font_list_.emplace_back(font_info);
+    font_list_.emplace(font_info);
   }
-  if (font_info.families.empty() && font_info.fullnames.empty() &&
-      font_info.psnames.empty()) {
+  if (font_info.second.families.empty() && font_info.second.fullnames.empty() &&
+      font_info.second.psnames.empty()) {
     logger_->warn(_ST("\"{}\" has no parsable name."), font_path);
   }
   FT_Done_Face(ft_face);
@@ -285,41 +290,36 @@ int FontParser::AssFaceGetWeight(const FT_Face& face) {
     return 300 * !!(face->style_flags & FT_STYLE_FLAG_BOLD) + 400;
 }
 
-bool FontParser::ExistInDB(const AString& font_path, std::string& hash) {
-  std::vector<std::vector<FontInfo>::iterator> iters_found;
-  for (auto iter = font_list_in_db_.begin(); iter != font_list_in_db_.end();
-       ++iter) {
-    iter = std::find_if(iter, font_list_in_db_.end(),
-                        [&font_path](const FontInfo& x) {
-                          if (x.path == font_path) {
-                            return true;
-                          } else {
-                            return false;
-                          }
-                        });
-    if (iter != font_list_in_db_.end()) {
-      iters_found.emplace_back(iter);
-    }
+bool FontParser::ExistInDB(
+    const AString& font_path, std::string& last_write_time,
+    std::vector<std::unordered_multimap<AString, FontInfo>::iterator>&
+        iters_found) {
+  last_write_time = GetLastWriteTime(font_path);
+  auto iter_pair = font_list_in_db_.equal_range(font_path);
+  for (auto iter = iter_pair.first; iter != iter_pair.second; ++iter) {
+    iters_found.emplace_back(iter);
   }
   if (iters_found.empty()) {
     return false;
   }
-  fs::path font(font_path);
-  std::ifstream font_file(font, std::ios::binary);
-  CryptoPP::BLAKE2b blake2b_hash;
-  CryptoPP::FileSource font_source(
-      font_file, true,
-      new CryptoPP::HashFilter(
-          blake2b_hash,
-          new CryptoPP::HexEncoder(new CryptoPP::StringSink(hash))));
-  if (iters_found[0]->hash == hash) {
+  if (iters_found[0]->second.last_write_time == last_write_time) {
     return true;
   } else {
-    for(auto iter: iters_found) {
-      font_list_in_db_.erase(iter);
-    }
     return false;
   }
+}
+
+std::string FontParser::GetLastWriteTime(const AString& font_path) {
+#ifdef _WIN32
+  auto buffer = std::make_unique<struct _stat>();
+  _wstat(font_path.c_str(), buffer.get());
+#else
+  auto buffer = std::make_unique<struct stat>();
+  stat(font_path.c_str(), buffer.get());
+#endif
+  std::stringstream ss;
+  ss << buffer->st_mtime;
+  return ss.str();
 }
 
 }  // namespace ass

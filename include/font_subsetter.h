@@ -24,6 +24,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #ifdef __cplusplus
@@ -89,8 +90,8 @@ class FontSubsetter {
 
   bool FindFont(
       const std::pair<AssParser::FontDesc, std::set<char32_t>>& font_set,
-      const std::vector<FontParser::FontInfo>& font_list, AString& found_path,
-      long& found_index);
+      const std::unordered_multimap<AString, FontParser::FontInfo>& font_list,
+      AString& found_path, long& found_index);
   bool set_subset_font_codepoint_sets();
   bool CreateSubfont(
       const std::pair<FontPath, std::set<uint32_t>>& subset_font);

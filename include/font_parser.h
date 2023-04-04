@@ -23,6 +23,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #ifdef __cplusplus
@@ -68,22 +69,25 @@ class FontParser {
     std::vector<std::string> psnames;
     int weight = 400;
     int slant = 0;
-    AString path;
     long index = 0;
-    std::string hash;
+    std::string last_write_time;
   };
 
   std::shared_ptr<spdlog::async_logger> logger_;
   std::mutex mtx_;
-  std::vector<FontInfo> font_list_;
-  std::vector<FontInfo> font_list_in_db_;
+  std::unordered_multimap<AString, FontInfo> font_list_;
+  std::unordered_multimap<AString, FontInfo> font_list_in_db_;
   std::vector<AString> fonts_path_;
 
   std::vector<AString> FindFileInDir(const AString& dir,
                                      const AString& pattern);
   void GetFontInfo(const AString& font_path);
   int AssFaceGetWeight(const FT_Face& face);
-  bool ExistInDB(const AString& font_path, std::string& hash);
+  bool ExistInDB(
+      const AString& font_path, std::string& last_write_time,
+      std::vector<std::unordered_multimap<AString, FontInfo>::iterator>&
+          iters_found);
+  std::string GetLastWriteTime(const AString& font_path);
 
   friend class FontSubsetter;
 };

@@ -45,8 +45,7 @@ class AssfontsConan(ConanFile):
                 "spdlog/1.11.0",
                 "fmt/9.1.0",
                 "cli11/2.3.1",
-                "pcre2/10.42",
-                "cryptopp/8.7.0"]
+                "pcre2/10.42"]
 
     default_options = {"harfbuzz:shared": False,
                        "harfbuzz:with_freetype": False,
@@ -75,9 +74,7 @@ class AssfontsConan(ConanFile):
                        "pcre2:build_pcre2_16": False,
                        "pcre2:build_pcre2_32": False,
                        "pcre2:build_pcre2grep": False,
-                       "pcre2:support_jit": True,
-                       
-                       "cryptopp:shared": False}
+                       "pcre2:support_jit": True}
 
     def system_requirements(self):
         Apt(self).install_substitutes(["build-essential", "libgtk-3-dev"])
