@@ -178,9 +178,6 @@ void FontParser::GetFontInfo(const AString& font_path) {
     }
     return;
   }
-  std::vector<std::string> families;
-  std::vector<std::string> fullnames;
-  std::vector<std::string> psnames;
   FT_Library ft_library;
   FT_Init_FreeType(&ft_library);
   FT_StreamRec ft_stream = {};
@@ -193,7 +190,17 @@ void FontParser::GetFontInfo(const AString& font_path) {
   }
   const long n_face = ft_face->num_faces;
   for (long face_idx = 0; face_idx < n_face; ++face_idx) {
+    std::vector<std::string> families;
+    std::vector<std::string> fullnames;
+    std::vector<std::string> psnames;
     FT_Open_Face(ft_library, &open_args, face_idx, &ft_face);
+    if (FT_Has_PS_Glyph_Names(ft_face)) {
+      PS_FontInfo afont_info = nullptr;
+      if (!FT_Get_PS_Font_Info(ft_face, afont_info)) {
+        families.emplace_back(std::string(afont_info->family_name));
+        fullnames.emplace_back(std::string(afont_info->full_name));
+      }
+    }
     const unsigned int num_names = FT_Get_Sfnt_Name_Count(ft_face);
     for (unsigned int i = 0; i < num_names; i++) {
       FT_SfntName name;
