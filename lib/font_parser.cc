@@ -49,7 +49,9 @@ extern "C" {
 #include "ass_freetype.h"
 #include "ass_threadpool.h"
 
+#ifdef _WIN32
 constexpr int MAX_TCHAR = 128;
+#endif
 
 namespace fs = std::filesystem;
 
