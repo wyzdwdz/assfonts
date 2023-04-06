@@ -11,7 +11,9 @@ add_executable(${TARGET_NAME} assfonts.cc)
 target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} libassfonts)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_link_options(${TARGET_NAME} PRIVATE -s)
+    if(CMAKE_BUILD_TYPE MATCHES "Release")
+        target_link_options(${TARGET_NAME} PRIVATE -s)
+    endif()
 endif()
 
 target_include_directories(${TARGET_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include
@@ -22,7 +24,7 @@ target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
 
 target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})
 
-install(TARGETS ${TARGET_NAME} RUNTIME 
-        DESTINATION ${CMAKE_INSTALL_BINDIR} 
-        CONFIGURATIONS Release
+install(TARGETS ${TARGET_NAME} 
+        CONFIGURATIONS Release 
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} 
         COMPONENT ${TARGET_NAME})
