@@ -97,6 +97,7 @@ class FontSubsetter {
       const std::pair<FontPath, std::set<uint32_t>>& subset_font);
   bool CheckGlyph(const AString& font_path, const long& font_index,
                   const std::set<char32_t>& codepoint_set);
+  bool LowerCmp(const std::string& a, const std::string& b);
 
   friend class AssFontEmbedder;
 };
