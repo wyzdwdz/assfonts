@@ -21,7 +21,6 @@
 #define ASSFONTS_FONTPARSER_H_
 
 #include <memory>
-#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -74,14 +73,14 @@ class FontParser {
   };
 
   std::shared_ptr<spdlog::async_logger> logger_;
-  std::mutex mtx_;
   std::unordered_multimap<AString, FontInfo> font_list_;
   std::unordered_multimap<AString, FontInfo> font_list_in_db_;
   std::vector<AString> fonts_path_;
 
   std::vector<AString> FindFileInDir(const AString& dir,
                                      const AString& pattern);
-  void GetFontInfo(const AString& font_path);
+  std::unordered_multimap<AString, FontInfo> GetFontInfo(
+      const AString& font_path);
   int AssFaceGetWeight(const FT_Face& face);
   bool ExistInDB(
       const AString& font_path, std::string& last_write_time,

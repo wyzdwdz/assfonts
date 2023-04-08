@@ -45,7 +45,8 @@ class AssfontsConan(ConanFile):
                 "spdlog/1.11.0",
                 "fmt/9.1.0",
                 "cli11/2.3.1",
-                "pcre2/10.42"]
+                "pcre2/10.42",
+                "threadpool/20140926"]
 
     default_options = {"harfbuzz:shared": False,
                        "harfbuzz:with_freetype": False,

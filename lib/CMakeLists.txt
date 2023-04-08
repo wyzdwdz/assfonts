@@ -6,6 +6,7 @@ set(THIRD_PARTY_LIBS harfbuzz::harfbuzz
                      Iconv::Iconv
                      spdlog::spdlog
                      fmt::fmt
+                     threadpool::threadpool
                      ced
                      libasshdr)
 
@@ -14,8 +15,7 @@ set(TARGET_SOURCES font_parser.cc
                    font_subsetter.cc
                    ass_font_embedder.cc
                    ass_string.cc
-                   ass_freetype.cc
-                   ass_threadpool.cc)
+                   ass_freetype.cc)
 
 set(TARGET_NAME libassfonts)
 						  

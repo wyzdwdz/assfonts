@@ -104,6 +104,7 @@ bool FontSubsetter::FindFont(
     const std::pair<AssParser::FontDesc, std::set<char32_t>>& font_set,
     const std::unordered_multimap<AString, FontParser::FontInfo>& font_list,
     AString& found_path, long& found_index) {
+  auto fontname = ToLower(font_set.first.fontname);
   bool is_found = false;
   unsigned int min_score = UINT_MAX;
   unsigned int score = UINT_MAX;
@@ -116,10 +117,8 @@ bool FontSubsetter::FindFont(
   AString otf_path;
   long otf_index = 0;
   for (const auto& font : font_list) {
-    if (std::find_if(font.second.families.begin(), font.second.families.end(),
-                     [this, &font_set](const std::string& s) {
-                       return LowerCmp(s, font_set.first.fontname);
-                     }) != font.second.families.end()) {
+    if (std::find(font.second.families.begin(), font.second.families.end(),
+                  fontname) != font.second.families.end()) {
       if (ToLower(font.first.substr(font.first.size() - 4, 4)) == _ST(".otf") ||
           ToLower(font.first.substr(font.first.size() - 4, 4)) == _ST(".otc")) {
         continue;
@@ -127,16 +126,12 @@ bool FontSubsetter::FindFont(
       score = 0;
       score += std::abs(font_set.first.bold - font.second.weight);
       score += std::abs(font_set.first.italic - font.second.slant);
-    } else if ((std::find_if(font.second.fullnames.begin(),
-                             font.second.fullnames.end(),
-                             [this, &font_set](const std::string& s) {
-                               return LowerCmp(s, font_set.first.fontname);
-                             }) != font.second.fullnames.end()) ||
-               (std::find_if(font.second.psnames.begin(),
-                             font.second.psnames.end(),
-                             [this, &font_set](const std::string& s) {
-                               return LowerCmp(s, font_set.first.fontname);
-                             }) != font.second.psnames.end())) {
+    } else if ((std::find(font.second.fullnames.begin(),
+                          font.second.fullnames.end(),
+                          fontname) != font.second.fullnames.end()) ||
+               (std::find(font.second.psnames.begin(),
+                          font.second.psnames.end(),
+                          fontname) != font.second.psnames.end())) {
       if (ToLower(font.first.substr(font.first.size() - 4, 4)) == _ST(".otf") ||
           ToLower(font.first.substr(font.first.size() - 4, 4)) == _ST(".otc")) {
         continue;
@@ -163,10 +158,8 @@ bool FontSubsetter::FindFont(
   tmp_path.clear();
   tmp_index = 0;
   for (const auto& font : font_list) {
-    if (std::find_if(font.second.families.begin(), font.second.families.end(),
-                     [this, &font_set](const std::string& s) {
-                       return LowerCmp(s, font_set.first.fontname);
-                     }) != font.second.families.end()) {
+    if (std::find(font.second.families.begin(), font.second.families.end(),
+                  fontname) != font.second.families.end()) {
       if (ToLower(font.first.substr(font.first.size() - 4, 4)) == _ST(".ttf") ||
           ToLower(font.first.substr(font.first.size() - 4, 4)) == _ST(".ttc")) {
         continue;
@@ -174,16 +167,12 @@ bool FontSubsetter::FindFont(
       score = 0;
       score += std::abs(font_set.first.bold - font.second.weight);
       score += std::abs(font_set.first.italic - font.second.slant);
-    } else if ((std::find_if(font.second.fullnames.begin(),
-                             font.second.fullnames.end(),
-                             [this, &font_set](const std::string& s) {
-                               return LowerCmp(s, font_set.first.fontname);
-                             }) != font.second.fullnames.end()) ||
-               (std::find_if(font.second.psnames.begin(),
-                             font.second.psnames.end(),
-                             [this, &font_set](const std::string& s) {
-                               return LowerCmp(s, font_set.first.fontname);
-                             }) != font.second.psnames.end())) {
+    } else if ((std::find(font.second.fullnames.begin(),
+                          font.second.fullnames.end(),
+                          fontname) != font.second.fullnames.end()) ||
+               (std::find(font.second.psnames.begin(),
+                          font.second.psnames.end(),
+                          fontname) != font.second.psnames.end())) {
       if (ToLower(font.first.substr(font.first.size() - 4, 4)) == _ST(".ttf") ||
           ToLower(font.first.substr(font.first.size() - 4, 4)) == _ST(".ttc")) {
         continue;

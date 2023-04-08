@@ -22,6 +22,7 @@
 #include <exception>
 #include <filesystem>
 #include <fstream>
+#include <future>
 #include <regex>
 #include <sstream>
 #include <thread>
@@ -44,10 +45,10 @@ extern "C" {
 }
 #endif
 
+#include <ThreadPool/ThreadPool.h>
 #include <nlohmann/json.hpp>
 
 #include "ass_freetype.h"
-#include "ass_threadpool.h"
 
 #ifdef _WIN32
 constexpr int MAX_TCHAR = 128;
@@ -62,12 +63,16 @@ void FontParser::LoadFonts(const AString& fonts_dir) {
   logger_->info(_ST("Found {} font files in \"{}\". Parsing font files."),
                 fonts_path_.size(), fonts_dir);
   font_list_.reserve(fonts_path_.size());
-  unsigned int num_thread = std::thread::hardware_concurrency() + 1;
-  ThreadPool pool(num_thread);
+  ThreadPool pool(std::thread::hardware_concurrency() + 1);
+  std::vector<std::future<std::unordered_multimap<AString, FontInfo>>> results;
   for (const AString& font_path : fonts_path_) {
-    pool.LoadJob([this, font_path]() { GetFontInfo(font_path); });
+    results.emplace_back(
+        pool.enqueue([this, font_path]() { return GetFontInfo(font_path); }));
   }
-  pool.Join();
+  for (auto&& result : results) {
+    auto font_list = result.get();
+    font_list_.insert(font_list.begin(), font_list.end());
+  }
 }
 
 void FontParser::SaveDB(const AString& db_path) {
@@ -167,16 +172,16 @@ std::vector<AString> FontParser::FindFileInDir(const AString& dir,
   return res;
 }
 
-void FontParser::GetFontInfo(const AString& font_path) {
-  std::pair<AString, FontInfo> font_info;
+std::unordered_multimap<AString, FontParser::FontInfo> FontParser::GetFontInfo(
+    const AString& font_path) {
+  std::unordered_multimap<AString, FontInfo> font_list;
   std::string last_write_time;
   std::vector<std::unordered_multimap<AString, FontInfo>::iterator> iters_found;
   if (ExistInDB(font_path, last_write_time, iters_found)) {
     for (const auto& iter : iters_found) {
-      std::lock_guard font_list_lock(mtx_);
-      font_list_.emplace(*iter);
+      font_list.emplace(*iter);
     }
-    return;
+    return font_list;
   }
   FT_Library ft_library;
   FT_Init_FreeType(&ft_library);
@@ -186,10 +191,11 @@ void FontParser::GetFontInfo(const AString& font_path) {
   FT_Face ft_face;
   if (FT_Open_Face(ft_library, &open_args, -1, &ft_face)) {
     logger_->warn(_ST("\"{}\" cannot be opened."), font_path);
-    return;
+    return font_list;
   }
   const long n_face = ft_face->num_faces;
   for (long face_idx = 0; face_idx < n_face; ++face_idx) {
+    std::pair<AString, FontInfo> font_info;
     std::vector<std::string> families;
     std::vector<std::string> fullnames;
     std::vector<std::string> psnames;
@@ -228,18 +234,18 @@ void FontParser::GetFontInfo(const AString& font_path) {
         case TT_NAME_ID_FONT_FAMILY:
           if (std::find(families.begin(), families.end(), buf) ==
               families.end()) {
-            families.emplace_back(buf);
+            families.emplace_back(ToLower(buf));
           }
           break;
         case TT_NAME_ID_FULL_NAME:
           if (std::find(fullnames.begin(), fullnames.end(), buf) ==
               fullnames.end()) {
-            fullnames.emplace_back(buf);
+            fullnames.emplace_back(ToLower(buf));
           }
           break;
         case TT_NAME_ID_PS_NAME:
           if (std::find(psnames.begin(), psnames.end(), buf) == psnames.end()) {
-            psnames.emplace_back(buf);
+            psnames.emplace_back(ToLower(buf));
           }
           break;
         default:
@@ -262,15 +268,14 @@ void FontParser::GetFontInfo(const AString& font_path) {
     font_info.first = font_path;
     font_info.second.index = face_idx;
     font_info.second.last_write_time = last_write_time;
-    std::lock_guard font_list_lock(mtx_);
-    font_list_.emplace(font_info);
+    font_list.emplace(font_info);
   }
-  if (font_info.second.families.empty() && font_info.second.fullnames.empty() &&
-      font_info.second.psnames.empty()) {
+  if (font_list.empty()) {
     logger_->warn(_ST("\"{}\" has no parsable name."), font_path);
   }
   FT_Done_Face(ft_face);
   FT_Done_FreeType(ft_library);
+  return font_list;
 }
 
 int FontParser::AssFaceGetWeight(const FT_Face& face) {

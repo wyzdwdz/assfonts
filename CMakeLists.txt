@@ -13,6 +13,7 @@ find_package(Iconv REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
 find_package(CLI11 REQUIRED)
+find_package(threadpool REQUIRED)
 
 # set(VERSION_MAJOR 0)
 # set(VERSION_MINOR 0)
@@ -26,7 +27,8 @@ set(THIRD_PARTY_INCLUDE_DIRS ${harfbuzz_INCLUDE_DIR}
                              ${Iconv_INCLUDE_DIR}
                              ${spdlog_INCLUDE_DIR}
                              ${fmt_INCLUDE_DIR}
-                             ${CLI11_INCLUDE_DIR})
+                             ${CLI11_INCLUDE_DIR}
+                             ${threadpool_INCLUDE_DIR})
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     if(CMAKE_BUILD_TYPE MATCHES "Debug")
@@ -36,7 +38,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     endif()
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     if(CMAKE_BUILD_TYPE MATCHES "Debug")
-        set(COMPILE_OPTIONS -Og -Wall -fPIC)
+        set(COMPILE_OPTIONS -O0 -Wall -fPIC)
     elseif(CMAKE_BUILD_TYPE MATCHES "Release")
         set(COMPILE_OPTIONS -O3 -Wall -Werror -fPIC)
     endif()

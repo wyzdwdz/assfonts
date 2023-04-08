@@ -30,7 +30,13 @@
 #include <Windows.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" {
 #include <iconv.h>
+#endif
+#ifdef __cplusplus
+}
+#endif
 
 namespace ass {
 
@@ -54,10 +60,7 @@ std::u32string Trim(const std::u32string& str) {
 }
 
 std::string ToLower(const std::string& str) {
-  std::string res = str;
-  std::transform(res.begin(), res.end(), res.begin(),
-                 [](unsigned char c) { return std::tolower(c); });
-  return res;
+  return WideToU8(ToLower(U8ToWide(str)));
 }
 
 std::wstring ToLower(const std::wstring& str) {
@@ -125,7 +128,7 @@ std::u32string U8ToU32(const std::string& str_u8) {
   IconvConvert(str_u8, str_u32_narrow, "UTF-8", "UTF-32BE");
   str_u32.resize(str_u32_narrow.size() / 4);
   for (size_t i = 0; i < str_u32.size(); ++i) {
-    if (IS_BIG_ENDIAN) {
+    if (endian::native == endian::big) {
       str_u32[i] =
           (static_cast<unsigned char>(str_u32_narrow[i * 4]) << 0) |
           (static_cast<unsigned char>(str_u32_narrow[i * 4 + 1]) << 8) |
@@ -147,7 +150,7 @@ std::string U32ToU8(const std::u32string& str_u32) {
   std::string str_u32_narrow;
   str_u32_narrow.resize(str_u32.size() * 4);
   for (size_t i = 0; i < str_u32.size(); ++i) {
-    if (IS_BIG_ENDIAN) {
+    if (endian::native == endian::big) {
       str_u32_narrow[i * 4] =
           static_cast<char>(static_cast<uint32_t>(str_u32[i]) >> 0);
       str_u32_narrow[i * 4 + 1] =
@@ -171,28 +174,49 @@ std::string U32ToU8(const std::u32string& str_u32) {
   return str_u8;
 }
 
-#ifdef _WIN32
 std::wstring U8ToWide(const std::string& str) {
+#ifdef _WIN32
   std::wstring w_str;
-  int w_len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(),
-                                  static_cast<int>(str.size()), NULL, 0);
+  MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()),
+                      NULL, 0);
   w_str.resize(w_len);
   MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()),
-                      &w_str[0], static_cast<int>(w_str.size()));
+                      w_str.c_str(), static_cast<int>(w_str.size()));
   return w_str;
+#else
+  std::wstring w_str;
+  int offset = 0;
+  size_t index = 0;
+  for (wchar_t wc; (offset = std::mbtowc(&wc, str.c_str() + index,
+                                         str.length() - index)) > 0;
+       index += offset) {
+    w_str.push_back(wc);
+  }
+  return w_str;
+#endif
 }
 
 std::string WideToU8(const std::wstring& w_str) {
+#ifdef _WIN32
   std::string str;
-  int len =
-      WideCharToMultiByte(CP_UTF8, 0, w_str.c_str(),
-                          static_cast<int>(w_str.size()), NULL, 0, NULL, NULL);
+  WideCharToMultiByte(CP_UTF8, 0, w_str.c_str(), static_cast<int>(w_str.size()),
+                      NULL, 0, NULL, NULL);
   str.resize(len);
   WideCharToMultiByte(CP_UTF8, 0, w_str.c_str(), static_cast<int>(w_str.size()),
                       &str[0], static_cast<int>(str.size()), NULL, NULL);
   return str;
-}
+#else
+  std::string str;
+  for (const auto& wc : w_str) {
+    char c[MB_CUR_MAX];
+    int len = std::wctomb(c, wc);
+    if (len > 0) {
+      str.append(std::string(c, len));
+    };
+  }
+  return str;
 #endif
+}
 
 int StringToInt(const std::string& str) {
   int res = 0;

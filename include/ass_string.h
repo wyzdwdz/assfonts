@@ -37,17 +37,19 @@ using AString = std::string;
 
 #endif
 
-inline bool is_big_endian() {
-  union {
-    uint32_t i;
-    char c[4];
-  } uni = {0x01020304};
-  return uni.c[0] == 1;
-}
-
-static const bool IS_BIG_ENDIAN = is_big_endian();
-
 namespace ass {
+
+enum class endian {
+#ifdef _WIN32
+  little = 0,
+  big = 1,
+  native = little
+#else
+  little = __ORDER_LITTLE_ENDIAN__,
+  big = __ORDER_BIG_ENDIAN__,
+  native = __BYTE_ORDER__
+#endif
+};
 
 std::string Trim(const std::string& str);
 std::u32string Trim(const std::u32string& str);
@@ -65,10 +67,8 @@ bool IconvConvert(const std::string& in, std::string& out,
 std::u32string U8ToU32(const std::string& str_u8);
 std::string U32ToU8(const std::u32string& str_u32);
 
-#ifdef _WIN32
 std::wstring U8ToWide(const std::string& str);
 std::string WideToU8(const std::wstring& str);
-#endif
 
 int StringToInt(const std::string& str);
 int StringToInt(const std::u32string& str_u32);

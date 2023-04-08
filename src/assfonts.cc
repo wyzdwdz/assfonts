@@ -17,6 +17,7 @@
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
+#include <clocale>
 #include <cstdlib>
 #include <filesystem>
 #include <memory>
@@ -65,6 +66,15 @@ int main(int argc, char** argv) {
   auto logger = std::make_shared<spdlog::async_logger>("main", fmt_sink,
                                                        spdlog::thread_pool());
   spdlog::register_logger(logger);
+
+#ifndef _WIN32
+  auto loc = std::setlocale(LC_ALL, "");
+  if (loc == nullptr) {
+    logger->error("Install system locale failed.");
+    spdlog::shutdown();
+    return 0;
+  }
+#endif
 
   ass::AssParser ap(fmt_sink);
   ass::FontParser fp(fmt_sink);
