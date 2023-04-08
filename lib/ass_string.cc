@@ -65,8 +65,14 @@ std::string ToLower(const std::string& str) {
 
 std::wstring ToLower(const std::wstring& str) {
   std::wstring res = str;
+#ifdef _WIN32
+  _locale_t loc = _wcreate_locale(LC_ALL, L"");
+  std::transform(res.begin(), res.end(), res.begin(),
+                 [&loc](wchar_t c) { return _towlower_l(c, loc); });
+#else
   std::transform(res.begin(), res.end(), res.begin(),
                  [](wchar_t c) { return std::towlower(c); });
+#endif
   return res;
 }
 
@@ -177,11 +183,12 @@ std::string U32ToU8(const std::u32string& str_u32) {
 std::wstring U8ToWide(const std::string& str) {
 #ifdef _WIN32
   std::wstring w_str;
-  MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()),
-                      NULL, 0);
+  auto w_len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(),
+                                   static_cast<int>(str.size()), NULL, 0);
   w_str.resize(w_len);
   MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()),
-                      w_str.c_str(), static_cast<int>(w_str.size()));
+                      const_cast<wchar_t*>(w_str.c_str()),
+                      static_cast<int>(w_str.size()));
   return w_str;
 #else
   std::wstring w_str;
@@ -199,11 +206,13 @@ std::wstring U8ToWide(const std::string& str) {
 std::string WideToU8(const std::wstring& w_str) {
 #ifdef _WIN32
   std::string str;
-  WideCharToMultiByte(CP_UTF8, 0, w_str.c_str(), static_cast<int>(w_str.size()),
-                      NULL, 0, NULL, NULL);
+  auto len =
+      WideCharToMultiByte(CP_UTF8, 0, w_str.c_str(),
+                          static_cast<int>(w_str.size()), NULL, 0, NULL, NULL);
   str.resize(len);
   WideCharToMultiByte(CP_UTF8, 0, w_str.c_str(), static_cast<int>(w_str.size()),
-                      &str[0], static_cast<int>(str.size()), NULL, NULL);
+                      const_cast<char*>(str.c_str()),
+                      static_cast<int>(str.size()), NULL, NULL);
   return str;
 #else
   std::string str;
