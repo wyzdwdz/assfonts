@@ -338,18 +338,12 @@ bool AssParser::set_font_sets() {
     std::u32string w_dialogue = U8ToU32(dialogue.dialogue[10]);
     auto wch = w_dialogue.begin();
     font_desc = font_desc_style;
-    while (true) {
-      if (wch == w_dialogue.end()) {
-        break;
-      }
+    while (wch != w_dialogue.end()) {
       if (*wch == U'\\') {
         if ((wch + 1) != w_dialogue.end() &&
             (*(wch + 1) == U'h' || *(wch + 1) == U'n' || *(wch + 1) == U'N')) {
-          if ((wch + 2) != w_dialogue.end()) {
-            wch = wch + 2;
-          } else {
-            break;
-          }
+          wch = wch + 2;
+          continue;
         }
       }
       if (*wch == U'{') {

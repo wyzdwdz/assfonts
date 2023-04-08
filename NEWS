@@ -1,8 +1,9 @@
-Overview of changes leading to v0.3.6
+Overview of changes leading to v0.3.6 and v0.3.7
 Saturday, April 8, 2023
 ====================================
 - Incremental update for font database
 - Fix font parsing bug
+- Fix ass parsing bugs
 
 Overview of changes leading to v0.3.5
 Monday, March 27, 2023
