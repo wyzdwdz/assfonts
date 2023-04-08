@@ -20,9 +20,9 @@ Package Manager ---- Conan version 1.57.0
 
 - [CLI11](https://github.com/CLIUtils/CLI11)
 
-- [pcre2](https://www.pcre.org/
+- [pcre2](https://www.pcre.org/)
 
-- [ThreadPool](https://github.com/progschj/ThreadPool))
+- [ThreadPool](https://github.com/progschj/ThreadPool)
 
 ### How to build
 
