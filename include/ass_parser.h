@@ -42,19 +42,27 @@ class AssParser {
                                                      spdlog::thread_pool());
     spdlog::register_logger(logger_);
   };
+
   template <typename T>
   AssParser(const AString& ass_file_path, std::shared_ptr<T> sink)
       : AssParser(sink) {
     ReadFile(ass_file_path);
   }
+
   ~AssParser() { spdlog::drop("ass_parser"); };
 
   void set_output_dir_path(const AString& output_dir_path);
+
   bool ReadFile(const AString& ass_file_path);
+
   bool get_has_fonts() const;
+
   std::vector<std::string> get_text() const;
+
   AString get_ass_path() const;
+
   bool Recolorize(const AString& ass_file_path, const unsigned int& brightness);
+
   void Clear();
 
  private:
@@ -90,26 +98,59 @@ class AssParser {
   };
 
   std::shared_ptr<spdlog::async_logger> logger_;
+
   AString ass_path_;
   AString output_dir_path_;
+
   std::vector<TextInfo> text_;
   std::vector<std::vector<std::string>> styles_;
+  std::vector<DialogueInfo> dialogues_;
+
   bool has_default_style_ = false;
   bool has_fonts_ = false;
-  std::vector<DialogueInfo> dialogues_;
+
   std::map<FontDesc, std::set<char32_t>> font_sets_;
   std::map<std::string, FontDesc> stylename_fontdesc_;
 
+  void SkipFontsLines(std::istringstream& is, unsigned int& line_num);
+
   bool GetUTF8(const std::ifstream& is, std::string& res);
+
   bool FindTitle(const std::string& line, const std::string& title);
-  bool ParseLine(const std::string& line, const unsigned int& num_field,
+
+  bool ParseLine(const std::string& line, const unsigned int num_field,
                  std::vector<std::string>& res);
+
   bool ParseAss();
+  bool GetStyles(std::vector<TextInfo>::iterator& line,
+                 const std::vector<TextInfo>::iterator& end, bool& has_style);
+  bool GetEvents(std::vector<TextInfo>::iterator& line,
+                 const std::vector<TextInfo>::iterator& end, bool& has_event);
+
   void set_stylename_fontdesc();
-  bool set_font_sets();
-  bool StyleOverride(const std::u32string& code, FontDesc& font_desc,
+  int CalculateBold(int value);
+  int CalculateItalic(int value);
+
+  void set_font_sets();
+  FontDesc GetFontDescStyle(const DialogueInfo& dialogue);
+  void GetCharacter(std::u32string::iterator& wch,
+                    const std::u32string::iterator& end,
+                    const FontDesc& font_desc_style, FontDesc& font_desc,
+                    const unsigned int line_num);
+
+  void StyleOverride(const std::u32string& code, FontDesc& font_desc,
                      const FontDesc& font_desc_style,
-                     const unsigned int& line_num);
+                     const unsigned int line_num);
+  void ChangeFontname(const std::u32string& code, FontDesc& font_desc,
+                      const FontDesc& font_desc_style);
+  void ChangeBold(const std::u32string& code, FontDesc& font_desc,
+                  const FontDesc& font_desc_style);
+  void ChangeItalic(const std::u32string& code, FontDesc& font_desc,
+                    const FontDesc& font_desc_style);
+  void ChangeStyle(const std::u32string& code, FontDesc& font_desc,
+                   const FontDesc& font_desc_style,
+                   const unsigned int line_num);
+
   void CleanFonts();
 
   friend class FontSubsetter;
