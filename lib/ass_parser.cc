@@ -448,13 +448,12 @@ void AssParser::GetCharacter(std::u32string::iterator& wch,
     auto pos = override.find(U'}', 0);
 
     if (pos == std::u32string::npos) {
-
       if (!font_desc_style.fontname.empty()) {
         font_sets_[font_desc].insert(*wch);
       }
       ++wch;
       return;
-
+      
     } else {
       override = std::u32string(wch + 1, wch + pos);
       StyleOverride(override, font_desc, font_desc_style, line_num);
