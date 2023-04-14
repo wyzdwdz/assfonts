@@ -295,12 +295,15 @@ bool AssParser::GetStyles(std::vector<TextInfo>::iterator& line,
   if (FindTitle((*line).text, "[V4+ Styles]") ||
       FindTitle((*line).text, "[V4 Styles]")) {
     ++line;
+
     for (; line != text_.end(); ++line) {
       if (FindTitle((*line).text, "[")) {
         break;
       }
+
       if (FindTitle((*line).text, "Style:")) {
         std::vector<std::string> res;
+        
         if (!ParseLine((*line).text, 10, res)) {
           return false;
         }
@@ -402,11 +405,13 @@ void AssParser::set_font_sets() {
   }
 
   std::vector<FontDesc> keys_for_del;
+
   for (const auto& font_set : font_sets_) {
     if (font_set.second.size() == 0) {
       keys_for_del.emplace_back(font_set.first);
     }
   }
+  
   for (const auto& key_del : keys_for_del) {
     font_sets_.erase(key_del);
   }

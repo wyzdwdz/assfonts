@@ -49,16 +49,21 @@ class FontParser {
                                                      spdlog::thread_pool());
     spdlog::register_logger(logger_);
   };
+
   template <typename T>
   FontParser(const std::string& fonts_dir, std::shared_ptr<T> sink)
       : FontParser(sink) {
     LoadFonts(fonts_dir);
   };
+
   ~FontParser() { spdlog::drop("font_parser"); };
 
   void LoadFonts(const AString& fonts_dir);
+
   void SaveDB(const AString& db_path);
+
   void LoadDB(const AString& db_path);
+
   void clean_font_list();
 
  private:
@@ -79,8 +84,24 @@ class FontParser {
 
   std::vector<AString> FindFileInDir(const AString& dir,
                                      const AString& pattern);
+
   std::unordered_multimap<AString, FontInfo> GetFontInfo(
       const AString& font_path);
+  std::unordered_multimap<AString, FontInfo> GetFontInfoFromDB(
+      const AString& font_path, const std::string& last_write_time,
+      const std::vector<std::unordered_multimap<AString, FontInfo>::iterator>&
+          iters_found);
+  bool OpenFontFace(FT_Library& ft_library, const FT_Open_Args& open_args,
+                    FT_Face& ft_face, const AString& font_path);
+  void GetFontInfoFromFace(
+      FT_Library& ft_library, FT_Face& ft_face, const FT_Open_Args& open_args,
+      const long face_idx,
+      std::unordered_multimap<AString, FontInfo>& font_list,
+      const AString& font_path, const std::string& last_write_time);
+  void ParseFontName(const FT_Face& ft_face, const unsigned int name_idx,
+                     std::vector<std::string>& families,
+                     std::vector<std::string>& fullnames,
+                     std::vector<std::string>& psnames);
   int AssFaceGetWeight(const FT_Face& face);
   bool ExistInDB(
       const AString& font_path, std::string& last_write_time,
