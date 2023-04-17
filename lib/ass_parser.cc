@@ -527,7 +527,7 @@ void AssParser::ChangeBold(const std::u32string& code, FontDesc& font_desc,
   while (true) {
     pos = code.find(U"\\b", pos);
 
-    if (pos != std::u32string::npos) {
+    if (pos == std::u32string::npos) {
       break;
     }
 

@@ -430,12 +430,14 @@ std::string FontParser::GetLastWriteTime(const AString& font_path) {
                   OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
   if (file_handle == INVALID_HANDLE_VALUE) {
+    CloseHandle(file_handle);
     return std::string();
   }
 
   TCHAR date[MAX_TCHAR], time[MAX_TCHAR];
 
   if (!GetFileTime(file_handle, NULL, NULL, &file_time)) {
+    CloseHandle(file_handle);
     return std::string();
   }
 
@@ -443,14 +445,17 @@ std::string FontParser::GetLastWriteTime(const AString& font_path) {
 
   if (!GetDateFormat(LOCALE_SYSTEM_DEFAULT, NULL, &system_time,
                      "yyyy'-'MM'-'dd", date, MAX_TCHAR)) {
+    CloseHandle(file_handle);
     return std::string();
   }
 
   if (!GetTimeFormat(LOCALE_SYSTEM_DEFAULT, NULL, &system_time, "HH':'mm':'ss",
                      time, MAX_TCHAR)) {
+    CloseHandle(file_handle);
     return std::string();
   }
 
+  CloseHandle(file_handle);
   return "UTC " + std::string(date) + " " + std::string(time);
 #else
   auto buffer = std::make_unique<struct stat>();

@@ -65,14 +65,8 @@ std::string ToLower(const std::string& str) {
 
 std::wstring ToLower(const std::wstring& str) {
   std::wstring res = str;
-#ifdef _WIN32
-  _locale_t loc = _wcreate_locale(LC_ALL, L"");
-  std::transform(res.begin(), res.end(), res.begin(),
-                 [&loc](wchar_t c) { return _towlower_l(c, loc); });
-#else
   std::transform(res.begin(), res.end(), res.begin(),
                  [](wchar_t c) { return std::towlower(c); });
-#endif
   return res;
 }
 

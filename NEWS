@@ -1,4 +1,9 @@
 Overview of changes leading to v0.3.6 and v0.3.7
+Monday, April 17, 2023
+====================================
+- Fix Windows memory leak
+
+Overview of changes leading to v0.3.6 and v0.3.7
 Saturday, April 8, 2023
 ====================================
 - Incremental update for font database

@@ -386,12 +386,10 @@ GuiFrame::GuiFrame(wxWindow* parent, wxWindowID id, const wxString& title,
   logger_->info("assfonts-gui v{}.{}.{}", VERSION_MAJOR, VERSION_MINOR,
                 VERSION_PATCH);
 
-#ifndef _WIN32
   auto loc = std::setlocale(LC_ALL, "");
   if (loc == nullptr) {
     logger_->error("Install system locale failed.");
   }
-#endif
 
   auto db_path = fs::path(db_text_->GetValue().ToAString() +
                           fs::path::preferred_separator + _ST("fonts.json"));
