@@ -292,54 +292,62 @@ bool AssParser::ParseAss() {
 bool AssParser::GetStyles(std::vector<TextInfo>::iterator& line,
                           const std::vector<TextInfo>::iterator& end,
                           bool& has_style) {
-  if (FindTitle((*line).text, "[V4+ Styles]") ||
-      FindTitle((*line).text, "[V4 Styles]")) {
-    ++line;
-
-    for (; line != text_.end(); ++line) {
-      if (FindTitle((*line).text, "[")) {
-        break;
-      }
-
-      if (FindTitle((*line).text, "Style:")) {
-        std::vector<std::string> res;
-        
-        if (!ParseLine((*line).text, 10, res)) {
-          return false;
-        }
-        styles_.emplace_back(res);
-      }
-    }
-    has_style = true;
+  if (!FindTitle((*line).text, "[V4+ Styles]") &&
+      !FindTitle((*line).text, "[V4 Styles]")) {
+    return true;
   }
+
+  ++line;
+
+  for (; line != text_.end(); ++line) {
+    if (FindTitle((*line).text, "[")) {
+      break;
+    }
+
+    if (!FindTitle((*line).text, "Style:")) {
+      continue;
+    }
+
+    std::vector<std::string> res;
+    if (!ParseLine((*line).text, 10, res)) {
+      return false;
+    }
+    styles_.emplace_back(res);
+  }
+  has_style = true;
+
   return true;
 }
 
 bool AssParser::GetEvents(std::vector<TextInfo>::iterator& line,
                           const std::vector<TextInfo>::iterator& end,
                           bool& has_event) {
-  if (FindTitle((*line).text, "[Events]")) {
-    ++line;
+  if (!FindTitle((*line).text, "[Events]")) {
+    return true;
+  }
 
-    for (; line != text_.end(); ++line) {
-      if (FindTitle((*line).text, "[")) {
-        break;
-      }
+  ++line;
 
-      if (FindTitle((*line).text, "Dialogue:")) {
-        std::vector<std::string> res;
-
-        if (!ParseLine((*line).text, 10, res)) {
-          return false;
-        }
-
-        DialogueInfo dialogue_info = {(*line).line_num, res};
-        dialogues_.emplace_back(dialogue_info);
-      }
+  for (; line != text_.end(); ++line) {
+    if (FindTitle((*line).text, "[")) {
+      break;
     }
 
-    has_event = true;
+    if (!FindTitle((*line).text, "Dialogue:")) {
+      continue;
+    }
+
+    std::vector<std::string> res;
+    if (!ParseLine((*line).text, 10, res)) {
+      return false;
+    }
+
+    DialogueInfo dialogue_info = {(*line).line_num, res};
+    dialogues_.emplace_back(dialogue_info);
   }
+
+  has_event = true;
+
   return true;
 }
 
@@ -411,7 +419,7 @@ void AssParser::set_font_sets() {
       keys_for_del.emplace_back(font_set.first);
     }
   }
-  
+
   for (const auto& key_del : keys_for_del) {
     font_sets_.erase(key_del);
   }
@@ -458,7 +466,7 @@ void AssParser::GetCharacter(std::u32string::iterator& wch,
       }
       ++wch;
       return;
-      
+
     } else {
       override = std::u32string(wch + 1, wch + pos);
       StyleOverride(override, font_desc, font_desc_style, line_num);
@@ -505,18 +513,16 @@ void AssParser::ChangeFontname(const std::u32string& code, FontDesc& font_desc,
       ++pos;
     }
 
-    if (!Trim(font).empty()) {
-      std::string fontname = U32ToU8(Trim(font));
-
-      if (fontname[0] == '@') {
-        fontname.erase(0, 1);
-      }
-
-      font_desc.fontname = fontname;
-
-    } else {
+    if (Trim(font).empty()) {
       font_desc.fontname = font_desc_style.fontname;
+      continue;
     }
+
+    std::string fontname = U32ToU8(Trim(font));
+    if (fontname[0] == '@') {
+      fontname.erase(0, 1);
+    }
+    font_desc.fontname = fontname;
   }
 }
 
@@ -619,17 +625,15 @@ void AssParser::ChangeStyle(const std::u32string& code, FontDesc& font_desc,
 
     std::string style_name = U32ToU8(Trim(style));
 
-    if (!style_name.empty()) {
-
-      if (stylename_fontdesc_.find(style_name) == stylename_fontdesc_.end()) {
-        logger_->warn("Style \"{}\" not found. (Line {})", style_name,
-                      line_num);
-      } else {
-        font_desc = stylename_fontdesc_[style_name];
-      }
-
-    } else {
+    if (style_name.empty()) {
       font_desc = font_desc_style;
+      continue;
+    }
+
+    if (stylename_fontdesc_.find(style_name) == stylename_fontdesc_.end()) {
+      logger_->warn("Style \"{}\" not found. (Line {})", style_name, line_num);
+    } else {
+      font_desc = stylename_fontdesc_[style_name];
     }
   }
 }
