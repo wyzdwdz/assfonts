@@ -1,4 +1,4 @@
-Overview of changes leading to v0.3.6 and v0.3.7
+Overview of changes leading to v0.3.8
 Monday, April 17, 2023
 ====================================
 - Fix Windows memory leak
