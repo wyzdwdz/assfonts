@@ -103,8 +103,8 @@ std::istream& SafeGetLine(std::istream& is, std::string& t) {
 
 bool IconvConvert(const std::string& in, std::string& out,
                   const std::string& from_code, const std::string& to_code) {
-  iconv_t cd = iconv_open(to_code.c_str(), from_code.c_str());
-  if (cd == reinterpret_cast<iconv_t>(-1)) {
+  IconvT cd(to_code.c_str(), from_code.c_str());
+  if (cd.get() == reinterpret_cast<iconv_t>(-1)) {
     return false;
   }
   char* inbuf = const_cast<char*>(in.c_str());
@@ -112,13 +112,11 @@ bool IconvConvert(const std::string& in, std::string& out,
   auto outbuf = std::make_unique<char[]>(insize * 4);
   char* outbuf_tmp = outbuf.get();
   size_t outsize = insize * 4;
-  size_t err = iconv(cd, &inbuf, &insize, &outbuf_tmp, &outsize);
+  size_t err = iconv(cd.get(), &inbuf, &insize, &outbuf_tmp, &outsize);
   if (err == static_cast<size_t>(-1)) {
-    iconv_close(cd);
     return false;
   }
   out = std::string(outbuf.get(), outbuf_tmp - outbuf.get());
-  iconv_close(cd);
   return true;
 }
 

@@ -23,6 +23,14 @@
 #include <iostream>
 #include <string>
 
+#ifdef __cplusplus
+extern "C" {
+#include <iconv.h>
+#endif
+#ifdef __cplusplus
+}
+#endif
+
 #ifdef _WIN32
 
 using AChar = wchar_t;
@@ -49,6 +57,19 @@ enum class endian {
   big = __ORDER_BIG_ENDIAN__,
   native = __BYTE_ORDER__
 #endif
+};
+
+class IconvT {
+ public:
+  IconvT(const char* in_code, const char* out_code) {
+    cd_ = iconv_open(in_code, out_code);
+  }
+  ~IconvT() { iconv_close(cd_); }
+
+  inline iconv_t& get() { return cd_; }
+
+ private:
+  iconv_t cd_;
 };
 
 std::string Trim(const std::string& str);

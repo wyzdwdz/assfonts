@@ -201,30 +201,27 @@ std::unordered_multimap<AString, FontParser::FontInfo> FontParser::GetFontInfo(
 
   std::unordered_multimap<AString, FontInfo> font_list;
 
-  FT_Library ft_library;
-  FT_Init_FreeType(&ft_library);
+  FTLibrary ft_library;
+  FT_Init_FreeType(&ft_library.get());
 
   FT_StreamRec ft_stream = {};
   FT_Open_Args open_args = {};
   NewOpenArgs(font_path, ft_stream, open_args);
 
-  FT_Face ft_face;
-  if (!OpenFontFace(ft_library, open_args, ft_face, font_path)) {
+  FTFace ft_face;
+  if (!OpenFontFace(ft_library.get(), open_args, ft_face.get(), font_path)) {
     return font_list;
   }
 
-  const long n_face = ft_face->num_faces;
+  const long n_face = ft_face.get()->num_faces;
   for (long face_idx = 0; face_idx < n_face; ++face_idx) {
-    GetFontInfoFromFace(ft_library, ft_face, open_args, face_idx, font_list,
-                        font_path, last_write_time);
+    GetFontInfoFromFace(ft_library.get(), ft_face.get(), open_args, face_idx,
+                        font_list, font_path, last_write_time);
   }
 
   if (font_list.empty()) {
     logger_->warn(_ST("\"{}\" has no parsable name."), font_path);
   }
-
-  FT_Done_Face(ft_face);
-  FT_Done_FreeType(ft_library);
 
   return font_list;
 }

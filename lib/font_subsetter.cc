@@ -28,6 +28,8 @@
 #include <fmt/core.h>
 #include <harfbuzz/hb-subset.h>
 
+#include "ass_harfbuzz.h"
+
 static const std::u32string ADDITIONAL_CODEPOINTS =
     U"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -263,42 +265,31 @@ bool FontSubsetter::CreateSubfont(
   const auto font_size = fs::file_size(subset_font.first.path);
   std::string font_data(font_size, '\0');
   is.read(&font_data[0], font_size);
-  hb_blob_t* hb_blob = hb_blob_create_or_fail(
-      &font_data[0], static_cast<unsigned int>(font_size),
-      HB_MEMORY_MODE_READONLY, NULL, NULL);
-  hb_face_t* hb_face = hb_face_create(hb_blob, subset_font.first.index);
-  hb_set_t* codepoint_set = hb_set_create();
+  HbBlob hb_blob(hb_blob_create_or_fail(&font_data[0],
+                                        static_cast<unsigned int>(font_size),
+                                        HB_MEMORY_MODE_READONLY, NULL, NULL));
+  HbFace hb_face(hb_face_create(hb_blob.get(), subset_font.first.index));
+  HbSet codepoint_set(hb_set_create());
   for (const auto& codepoint : subset_font.second) {
-    hb_set_add(codepoint_set, codepoint);
+    hb_set_add(codepoint_set.get(), codepoint);
   }
-  hb_subset_input_t* input = hb_subset_input_create_or_fail();
+  HbSubsetInput input(hb_subset_input_create_or_fail());
   hb_set_t* input_codepoints =
-      hb_subset_input_set(input, HB_SUBSET_SETS_UNICODE);
+      hb_subset_input_set(input.get(), HB_SUBSET_SETS_UNICODE);
   hb_set_t* input_namelangid =
-      hb_subset_input_set(input, HB_SUBSET_SETS_NAME_LANG_ID);
+      hb_subset_input_set(input.get(), HB_SUBSET_SETS_NAME_LANG_ID);
   hb_set_clear(input_namelangid);
   hb_set_invert(input_namelangid);
-  hb_set_union(input_codepoints, codepoint_set);
-  hb_face_t* subset_face = hb_subset_or_fail(hb_face, input);
-  if (subset_face == nullptr) {
-    hb_blob_destroy(hb_blob);
-    hb_face_destroy(subset_face);
-    hb_face_destroy(hb_face);
-    hb_set_destroy(codepoint_set);
-    hb_subset_input_destroy(input);
+  hb_set_union(input_codepoints, codepoint_set.get());
+  HbFace subset_face(hb_subset_or_fail(hb_face.get(), input.get()));
+  if (subset_face.get() == nullptr) {
     return false;
   }
-  hb_blob_t* subset_blob = hb_face_reference_blob(subset_face);
+  HbBlob subset_blob(hb_face_reference_blob(subset_face.get()));
   unsigned int len = 0;
-  const char* subset_data = hb_blob_get_data(subset_blob, &len);
+  const char* subset_data = hb_blob_get_data(subset_blob.get(), &len);
   std::ofstream subset_file(output_filepath.native(), std::ios::binary);
   subset_file.write(subset_data, len);
-  hb_blob_destroy(subset_blob);
-  hb_blob_destroy(hb_blob);
-  hb_face_destroy(subset_face);
-  hb_face_destroy(hb_face);
-  hb_set_destroy(codepoint_set);
-  hb_subset_input_destroy(input);
   if (len == 0) {
     return false;
   }
