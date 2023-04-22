@@ -81,7 +81,10 @@ bool AssParser::ReadFile(const AString& ass_file_path) {
     return false;
   }
 
-  CleanFonts();
+  if (!CleanFonts()) {
+    return false;
+  }
+
   return true;
 }
 
@@ -148,6 +151,10 @@ bool AssParser::Recolorize(const AString& ass_file_path,
       ass_path.stem().native() + _ST(".hdr") + ass_path.extension().native());
 
   std::ofstream os(output_file_path.native());
+  if (!os.is_open()) {
+    logger_->error(_ST("Failed to write the file: {}", ass_path.native()));
+    return false;
+  }
   os << std::string(out_text.get(), out_size);
   logger_->info(_ST("Recolored ass file has been saved in \"{}\""),
                 output_file_path.native());
@@ -638,9 +645,9 @@ void AssParser::ChangeStyle(const std::u32string& code, FontDesc& font_desc,
   }
 }
 
-void AssParser::CleanFonts() {
+bool AssParser::CleanFonts() {
   if (!has_fonts_) {
-    return;
+    return true;
   }
 
   fs::path input_path(ass_path_);
@@ -653,6 +660,10 @@ void AssParser::CleanFonts() {
       input_path.native(), output_path.native());
 
   std::ofstream os(output_path.native());
+  if (!os.is_open()) {
+    logger_->error(_ST("Failed to write the file: {}", output_path.native()));
+    return false;
+  }
   size_t num_line = 0;
 
   for (const auto& line : text_) {
@@ -663,6 +674,8 @@ void AssParser::CleanFonts() {
       os << '\n';
     }
   }
+
+  return true;
 }
 
 }  // namespace ass

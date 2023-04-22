@@ -151,7 +151,7 @@ class AssParser {
                    const FontDesc& font_desc_style,
                    const unsigned int line_num);
 
-  void CleanFonts();
+  bool CleanFonts();
 
   friend class FontSubsetter;
 };

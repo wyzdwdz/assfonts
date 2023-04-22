@@ -289,6 +289,9 @@ bool FontSubsetter::CreateSubfont(
   unsigned int len = 0;
   const char* subset_data = hb_blob_get_data(subset_blob.get(), &len);
   std::ofstream subset_file(output_filepath.native(), std::ios::binary);
+  if (!subset_file.is_open()) {
+    return false;
+  }
   subset_file.write(subset_data, len);
   if (len == 0) {
     return false;

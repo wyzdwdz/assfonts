@@ -12,7 +12,7 @@ set(RESOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/resource)
 
 if(WIN32)
     LIST(APPEND TARGET_SOURCE ${RESOURCE_DIR}/assfonts_gui.rc
-                              ${RESOURCE_DIR}/wx_dpi_aware.manifest)
+                              ${RESOURCE_DIR}/assfonts_gui.manifest)
 endif()
 
 set(INCLUDE_DIR ${RESOURCE_DIR})
