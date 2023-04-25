@@ -152,7 +152,7 @@ bool AssParser::Recolorize(const AString& ass_file_path,
 
   std::ofstream os(output_file_path.native());
   if (!os.is_open()) {
-    logger_->error(_ST("Failed to write the file: {}", ass_path.native()));
+    logger_->error(_ST("Failed to write the file: {}"), ass_path.native());
     return false;
   }
   os << std::string(out_text.get(), out_size);
@@ -661,7 +661,7 @@ bool AssParser::CleanFonts() {
 
   std::ofstream os(output_path.native());
   if (!os.is_open()) {
-    logger_->error(_ST("Failed to write the file: {}", output_path.native()));
+    logger_->error(_ST("Failed to write the file: {}"), output_path.native());
     return false;
   }
   size_t num_line = 0;
