@@ -27,8 +27,8 @@ Package Manager ---- Conan version 1.57.0
 ### How to build
 
 ```
-conan install . -b=missing -s build_type=Release -c tools.cmake.cmaketoolchain.presets:max_schema_version=2
-conan build .
+chmod +x build.sh
+./build.sh
 ```
 
 ### How to use

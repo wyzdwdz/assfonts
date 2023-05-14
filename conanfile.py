@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMakeDeps, CMakeToolchain
 
 
 class CompressorRecipe(ConanFile):
@@ -35,7 +35,8 @@ class CompressorRecipe(ConanFile):
         self.options["pcre2"].support_jit=True
 
     def layout(self):
-        cmake_layout(self)
+        self.folders.build = f"build/{str(self.settings.build_type)}"
+        self.folders.generators = "build"
 
     def generate(self):
         dp = CMakeDeps(self)
@@ -46,5 +47,5 @@ class CompressorRecipe(ConanFile):
         tc.variables["VERSION_MAJOR"] = self.version.split('.')[0]
         tc.variables["VERSION_MINOR"] = self.version.split('.')[1]
         tc.variables["VERSION_PATCH"] = self.version.split('.')[2]
-
+        
         tc.generate()

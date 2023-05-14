@@ -33,7 +33,7 @@ namespace ass {
 class AssFontEmbedder {
  public:
   AssFontEmbedder(const FontSubsetter& fs, std::shared_ptr<Logger> logger)
-      : logger_(logger){};
+      : fs_(fs), logger_(logger){};
   ~AssFontEmbedder() = default;
 
   void set_output_dir_path(const AString& output_ass_path);

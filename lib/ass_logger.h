@@ -50,7 +50,7 @@ class Logger {
   template <typename... T>
   void Warn(fmt::format_string<T...> fmt, T&&... args) {
     if (log_level_ <= WARN) {
-      Log(WARN fmt, std::forward<T>(args)...);
+      Log(WARN, fmt, std::forward<T>(args)...);
     }
   }
 

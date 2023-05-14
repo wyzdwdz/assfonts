@@ -25,7 +25,7 @@
 #include <filesystem>
 #include <fstream>
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <harfbuzz/hb-subset.h>
 
 #include "ass_harfbuzz.h"
