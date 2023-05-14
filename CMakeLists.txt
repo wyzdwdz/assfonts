@@ -10,25 +10,11 @@ find_package(harfbuzz REQUIRED)
 find_package(freetype REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(Iconv REQUIRED)
-find_package(spdlog REQUIRED)
 find_package(fmt REQUIRED)
 find_package(CLI11 REQUIRED)
 find_package(threadpool REQUIRED)
-
-# set(VERSION_MAJOR 0)
-# set(VERSION_MINOR 0)
-# set(VERSION_PATCH 0)
-
-configure_file(${PROJECT_SOURCE_DIR}/include/ver.h.in ${PROJECT_BINARY_DIR}/include/ver.h)
-
-set(THIRD_PARTY_INCLUDE_DIRS ${harfbuzz_INCLUDE_DIR}
-                             ${freetype_INCLUDE_DIR}
-                             ${nlohmann_json_INCLUDE_DIR}
-                             ${Iconv_INCLUDE_DIR}
-                             ${spdlog_INCLUDE_DIR}
-                             ${fmt_INCLUDE_DIR}
-                             ${CLI11_INCLUDE_DIR}
-                             ${threadpool_INCLUDE_DIR})
+find_package(imgui REQUIRED)
+find_package(glfw3 REQUIRED)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     if(CMAKE_BUILD_TYPE MATCHES "Debug")
@@ -48,5 +34,4 @@ set(CXX_STD_VER cxx_std_17)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)
-add_subdirectory(${PROJECT_SOURCE_DIR}/gui)
 # add_subdirectory(${PROJECT_SOURCE_DIR}/test)

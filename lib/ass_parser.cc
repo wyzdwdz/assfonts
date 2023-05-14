@@ -42,7 +42,7 @@ bool AssParser::ReadFile(const AString& ass_file_path) {
   unsigned int line_num = 0;
 
   if (!ass_file.is_open()) {
-    logger_->error(_ST("\"{}\" cannot be opened."), ass_path.native());
+    logger_->Error(_ST("\"{}\" cannot be opened."), ass_path.native());
     return false;
   }
 
@@ -76,7 +76,7 @@ bool AssParser::ReadFile(const AString& ass_file_path) {
   set_font_sets();
 
   if (font_sets_.empty()) {
-    logger_->error(_ST("Failed to parse \"{}\". Format error."),
+    logger_->Error(_ST("Failed to parse \"{}\". Format error."),
                    ass_path.native());
     return false;
   }
@@ -129,7 +129,7 @@ bool AssParser::Recolorize(const AString& ass_file_path,
   std::string buf_u8;
 
   if (!ass_file.is_open()) {
-    logger_->error(_ST("\"{}\" cannot be opened."), ass_path.native());
+    logger_->Error(_ST("\"{}\" cannot be opened."), ass_path.native());
     return false;
   }
 
@@ -142,7 +142,7 @@ bool AssParser::Recolorize(const AString& ass_file_path,
 
   if (!asshdr::AssRecolor(buf_u8.c_str(), buf_u8.size(), out_text.get(),
                           out_size, brightness)) {
-    logger_->error(_ST("Recolor failed: {}"), ass_path.native());
+    logger_->Error(_ST("Recolor failed: {}"), ass_path.native());
     return false;
   }
 
@@ -152,11 +152,11 @@ bool AssParser::Recolorize(const AString& ass_file_path,
 
   std::ofstream os(output_file_path.native());
   if (!os.is_open()) {
-    logger_->error(_ST("Failed to write the file: {}"), ass_path.native());
+    logger_->Error(_ST("Failed to write the file: {}"), ass_path.native());
     return false;
   }
   os << std::string(out_text.get(), out_size);
-  logger_->info(_ST("Recolored ass file has been saved in \"{}\""),
+  logger_->Info(_ST("Recolored ass file has been saved in \"{}\""),
                 output_file_path.native());
   return true;
 }
@@ -190,14 +190,14 @@ bool AssParser::GetUTF8(const std::ifstream& is, std::string& res) {
     encode_name = "GB18030";
   }
 
-  logger_->info("Detect input file encoding:  \"{}\"", encode_name);
+  logger_->Info("Detect input file encoding:  \"{}\"", encode_name);
 
   if (encode_name == "UTF-8") {
     res = sstream.str();
   }
 
   if (!IconvConvert(sstream.str(), res, encode_name, "UTF-8")) {
-    logger_->error("Recode to \"UTF-8\" failed.");
+    logger_->Error("Recode to \"UTF-8\" failed.");
     return false;
   }
 
@@ -253,7 +253,7 @@ bool AssParser::ParseLine(const std::string& line, const unsigned int num_field,
   words.emplace_back(word);
 
   if (field < num_field - 1) {
-    logger_->error(_ST("Failed to parse \"{}\". Incorrect number of field."),
+    logger_->Error(_ST("Failed to parse \"{}\". Incorrect number of field."),
                    ass_path_);
     return false;
   }
@@ -282,13 +282,13 @@ bool AssParser::ParseAss() {
   }
 
   if (!has_style) {
-    logger_->error(_ST("Failed to parse \"{}\". No Style Title found."),
+    logger_->Error(_ST("Failed to parse \"{}\". No Style Title found."),
                    ass_path_);
     return false;
   }
 
   if (!has_event) {
-    logger_->error(_ST("Failed to parse \"{}\". No Event Title found."),
+    logger_->Error(_ST("Failed to parse \"{}\". No Event Title found."),
                    ass_path_);
     return false;
   }
@@ -441,7 +441,7 @@ AssParser::FontDesc AssParser::GetFontDescStyle(const DialogueInfo& dialogue) {
     if (has_default_style_) {
       font_desc_style = stylename_fontdesc_["Default"];
     } else {
-      logger_->warn("Style \"{}\" not found. (Line {})", dialogue.dialogue[4],
+      logger_->Warn("Style \"{}\" not found. (Line {})", dialogue.dialogue[4],
                     dialogue.line_num);
       font_desc_style.fontname = "";
     }
@@ -638,7 +638,7 @@ void AssParser::ChangeStyle(const std::u32string& code, FontDesc& font_desc,
     }
 
     if (stylename_fontdesc_.find(style_name) == stylename_fontdesc_.end()) {
-      logger_->warn("Style \"{}\" not found. (Line {})", style_name, line_num);
+      logger_->Warn("Style \"{}\" not found. (Line {})", style_name, line_num);
     } else {
       font_desc = stylename_fontdesc_[style_name];
     }
@@ -655,13 +655,13 @@ bool AssParser::CleanFonts() {
                        input_path.stem().native() + _ST(".cleaned") +
                        input_path.extension().native());
 
-  logger_->info(
+  logger_->Info(
       _ST("Found fonts in \"{}\". Delete them and save new file in \"{}\""),
       input_path.native(), output_path.native());
 
   std::ofstream os(output_path.native());
   if (!os.is_open()) {
-    logger_->error(_ST("Failed to write the file: {}"), output_path.native());
+    logger_->Error(_ST("Failed to write the file: {}"), output_path.native());
     return false;
   }
   size_t num_line = 0;

@@ -42,7 +42,7 @@ bool AssFontEmbedder::Run() {
   std::string buf_u8;
   std::ofstream output_ass(output_path.native());
   if (!output_ass.is_open()) {
-    logger_->error(_ST("\"{}\" cannot be created."), output_path.native());
+    logger_->Error(_ST("\"{}\" cannot be created."), output_path.native());
     return false;
   }
   auto text = fs_.ap_.get_text();
@@ -55,7 +55,7 @@ bool AssFontEmbedder::Run() {
       for (const auto& font : fs_.subfonts_path_) {
         fs::path font_path(font);
         if (ToLower(font_path.extension().native()) != _ST(".ttf")) {
-          logger_->warn(_ST("\"{}\" is not a .ttf font."), font_path.native());
+          logger_->Warn(_ST("\"{}\" is not a .ttf font."), font_path.native());
           has_none_ttf = true;
         }
         AString a_fontname = font_path.stem().native() + _ST("_0") +
@@ -77,7 +77,7 @@ bool AssFontEmbedder::Run() {
       }
       output_ass << "\n\n" << line;
       if (has_none_ttf) {
-        logger_->warn(
+        logger_->Warn(
             _ST("Found non-TTF fonts. Check the warnings above. Based on ASS "
                 "Specs, only Truetype fonts can be embedded in ASS scripts. "
                 "Ignored this error, but these fonts may not be loaded by some "
@@ -90,7 +90,7 @@ bool AssFontEmbedder::Run() {
       output_ass << '\n';
     }
   }
-  logger_->info(_ST("Create font-embeded subtitle: \"{}\""),
+  logger_->Info(_ST("Create font-embeded subtitle: \"{}\""),
                 output_path.native());
   return true;
 }

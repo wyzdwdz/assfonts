@@ -54,11 +54,11 @@ bool FontSubsetter::Run(const bool& is_no_subset) {
 #endif
       if (!FindFont(font_set, fp_.font_list_, path, index) &&
           !FindFont(font_set, fp_.font_list_in_db_, path, index)) {
-        logger_->warn(_ST("Missing the font: \"{}\" ({},{})"), fontname,
+        logger_->Warn(_ST("Missing the font: \"{}\" ({},{})"), fontname,
                       font_set.first.bold, font_set.first.italic);
         have_missing = true;
       } else {
-        logger_->info(_ST("Found font: \"{}\" ({},{}) --> \"{}\"[{}]"),
+        logger_->Info(_ST("Found font: \"{}\" ({},{}) --> \"{}\"[{}]"),
                       fontname, font_set.first.bold, font_set.first.italic,
                       path, index);
         CheckGlyph(path, index, font_set.second);
@@ -66,7 +66,7 @@ bool FontSubsetter::Run(const bool& is_no_subset) {
       subfonts_path_.emplace_back(path);
     }
     if (have_missing) {
-      logger_->error(_ST("Found missing fonts. Check warning info above."));
+      logger_->Error(_ST("Found missing fonts. Check warning info above."));
       return false;
     }
     return true;
@@ -76,19 +76,19 @@ bool FontSubsetter::Run(const bool& is_no_subset) {
   }
   fs::path dir_path(subfont_dir_);
   if (!fs::exists(dir_path)) {
-    logger_->info(_ST("Create subset fonts directory: \"{}\""),
+    logger_->Info(_ST("Create subset fonts directory: \"{}\""),
                   dir_path.native());
     try {
       fs::create_directory(dir_path);
     } catch (const fs::filesystem_error& e) {
-      logger_->error("Create subset fonts directory failed. Error code: {}",
+      logger_->Error("Create subset fonts directory failed. Error code: {}",
                      e.what());
       return false;
     }
   }
   for (const auto& subset_font : subset_font_codepoint_sets_) {
     if (!CreateSubfont(subset_font)) {
-      logger_->error(_ST("Subset failed: \"{}\"[{}]"), subset_font.first.path,
+      logger_->Error(_ST("Subset failed: \"{}\"[{}]"), subset_font.first.path,
                      subset_font.first.index);
       return false;
     }
@@ -219,11 +219,11 @@ bool FontSubsetter::set_subset_font_codepoint_sets() {
     if (!FindFont(font_set, fp_.font_list_, font_path.path, font_path.index) &&
         !FindFont(font_set, fp_.font_list_in_db_, font_path.path,
                   font_path.index)) {
-      logger_->warn(_ST("Missing the font: \"{}\" ({},{})"), fontname,
+      logger_->Warn(_ST("Missing the font: \"{}\" ({},{})"), fontname,
                     font_set.first.bold, font_set.first.italic);
       have_missing = true;
     } else {
-      logger_->info(_ST("Found font: \"{}\" ({},{}) --> \"{}\"[{}]"), fontname,
+      logger_->Info(_ST("Found font: \"{}\" ({},{}) --> \"{}\"[{}]"), fontname,
                     font_set.first.bold, font_set.first.italic, font_path.path,
                     font_path.index);
       if (!CheckGlyph(font_path.path, font_path.index, font_set.second)) {
@@ -244,7 +244,7 @@ bool FontSubsetter::set_subset_font_codepoint_sets() {
     }
   }
   if (have_missing) {
-    logger_->error(_ST("Found missing fonts. Check warning info above."));
+    logger_->Error(_ST("Found missing fonts. Check warning info above."));
     return false;
   }
   return true;
@@ -306,7 +306,7 @@ bool FontSubsetter::CheckGlyph(const AString& font_path, const long& font_index,
   FT_Face ft_face;
   std::ifstream is(font_path, std::ios::binary);
   if (!is.is_open()) {
-    logger_->error(_ST("\"{}\" is inaccessible."), font_path);
+    logger_->Error(_ST("\"{}\" is inaccessible."), font_path);
     return false;
   }
   const auto font_size = fs::file_size(font_path);
@@ -324,7 +324,7 @@ bool FontSubsetter::CheckGlyph(const AString& font_path, const long& font_index,
     }
   }
   if (!missing_codepoints.empty()) {
-    logger_->warn(_ST("Missing codepoints: {:#06x}"),
+    logger_->Warn(_ST("Missing codepoints: {:#06x}"),
                   fmt::join(missing_codepoints, _ST("  ")));
   }
   FT_Done_Face(ft_face);

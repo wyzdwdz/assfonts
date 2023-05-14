@@ -1,14 +1,21 @@
 ﻿cmake_minimum_required (VERSION 3.16)
 
-set(THIRD_PARTY_LIBS CLI11::CLI11
-                     spdlog::spdlog
-                     fmt::fmt)
+set(THIRD_PARTY_LIBS imgui::imgui
+                     glfw)
 
-set(TARGET_NAME assfonts)
+set(TARGET_SOURCES imgui_impl_glfw.cpp
+                   imgui_impl_opengl3.cpp
+                   test.cc)
+
+set(TARGET_NAME assfonts_gui)
+
+set(BINARY_NAME assfonts)
+
+configure_file(ver.h.in ver.h)
 						  
-add_executable(${TARGET_NAME} assfonts.cc)
+add_executable(${TARGET_NAME} ${TARGET_SOURCES})
 
-target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} libassfonts)
+target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} assfonts)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     if(CMAKE_BUILD_TYPE MATCHES "Release")
@@ -16,15 +23,12 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif()
 endif()
 
-target_include_directories(${TARGET_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/include
-                                                  ${PROJECT_BINARY_DIR}/include
-                                                  ${THIRD_PARTY_INCLUDE_DIRS})
-
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
 
 target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})
 
+set_target_properties(${TARGET_NAME} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
+
 install(TARGETS ${TARGET_NAME} 
         CONFIGURATIONS Release 
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} 
-        COMPONENT ${TARGET_NAME})
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

@@ -1,3 +1,0 @@
-#include <wx/msw/wx.rc>
-
-icon_resource ICON "icon.ico"

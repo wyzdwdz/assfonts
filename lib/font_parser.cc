@@ -60,7 +60,7 @@ namespace ass {
 
 void FontParser::LoadFonts(const AString& fonts_dir) {
   fonts_path_ = FindFileInDir(fonts_dir, _ST(".+\\.(ttf|otf|ttc|otc)$"));
-  logger_->info(_ST("Found {} font files in \"{}\". Parsing font files."),
+  logger_->Info(_ST("Found {} font files in \"{}\". Parsing font files."),
                 fonts_path_.size(), fonts_dir);
   font_list_.reserve(fonts_path_.size());
 
@@ -80,19 +80,19 @@ void FontParser::LoadFonts(const AString& fonts_dir) {
 
 void FontParser::SaveDB(const AString& db_path) {
   if (font_list_.size() == 0) {
-    logger_->warn(_ST("No font is found. Nothing to save."));
+    logger_->Warn(_ST("No font is found. Nothing to save."));
     return;
   }
 
   fs::path file_path(db_path);
   if (fs::is_regular_file(file_path)) {
-    logger_->warn(_ST("\"{}\" already exists. It will be overwritten."),
+    logger_->Warn(_ST("\"{}\" already exists. It will be overwritten."),
                   file_path.native());
   }
 
   std::ofstream db_file(file_path.native());
   if (!db_file.is_open()) {
-    logger_->warn(_ST("\"{}\" is inaccessible."), file_path.native());
+    logger_->Warn(_ST("\"{}\" is inaccessible."), file_path.native());
     return;
   }
 
@@ -118,7 +118,7 @@ void FontParser::SaveDB(const AString& db_path) {
 
   db_file << json.dump(4);
 
-  logger_->info(_ST("Fonts database has been saved in \"{}\""),
+  logger_->Info(_ST("Fonts database has been saved in \"{}\""),
                 file_path.native());
 }
 
@@ -127,7 +127,7 @@ void FontParser::LoadDB(const AString& db_path) {
 
   std::ifstream db_file(file_path.native());
   if (!db_file.is_open()) {
-    logger_->warn(_ST("Fonts database \"{}\" doesn't exists."),
+    logger_->Warn(_ST("Fonts database \"{}\" doesn't exists."),
                   file_path.native());
     return;
   }
@@ -153,13 +153,13 @@ void FontParser::LoadDB(const AString& db_path) {
       font_list_in_db_.emplace(font);
     }
   } catch (const nlohmann::json::exception&) {
-    logger_->warn(_ST("Cannot load fonts database: \"{}\""),
+    logger_->Warn(_ST("Cannot load fonts database: \"{}\""),
                   file_path.native());
     font_list_in_db_.clear();
     return;
   }
 
-  logger_->info(_ST("Load fonts database \"{}\""), file_path.native());
+  logger_->Info(_ST("Load fonts database \"{}\""), file_path.native());
 }
 
 void FontParser::clean_font_list() {
@@ -182,7 +182,7 @@ std::vector<AString> FontParser::FindFileInDir(const AString& dir,
     }
 
   } catch (const fs::filesystem_error& e) {
-    logger_->warn("Failed in searching font files. Error code: {}", e.what());
+    logger_->Warn("Failed in searching font files. Error code: {}", e.what());
     res.clear();
     return res;
   }
@@ -220,7 +220,7 @@ std::unordered_multimap<AString, FontParser::FontInfo> FontParser::GetFontInfo(
   }
 
   if (font_list.empty()) {
-    logger_->warn(_ST("\"{}\" has no parsable name."), font_path);
+    logger_->Warn(_ST("\"{}\" has no parsable name."), font_path);
   }
 
   return font_list;
@@ -244,7 +244,7 @@ bool FontParser::OpenFontFace(FT_Library& ft_library,
                               const FT_Open_Args& open_args, FT_Face& ft_face,
                               const AString& font_path) {
   if (FT_Open_Face(ft_library, &open_args, -1, &ft_face)) {
-    logger_->warn(_ST("\"{}\" cannot be opened."), font_path);
+    logger_->Warn(_ST("\"{}\" cannot be opened."), font_path);
     return false;
   }
   return true;

@@ -1,2 +1,0 @@
-[libfuzzer]
-dict = pcre2_fuzzer.dict
