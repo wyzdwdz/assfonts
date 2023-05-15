@@ -1,7 +1,7 @@
 ﻿cmake_minimum_required (VERSION 3.16)
 
 set(THIRD_PARTY_LIBS harfbuzz::harfbuzz
-                     freetype
+                     Freetype::Freetype
                      nlohmann_json::nlohmann_json
                      Iconv::Iconv
                      fmt::fmt

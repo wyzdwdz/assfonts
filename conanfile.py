@@ -23,7 +23,6 @@ class CompressorRecipe(ConanFile):
         self.requires("cli11/2.3.2")
         self.requires("pcre2/10.42")
         self.requires("threadpool/20140926")
-        self.requires("imgui/cci.20230105+1.89.2.docking")
         self.requires("glfw/3.3.8")
 
     def build_requirements(self):

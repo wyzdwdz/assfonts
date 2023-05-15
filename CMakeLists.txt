@@ -13,7 +13,6 @@ find_package(Iconv REQUIRED)
 find_package(fmt REQUIRED)
 find_package(CLI11 REQUIRED)
 find_package(threadpool REQUIRED)
-find_package(imgui REQUIRED)
 find_package(glfw3 REQUIRED)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")

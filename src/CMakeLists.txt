@@ -1,11 +1,13 @@
 ﻿cmake_minimum_required (VERSION 3.16)
 
-set(THIRD_PARTY_LIBS imgui::imgui
+set(THIRD_PARTY_LIBS imgui
                      glfw)
 
-set(TARGET_SOURCES imgui_impl_glfw.cpp
-                   imgui_impl_opengl3.cpp
-                   test.cc)
+set(TARGET_SOURCES test.cc
+                   backends/imgui_impl_glfw.cpp
+                   backends/imgui_impl_opengl3.cpp)
+
+set(TARGET_RESOURCES )
 
 set(TARGET_NAME assfonts_gui)
 
@@ -13,9 +15,12 @@ set(BINARY_NAME assfonts)
 
 configure_file(ver.h.in ver.h)
 						  
-add_executable(${TARGET_NAME} ${TARGET_SOURCES})
+add_executable(${TARGET_NAME} ${TARGET_SOURCES} ${TARGET_RESOURCES})
 
 target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} assfonts)
+
+target_include_directories(${TARGET_NAME} PRIVATE backends
+                                                  resources)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     if(CMAKE_BUILD_TYPE MATCHES "Release")

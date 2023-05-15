@@ -25,6 +25,9 @@
 #include "../libs/emscripten/emscripten_mainloop_stub.h"
 #endif
 
+#include <cmath>
+#include "NotoSansCJK_Regular.hxx"
+
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
@@ -98,6 +101,15 @@ int main(int, char**)
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != nullptr);
+    ImFontGlyphRangesBuilder glyph_range_builder;
+    glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesChineseFull());
+    glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
+    glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesKorean());
+    ImVector<ImWchar> combined_glyph_ranges;
+    glyph_range_builder.BuildRanges(&combined_glyph_ranges);
+    float dpi_scale = 2.0f;
+    io.Fonts->AddFontFromMemoryCompressedTTF(NotoSansCJK_Regular_compressed_data, NotoSansCJK_Regular_compressed_size, std::round(18.0f * dpi_scale), nullptr, combined_glyph_ranges.Data);
+    ImGui::GetStyle().ScaleAllSizes(dpi_scale);
 
     // Our state
     bool show_demo_window = true;
