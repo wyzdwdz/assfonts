@@ -469,3 +469,6 @@ build/
 
 #whitelist
 !3rdparty/**
+
+#imgui
+imgui.ini
