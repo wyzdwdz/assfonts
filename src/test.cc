@@ -26,7 +26,9 @@
 #endif
 
 #include <cmath>
-#include "NotoSansCJK_Regular.hxx"
+// #include "NotoSansCJK_Regular.hxx"
+#include "NotoSansCJK_Regular_base85.hxx"
+#include "ImGuiFileDialog.h"
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -63,8 +65,13 @@ int main(int, char**)
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
 
+    float xscale, yscale;
+    GLFWmonitor* primary = glfwGetPrimaryMonitor();
+    glfwGetMonitorContentScale(primary, &xscale, &yscale);
+    float dpi_scale = yscale;
+
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(std::round(600.0f * yscale), std::round(400.0f * yscale), "test", nullptr, nullptr);
     if (window == nullptr)
         return 1;
     glfwMakeContextCurrent(window);
@@ -76,10 +83,22 @@ int main(int, char**)
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+    // io.ConfigViewportsNoAutoMerge = true;
+    // io.ConfigViewportsNoTaskBarIcon = true;
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsLight();
+
+    // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+    ImGuiStyle& style = ImGui::GetStyle();
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
+        style.WindowRounding = 0.0f;
+        style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+    }
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -101,18 +120,22 @@ int main(int, char**)
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != nullptr);
+
     ImFontGlyphRangesBuilder glyph_range_builder;
     glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesChineseFull());
     glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
     glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesKorean());
     ImVector<ImWchar> combined_glyph_ranges;
     glyph_range_builder.BuildRanges(&combined_glyph_ranges);
-    float dpi_scale = 2.0f;
-    io.Fonts->AddFontFromMemoryCompressedTTF(NotoSansCJK_Regular_compressed_data, NotoSansCJK_Regular_compressed_size, std::round(18.0f * dpi_scale), nullptr, combined_glyph_ranges.Data);
+    // io.Fonts->AddFontFromMemoryCompressedTTF(NotoSansCJK_Regular_compressed_data, NotoSansCJK_Regular_compressed_size, std::round(18.0f * dpi_scale), nullptr, combined_glyph_ranges.Data);
+    io.Fonts->AddFontFromMemoryCompressedBase85TTF(NotoSansCJK_Regular_compressed_data_base85, std::round(18.0f * yscale), nullptr, combined_glyph_ranges.Data);
+    
     ImGui::GetStyle().ScaleAllSizes(dpi_scale);
 
+    io.IniFilename = nullptr;
+
     // Our state
-    bool show_demo_window = true;
+    bool show_demo_window = false;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -138,16 +161,34 @@ int main(int, char**)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        // int width, height;
+        // glfwGetWindowSize(window, &width, &height);
+        // ImGui::SetNextWindowSize(ImVec2(width, height)); // ensures ImGui fits the GLFW window
+        // ImGui::SetNextWindowPos(ImVec2(0, 0));
+
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-        if (show_demo_window)
+        if (show_demo_window) {
+            ImGuiWindowClass cls;
+            cls.ViewportFlagsOverrideSet = ImGuiViewportFlags_NoAutoMerge;
+            ImGui::SetNextWindowClass(&cls);
             ImGui::ShowDemoWindow(&show_demo_window);
+        }
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a named window.
         {
             static float f = 0.0f;
             static int counter = 0;
 
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+            ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
+
+            int width, height;
+            int xpos, ypos;
+            glfwGetWindowSize(window, &width, &height);
+            glfwGetWindowPos(window, &xpos, &ypos);
+            ImGui::SetNextWindowSize(ImVec2(width, height)); // ensures ImGui fits the GLFW window
+            ImGui::SetNextWindowPos(ImVec2(xpos, ypos));
+
+            ImGui::Begin("Hello, world!", nullptr, ImGuiWindowFlags_NoDecoration);                          // Create a window called "Hello, world!" and append into it.
 
             ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
             ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
@@ -162,12 +203,38 @@ int main(int, char**)
             ImGui::Text("counter = %d", counter);
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+            
+            // open Dialog Simple
+            if (ImGui::Button("Open File Dialog"))
+                ImGuiFileDialog::Instance()->OpenDialog("ChooseFileDlgKey", "Choose File", ".cpp,.h,.hpp", ".");
+
+            ImGuiWindowClass cls;
+            cls.ViewportFlagsOverrideSet = ImGuiViewportFlags_NoAutoMerge;
+            ImGui::SetNextWindowClass(&cls);
+            // display
+            if (ImGuiFileDialog::Instance()->Display("ChooseFileDlgKey", ImGuiWindowFlags_NoCollapse, ImVec2(500.0f * dpi_scale, 300.0f * dpi_scale))) 
+            {
+                // action if OK
+                if (ImGuiFileDialog::Instance()->IsOk())
+                {
+                std::string filePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+                std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
+                // action
+                }
+                
+                // close
+                ImGuiFileDialog::Instance()->Close();
+            }
+            
             ImGui::End();
         }
 
         // 3. Show another simple window.
         if (show_another_window)
         {
+            ImGuiWindowClass cls;
+            cls.ViewportFlagsOverrideSet = ImGuiViewportFlags_NoAutoMerge;
+            ImGui::SetNextWindowClass(&cls);
             ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
             ImGui::Text("Hello from another window!");
             if (ImGui::Button("Close Me"))
@@ -183,6 +250,17 @@ int main(int, char**)
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        // Update and Render additional Platform Windows
+        // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
+        //  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            GLFWwindow* backup_current_context = glfwGetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backup_current_context);
+        }
 
         glfwSwapBuffers(window);
     }

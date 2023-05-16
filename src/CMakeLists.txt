@@ -1,6 +1,7 @@
 ﻿cmake_minimum_required (VERSION 3.16)
 
-set(THIRD_PARTY_LIBS imgui
+set(THIRD_PARTY_LIBS ImGuiFileDialog
+                     imgui
                      glfw)
 
 set(TARGET_SOURCES test.cc

@@ -557,7 +557,7 @@ backslash \ within a string literal, you need to write it double backslash "\\":
 
 ```cpp
 io.Fonts->AddFontFromFileTTF("MyFolder\MyFont.ttf", size);  // WRONG (you are escaping the M here!)
-io.Fonts->AddFontFromFileTTF("MyFolder\\MyFont.ttf", size;  // CORRECT (Windows only)
+io.Fonts->AddFontFromFileTTF("MyFolder\\MyFont.ttf", size); // CORRECT (Windows only)
 io.Fonts->AddFontFromFileTTF("MyFolder/MyFont.ttf", size);  // ALSO CORRECT
 ```
 
@@ -628,10 +628,11 @@ builder.BuildRanges(&ranges);                          // Build the final result
 io.Fonts->AddFontFromFileTTF("myfontfile.ttf", 16.0f, nullptr, ranges.Data);
 ```
 
-All your strings need to use UTF-8 encoding. In C++11 you can encode a string literal in UTF-8
-by using the u8"hello" syntax. Specifying literal in your source code using a local code page
-(such as CP-923 for Japanese or CP-1251 for Cyrillic) will NOT work!
-Otherwise, you can convert yourself to UTF-8 or load text data from a file already saved as UTF-8.
+All your strings need to use UTF-8 encoding.
+You need to tell your compiler to use UTF-8, or in C++11 you can encode a string literal in UTF-8 by using the u8"hello" syntax.
+Specifying literal in your source code using a local code page (such as CP-923 for Japanese or CP-1251 for Cyrillic) will NOT work!
+See [About UTF-8 Encoding](https://github.com/ocornut/imgui/blob/master/docs/FONTS.md#about-utf-8-encoding) section
+of [FONTS.md](https://github.com/ocornut/imgui/blob/master/docs/FONTS.md) for details about UTF-8 Encoding.
 
 Text input: it is up to your application to pass the right character code by calling `io.AddInputCharacter()`.
 The applications in examples/ are doing that.
@@ -665,7 +666,7 @@ Yes. People have written game editors, data browsers, debuggers, profilers, and 
 
 Dear ImGui is very programmer centric and the immediate-mode GUI paradigm might require you to readjust some habits before you can realize its full potential. Dear ImGui is about making things that are simple, efficient, and powerful.
 
-Dear ImGui is built to be efficient and scalable toward the needs for AAA-quality applications running all day. The IMGUI paradigm offers different opportunities for optimization that the more typical RMGUI paradigm.
+Dear ImGui is built to be efficient and scalable toward the needs for AAA-quality applications running all day. The IMGUI paradigm offers different opportunities for optimization than the more typical RMGUI paradigm.
 
 ##### [Return to Index](#index)
 
@@ -673,7 +674,7 @@ Dear ImGui is built to be efficient and scalable toward the needs for AAA-qualit
 
 ### Q: Can you reskin the look of Dear ImGui?
 
-Somehow. You can alter the look of the interface to some degree: changing colors, sizes, padding, rounding, and fonts. However, as Dear ImGui is designed and optimized to create debug tools, the amount of skinning you can apply is limited. There is only so much you can stray away from the default look and feel of the interface. Dear ImGui is NOT designed to create a user interface for games, although with ingenious use of the low-level API you can do it.
+Somewhat. You can alter the look of the interface to some degree: changing colors, sizes, padding, rounding, and fonts. However, as Dear ImGui is designed and optimized to create debug tools, the amount of skinning you can apply is limited. There is only so much you can stray away from the default look and feel of the interface. Dear ImGui is NOT designed to create a user interface for games, although with ingenious use of the low-level API you can do it.
 
 A reasonably skinned application may look like (screenshot from [#2529](https://github.com/ocornut/imgui/issues/2529#issuecomment-524281119)):
 ![minipars](https://user-images.githubusercontent.com/314805/63589441-d9794f00-c5b1-11e9-8d96-cfc1b93702f7.png)

@@ -17,3 +17,10 @@
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
+#include "main_window.h"
+
+int main() {
+    ShowMainWindow();
+
+    return 0;
+}
