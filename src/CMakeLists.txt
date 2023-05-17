@@ -4,7 +4,7 @@ set(THIRD_PARTY_LIBS ImGuiFileDialog
                      imgui
                      glfw)
 
-set(TARGET_SOURCES test.cc
+set(TARGET_SOURCES main.cc
                    backends/imgui_impl_glfw.cpp
                    backends/imgui_impl_opengl3.cpp)
 

@@ -9,7 +9,8 @@ set(TARGET_SOURCES imgui.cpp
                    imgui_tables.cpp
                    imgui_draw.cpp
                    imgui_demo.cpp
-                   misc/freetype/imgui_freetype.cpp)
+                   misc/freetype/imgui_freetype.cpp
+                   misc/cpp/imgui_stdlib.cpp)
 
 set(TARGET_NAME imgui)
 
@@ -35,7 +36,8 @@ target_sources(${TARGET_NAME} PRIVATE ${TARGET_SOURCES})
 
 target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS})
 
-target_include_directories(${TARGET_NAME} PUBLIC . )
+target_include_directories(${TARGET_NAME} PUBLIC . 
+                                          PUBLIC misc/cpp)
 
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
 
