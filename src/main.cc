@@ -21,6 +21,8 @@
 #include <functional>
 #include <map>
 #include <string>
+#include <string_view>
+#include <thread>
 #include <vector>
 
 #include <ImGuiFileDialog.h>
@@ -34,6 +36,8 @@
 #include <GLES2/gl2.h>
 #endif
 #include <GLFW/glfw3.h>
+
+#include "assfonts.h"
 
 // #include "NotoSansCJK_Regular.hxx"
 #include "NotoSansCJK_Regular_base85.hxx"
@@ -54,6 +58,10 @@ static int hdr_state = NO_HDR;
 static bool is_subset_only;
 static bool is_embed_only;
 
+static bool is_running = false;
+
+static bool is_show_log = false;
+
 void AppRender(GLFWwindow* window, ImGuiIO& io, const ScaleLambda& Scale);
 
 void TabBarRender(GLFWwindow* window, const ScaleLambda& Scale);
@@ -66,6 +74,12 @@ void SettingGroupRender(const ScaleLambda& Scale);
 void RunGroupRender(GLFWwindow* window, const ScaleLambda& Scale);
 
 void LogGroupRender(const ScaleLambda& Scale);
+
+void LogCallback(const char* msg, const unsigned int len,
+                 const unsigned int log_level);
+
+void BuildDatabase();
+void Start();
 
 int main() {
   if (!glfwInit()) {
@@ -210,7 +224,13 @@ void TabBarRender(GLFWwindow* window, const ScaleLambda& Scale) {
       ImGui::EndTabItem();
     }
 
-    if (ImGui::BeginTabItem(" Log ")) {
+    ImGuiTabItemFlags log_tab_item_flags = ImGuiTabItemFlags_None;
+    if (is_show_log) {
+      log_tab_item_flags |= ImGuiTabItemFlags_SetSelected;
+      is_show_log = false;
+    }
+
+    if (ImGui::BeginTabItem(" Log ", nullptr, log_tab_item_flags)) {
       LogGroupRender(Scale);
       ImGui::EndTabItem();
     }
@@ -392,7 +412,10 @@ void RunGroupRender(GLFWwindow* window, const ScaleLambda& Scale) {
 
   ImGui::BeginGroup();
 
-  ImGui::Button("Build Databse", ImVec2(Scale(125.0f), Scale(45.0f)));
+  if (ImGui::Button("Build Databse", ImVec2(Scale(125.0f), Scale(45.0f)))) {
+    is_show_log = true;
+    BuildDatabase();
+  }
 
   ImGui::SameLine(0, 2 * ImGui::GetStyle().ItemSpacing.x);
   ImGui::Button("Start", ImVec2(Scale(70.0f), Scale(45.0f)));
@@ -411,10 +434,39 @@ void LogGroupRender(const ScaleLambda& Scale) {
 
   ImGui::BeginGroup();
 
-  ImGui::Button("Reset", ImVec2(Scale(55.0f), Scale(0.0f)));
+  if (ImGui::Button("Reset", ImVec2(Scale(55.0f), Scale(0.0f)))) {
+    log_text_buffer.clear();
+  }
 
   ImGui::Spacing();
-  ImGui::InputTextMultiline("##log_text", &log_text_buffer, ImVec2(Scale(600.0f), Scale(330.0f)));
+  ImGui::InputTextMultiline(
+      "##log_text", &log_text_buffer, ImVec2(Scale(600.0f), Scale(330.0f)),
+      ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_WordWrapping);
 
   ImGui::EndGroup();
+}
+
+void LogCallback(const char* msg, const unsigned int len,
+                 const unsigned int log_level) {
+  std::string_view log_msg(msg, len);
+  log_text_buffer.append(log_msg);
+}
+
+void BuildDatabase() {
+  if (!is_running) {
+    auto thrd = std::thread([]() {
+      is_running = true;
+
+      std::string fonts_path = font_text_buffer;
+      std::string database_path = database_text_buffer;
+
+      AssfontsBuildDB(fonts_path.c_str(), database_path.c_str(), LogCallback,
+                      ASSFONTS_INFO);
+
+      is_running = false;
+
+      log_text_buffer.push_back('\n');
+    });
+    thrd.detach();
+  }
 }

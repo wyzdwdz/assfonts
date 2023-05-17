@@ -30,10 +30,6 @@
 
 namespace ass {
 
-constexpr unsigned int INFO = 0;
-constexpr unsigned int WARN = 1;
-constexpr unsigned int ERROR = 2;
-
 class Logger {
  public:
   Logger(AssfontsLogCallback cb, unsigned int log_level)
@@ -42,22 +38,22 @@ class Logger {
 
   template <typename... T>
   void Info(fmt::format_string<T...> fmt, T&&... args) {
-    if (log_level_ <= INFO) {
-      Log(INFO, fmt, std::forward<T>(args)...);
+    if (log_level_ <= ASSFONTS_INFO) {
+      Log(ASSFONTS_INFO, fmt, std::forward<T>(args)...);
     }
   }
 
   template <typename... T>
   void Warn(fmt::format_string<T...> fmt, T&&... args) {
-    if (log_level_ <= WARN) {
-      Log(WARN, fmt, std::forward<T>(args)...);
+    if (log_level_ <= ASSFONTS_WARN) {
+      Log(ASSFONTS_WARN, fmt, std::forward<T>(args)...);
     }
   }
 
   template <typename... T>
   void Error(fmt::format_string<T...> fmt, T&&... args) {
-    if (log_level_ <= ERROR) {
-      Log(ERROR, fmt, std::forward<T>(args)...);
+    if (log_level_ <= ASSFONTS_ERROR) {
+      Log(ASSFONTS_ERROR, fmt, std::forward<T>(args)...);
     }
   }
 
@@ -70,15 +66,15 @@ class Logger {
     std::string msg;
 
     switch (log_level) {
-      case INFO:
+      case ASSFONTS_INFO:
         msg = "[INFO] ";
         break;
 
-      case WARN:
+      case ASSFONTS_WARN:
         msg = "[WARN] ";
         break;
 
-      case ERROR:
+      case ASSFONTS_ERROR:
         msg = "[ERROR] ";
         break;
 
@@ -92,7 +88,9 @@ class Logger {
     msg.append(fmt::format(fmt, std::forward<T>(args)...));
 #endif
 
-    cb_(msg.c_str(), msg.size());
+    msg.push_back('\n');
+
+    cb_(msg.c_str(), msg.size(), log_level);
   }
 };
 

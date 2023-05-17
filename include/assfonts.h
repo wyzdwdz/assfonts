@@ -20,9 +20,12 @@
 #ifndef ASSFONTS_ASSFONTS_H_
 #define ASSFONTS_ASSFONTS_H_
 
+enum ASSFONTS_LOG_LEVEL { ASSFONTS_INFO = 0, ASSFONTS_WARN, ASSFONTS_ERROR };
+
 extern "C" {
 
-typedef void (*AssfontsLogCallback)(const char* msg, const unsigned int len);
+typedef void (*AssfontsLogCallback)(const char* msg, const unsigned int len,
+                                    const unsigned int log_level);
 
 void AssfontsBuildDB(const char* fonts_path, const char* db_path,
                      const AssfontsLogCallback cb,
