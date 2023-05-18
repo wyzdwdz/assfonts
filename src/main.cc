@@ -19,11 +19,9 @@
 
 #include <cmath>
 #include <functional>
-#include <map>
 #include <string>
-#include <string_view>
 #include <thread>
-#include <vector>
+#include <utility>
 
 #include <ImGuiFileDialog.h>
 #include <imgui.h>
@@ -38,6 +36,7 @@
 #include <GLFW/glfw3.h>
 
 #include "assfonts.h"
+#include "circular_buffer.h"
 
 // #include "NotoSansCJK_Regular.hxx"
 #include "NotoSansCJK_Regular_base85.hxx"
@@ -52,7 +51,8 @@ static std::string input_text_buffer;
 static std::string output_text_buffer;
 static std::string font_text_buffer;
 static std::string database_text_buffer;
-static std::string log_text_buffer;
+static CircularBuffer<std::pair<unsigned int, std::string>> log_text_buffer(
+    8 * 1024);
 
 static int hdr_state = NO_HDR;
 static bool is_subset_only;
@@ -72,7 +72,6 @@ void FontGroupRender(const ScaleLambda& Scale);
 void DatabaseGroupRender(const ScaleLambda& Scale);
 void SettingGroupRender(const ScaleLambda& Scale);
 void RunGroupRender(GLFWwindow* window, const ScaleLambda& Scale);
-
 void LogGroupRender(const ScaleLambda& Scale);
 
 void LogCallback(const char* msg, const unsigned int len,
@@ -190,6 +189,7 @@ void AppRender(GLFWwindow* window, ImGuiIO& io, const ScaleLambda& Scale) {
     glfwSetWindowSize(window, window_size.x, window_size.y);
 
     TabBarRender(window, Scale);
+
     ImGui::End();
   }
 
@@ -399,7 +399,7 @@ void SettingGroupRender(const ScaleLambda& Scale) {
   ImGui::SameLine(0, 2 * ImGui::GetStyle().ItemSpacing.x);
   ImGui::Checkbox("Subset only", &is_subset_only);
 
-  ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
+  ImGui::SameLine(0, 2 * ImGui::GetStyle().ItemSpacing.x);
   ImGui::Checkbox("Embed only", &is_embed_only);
 
   ImGui::EndGroup();
@@ -430,26 +430,53 @@ void RunGroupRender(GLFWwindow* window, const ScaleLambda& Scale) {
 
 void LogGroupRender(const ScaleLambda& Scale) {
   ImGui::Spacing();
-  ImGui::Indent(1 * ImGui::GetStyle().IndentSpacing / 2);
-
   ImGui::BeginGroup();
 
-  if (ImGui::Button("Reset", ImVec2(Scale(55.0f), Scale(0.0f)))) {
+  if (ImGui::Button("Clear", ImVec2(Scale(55.0f), Scale(0.0f)))) {
     log_text_buffer.clear();
   }
 
   ImGui::Spacing();
-  ImGui::InputTextMultiline(
-      "##log_text", &log_text_buffer, ImVec2(Scale(600.0f), Scale(330.0f)),
-      ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_WordWrapping);
+  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+  if (ImGui::BeginChild("scrolling", ImVec2(Scale(0.0f), Scale(335.0f)),
+                        false)) {
+    for (const auto& log : log_text_buffer) {
+      switch (log.first) {
+        case ASSFONTS_INFO:
+          ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+          break;
+
+        case ASSFONTS_WARN:
+          ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
+          break;
+
+        case ASSFONTS_ERROR:
+          ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+          break;
+
+        default:
+          ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+          break;
+      }
+
+      ImGui::TextWrappedUnformatted(log.second.c_str());
+      ImGui::PopStyleColor();
+    }
+
+    if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY()) {
+      ImGui::SetScrollHereY(1.0f);
+    }
+
+    ImGui::PopStyleColor();
+    ImGui::EndChild();
+  }
 
   ImGui::EndGroup();
 }
 
 void LogCallback(const char* msg, const unsigned int len,
                  const unsigned int log_level) {
-  std::string_view log_msg(msg, len);
-  log_text_buffer.append(log_msg);
+  log_text_buffer.push_back(make_pair(log_level, std::string(msg, len)));
 }
 
 void BuildDatabase() {
@@ -465,7 +492,7 @@ void BuildDatabase() {
 
       is_running = false;
 
-      log_text_buffer.push_back('\n');
+      log_text_buffer.push_back(std::make_pair(ASSFONTS_INFO, std::string("\n")));
     });
     thrd.detach();
   }
