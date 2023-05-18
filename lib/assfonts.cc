@@ -72,13 +72,17 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
   fp.LoadDB(db.native() + fs::path::preferred_separator + _ST("fonts.json"));
 
   for (unsigned int idx = 0; idx < num_paths; ++idx) {
+    if(idx != 0) {
+      logger->Text("");
+    }
+    
     fs::path input(input_paths[idx]);
 
     ap.set_output_dir_path(output.native());
 
     if (brightness != 0) {
       if (!ap.Recolorize(input.native(), brightness)) {
-        return;
+        continue;
       }
 
       input = fs::path(output.native() + fs::path::preferred_separator +
@@ -87,7 +91,7 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
     }
 
     if (!ap.ReadFile(input.native())) {
-      return;
+      continue;
     }
 
     if (is_embed_only && is_subset_only) {
@@ -103,14 +107,14 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
     }
 
     if (!fs.Run(is_embed_only)) {
-      return;
+      continue;
     }
 
     if (!is_subset_only) {
       afe.set_output_dir_path(output.native());
 
       if (!afe.Run()) {
-        return;
+        continue;
       }
     }
 

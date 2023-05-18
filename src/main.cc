@@ -19,6 +19,7 @@
 
 #include <cmath>
 #include <functional>
+#include <memory>
 #include <string>
 #include <thread>
 #include <utility>
@@ -38,8 +39,7 @@
 #include "assfonts.h"
 #include "circular_buffer.h"
 
-// #include "NotoSansCJK_Regular.hxx"
-#include "NotoSansCJK_Regular_base85.hxx"
+#include "NotoSansCJK_Regular.hxx"
 
 using ScaleLambda = std::function<float(float)>;
 
@@ -50,17 +50,18 @@ static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 static std::string input_text_buffer;
 static std::string output_text_buffer;
 static std::string font_text_buffer;
-static std::string database_text_buffer;
+static std::string database_text_buffer = ".";
 static CircularBuffer<std::pair<unsigned int, std::string>> log_text_buffer(
     8 * 1024);
 
 static int hdr_state = NO_HDR;
-static bool is_subset_only;
-static bool is_embed_only;
+static bool is_subset_only = false;
+static bool is_embed_only = false;
 
 static bool is_running = false;
 
 static bool is_show_log = false;
+static int show_log_level = ASSFONTS_INFO;
 
 void AppRender(GLFWwindow* window, ImGuiIO& io, const ScaleLambda& Scale);
 
@@ -72,13 +73,16 @@ void FontGroupRender(const ScaleLambda& Scale);
 void DatabaseGroupRender(const ScaleLambda& Scale);
 void SettingGroupRender(const ScaleLambda& Scale);
 void RunGroupRender(GLFWwindow* window, const ScaleLambda& Scale);
-void LogGroupRender(const ScaleLambda& Scale);
+void LogGroupRender(GLFWwindow* window, const ScaleLambda& Scale);
 
 void LogCallback(const char* msg, const unsigned int len,
                  const unsigned int log_level);
+void LogToClipBoard(GLFWwindow* window);
 
 void BuildDatabase();
 void Start();
+
+std::string Trim(const std::string& str);
 
 int main() {
   if (!glfwInit()) {
@@ -113,7 +117,7 @@ int main() {
   };
 
   GLFWwindow* window =
-      glfwCreateWindow(Scale(1280), Scale(720), "assfonts", nullptr, nullptr);
+      glfwCreateWindow(Scale(640), Scale(440), "assfonts", nullptr, nullptr);
   if (window == nullptr) {
     return -1;
   }
@@ -148,10 +152,9 @@ int main() {
   glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
   glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesKorean());
   glyph_range_builder.BuildRanges(&combined_glyph_ranges);
-  // io.Fonts->AddFontFromMemoryCompressedTTF(NotoSansCJK_Regular_compressed_data, NotoSansCJK_Regular_compressed_size, std::round(18.0f * dpi_scale), nullptr, combined_glyph_ranges.Data);
-  io.Fonts->AddFontFromMemoryCompressedBase85TTF(
-      NotoSansCJK_Regular_compressed_data_base85, Scale(18.0f), nullptr,
-      combined_glyph_ranges.Data);
+  io.Fonts->AddFontFromMemoryCompressedTTF(
+      NotoSansCJK_Regular_compressed_data, NotoSansCJK_Regular_compressed_size,
+      Scale(18.0f), nullptr, combined_glyph_ranges.Data);
 
   io.IniFilename = nullptr;
 
@@ -231,7 +234,7 @@ void TabBarRender(GLFWwindow* window, const ScaleLambda& Scale) {
     }
 
     if (ImGui::BeginTabItem(" Log ", nullptr, log_tab_item_flags)) {
-      LogGroupRender(Scale);
+      LogGroupRender(window, Scale);
       ImGui::EndTabItem();
     }
 
@@ -418,7 +421,10 @@ void RunGroupRender(GLFWwindow* window, const ScaleLambda& Scale) {
   }
 
   ImGui::SameLine(0, 2 * ImGui::GetStyle().ItemSpacing.x);
-  ImGui::Button("Start", ImVec2(Scale(70.0f), Scale(45.0f)));
+  if (ImGui::Button("Start", ImVec2(Scale(70.0f), Scale(45.0f)))) {
+    is_show_log = true;
+    Start();
+  }
 
   ImGui::SameLine(0, 42 * ImGui::GetStyle().ItemSpacing.x);
   if (ImGui::Button("Exit", ImVec2(Scale(50.0f), Scale(45.0f)))) {
@@ -428,13 +434,24 @@ void RunGroupRender(GLFWwindow* window, const ScaleLambda& Scale) {
   ImGui::EndGroup();
 }
 
-void LogGroupRender(const ScaleLambda& Scale) {
+void LogGroupRender(GLFWwindow* window, const ScaleLambda& Scale) {
   ImGui::Spacing();
   ImGui::BeginGroup();
 
   if (ImGui::Button("Clear", ImVec2(Scale(55.0f), Scale(0.0f)))) {
     log_text_buffer.clear();
   }
+
+  ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
+  if (ImGui::Button("Copy", ImVec2(Scale(55.0f), Scale(0.0f)))) {
+    LogToClipBoard(window);
+  }
+
+  ImGui::SameLine(0, 38 * ImGui::GetStyle().ItemSpacing.x);
+  ImGui::TextUnformatted("Show log level >=");
+  ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
+  ImGui::SetNextItemWidth(Scale(80));
+  ImGui::Combo("##log_level", &show_log_level, "INFO\0WARN\0ERROR\0");
 
   ImGui::Spacing();
   ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -459,7 +476,10 @@ void LogGroupRender(const ScaleLambda& Scale) {
           break;
       }
 
-      ImGui::TextWrappedUnformatted(log.second.c_str());
+      if (log.first >= static_cast<unsigned int>(show_log_level)) {
+        ImGui::TextWrappedUnformatted(log.second.c_str());
+      }
+
       ImGui::PopStyleColor();
     }
 
@@ -479,6 +499,18 @@ void LogCallback(const char* msg, const unsigned int len,
   log_text_buffer.push_back(make_pair(log_level, std::string(msg, len)));
 }
 
+void LogToClipBoard(GLFWwindow* window) {
+  std::string paste_text;
+
+  for (const auto& log : log_text_buffer) {
+    if (log.first >= static_cast<unsigned int>(show_log_level)) {
+      paste_text.append(log.second);
+    }
+  }
+
+  glfwSetClipboardString(window, Trim(paste_text).c_str());
+}
+
 void BuildDatabase() {
   if (!is_running) {
     auto thrd = std::thread([]() {
@@ -490,10 +522,81 @@ void BuildDatabase() {
       AssfontsBuildDB(fonts_path.c_str(), database_path.c_str(), LogCallback,
                       ASSFONTS_INFO);
 
-      is_running = false;
+      LogCallback("\n", 1, ASSFONTS_TEXT);
 
-      log_text_buffer.push_back(std::make_pair(ASSFONTS_INFO, std::string("\n")));
+      is_running = false;
     });
+
     thrd.detach();
   }
+}
+
+void Start() {
+  if (!is_running) {
+    auto thrd = std::thread([]() {
+      is_running = true;
+
+      std::string input_text = input_text_buffer;
+      std::vector<std::string> input_vec;
+
+      size_t pos = 0;
+      size_t pos_next = 0;
+      while (pos != std::string::npos) {
+        pos_next = input_text.find(';', pos);
+        std::string input_trim = Trim(input_text.substr(pos, pos_next - pos));
+
+        if (!input_trim.empty()) {
+          input_vec.emplace_back(input_trim);
+        }
+
+        pos = (pos_next != std::string::npos) ? pos_next + 1 : pos_next;
+      }
+
+      auto input_paths = std::make_unique<char*[]>(input_vec.size());
+      for (size_t idx = 0; idx < input_vec.size(); ++idx) {
+        input_paths[idx] = const_cast<char*>(input_vec[idx].c_str());
+      }
+
+      unsigned int brightness = 0;
+      switch (hdr_state) {
+        case NO_HDR:
+          brightness = 0;
+          break;
+        case HDR_LOW:
+          brightness = 100;
+          break;
+        case HDR_HIGH:
+          brightness = 203;
+          break;
+        default:
+          break;
+      }
+
+      AssfontsRun(const_cast<const char**>(input_paths.get()), input_vec.size(),
+                  output_text_buffer.c_str(), font_text_buffer.c_str(),
+                  database_text_buffer.c_str(), brightness, is_subset_only,
+                  is_embed_only, LogCallback, ASSFONTS_INFO);
+
+      LogCallback("\n", 1, ASSFONTS_TEXT);
+
+      is_running = false;
+    });
+
+    thrd.detach();
+  }
+}
+
+std::string Trim(const std::string& str) {
+  std::string res = str;
+
+  res.erase(res.begin(),
+            std::find_if(res.begin(), res.end(),
+                         [](unsigned char ch) { return !std::isspace(ch); }));
+
+  res.erase(std::find_if(res.rbegin(), res.rend(),
+                         [](unsigned char ch) { return !std::isspace(ch); })
+                .base(),
+            res.end());
+
+  return res;
 }
