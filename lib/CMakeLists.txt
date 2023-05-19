@@ -18,6 +18,8 @@ set(TARGET_SOURCES font_parser.cc
                    assfonts.cc)
 
 set(TARGET_NAME assfonts)
+
+configure_file(${PROJECT_SOURCE_DIR}/include/assfonts.h.in ${PROJECT_BINARY_DIR}/include/assfonts.h)
 						  
 add_library(${TARGET_NAME} OBJECT EXCLUDE_FROM_ALL)
 
@@ -25,7 +27,7 @@ target_sources(${TARGET_NAME} PRIVATE ${TARGET_SOURCES})
 
 target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS})
 
-target_include_directories(${TARGET_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(${TARGET_NAME} PUBLIC ${PROJECT_BINARY_DIR}/include)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_link_options(${TARGET_NAME} PRIVATE -pthread)

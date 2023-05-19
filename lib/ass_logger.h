@@ -97,7 +97,7 @@ class Logger {
 
     msg.push_back('\n');
 
-    cb_(msg.c_str(), msg.size(), log_level);
+    cb_(msg.c_str(), log_level);
   }
 };
 

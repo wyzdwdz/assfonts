@@ -36,6 +36,16 @@ void AssfontsBuildDB(const char* fonts_path, const char* db_path,
                      const unsigned int log_level) {
   auto logger = std::make_shared<ass::Logger>(ass::Logger(cb, log_level));
 
+  if (*fonts_path == '\0') {
+    logger->Error("No font directory.");
+    return;
+  }
+
+  if (*db_path == '\0') {
+    logger->Error("No database directory.");
+    return;
+  }
+
   ass::FontParser fp(logger);
 
   fs::path db(db_path);
@@ -56,6 +66,26 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
                  const unsigned int log_level) {
   auto logger = std::make_shared<ass::Logger>(ass::Logger(cb, log_level));
 
+  if (num_paths == 0) {
+    logger->Error("No input ASS file.");
+    return;
+  }
+
+  if (*output_path == '\0') {
+    logger->Error("No output directory.");
+    return;
+  }
+
+  if (*fonts_path == '\0') {
+    logger->Error("No font directory.");
+    return;
+  }
+
+  if (*db_path == '\0') {
+    logger->Error("No database directory.");
+    return;
+  }
+
   ass::AssParser ap(logger);
   ass::FontParser fp(logger);
   ass::FontSubsetter fs(ap, fp, logger);
@@ -72,10 +102,10 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
   fp.LoadDB(db.native() + fs::path::preferred_separator + _ST("fonts.json"));
 
   for (unsigned int idx = 0; idx < num_paths; ++idx) {
-    if(idx != 0) {
+    if (idx != 0) {
       logger->Text("");
     }
-    
+
     fs::path input(input_paths[idx]);
 
     ap.set_output_dir_path(output.native());

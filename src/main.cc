@@ -43,7 +43,7 @@
 
 using ScaleLambda = std::function<float(float)>;
 
-enum HdrComboState : int { NO_HDR = 0, HDR_LOW, HDR_HIGH };
+enum HdrComboState { NO_HDR = 0, HDR_LOW, HDR_HIGH };
 
 static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
@@ -61,7 +61,10 @@ static bool is_embed_only = false;
 static bool is_running = false;
 
 static bool is_show_log = false;
+static bool is_show_space = false;
 static int show_log_level = ASSFONTS_INFO;
+
+void AppInit();
 
 void AppRender(GLFWwindow* window, ImGuiIO& io, const ScaleLambda& Scale);
 
@@ -75,9 +78,11 @@ void SettingGroupRender(const ScaleLambda& Scale);
 void RunGroupRender(GLFWwindow* window, const ScaleLambda& Scale);
 void LogGroupRender(GLFWwindow* window, const ScaleLambda& Scale);
 
-void LogCallback(const char* msg, const unsigned int len,
-                 const unsigned int log_level);
+void LogCallback(const char* msg, const unsigned int log_level);
 void LogToClipBoard(GLFWwindow* window);
+
+void OnBuildDatabase();
+void OnStart();
 
 void BuildDatabase();
 void Start();
@@ -158,6 +163,8 @@ int main() {
 
   io.IniFilename = nullptr;
 
+  AppInit();
+
   while (!glfwWindowShouldClose(window)) {
     AppRender(window, io, Scale);
   }
@@ -170,6 +177,15 @@ int main() {
   glfwTerminate();
 
   return 0;
+}
+
+void AppInit() {
+  std::string version_info = "assfonts -- version " +
+                             std::to_string(ASSFONTS_VERSION_MAJOR) + "." +
+                             std::to_string(ASSFONTS_VERSION_MINOR) + "." +
+                             std::to_string(ASSFONTS_VERSION_PATCH);
+  LogCallback(version_info.c_str(), ASSFONTS_TEXT);
+  LogCallback("\n", ASSFONTS_TEXT);
 }
 
 void AppRender(GLFWwindow* window, ImGuiIO& io, const ScaleLambda& Scale) {
@@ -417,13 +433,13 @@ void RunGroupRender(GLFWwindow* window, const ScaleLambda& Scale) {
 
   if (ImGui::Button("Build Databse", ImVec2(Scale(125.0f), Scale(45.0f)))) {
     is_show_log = true;
-    BuildDatabase();
+    OnBuildDatabase();
   }
 
   ImGui::SameLine(0, 2 * ImGui::GetStyle().ItemSpacing.x);
   if (ImGui::Button("Start", ImVec2(Scale(70.0f), Scale(45.0f)))) {
     is_show_log = true;
-    Start();
+    OnStart();
   }
 
   ImGui::SameLine(0, 42 * ImGui::GetStyle().ItemSpacing.x);
@@ -447,8 +463,12 @@ void LogGroupRender(GLFWwindow* window, const ScaleLambda& Scale) {
     LogToClipBoard(window);
   }
 
-  ImGui::SameLine(0, 38 * ImGui::GetStyle().ItemSpacing.x);
+  ImGui::SameLine(0, 2 * ImGui::GetStyle().ItemSpacing.x);
+  ImGui::Checkbox("Show space", &is_show_space);
+
+  ImGui::SameLine(0, 25 * ImGui::GetStyle().ItemSpacing.x);
   ImGui::TextUnformatted("Show log level >=");
+
   ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
   ImGui::SetNextItemWidth(Scale(80));
   ImGui::Combo("##log_level", &show_log_level, "INFO\0WARN\0ERROR\0");
@@ -457,7 +477,14 @@ void LogGroupRender(GLFWwindow* window, const ScaleLambda& Scale) {
   ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
   if (ImGui::BeginChild("scrolling", ImVec2(Scale(0.0f), Scale(335.0f)),
                         false)) {
+    ImGui::SameLine(0, 0.5 * ImGui::GetStyle().ItemSpacing.x);
+    ImGui::BeginGroup();
+
     for (const auto& log : log_text_buffer) {
+      if (!is_show_space && log.second == "\n") {
+        continue;
+      }
+
       switch (log.first) {
         case ASSFONTS_INFO:
           ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -487,6 +514,8 @@ void LogGroupRender(GLFWwindow* window, const ScaleLambda& Scale) {
       ImGui::SetScrollHereY(1.0f);
     }
 
+    ImGui::EndGroup();
+
     ImGui::PopStyleColor();
     ImGui::EndChild();
   }
@@ -494,15 +523,18 @@ void LogGroupRender(GLFWwindow* window, const ScaleLambda& Scale) {
   ImGui::EndGroup();
 }
 
-void LogCallback(const char* msg, const unsigned int len,
-                 const unsigned int log_level) {
-  log_text_buffer.push_back(make_pair(log_level, std::string(msg, len)));
+void LogCallback(const char* msg, const unsigned int log_level) {
+  log_text_buffer.push_back(make_pair(log_level, std::string(msg)));
 }
 
 void LogToClipBoard(GLFWwindow* window) {
   std::string paste_text;
 
   for (const auto& log : log_text_buffer) {
+    if (!is_show_space && log.second == "\n") {
+      continue;
+    }
+
     if (log.first >= static_cast<unsigned int>(show_log_level)) {
       paste_text.append(log.second);
     }
@@ -511,79 +543,81 @@ void LogToClipBoard(GLFWwindow* window) {
   glfwSetClipboardString(window, Trim(paste_text).c_str());
 }
 
-void BuildDatabase() {
+void OnBuildDatabase() {
   if (!is_running) {
-    auto thrd = std::thread([]() {
-      is_running = true;
-
-      std::string fonts_path = font_text_buffer;
-      std::string database_path = database_text_buffer;
-
-      AssfontsBuildDB(fonts_path.c_str(), database_path.c_str(), LogCallback,
-                      ASSFONTS_INFO);
-
-      LogCallback("\n", 1, ASSFONTS_TEXT);
-
-      is_running = false;
-    });
-
+    auto thrd = std::thread([]() { BuildDatabase(); });
     thrd.detach();
   }
 }
 
-void Start() {
+void OnStart() {
   if (!is_running) {
-    auto thrd = std::thread([]() {
-      is_running = true;
-
-      std::string input_text = input_text_buffer;
-      std::vector<std::string> input_vec;
-
-      size_t pos = 0;
-      size_t pos_next = 0;
-      while (pos != std::string::npos) {
-        pos_next = input_text.find(';', pos);
-        std::string input_trim = Trim(input_text.substr(pos, pos_next - pos));
-
-        if (!input_trim.empty()) {
-          input_vec.emplace_back(input_trim);
-        }
-
-        pos = (pos_next != std::string::npos) ? pos_next + 1 : pos_next;
-      }
-
-      auto input_paths = std::make_unique<char*[]>(input_vec.size());
-      for (size_t idx = 0; idx < input_vec.size(); ++idx) {
-        input_paths[idx] = const_cast<char*>(input_vec[idx].c_str());
-      }
-
-      unsigned int brightness = 0;
-      switch (hdr_state) {
-        case NO_HDR:
-          brightness = 0;
-          break;
-        case HDR_LOW:
-          brightness = 100;
-          break;
-        case HDR_HIGH:
-          brightness = 203;
-          break;
-        default:
-          break;
-      }
-
-      AssfontsRun(const_cast<const char**>(input_paths.get()), input_vec.size(),
-                  output_text_buffer.c_str(), font_text_buffer.c_str(),
-                  database_text_buffer.c_str(), brightness, is_subset_only,
-                  is_embed_only, LogCallback, ASSFONTS_INFO);
-
-      LogCallback("\n", 1, ASSFONTS_TEXT);
-
-      is_running = false;
-    });
-
+    auto thrd = std::thread([]() { Start(); });
     thrd.detach();
   }
+}
+
+void BuildDatabase() {
+  is_running = true;
+
+  std::string fonts_path = font_text_buffer;
+  std::string database_path = database_text_buffer;
+
+  AssfontsBuildDB(fonts_path.c_str(), database_path.c_str(), LogCallback,
+                  ASSFONTS_INFO);
+
+  LogCallback("\n", ASSFONTS_TEXT);
+
+  is_running = false;
+}
+
+void Start() {
+  is_running = true;
+
+  std::string input_text = input_text_buffer;
+  std::vector<std::string> input_vec;
+
+  size_t pos = 0;
+  size_t pos_next = 0;
+  while (pos != std::string::npos) {
+    pos_next = input_text.find(';', pos);
+    std::string input_trim = Trim(input_text.substr(pos, pos_next - pos));
+
+    if (!input_trim.empty()) {
+      input_vec.emplace_back(input_trim);
+    }
+
+    pos = (pos_next != std::string::npos) ? pos_next + 1 : pos_next;
+  }
+
+  auto input_paths = std::make_unique<char*[]>(input_vec.size());
+  for (size_t idx = 0; idx < input_vec.size(); ++idx) {
+    input_paths[idx] = const_cast<char*>(input_vec[idx].c_str());
+  }
+
+  unsigned int brightness = 0;
+  switch (hdr_state) {
+    case NO_HDR:
+      brightness = 0;
+      break;
+    case HDR_LOW:
+      brightness = 100;
+      break;
+    case HDR_HIGH:
+      brightness = 203;
+      break;
+    default:
+      break;
+  }
+
+  AssfontsRun(const_cast<const char**>(input_paths.get()), input_vec.size(),
+              output_text_buffer.c_str(), font_text_buffer.c_str(),
+              database_text_buffer.c_str(), brightness, is_subset_only,
+              is_embed_only, LogCallback, ASSFONTS_INFO);
+
+  LogCallback("\n", ASSFONTS_TEXT);
+
+  is_running = false;
 }
 
 std::string Trim(const std::string& str) {

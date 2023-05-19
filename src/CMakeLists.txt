@@ -13,8 +13,6 @@ set(TARGET_RESOURCES )
 set(TARGET_NAME assfonts_gui)
 
 set(BINARY_NAME assfonts)
-
-configure_file(ver.h.in ver.h)
 						  
 add_executable(${TARGET_NAME} ${TARGET_SOURCES} ${TARGET_RESOURCES})
 
