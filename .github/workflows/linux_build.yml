@@ -2,7 +2,8 @@ name: Build linux AppImage
 run-name: Build linux AppImage by ${{ github.actor }}
 on: 
   push:
-    branches: [ imgui ]
+    tags: 
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 jobs:
   build:
     runs-on: ubuntu-20.04
@@ -21,10 +22,10 @@ jobs:
       - name: Conan version
         run: echo "${{ steps.conan.outputs.version }}"
         
-      - name: Start build script
+      - name: Start build
         run: |
-             conan install . -b missing -s build_type=Release -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True
-             cd build
-             source conanbuild.sh
-             cmake .. --preset conan-release
-             cmake --build --preset conan-release --target install -j
+          conan install . -b missing -s build_type=Release -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True
+          cd build
+          source conanbuild.sh
+          cmake .. --preset conan-release
+          cmake --build --preset conan-release --target install -j
