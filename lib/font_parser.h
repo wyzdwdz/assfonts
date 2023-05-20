@@ -43,7 +43,7 @@ class FontParser {
  public:
   FontParser(std::shared_ptr<Logger> logger) : logger_(logger){};
 
-  FontParser(const std::string& fonts_dir, std::shared_ptr<Logger> logger)
+  FontParser(const AString& fonts_dir, std::shared_ptr<Logger> logger)
       : FontParser(logger) {
     LoadFonts(fonts_dir);
   };

@@ -24,6 +24,7 @@
 #include <utility>
 
 #include <fmt/core.h>
+#include <fmt/xchar.h>
 
 #include "ass_string.h"
 #include "assfonts.h"
@@ -42,9 +43,21 @@ class Logger {
       Log(ASSFONTS_TEXT, fmt, std::forward<T>(args)...);
     }
   }
+  template <typename... T>
+  void Text(fmt::wformat_string<T...> fmt, T&&... args) {
+    if (log_level_ <= ASSFONTS_WARN) {
+      Log(ASSFONTS_TEXT, fmt, std::forward<T>(args)...);
+    }
+  }
 
   template <typename... T>
   void Info(fmt::format_string<T...> fmt, T&&... args) {
+    if (log_level_ <= ASSFONTS_INFO) {
+      Log(ASSFONTS_INFO, fmt, std::forward<T>(args)...);
+    }
+  }
+  template <typename... T>
+  void Info(fmt::wformat_string<T...> fmt, T&&... args) {
     if (log_level_ <= ASSFONTS_INFO) {
       Log(ASSFONTS_INFO, fmt, std::forward<T>(args)...);
     }
@@ -56,9 +69,21 @@ class Logger {
       Log(ASSFONTS_WARN, fmt, std::forward<T>(args)...);
     }
   }
+  template <typename... T>
+  void Warn(fmt::wformat_string<T...> fmt, T&&... args) {
+    if (log_level_ <= ASSFONTS_WARN) {
+      Log(ASSFONTS_WARN, fmt, std::forward<T>(args)...);
+    }
+  }
 
   template <typename... T>
   void Error(fmt::format_string<T...> fmt, T&&... args) {
+    if (log_level_ <= ASSFONTS_ERROR) {
+      Log(ASSFONTS_ERROR, fmt, std::forward<T>(args)...);
+    }
+  }
+  template <typename... T>
+  void Error(fmt::wformat_string<T...> fmt, T&&... args) {
     if (log_level_ <= ASSFONTS_ERROR) {
       Log(ASSFONTS_ERROR, fmt, std::forward<T>(args)...);
     }
@@ -89,11 +114,35 @@ class Logger {
         break;
     }
 
-#ifdef _WIN32
-    msg.append(WideToU8(fmt::format(fmt, std::forward<T>(args)...)));
-#else
     msg.append(fmt::format(fmt, std::forward<T>(args)...));
-#endif
+
+    msg.push_back('\n');
+
+    cb_(msg.c_str(), log_level);
+  }
+
+  template <typename... T>
+  void Log(unsigned int log_level, fmt::wformat_string<T...> fmt, T&&... args) {
+    std::string msg;
+
+    switch (log_level) {
+      case ASSFONTS_INFO:
+        msg = "[INFO] ";
+        break;
+
+      case ASSFONTS_WARN:
+        msg = "[WARN] ";
+        break;
+
+      case ASSFONTS_ERROR:
+        msg = "[ERROR] ";
+        break;
+
+      default:
+        break;
+    }
+
+    msg.append(WideToU8(fmt::format(fmt, std::forward<T>(args)...)));
 
     msg.push_back('\n');
 

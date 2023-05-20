@@ -76,11 +76,6 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
     return;
   }
 
-  if (*fonts_path == '\0') {
-    logger->Error("No font directory.");
-    return;
-  }
-
   if (*db_path == '\0') {
     logger->Error("No database directory.");
     return;

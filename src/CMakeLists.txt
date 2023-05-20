@@ -8,7 +8,7 @@ set(TARGET_SOURCES main.cc
                    backends/imgui_impl_glfw.cpp
                    backends/imgui_impl_opengl3.cpp)
 
-set(TARGET_RESOURCES )
+set(TARGET_RESOURCES resources/assfonts.rc)
 
 set(TARGET_NAME assfonts_gui)
 

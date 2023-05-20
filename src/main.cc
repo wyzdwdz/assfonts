@@ -17,6 +17,7 @@
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
+#include <clocale>
 #include <cmath>
 #include <functional>
 #include <memory>
@@ -39,7 +40,15 @@
 #include "assfonts.h"
 #include "circular_buffer.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #include "NotoSansCJK_Regular.hxx"
+#include "icon.hxx"
+
+#ifdef _WIN32
+#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+#endif
 
 using ScaleLambda = std::function<float(float)>;
 
@@ -53,6 +62,8 @@ static std::string font_text_buffer;
 static std::string database_text_buffer = ".";
 static CircularBuffer<std::pair<unsigned int, std::string>> log_text_buffer(
     8 * 1024);
+
+static bool is_font_text_locked = false;
 
 static int hdr_state = NO_HDR;
 static bool is_subset_only = false;
@@ -90,6 +101,8 @@ void Start();
 std::string Trim(const std::string& str);
 
 int main() {
+  std::setlocale(LC_ALL, ".UTF8");
+
   if (!glfwInit()) {
     return -1;
   }
@@ -110,7 +123,7 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #endif
-  glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
+  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
   float xscale, yscale;
   GLFWmonitor* primary = glfwGetPrimaryMonitor();
@@ -122,10 +135,17 @@ int main() {
   };
 
   GLFWwindow* window =
-      glfwCreateWindow(Scale(640), Scale(440), "assfonts", nullptr, nullptr);
+      glfwCreateWindow(Scale(640), Scale(400), "assfonts", nullptr, nullptr);
   if (window == nullptr) {
     return -1;
   }
+
+  GLFWimage icon[1];
+  icon[0].pixels = stbi_load_from_memory(icon_data, icon_size, &icon[0].width,
+                                         &icon[0].height, 0, 4);
+  glfwSetWindowIcon(window, 1, icon);
+  stbi_image_free(icon[0].pixels);
+
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);
 
@@ -197,15 +217,12 @@ void AppRender(GLFWwindow* window, ImGuiIO& io, const ScaleLambda& Scale) {
 
   ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 
-  if (ImGui::Begin("assfonts", nullptr,
-                   ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar |
-                       ImGuiWindowFlags_NoCollapse)) {
-    ImGui::SetWindowSize(ImVec2(Scale(640), Scale(440)));
-
-    ImVec2 window_pos = ImGui::GetWindowPos();
-    ImVec2 window_size = ImGui::GetWindowSize();
-    glfwSetWindowPos(window, window_pos.x, window_pos.y);
-    glfwSetWindowSize(window, window_size.x, window_size.y);
+  if (ImGui::Begin("assfonts", nullptr, ImGuiWindowFlags_NoDecoration)) {
+    int width, height, xpos, ypos;
+    glfwGetWindowSize(window, &width, &height);
+    glfwGetWindowPos(window, &xpos, &ypos);
+    ImGui::SetWindowSize(ImVec2(width, height));
+    ImGui::SetWindowPos(ImVec2(xpos, ypos));
 
     TabBarRender(window, Scale);
 
@@ -272,7 +289,7 @@ void InputGroupRender(const ScaleLambda& Scale) {
   ImGui::InputText("##input_text", &input_text_buffer);
 
   ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
-  if (ImGui::Button("\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
+  if (ImGui::Button(u8"\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
     ImGuiFileDialog::Instance()->OpenDialog(
         "ChooseInputDlgKey", "Choose File - Input ASS files", ".ass,.ssa", ".",
         128, nullptr, ImGuiFileDialogFlags_CaseInsensitiveExtention);
@@ -317,7 +334,7 @@ void OutputGroupRender(const ScaleLambda& Scale) {
   ImGui::InputText("##output_text", &output_text_buffer);
 
   ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
-  if (ImGui::Button("\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
+  if (ImGui::Button(u8"\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
     ImGuiFileDialog::Instance()->OpenDialog(
         "ChooseOutputDlgKey", "Choose Directory - Output directory", nullptr,
         ".", 1, nullptr);
@@ -348,10 +365,15 @@ void FontGroupRender(const ScaleLambda& Scale) {
 
   ImGui::Spacing();
   ImGui::SetNextItemWidth(Scale(560));
-  ImGui::InputText("##font_text", &font_text_buffer);
+  if (is_font_text_locked) {
+    ImGui::InputText("##font_text", &font_text_buffer,
+                     ImGuiInputTextFlags_ReadOnly);
+  } else {
+    ImGui::InputText("##font_text", &font_text_buffer);
+  }
 
   ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
-  if (ImGui::Button("\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
+  if (ImGui::Button(u8"\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
     ImGuiFileDialog::Instance()->OpenDialog("ChooseFontDlgKey",
                                             "Choose Directory - Font directory",
                                             nullptr, ".", 1, nullptr);
@@ -385,7 +407,7 @@ void DatabaseGroupRender(const ScaleLambda& Scale) {
   ImGui::InputText("##database_text", &database_text_buffer);
 
   ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
-  if (ImGui::Button("\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
+  if (ImGui::Button(u8"\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
     ImGuiFileDialog::Instance()->OpenDialog(
         "ChooseDatabaseDlgKey", "Choose Directory - Database directory",
         nullptr, ".", 1, nullptr);
@@ -414,12 +436,24 @@ void SettingGroupRender(const ScaleLambda& Scale) {
 
   ImGui::SetNextItemWidth(Scale(120));
   ImGui::Combo("##HDR", &hdr_state, "No HDR\0HDR Low\0HDR High\0");
+  if (ImGui::IsItemHovered()) {
+    ImGui::SetTooltip(
+        "Change HDR subtitle brightness\n"
+        " HDR Low  targets 100 nit\n"
+        " HDR High  targets 203 nit");
+  }
 
   ImGui::SameLine(0, 2 * ImGui::GetStyle().ItemSpacing.x);
   ImGui::Checkbox("Subset only", &is_subset_only);
+  if (ImGui::IsItemHovered()) {
+    ImGui::SetTooltip("Subset fonts but not embed them into subtitle");
+  }
 
   ImGui::SameLine(0, 2 * ImGui::GetStyle().ItemSpacing.x);
   ImGui::Checkbox("Embed only", &is_embed_only);
+  if (ImGui::IsItemHovered()) {
+    ImGui::SetTooltip("Embed fonts into subtitle but not subset them");
+  }
 
   ImGui::EndGroup();
 }
@@ -435,11 +469,17 @@ void RunGroupRender(GLFWwindow* window, const ScaleLambda& Scale) {
     is_show_log = true;
     OnBuildDatabase();
   }
+  if (ImGui::IsItemHovered()) {
+    ImGui::SetTooltip("Build fonts database");
+  }
 
   ImGui::SameLine(0, 2 * ImGui::GetStyle().ItemSpacing.x);
   if (ImGui::Button("Start", ImVec2(Scale(70.0f), Scale(45.0f)))) {
     is_show_log = true;
     OnStart();
+  }
+  if (ImGui::IsItemHovered()) {
+    ImGui::SetTooltip("Start program");
   }
 
   ImGui::SameLine(0, 42 * ImGui::GetStyle().ItemSpacing.x);
@@ -562,6 +602,10 @@ void BuildDatabase() {
 
   std::string fonts_path = font_text_buffer;
   std::string database_path = database_text_buffer;
+
+  is_font_text_locked = true;
+  font_text_buffer.clear();
+  is_font_text_locked = false;
 
   AssfontsBuildDB(fonts_path.c_str(), database_path.c_str(), LogCallback,
                   ASSFONTS_INFO);
