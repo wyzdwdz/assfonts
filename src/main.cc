@@ -19,8 +19,10 @@
 
 #include <clocale>
 #include <cmath>
+#include <filesystem>
 #include <functional>
 #include <memory>
+#include <regex>
 #include <string>
 #include <thread>
 #include <utility>
@@ -63,6 +65,10 @@ static std::string database_text_buffer = ".";
 static CircularBuffer<std::pair<unsigned int, std::string>> log_text_buffer(
     8 * 1024);
 
+static std::vector<std::string> drop_buffer;
+static const std::regex ass_regex(".+\\.(ass|ssa)$",
+                                  std::regex_constants::icase);
+
 static bool is_font_text_locked = false;
 
 static int hdr_state = NO_HDR;
@@ -91,6 +97,13 @@ void LogGroupRender(GLFWwindow* window, const ScaleLambda& Scale);
 
 void LogCallback(const char* msg, const unsigned int log_level);
 void LogToClipBoard(GLFWwindow* window);
+
+void DropCallback(GLFWwindow* window, int count, const char** paths);
+
+void OnDropInput();
+void OnDropOutput();
+void OnDropFont();
+void OnDropDatabase();
 
 void OnBuildDatabase();
 void OnStart();
@@ -145,6 +158,8 @@ int main() {
                                          &icon[0].height, 0, 4);
   glfwSetWindowIcon(window, 1, icon);
   stbi_image_free(icon[0].pixels);
+
+  glfwSetDropCallback(window, DropCallback);
 
   glfwMakeContextCurrent(window);
   glfwSwapInterval(1);
@@ -203,9 +218,8 @@ void AppInit() {
   std::string version_info = "assfonts -- version " +
                              std::to_string(ASSFONTS_VERSION_MAJOR) + "." +
                              std::to_string(ASSFONTS_VERSION_MINOR) + "." +
-                             std::to_string(ASSFONTS_VERSION_PATCH);
+                             std::to_string(ASSFONTS_VERSION_PATCH) + "\n";
   LogCallback(version_info.c_str(), ASSFONTS_TEXT);
-  LogCallback("\n", ASSFONTS_TEXT);
 }
 
 void AppRender(GLFWwindow* window, ImGuiIO& io, const ScaleLambda& Scale) {
@@ -223,7 +237,9 @@ void AppRender(GLFWwindow* window, ImGuiIO& io, const ScaleLambda& Scale) {
 
   ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 
-  if (ImGui::Begin("assfonts", nullptr, ImGuiWindowFlags_NoDecoration)) {
+  if (ImGui::Begin(
+          "assfonts", nullptr,
+          ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollWithMouse)) {
     TabBarRender(window, Scale);
     ImGui::End();
   }
@@ -286,6 +302,9 @@ void InputGroupRender(const ScaleLambda& Scale) {
   ImGui::Spacing();
   ImGui::SetNextItemWidth(Scale(560));
   ImGui::InputText("##input_text", &input_text_buffer);
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) {
+    OnDropInput();
+  }
 
   ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
   if (ImGui::Button(u8"\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
@@ -331,6 +350,9 @@ void OutputGroupRender(const ScaleLambda& Scale) {
   ImGui::Spacing();
   ImGui::SetNextItemWidth(Scale(560));
   ImGui::InputText("##output_text", &output_text_buffer);
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) {
+    OnDropOutput();
+  }
 
   ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
   if (ImGui::Button(u8"\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
@@ -370,6 +392,9 @@ void FontGroupRender(const ScaleLambda& Scale) {
   } else {
     ImGui::InputText("##font_text", &font_text_buffer);
   }
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) {
+    OnDropFont();
+  }
 
   ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
   if (ImGui::Button(u8"\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
@@ -404,6 +429,9 @@ void DatabaseGroupRender(const ScaleLambda& Scale) {
   ImGui::Spacing();
   ImGui::SetNextItemWidth(Scale(560));
   ImGui::InputText("##database_text", &database_text_buffer);
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem)) {
+    OnDropDatabase();
+  }
 
   ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
   if (ImGui::Button(u8"\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
@@ -435,7 +463,7 @@ void SettingGroupRender(const ScaleLambda& Scale) {
 
   ImGui::SetNextItemWidth(Scale(120));
   ImGui::Combo("##HDR", &hdr_state, "No HDR\0HDR Low\0HDR High\0");
-  if (ImGui::IsItemHovered()) {
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
     ImGui::SetTooltip(
         "Change HDR subtitle brightness\n"
         " HDR Low  targets 100 nit\n"
@@ -444,13 +472,13 @@ void SettingGroupRender(const ScaleLambda& Scale) {
 
   ImGui::SameLine(0, 2 * ImGui::GetStyle().ItemSpacing.x);
   ImGui::Checkbox("Subset only", &is_subset_only);
-  if (ImGui::IsItemHovered()) {
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
     ImGui::SetTooltip("Subset fonts but not embed them into subtitle");
   }
 
   ImGui::SameLine(0, 2 * ImGui::GetStyle().ItemSpacing.x);
   ImGui::Checkbox("Embed only", &is_embed_only);
-  if (ImGui::IsItemHovered()) {
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
     ImGui::SetTooltip("Embed fonts into subtitle but not subset them");
   }
 
@@ -468,7 +496,7 @@ void RunGroupRender(GLFWwindow* window, const ScaleLambda& Scale) {
     is_show_log = true;
     OnBuildDatabase();
   }
-  if (ImGui::IsItemHovered()) {
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
     ImGui::SetTooltip("Build fonts database");
   }
 
@@ -477,7 +505,7 @@ void RunGroupRender(GLFWwindow* window, const ScaleLambda& Scale) {
     is_show_log = true;
     OnStart();
   }
-  if (ImGui::IsItemHovered()) {
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
     ImGui::SetTooltip("Start program");
   }
 
@@ -580,6 +608,81 @@ void LogToClipBoard(GLFWwindow* window) {
   }
 
   glfwSetClipboardString(window, Trim(paste_text).c_str());
+}
+
+void DropCallback(GLFWwindow* window, int count, const char** paths) {
+  if (drop_buffer.empty()) {
+    for (int i = 0; i < count; ++i) {
+      drop_buffer.emplace_back(std::string(paths[i]));
+    }
+  }
+}
+
+void OnDropInput() {
+  if (!drop_buffer.empty()) {
+    bool is_already_clear = false;
+    std::filesystem::path first_item;
+
+    for (auto it = drop_buffer.begin(); it != drop_buffer.end(); ++it) {
+      if (!std::regex_match(*it, ass_regex)) {
+        continue;
+      }
+
+      if (!is_already_clear) {
+        input_text_buffer.clear();
+        is_already_clear = true;
+
+        first_item = std::filesystem::path(*it);
+      }
+
+      input_text_buffer.append(*it);
+      if (it != drop_buffer.end() - 1) {
+        input_text_buffer.append("; ");
+      }
+    }
+
+    if (!first_item.empty()) {
+      output_text_buffer = first_item.parent_path().string();
+    }
+
+    drop_buffer.clear();
+  }
+}
+
+void OnDropOutput() {
+  if (!drop_buffer.empty()) {
+    std::filesystem::path first_item(drop_buffer[0]);
+
+    if (std::filesystem::is_directory(first_item)) {
+      output_text_buffer = drop_buffer[0];
+    }
+
+    drop_buffer.clear();
+  }
+}
+
+void OnDropFont() {
+  if (!drop_buffer.empty()) {
+    std::filesystem::path first_item(drop_buffer[0]);
+
+    if (std::filesystem::is_directory(first_item)) {
+      font_text_buffer = drop_buffer[0];
+    }
+
+    drop_buffer.clear();
+  }
+}
+
+void OnDropDatabase() {
+  if (!drop_buffer.empty()) {
+    std::filesystem::path first_item(drop_buffer[0]);
+
+    if (std::filesystem::is_directory(first_item)) {
+      database_text_buffer = drop_buffer[0];
+    }
+
+    drop_buffer.clear();
+  }
 }
 
 void OnBuildDatabase() {
