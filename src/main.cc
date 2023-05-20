@@ -123,7 +123,6 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 #endif
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
   float xscale, yscale;
   GLFWmonitor* primary = glfwGetPrimaryMonitor();
@@ -135,10 +134,11 @@ int main() {
   };
 
   GLFWwindow* window =
-      glfwCreateWindow(Scale(640), Scale(400), "assfonts", nullptr, nullptr);
+      glfwCreateWindow(Scale(640), Scale(410), "assfonts", nullptr, nullptr);
   if (window == nullptr) {
     return -1;
   }
+  glfwSetWindowAttrib(window, GLFW_RESIZABLE, GLFW_FALSE);
 
   GLFWimage icon[1];
   icon[0].pixels = stbi_load_from_memory(icon_data, icon_size, &icon[0].width,
@@ -215,17 +215,16 @@ void AppRender(GLFWwindow* window, ImGuiIO& io, const ScaleLambda& Scale) {
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
 
+  int width, height, xpos, ypos;
+  glfwGetWindowSize(window, &width, &height);
+  glfwGetWindowPos(window, &xpos, &ypos);
+  ImGui::SetNextWindowSize(ImVec2(width, height));
+  ImGui::SetNextWindowPos(ImVec2(xpos, ypos));
+
   ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 
   if (ImGui::Begin("assfonts", nullptr, ImGuiWindowFlags_NoDecoration)) {
-    int width, height, xpos, ypos;
-    glfwGetWindowSize(window, &width, &height);
-    glfwGetWindowPos(window, &xpos, &ypos);
-    ImGui::SetWindowSize(ImVec2(width, height));
-    ImGui::SetWindowPos(ImVec2(xpos, ypos));
-
     TabBarRender(window, Scale);
-
     ImGui::End();
   }
 
