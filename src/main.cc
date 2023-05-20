@@ -220,6 +220,7 @@ void AppInit() {
                              std::to_string(ASSFONTS_VERSION_MINOR) + "." +
                              std::to_string(ASSFONTS_VERSION_PATCH) + "\n";
   LogCallback(version_info.c_str(), ASSFONTS_TEXT);
+  LogCallback("\n", ASSFONTS_TEXT);
 }
 
 void AppRender(GLFWwindow* window, ImGuiIO& io, const ScaleLambda& Scale) {

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Categories=Utility;
+Encoding=UTF-8
+Exec=assfonts
+GenericName=assfonts
+Icon=icon
+Name=assfonts
+Terminal=false
+Type=Application
