@@ -1,0 +1,20 @@
+name: Build linux AppImage
+run-name: Build linux AppImage by ${{ github.actor }}
+on: 
+  push:
+    branches: [ imgui ]
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
+        with:
+          version: 2.0.4
+
+      - name: Conan version
+        run: echo "${{ steps.conan.outputs.version }}"
+        
+      - name: Start build script
+        run: ./build.sh
