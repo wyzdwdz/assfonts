@@ -22,7 +22,8 @@ jobs:
         run: echo "${{ steps.conan.outputs.version }}"
         
       - name: Start build script
-        run: conan install . -b missing -s build_type=Release -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True
+        run: |
+             conan install . -b missing -s build_type=Release -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True
              cd build
              source conanbuild.sh
              cmake .. --preset conan-release
