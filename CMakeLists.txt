@@ -2,8 +2,6 @@
 
 project (assfonts CXX C)
 
-set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/install)
-
 add_subdirectory(${PROJECT_SOURCE_DIR}/3rdparty)
 
 find_package(harfbuzz REQUIRED)
