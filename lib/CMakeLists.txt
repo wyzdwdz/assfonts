@@ -7,7 +7,8 @@ set(THIRD_PARTY_LIBS harfbuzz::harfbuzz
                      fmt::fmt
                      threadpool::threadpool
                      ced
-                     libasshdr)
+                     libasshdr
+                     ghcFilesystem::ghc_filesystem)
 
 set(TARGET_SOURCES font_parser.cc
                    ass_parser.cc

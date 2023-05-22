@@ -2,7 +2,8 @@
 
 set(THIRD_PARTY_LIBS ImGuiFileDialog
                      imgui
-                     glfw)
+                     glfw
+                     ghcFilesystem::ghc_filesystem)
 
 set(TARGET_SOURCES main.cc
                    backends/imgui_impl_glfw.cpp

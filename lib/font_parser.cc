@@ -20,7 +20,6 @@
 #include "font_parser.h"
 
 #include <exception>
-#include <filesystem>
 #include <fstream>
 #include <future>
 #include <regex>
@@ -46,6 +45,7 @@ extern "C" {
 #endif
 
 #include <ThreadPool/ThreadPool.h>
+#include <ghc/filesystem.hpp>
 #include <nlohmann/json.hpp>
 
 #include "ass_freetype.h"
@@ -54,7 +54,7 @@ extern "C" {
 constexpr int MAX_TCHAR = 128;
 #endif
 
-namespace fs = std::filesystem;
+namespace fs = ghc::filesystem;
 
 namespace ass {
 

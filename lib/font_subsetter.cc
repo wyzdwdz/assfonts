@@ -22,18 +22,18 @@
 #include <algorithm>
 #include <climits>
 #include <exception>
-#include <filesystem>
 #include <fstream>
 
 #include <fmt/format.h>
 #include <harfbuzz/hb-subset.h>
+#include <ghc/filesystem.hpp>
 
 #include "ass_harfbuzz.h"
 
 static const std::u32string ADDITIONAL_CODEPOINTS =
     U"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-namespace fs = std::filesystem;
+namespace fs = ghc::filesystem;
 
 namespace ass {
 

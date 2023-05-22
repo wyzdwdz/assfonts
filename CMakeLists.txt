@@ -12,6 +12,7 @@ find_package(fmt REQUIRED)
 find_package(CLI11 REQUIRED)
 find_package(threadpool REQUIRED)
 find_package(glfw3 REQUIRED)
+find_package(ghc_filesystem REQUIRED)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     if(CMAKE_BUILD_TYPE MATCHES "Debug")
@@ -27,7 +28,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif()
 endif()
 
-set(CXX_STD_VER cxx_std_17)
+set(CXX_STD_VER cxx_std_11)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
 add_subdirectory(${PROJECT_SOURCE_DIR}/src)

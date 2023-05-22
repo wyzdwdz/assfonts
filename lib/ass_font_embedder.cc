@@ -20,13 +20,14 @@
 #include "ass_font_embedder.h"
 
 #include <algorithm>
-#include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <regex>
 #include <sstream>
 
-namespace fs = std::filesystem;
+#include <ghc/filesystem.hpp>
+
+namespace fs = ghc::filesystem;
 
 namespace ass {
 

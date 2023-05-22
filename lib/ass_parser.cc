@@ -20,14 +20,14 @@
 #include "ass_parser.h"
 
 #include <exception>
-#include <filesystem>
 #include <sstream>
 
 #include <asshdr/ass_recolorize.h>
 #include <compact_enc_det/compact_enc_det.h>
 #include <util/encodings/encodings.h>
+#include <ghc/filesystem.hpp>
 
-namespace fs = std::filesystem;
+namespace fs = ghc::filesystem;
 
 namespace ass {
 

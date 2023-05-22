@@ -19,7 +19,6 @@
 
 #include <clocale>
 #include <cmath>
-#include <filesystem>
 #include <functional>
 #include <memory>
 #include <regex>
@@ -32,6 +31,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <imgui_stdlib.h>
+#include <ghc/filesystem.hpp>
 
 #define GL_SILENCE_DEPRECATION
 #if defined(IMGUI_IMPL_OPENGL_ES2)
@@ -51,6 +51,8 @@
 #ifdef _WIN32
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #endif
+
+namespace fs = ghc::filesystem;
 
 using ScaleLambda = std::function<float(float)>;
 
@@ -622,7 +624,7 @@ void DropCallback(GLFWwindow* window, int count, const char** paths) {
 void OnDropInput() {
   if (!drop_buffer.empty()) {
     bool is_already_clear = false;
-    std::filesystem::path first_item;
+    fs::path first_item;
 
     for (auto it = drop_buffer.begin(); it != drop_buffer.end(); ++it) {
       if (!std::regex_match(*it, ass_regex)) {
@@ -633,7 +635,7 @@ void OnDropInput() {
         input_text_buffer.clear();
         is_already_clear = true;
 
-        first_item = std::filesystem::path(*it);
+        first_item = fs::path(*it);
       }
 
       input_text_buffer.append(*it);
@@ -652,9 +654,9 @@ void OnDropInput() {
 
 void OnDropOutput() {
   if (!drop_buffer.empty()) {
-    std::filesystem::path first_item(drop_buffer[0]);
+    fs::path first_item(drop_buffer[0]);
 
-    if (std::filesystem::is_directory(first_item)) {
+    if (fs::is_directory(first_item)) {
       output_text_buffer = drop_buffer[0];
     }
 
@@ -664,9 +666,9 @@ void OnDropOutput() {
 
 void OnDropFont() {
   if (!drop_buffer.empty()) {
-    std::filesystem::path first_item(drop_buffer[0]);
+    fs::path first_item(drop_buffer[0]);
 
-    if (std::filesystem::is_directory(first_item)) {
+    if (fs::is_directory(first_item)) {
       font_text_buffer = drop_buffer[0];
     }
 
@@ -676,9 +678,9 @@ void OnDropFont() {
 
 void OnDropDatabase() {
   if (!drop_buffer.empty()) {
-    std::filesystem::path first_item(drop_buffer[0]);
+    fs::path first_item(drop_buffer[0]);
 
-    if (std::filesystem::is_directory(first_item)) {
+    if (fs::is_directory(first_item)) {
       database_text_buffer = drop_buffer[0];
     }
 

@@ -19,8 +19,9 @@
 
 #include "assfonts.h"
 
-#include <filesystem>
 #include <memory>
+
+#include <ghc/filesystem.hpp>
 
 #include "ass_font_embedder.h"
 #include "ass_logger.h"
@@ -29,7 +30,7 @@
 #include "font_parser.h"
 #include "font_subsetter.h"
 
-namespace fs = std::filesystem;
+namespace fs = ghc::filesystem;
 
 void AssfontsBuildDB(const char* fonts_path, const char* db_path,
                      const AssfontsLogCallback cb,
