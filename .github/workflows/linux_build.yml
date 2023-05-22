@@ -1,0 +1,31 @@
+name: Build linux AppImage
+run-name: Build linux AppImage by ${{ github.actor }}
+on: 
+  push:
+    tags: 
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
+        with:
+          version: 2.0.4
+          
+      - name: Detect Conan profile
+        run: conan profile detect
+
+      - name: Conan version
+        run: echo "${{ steps.conan.outputs.version }}"
+        
+      - name: Start build
+        run: |
+          conan install . -b missing -s build_type=Release -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True
+          cd build
+          source conanbuild.sh
+          cmake .. --preset conan-release
+          cmake --build --preset conan-release --target install -j
