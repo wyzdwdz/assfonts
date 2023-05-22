@@ -5,7 +5,7 @@ on:
     types: [ published ]
     branches: [ imgui ]
 jobs:
-  build and release:
+  build:
     runs-on: ubuntu-latest
     container:
       image: 'Dockerfile_x86_64_ubuntu'
