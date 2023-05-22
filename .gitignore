@@ -472,3 +472,7 @@ build/
 
 #imgui
 imgui.ini
+
+#Appimage
+AppDir/
+*.Appimage
