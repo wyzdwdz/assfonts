@@ -3,8 +3,9 @@ run-name: Build linux AppImage by ${{ github.actor }}
 on: 
   release:
     types: [ published ]
+    branches: [ imgui ]
 jobs:
-  build-x86_64-Linux-AppImage:
+  build and release:
     runs-on: ubuntu-latest
     container:
       image: 'Dockerfile_x86_64_ubuntu'
@@ -20,3 +21,9 @@ jobs:
           linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts
           appimagetool ./AppDir assfonts-${{ github.ref_name }}-x86_64.AppImage
 
+      - name: edit release
+        uses: irongut/EditRelease@v1.2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          id: ${{ github.event.release.id }}
+          files: "assfonts-${{ github.ref_name }}-x86_64.AppImage"
