@@ -4,7 +4,7 @@ on:
   release:
     types: [ published ]
 jobs:
-  build:
+  build-x86_64-Linux-AppImage:
     runs-on: ubuntu-latest
     container:
       image: 'Dockerfile_x86_64_ubuntu'
