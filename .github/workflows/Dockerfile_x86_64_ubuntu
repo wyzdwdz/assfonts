@@ -1,0 +1,47 @@
+FROM --platform=x86_64 ubuntu:18.04
+
+RUN apt update && apt -y upgrade
+RUN apt -y install build-essential pkg-config git
+
+RUN apt -y install python3 python3-pip python3-markupsafe
+RUN pip3 install conan==2.0.4
+RUN conan profile detect
+
+RUN apt -y install wget
+WORKDIR /tmp
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.26.4/cmake-3.26.4-linux-x86_64.tar.gz
+RUN tar -xf cmake-3.26.4-linux-x86_64.tar.gz
+WORKDIR /tmp/cmake-3.26.4-linux-x86_64
+RUN cp -rf * /usr
+
+WORKDIR /tmp
+RUN git clone --recurse-submodules https://github.com/linuxdeploy/linuxdeploy.git
+WORKDIR /tmp/linuxdeploy/build
+RUN apt -y install patchelf libpng-dev libjpeg-dev
+RUN cmake .. -DBUILD_TESTING=FALSE
+RUN apt -y install software-properties-common
+RUN add-apt-repository -y ppa:ubuntu-toolchain-r/test && apt update
+RUN apt -y install gcc-9 g++-9
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 2 --slave /usr/bin/g++ g++ /usr/bin/g++-9
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 1 --slave /usr/bin/g++ g++ /usr/bin/g++-7
+RUN update-alternatives --set gcc /usr/bin/gcc-9
+RUN sed -i 's|#include "copyright.h"|#include "copyright/copyright.h"|g' /tmp/linuxdeploy/src/core/appdir.cpp
+RUN make -j && make install
+RUN update-alternatives --set gcc /usr/bin/gcc-7
+
+WORKDIR /tmp
+RUN git clone --recurse-submodules https://github.com/linuxdeploy/linuxdeploy-plugin-appimage.git
+WORKDIR /tmp/linuxdeploy-plugin-appimage/build
+RUN cmake ..
+RUN make -j && make install
+
+ENV TZ=UTC
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN add-apt-repository -y ppa:deadsnakes/ppa && apt update
+RUN apt -y install python3.7
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 1
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 2
+RUN update-alternatives --set python3 /usr/bin/python3.7
+RUN sed -i 's|#!/usr/bin/python3|#!/usr/bin/python3.6|g' /usr/bin/add-apt-repository
+
+RUN DEBIAN_FRONTEND=noninteractive apt -y install xorg
