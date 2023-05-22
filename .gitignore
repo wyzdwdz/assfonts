@@ -475,4 +475,7 @@ imgui.ini
 
 #Appimage
 AppDir/
-*.Appimage
+*.AppImage
+
+#vscode dev container
+.devcontainer
