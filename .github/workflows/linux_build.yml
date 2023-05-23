@@ -7,7 +7,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: wyzdwdz/appimage-build:0.1.0
+      image: wyzdwdz/appimage-ubuntu18.04
     steps:
       - name: checkout
         uses: actions/checkout@v3
