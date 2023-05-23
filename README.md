@@ -20,6 +20,8 @@ Package Manager ---- Conan version 2.0.4
 
 - [ThreadPool](https://github.com/progschj/ThreadPool)
 
+- [ghc::filesystem](https://github.com/gulrak/filesystem)
+
 ### How to build
 
 Linux
