@@ -34,7 +34,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: release-appimage-amd64
-          path: build.sh
+          path: build*
           if-no-files-found: error
 
 
@@ -61,9 +61,10 @@ jobs:
           name: release-appimage-amd64
 
       - name: edit release
-        uses: irongut/EditRelease@master
+        uses: svenstaro/upload-release-action@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          id: ${{ github.event.release.id }}
-          files: "build.sh"
-        
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          asset_name: build*
+          tag: ${{ github.ref }}
+          overwrite: false
+          file_glob: true
