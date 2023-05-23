@@ -18,13 +18,13 @@ jobs:
       - name: build AppImage
         run: |
           linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts
-          appimagetool ./AppDir assfonts-${{ github.ref_name }}-x86_64.AppImage
+          appimagetool ./AppDir assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage
 
       - name: upload AppImages
         uses: actions/upload-artifact@v3
         with:
           name: release-appimage-amd64
-          path: assfonts-${{ github.ref_name }}-x86_64.AppImage
+          path: assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage
           if-no-files-found: error
 
   build-windows:
@@ -51,20 +51,20 @@ jobs:
         run: .\build.bat
 
       - name: copy and rename
-        run: echo f | xcopy /f /y .\install\bin\assfonts.exe assfonts-${{ github.ref_name }}-x86_64.exe
+        run: echo f | xcopy /f /y .\install\bin\assfonts.exe assfonts-${{ github.ref_name }}-x86_64-Windows.exe
 
       - name: upx compress
         uses: crazy-max/ghaction-upx@v2
         with:
           version: latest
-          files: assfonts-${{ github.ref_name }}-x86_64.exe
+          files: assfonts-${{ github.ref_name }}-x86_64-Windows.exe
           args: -fq9
 
       - name: upload exe
         uses: actions/upload-artifact@v3
         with:
           name: release-exe-amd64
-          path: assfonts-${{ github.ref_name }}-x86_64.exe
+          path: assfonts-${{ github.ref_name }}-x86_64-Windows.exe
           if-no-files-found: error
 
   release:
@@ -83,8 +83,8 @@ jobs:
 
       - name: calculate hash
         run: |
-          sha256sum assfonts-${{ github.ref_name }}-x86_64.AppImage > assfonts-${{ github.ref_name }}-x86_64.AppImage.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-x86_64.exe > assfonts-${{ github.ref_name }}-x86_64.exe.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage > assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-x86_64-Windows.exe > assfonts-${{ github.ref_name }}-x86_64-Windows.exe.sha256sum
 
       - name: edit release
         uses: svenstaro/upload-release-action@v2
