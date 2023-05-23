@@ -3,7 +3,6 @@ run-name: Build linux AppImage by ${{ github.actor }}
 on: 
   release:
     types: [ published ]
-    branches: [ imgui ]
 jobs:
   build:
     runs-on: ubuntu-latest
