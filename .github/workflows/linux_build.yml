@@ -13,11 +13,11 @@ jobs:
         uses: actions/checkout@v3
       
       - name: build executable binary
-        working-directory: ${{ github.workspace }}
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: conan profile detect && ./build.sh
 
       - name: build AppImage
-        working-directory: ${{ github.workspace }}
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: |
           linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts
           appimagetool ./AppDir assfonts-${{ github.ref_name }}-x86_64.AppImage
@@ -27,4 +27,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           id: ${{ github.event.release.id }}
-          files: "${{ github.workspace }}/assfonts-${{ github.ref_name }}-x86_64.AppImage"
+          files: "${{ env.GITHUB_WORKSPACE }}/assfonts-${{ github.ref_name }}-x86_64.AppImage"
