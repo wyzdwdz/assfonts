@@ -24,7 +24,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: release-appimage-amd64
-          path: assfonts-${{ github.ref_name }}-x86_64.AppImage*
+          path: assfonts-${{ github.ref_name }}-x86_64.AppImage
           if-no-files-found: error
 
   build-windows:
@@ -41,6 +41,8 @@ jobs:
       - name: install Conan
         id: conan
         uses: turtlebrowser/get-conan@main
+        with:
+          version: 2.0.4
       
       - name: checkout
         uses: actions/checkout@v3
@@ -49,7 +51,7 @@ jobs:
         run: .\build.bat
 
       - name: copy and rename
-        run: xcopy .\install\bin\assfonts.exe assfonts-${{ github.ref_name }}-x86_64.exe
+        run: echo f | xcopy /f /y .\install\bin\assfonts.exe assfonts-${{ github.ref_name }}-x86_64.exe
 
       - name: upload exe
         uses: actions/upload-artifact@v3
