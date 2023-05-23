@@ -32,5 +32,5 @@ chmod +x build.sh
 Windows
 
 ```
-./build.bat
+.\build.bat
 ```
