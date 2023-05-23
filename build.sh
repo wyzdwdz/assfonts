@@ -19,6 +19,8 @@ do
     esac
 done
 
+conan profile detect -vquiet
+
 if (( $EUID != 0 ))
 then        
     conan install . -b missing -s build_type=${BUILD_TYPE} -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=True
