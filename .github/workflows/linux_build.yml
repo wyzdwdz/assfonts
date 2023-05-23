@@ -53,6 +53,13 @@ jobs:
       - name: copy and rename
         run: echo f | xcopy /f /y .\install\bin\assfonts.exe assfonts-${{ github.ref_name }}-x86_64.exe
 
+      - name: upx compress
+        uses: crazy-max/ghaction-upx@v2
+        with:
+          version: latest
+          files: assfonts-${{ github.ref_name }}-x86_64.exe
+          args: -fq9
+
       - name: upload exe
         uses: actions/upload-artifact@v3
         with:

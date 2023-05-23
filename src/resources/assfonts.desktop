@@ -1,7 +1,4 @@
 [Desktop Entry]
-X-AppImage-Name=assfonts
-X-AppImage-Version=0.3.8
-X-AppImage-Arch=aarch64
 Categories=Utility;
 Encoding=UTF-8
 Exec=assfonts
