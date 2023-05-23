@@ -12,37 +12,58 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
       
-      - name: build executable binary
-        run: ./build.sh
+#       - name: build executable binary
+#         run: ./build.sh
 
-      - name: build AppImage
-        run: |
-          linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts
-          appimagetool ./AppDir assfonts-${{ github.ref_name }}-x86_64.AppImage
+#       - name: build AppImage
+#         run: |
+#           linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts
+#           appimagetool ./AppDir assfonts-${{ github.ref_name }}-x86_64.AppImage
 
-      - name: calculate hash
-        run: sha256sum assfonts-${{ github.ref_name }}-x86_64.AppImage > assfonts-${{ github.ref_name }}-x86_64.AppImage.sha256sum
+#       - name: calculate hash
+#         run: sha256sum assfonts-${{ github.ref_name }}-x86_64.AppImage > assfonts-${{ github.ref_name }}-x86_64.AppImage.sha256sum
 
-      - name: upload AppImages
+#       - name: upload AppImages
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: release-appimage-amd64
+#           path: assfonts-${{ github.ref_name }}-x86_64.AppImage*
+#           if-no-files-found: error
+
+      - name: upload
         uses: actions/upload-artifact@v3
         with:
           name: release-appimage-amd64
-          path: assfonts-${{ github.ref_name }}-x86_64.AppImage*
+          path: build.sh
           if-no-files-found: error
+
 
   release:
     runs-on: ubuntu-latest
     needs:
       - build-linux
     steps:
-      - name: download AppImages
+#       - name: download AppImages
+#         uses: actions/download-artifact@v3
+#         with:
+#           name: release-appimage-amd64
+
+#       - name: edit release
+#         uses: irongut/EditRelease@master
+#         with:
+#           token: ${{ secrets.GITHUB_TOKEN }}
+#           id: ${{ github.event.release.id }}
+#           files: "assfonts-${{ github.ref_name }}-x86_64.AppImage,assfonts-${{ github.ref_name }}-x86_64.AppImage.sha256sum"
+
+      - name: download
         uses: actions/download-artifact@v3
         with:
           name: release-appimage-amd64
 
       - name: edit release
-        uses: irongut/EditRelease@v1.2.0
+        uses: irongut/EditRelease@master
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           id: ${{ github.event.release.id }}
-          files: "assfonts-${{ github.ref_name }}-x86_64.AppImage,assfonts-${{ github.ref_name }}-x86_64.AppImage.sha256sum"
+          files: "build.sh"
+        
