@@ -6,11 +6,27 @@ on:
 jobs:
   build-linux:
     runs-on: ubuntu-latest
-    container:
-      image: wyzdwdz/appimage-ubuntu18.04
+    strategy:
+      matrix:
+        include:
+          - { arch: x86_64, platform: linux/amd64 }
+          - { arch: aarch64, platform: linux/arm64 }
+#     container:
+#       image: wyzdwdz/appimage-ubuntu18.04
+#       options:
+#         --platform ${{ matrix.platform }}
     steps:
       - name: checkout
         uses: actions/checkout@v3
+        
+      - name: set up QEMU
+        uses: docker/setup-qemu-action@v2
+        
+      - name: run Docker container
+        uses: addnab/docker-run-action@v3
+        with:
+          image: wyzdwdz/appimage-ubuntu18.04
+          options: -v ${{ github.workspace }}:/var/www --platform ${{ matrix.platform }}
       
       - name: build executable binary
         run: ./build.sh
@@ -18,13 +34,13 @@ jobs:
       - name: build AppImage
         run: |
           linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts
-          appimagetool ./AppDir assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage
+          appimagetool ./AppDir assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Linux.AppImage
 
       - name: upload AppImages
         uses: actions/upload-artifact@v3
         with:
-          name: release-appimage-amd64
-          path: assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage
+          name: release-appimage-${{ matrix.arch }}
+          path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Linux.AppImage
           if-no-files-found: error
 
   build-windows:
@@ -63,7 +79,7 @@ jobs:
       - name: upload exe
         uses: actions/upload-artifact@v3
         with:
-          name: release-exe-amd64
+          name: release-exe-x86_64
           path: assfonts-${{ github.ref_name }}-x86_64-Windows.exe
           if-no-files-found: error
 
@@ -71,19 +87,25 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ build-linux, build-windows ]
     steps:
-      - name: download AppImages
+      - name: download AppImages x86_64
         uses: actions/download-artifact@v3
         with:
-          name: release-appimage-amd64
+          name: release-appimage-x86_64
+          
+      - name: download AppImages aarch64
+        uses: actions/download-artifact@v3
+        with:
+          name: release-appimage-aarch64
 
       - name: download exe
         uses: actions/download-artifact@v3
         with:
-          name: release-exe-amd64
+          name: release-exe-x86_64
 
       - name: calculate hash
         run: |
           sha256sum assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage > assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage > assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage.sha256sum
           sha256sum assfonts-${{ github.ref_name }}-x86_64-Windows.exe > assfonts-${{ github.ref_name }}-x86_64-Windows.exe.sha256sum
 
       - name: edit release
