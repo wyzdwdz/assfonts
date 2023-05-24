@@ -30,7 +30,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS})
 
 target_include_directories(${TARGET_NAME} PUBLIC ${PROJECT_BINARY_DIR}/include)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_link_options(${TARGET_NAME} PRIVATE -pthread)
 endif()
 

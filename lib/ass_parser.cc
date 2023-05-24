@@ -62,7 +62,7 @@ bool AssParser::ReadFile(const AString& ass_file_path) {
       has_fonts_ = true;
       SkipFontsLines(isstream, line_num);
     } else {
-      TextInfo text_info = {line_num, line};
+      TextInfo text_info(line_num, line);
       text_.emplace_back(text_info);
     }
   }
@@ -97,7 +97,7 @@ void AssParser::SkipFontsLines(std::istringstream& is, unsigned int& line_num) {
 
     if (tmp == "[events]" || tmp == "[script info]" || tmp == "[v4 styles]" ||
         tmp == "[v4+ styles]" || tmp == "[graphics]") {
-      TextInfo text_info = {line_num, line};
+      TextInfo text_info(line_num, line);
       text_.emplace_back(text_info);
       break;
     }
@@ -349,7 +349,7 @@ bool AssParser::GetEvents(std::vector<TextInfo>::iterator& line,
       return false;
     }
 
-    DialogueInfo dialogue_info = {(*line).line_num, res};
+    DialogueInfo dialogue_info((*line).line_num, res);
     dialogues_.emplace_back(dialogue_info);
   }
 

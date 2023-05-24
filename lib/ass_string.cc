@@ -121,7 +121,7 @@ bool IconvConvert(const std::string& in, std::string& out,
   char* inbuf = const_cast<char*>(in.c_str());
   size_t insize = in.size();
 
-  auto outbuf = std::make_unique<char[]>(insize * 4);
+  auto outbuf = std::unique_ptr<char[]>(new char[insize * 4]);
   char* outbuf_tmp = outbuf.get();
   size_t outsize = insize * 4;
 

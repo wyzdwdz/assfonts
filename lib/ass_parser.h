@@ -80,11 +80,15 @@ class AssParser {
   };
 
   struct TextInfo {
+    TextInfo(unsigned int line_num, std::string text)
+        : line_num(line_num), text(text){};
     unsigned int line_num = 0;
     std::string text;
   };
 
   struct DialogueInfo {
+    DialogueInfo(unsigned int line_num, std::vector<std::string> dialogue)
+        : line_num(line_num), dialogue(dialogue){};
     unsigned int line_num = 0;
     std::vector<std::string> dialogue;
   };

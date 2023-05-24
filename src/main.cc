@@ -738,8 +738,8 @@ void Start() {
 
     pos = (pos_next != std::string::npos) ? pos_next + 1 : pos_next;
   }
-
-  auto input_paths = std::make_unique<char*[]>(input_vec.size());
+  
+  auto input_paths = std::unique_ptr<char*[]>(new char*[input_vec.size()]);
   for (size_t idx = 0; idx < input_vec.size(); ++idx) {
     input_paths[idx] = const_cast<char*>(input_vec[idx].c_str());
   }

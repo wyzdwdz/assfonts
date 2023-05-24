@@ -1,0 +1,16 @@
+[settings]
+arch=armv8
+build_type=Release
+compiler=gcc
+compiler.cppstd=gnu11
+compiler.libcxx=libstdc++11
+compiler.version=7
+os=Linux
+
+[buildenv]
+CC=aarch64-linux-gnu-gcc-7
+CXX=aarch64-linux-gnu-g++-7
+
+[conf]
+tools.system.package_manager:mode=install
+tools.system.package_manager:sudo=False

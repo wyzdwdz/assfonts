@@ -455,7 +455,7 @@ std::string FontParser::GetLastWriteTime(const AString& font_path) {
   CloseHandle(file_handle);
   return "UTC " + std::string(date) + " " + std::string(time);
 #else
-  auto buffer = std::make_unique<struct stat>();
+  auto buffer = std::unique_ptr<struct stat>(new struct stat);
 
   if (stat(font_path.c_str(), buffer.get())) {
     return std::string();
