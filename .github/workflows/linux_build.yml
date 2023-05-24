@@ -28,6 +28,7 @@ jobs:
           image: wyzdwdz/appimage-ubuntu18.04
           options: -v ${{ github.workspace }}:/var/www --platform ${{ matrix.platform }}
           run: |
+            cd /var/www
             ./build.sh
             linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts
             appimagetool ./AppDir assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Linux.AppImage
