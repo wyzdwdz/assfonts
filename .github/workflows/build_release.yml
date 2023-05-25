@@ -30,7 +30,7 @@ jobs:
           shell: bash
           run: |
             cd /var/www
-            apt -y install lld-10
+            apt update && apt -y install lld-10
             update-alternatives --install /usr/bin/ld ld /usr/lib/llvm-10/bin/lld 10
             conan config install .github/conan2-linux
             conan install . -b missing -pr:h x86_64 -pr:b x86_64
@@ -52,7 +52,7 @@ jobs:
           shell: bash
           run: |
             cd /var/www
-            apt -y install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu lld-10
+            apt update && apt -y install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu lld-10
             update-alternatives --install /usr/bin/ld ld /usr/lib/llvm-10/bin/lld 10
             cp -f .github/apt-lists/amd64-sources.list /etc/apt/sources.list
             cp -f .github/apt-lists/arm64-sources.list /etc/apt/sources.list.d/
@@ -77,7 +77,7 @@ jobs:
           shell: bash
           run: |
             cd /var/www
-            apt -y install squashfs-tools
+            apt update && apt -y install squashfs-tools
             linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts
             mksquashfs ./AppDir AppDir.squashfs -root-owned -noappend
             wget https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-aarch64
