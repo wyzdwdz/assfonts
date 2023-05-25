@@ -68,6 +68,7 @@ jobs:
           image: wyzdwdz/appimage-ubuntu18.04
           options: -v ${{ github.workspace }}:/var/www --platform linux/arm64
           run: |
+            cd /var/www
             apt -y install squashfs-tools
             linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts
             mksquashfs ./AppDir AppDir.squashfs -root-owned -noappend
@@ -84,11 +85,23 @@ jobs:
 
   build-windows:
     runs-on: windows-2019
+    strategy:
+      matrix:
+        include:
+          - { arch: x86_64, profile: x86_64 }
+          - { arch: aarch64, profile: armv8 }
     steps:
-      - name: install msvc
+      - name: x86_64 install msvc
+        if: ${{ matrix.arch == 'x86_64' }}
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
+
+      - name: arm64 install msvc
+        if: ${{ matrix.arch == 'aarch64' }}
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64_arm64
 
       - name: install cmake
         uses: lukka/get-cmake@latest
@@ -104,8 +117,8 @@ jobs:
 
       - name: build executable binary
         run: |
-          conan profile detect
-          conan install . -b missing -s build_type=Release -c tools.system.package_manager:mode=install
+          conan config install conan2-windows
+          conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
           cd build
           .\conanbuild.bat
           cmake .. --preset conan-default -DCMAKE_INSTALL_PREFIX=..\install
@@ -113,20 +126,20 @@ jobs:
           cd ..
 
       - name: copy and rename
-        run: echo f | xcopy /f /y .\install\bin\assfonts.exe assfonts-${{ github.ref_name }}-x86_64-Windows.exe
+        run: echo f | xcopy /f /y .\install\bin\assfonts.exe assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
 
       - name: upx compress
         uses: crazy-max/ghaction-upx@v2
         with:
           version: latest
-          files: assfonts-${{ github.ref_name }}-x86_64-Windows.exe
+          files: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
           args: -fq9
 
       - name: upload exe
         uses: actions/upload-artifact@v3
         with:
-          name: release-exe-x86_64
-          path: assfonts-${{ github.ref_name }}-x86_64-Windows.exe
+          name: release-exe-${{ matrix.arch }}
+          path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
           if-no-files-found: error
 
   release:
@@ -143,16 +156,22 @@ jobs:
         with:
           name: release-appimage-aarch64
 
-      - name: download exe
+      - name: download exe x86_64
         uses: actions/download-artifact@v3
         with:
           name: release-exe-x86_64
+
+      - name: download exe aarch64
+        uses: actions/download-artifact@v3
+        with:
+          name: release-exe-aarch64
 
       - name: calculate hash
         run: |
           sha256sum assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage > assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage.sha256sum
           sha256sum assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage > assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage.sha256sum
           sha256sum assfonts-${{ github.ref_name }}-x86_64-Windows.exe > assfonts-${{ github.ref_name }}-x86_64-Windows.exe.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-aarch64-Windows.exe > assfonts-${{ github.ref_name }}-aarch64-Windows.exe.sha256sum
 
       - name: edit release
         uses: svenstaro/upload-release-action@v2
