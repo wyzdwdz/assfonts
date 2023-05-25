@@ -26,7 +26,9 @@ jobs:
           options: -v ${{ github.workspace }}:/var/www --platform linux/amd64
           run: |
             cd /var/www
-            conan config install .github/conan2
+            apt -y install lld-10
+            update-alternatives --install /usr/bin/ld ld /usr/lib/llvm-10/bin/lld 10
+            conan config install .github/conan2-linux
             conan install . -b missing -pr:h x86_64 -pr:b x86_64
             cd build
             source conanbuild.sh
@@ -44,18 +46,20 @@ jobs:
           options: -v ${{ github.workspace }}:/var/www --platform linux/amd64
           run: |
             cd /var/www
-            apt -y install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+            apt -y install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu lld-10
+            update-alternatives --install /usr/bin/ld ld /usr/lib/llvm-10/bin/lld 10
             cp -f .github/apt-lists/amd64-sources.list /etc/apt/sources.list
             cp -f .github/apt-lists/arm64-sources.list /etc/apt/sources.list.d/
             dpkg --add-architecture arm64
             apt update
             export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
-            conan config install .github/conan2
+            conan config install .github/conan2-linux
             conan install . -b missing -pr:h armv8 -pr:b x86_64
             cd build
             source conanbuild.sh
             cmake .. --preset conan-release -DCMAKE_INSTALL_PREFIX=../install
             cmake --build --preset conan-release --target install -j
+            cd ..
 
       - name: aarch64 build appimage
         if: ${{ matrix.arch == 'aarch64' }}
@@ -99,7 +103,14 @@ jobs:
         uses: actions/checkout@v3
 
       - name: build executable binary
-        run: .\build.bat
+        run: |
+          conan profile detect
+          conan install . -b missing -s build_type=Release -c tools.system.package_manager:mode=install
+          cd build
+          .\conanbuild.bat
+          cmake .. --preset conan-default -DCMAKE_INSTALL_PREFIX=..\install
+          cmake --build --preset conan-release --target install -j
+          cd ..
 
       - name: copy and rename
         run: echo f | xcopy /f /y .\install\bin\assfonts.exe assfonts-${{ github.ref_name }}-x86_64-Windows.exe
