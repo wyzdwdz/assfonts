@@ -11,5 +11,6 @@ conan profile detect -vquiet
 conan install . -b missing -s build_type=%BUILD_TYPE% -c tools.system.package_manager:mode=install
 cd build
 call conanbuild.bat
-cmake .. --preset conan-default -DCMAKE_INSTALL_PREFIX=../install
-cmake --build --preset conan-%BUILD_TYPE_LOW% --target install -j
+cmake .. --preset conan-default
+cmake --build --preset conan-%BUILD_TYPE_LOW% -j
+cmake --install %BUILD_TYPE% --prefix ..\install

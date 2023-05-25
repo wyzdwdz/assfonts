@@ -22,12 +22,6 @@ target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} assfonts)
 target_include_directories(${TARGET_NAME} PRIVATE backends
                                                   resources)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    if(CMAKE_BUILD_TYPE MATCHES "Release")
-        target_link_options(${TARGET_NAME} PRIVATE -s)
-    endif()
-endif()
-
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
 
 target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})

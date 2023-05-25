@@ -30,5 +30,6 @@ fi
 
 cd build
 source conanbuild.sh
-cmake .. --preset conan-${BUILD_TYPE,,} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}
-cmake --build --preset conan-${BUILD_TYPE,,} --target install -j
+cmake .. --preset conan-${BUILD_TYPE,,}
+cmake --build --preset conan-${BUILD_TYPE,,} -j
+cmake --install ${BUILD_TYPE} --prefix ${INSTALL_PREFIX} --strip

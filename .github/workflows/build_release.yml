@@ -6,6 +6,9 @@ on:
 jobs:
   build-linux:
     runs-on: ubuntu-22.04
+    defaults:
+      run:
+        shell: bash
     strategy:
       matrix:
         include:
@@ -32,8 +35,9 @@ jobs:
             conan install . -b missing -pr:h x86_64 -pr:b x86_64
             cd build
             source conanbuild.sh
-            cmake .. --preset conan-release -DCMAKE_INSTALL_PREFIX=../install
-            cmake --build --preset conan-release --target install -j
+            cmake .. --preset conan-release
+            cmake --build --preset conan-release -j
+            cmake --install Release --prefix ../install --strip
             cd ..
             linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts
             appimagetool ./AppDir assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage
@@ -57,8 +61,9 @@ jobs:
             conan install . -b missing -pr:h armv8 -pr:b x86_64
             cd build
             source conanbuild.sh
-            cmake .. --preset conan-release -DCMAKE_INSTALL_PREFIX=../install
-            cmake --build --preset conan-release --target install -j
+            cmake .. --preset conan-release
+            cmake --build --preset conan-release -j
+            cmake --install Release --prefix ../install --strip
             cd ..
 
       - name: aarch64 build appimage
@@ -85,6 +90,9 @@ jobs:
 
   build-windows:
     runs-on: windows-2022
+    defaults:
+      run:
+        shell: cmd
     strategy:
       matrix:
         include:
@@ -121,8 +129,9 @@ jobs:
           conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
           cd build
           .\conanbuild.bat
-          cmake .. --preset conan-default -DCMAKE_INSTALL_PREFIX=..\install
-          cmake --build --preset conan-release --target install -j
+          cmake .. --preset conan-default
+          cmake --build --preset conan-release -j
+          cmake --install Release --prefix ..\install
           cd ..
 
       - name: copy and rename
@@ -144,6 +153,9 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     needs: [ build-linux, build-windows ]
     steps:
       - name: download AppImages x86_64
