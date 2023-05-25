@@ -5,7 +5,7 @@ on:
     types: [ published ]
 jobs:
   build-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         include:
@@ -84,7 +84,7 @@ jobs:
           if-no-files-found: error
 
   build-windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
     strategy:
       matrix:
         include:
@@ -110,7 +110,7 @@ jobs:
         id: conan
         uses: turtlebrowser/get-conan@main
         with:
-          version: 2.0.5
+          version: 2.0.4
       
       - name: checkout
         uses: actions/checkout@v3
@@ -118,7 +118,7 @@ jobs:
       - name: build executable binary
         run: |
           conan config install .github/conan2-windows
-          conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
+          conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b ${{ matrix.profile }}
           cd build
           .\conanbuild.bat
           cmake .. --preset conan-default -DCMAKE_INSTALL_PREFIX=..\install
