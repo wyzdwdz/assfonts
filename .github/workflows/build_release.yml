@@ -110,7 +110,7 @@ jobs:
         id: conan
         uses: turtlebrowser/get-conan@main
         with:
-          version: 2.0.4
+          version: 2.0.5
       
       - name: checkout
         uses: actions/checkout@v3
