@@ -95,7 +95,7 @@ jobs:
     runs-on: windows-2022
     defaults:
       run:
-        shell: cmd
+        shell: bash
     strategy:
       matrix:
         include:
@@ -128,17 +128,17 @@ jobs:
 
       - name: build executable binary
         run: |
-          conan config install ".github\conan2-windows"
+          conan config install .github/conan2-windows
           conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
           cd build
-          .\conanbuild.bat
+          ./conanbuild.bat
           cmake .. --preset conan-default
           cmake --build --preset conan-release -j
-          cmake --install Release --prefix ..\install
+          cmake --install Release --prefix ../install
           cd ..
 
       - name: copy and rename
-        run: echo f | xcopy /f /y ".\install\bin\assfonts.exe" "assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe"
+        run: cp -f ./install/bin/assfonts.exe assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
 
       - name: upx compress
         uses: crazy-max/ghaction-upx@v2
