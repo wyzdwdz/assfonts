@@ -26,6 +26,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: wyzdwdz/appimage-ubuntu18.04
+          shell: bash
           options: -v ${{ github.workspace }}:/var/www --platform linux/amd64
           run: |
             cd /var/www
@@ -47,6 +48,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: wyzdwdz/appimage-ubuntu18.04
+          shell: bash
           options: -v ${{ github.workspace }}:/var/www --platform linux/amd64
           run: |
             cd /var/www
@@ -71,6 +73,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: wyzdwdz/appimage-ubuntu18.04
+          shell: bash
           options: -v ${{ github.workspace }}:/var/www --platform linux/arm64
           run: |
             cd /var/www
