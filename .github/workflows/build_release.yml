@@ -26,8 +26,8 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: wyzdwdz/appimage-ubuntu18.04
-          shell: bash
           options: -v ${{ github.workspace }}:/var/www --platform linux/amd64
+          shell: bash
           run: |
             cd /var/www
             apt -y install lld-10
@@ -48,8 +48,8 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: wyzdwdz/appimage-ubuntu18.04
-          shell: bash
           options: -v ${{ github.workspace }}:/var/www --platform linux/amd64
+          shell: bash
           run: |
             cd /var/www
             apt -y install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu lld-10
@@ -73,8 +73,8 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: wyzdwdz/appimage-ubuntu18.04
-          shell: bash
           options: -v ${{ github.workspace }}:/var/www --platform linux/arm64
+          shell: bash
           run: |
             cd /var/www
             apt -y install squashfs-tools
