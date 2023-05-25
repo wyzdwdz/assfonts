@@ -117,7 +117,7 @@ jobs:
 
       - name: build executable binary
         run: |
-          conan config install conan2-windows
+          conan config install .github/conan2-windows
           conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
           cd build
           .\conanbuild.bat
