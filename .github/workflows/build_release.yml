@@ -84,7 +84,7 @@ jobs:
           if-no-files-found: error
 
   build-windows:
-    runs-on: windows-2019
+    runs-on: windows-latest
     strategy:
       matrix:
         include:
@@ -117,6 +117,7 @@ jobs:
 
       - name: build executable binary
         run: |
+          conan profile detect
           conan config install .github/conan2-windows
           conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
           cd build
