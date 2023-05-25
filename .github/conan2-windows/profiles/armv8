@@ -2,7 +2,7 @@
 arch=armv8
 build_type=Release
 compiler=msvc
-compiler.cppstd=11
+compiler.cppstd=14
 compiler.runtime=dynamic
 compiler.runtime_type=Release
 compiler.version=192
