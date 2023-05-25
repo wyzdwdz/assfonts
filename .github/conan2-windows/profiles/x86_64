@@ -7,5 +7,9 @@ compiler.runtime=dynamic
 compiler.version=193
 os=Windows
 
+[buildenv]
+CC=cl
+CXX=cl
+
 [conf]
 tools.system.package_manager:mode=install
