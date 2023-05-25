@@ -639,6 +639,7 @@ void AssParser::ChangeStyle(const std::u32string& code, FontDesc& font_desc,
 
     if (stylename_fontdesc_.find(style_name) == stylename_fontdesc_.end()) {
       logger_->Warn("Style \"{}\" not found. (Line {})", style_name, line_num);
+      font_desc = font_desc_style;
     } else {
       font_desc = stylename_fontdesc_[style_name];
     }
