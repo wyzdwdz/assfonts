@@ -129,8 +129,6 @@ jobs:
       - name: aarch64 fix conan recipes
         if: ${{ matrix.arch == 'aarch64' }}
         run: |
-          conan remove -c libiconv -vquiet
-          conan remove -c libffi -vquiet
           conan export .github/recipes/libffi_fix -nr --version 3.4.4
           conan export .github/recipes/libiconv_fix -nr --version 1.17
           export PATH="$(realpath .github/tools):$PATH"
