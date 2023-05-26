@@ -30,9 +30,9 @@ jobs:
           conan config install .github/conan2-macos
           conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
           cd build
-          ./conanbuild.sh
+          source conanbuild.sh
           cmake .. --preset conan-release
           cmake --build --preset conan-release -j
-          cmake --install Release --prefix ../install
+          cmake --install Release --prefix ../install --strip
           cd ..
           ls -a ./install
