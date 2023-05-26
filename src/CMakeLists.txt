@@ -9,13 +9,22 @@ set(TARGET_SOURCES main.cc
                    backends/imgui_impl_glfw.cpp
                    backends/imgui_impl_opengl3.cpp)
 
-set(TARGET_RESOURCES resources/assfonts.rc)
+if(WIN32)
+    set(TARGET_RESOURCES resources/assfonts.rc)
+endif()
 
 set(TARGET_NAME assfonts_gui)
 
 set(BINARY_NAME assfonts)
 						  
 add_executable(${TARGET_NAME} ${TARGET_SOURCES} ${TARGET_RESOURCES})
+
+if(APPLE)
+    set_target_properties(${TARGET_NAME} PROPERTIES
+        MACOSX_BUNDLE ON
+        MACOSX_BUNDLE_BUNDLE_NAME ${BINARY_NAME}
+        MACOSX_BUNDLE_INFO_PLIST resources/assfonts.plist)
+endif()
 
 target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} assfonts)
 

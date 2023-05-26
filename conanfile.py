@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeDeps, CMakeToolchain
 
 
-class CompressorRecipe(ConanFile):
+class Assfonts(ConanFile):
     name = "assfonts"
     version = "0.3.8"
 
