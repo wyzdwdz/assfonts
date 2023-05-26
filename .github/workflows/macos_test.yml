@@ -7,6 +7,11 @@ jobs:
     defaults:
       run:
         shell: bash
+    strategy:
+      matrix:
+        include:
+          - { arch: x86_64, profile: x86_64 }
+          - { arch: aarch64, profile: armv8 }
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -19,11 +24,14 @@ jobs:
         uses: turtlebrowser/get-conan@main
         with:
           version: 2.0.4
-      
-      - name: conan detect
-        run: conan profile detect
 
-      - run: |
+      - name: build executable binary
+        run: |
           conan config install .github/conan2-macos
-          clang --version
-          clang++ --version
+          conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
+        #   cd build
+        #   ./conanbuild.sh
+        #   cmake .. --preset conan-default
+        #   cmake --build --preset conan-release -j
+        #   cmake --install Release --prefix ../install
+        #   cd ..
