@@ -35,3 +35,4 @@ jobs:
           cmake --build --preset conan-release -j
           cmake --install Release --prefix ../install
           cd ..
+          ls -a ./install
