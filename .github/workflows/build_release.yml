@@ -150,7 +150,7 @@ jobs:
       - name: copy and rename
         run: cp -f ./install/bin/assfonts.exe assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
 
-      - name: upx compress
+      - name: x86_64 upx compress
         if: ${{ matrix.arch == 'x86_64' }}
         uses: crazy-max/ghaction-upx@v2
         with:
