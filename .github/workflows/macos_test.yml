@@ -1,0 +1,24 @@
+name: Macos Test
+run-name: Macos Test by ${{ github.actor }}
+on: push
+jobs:
+  build-macos:
+    runs-on: macos-12
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: install cmake
+        uses: lukka/get-cmake@latest
+
+      - name: install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
+        with:
+          version: 2.0.4
+      
+      - name: conan detect
+        run: conan profile detect
