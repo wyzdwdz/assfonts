@@ -22,3 +22,8 @@ jobs:
       
       - name: conan detect
         run: conan profile detect
+
+      - run: |
+          conan config install .github/conan2-macos
+          clang --version
+          clang++ --version
