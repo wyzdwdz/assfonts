@@ -131,7 +131,10 @@ jobs:
         run: |
           conan export .github/recipes/libffi_fix -nr --version 3.4.4
           conan export .github/recipes/libiconv_fix -nr --version 1.17
-          export PATH="$(realpath .github/tools):$PATH"
+
+      - name: aarch64 add tools to PATH
+        if: ${{ matrix.arch == 'aarch64' }}
+        run: echo $(realpath .github/tools) >> $GITHUB_PATH
 
       - name: build executable binary
         run: |
