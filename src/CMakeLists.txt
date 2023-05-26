@@ -22,7 +22,6 @@ add_executable(${TARGET_NAME} ${TARGET_SOURCES} ${TARGET_RESOURCES})
 if(APPLE)
     set_target_properties(${TARGET_NAME} PROPERTIES
         MACOSX_BUNDLE ON
-        MACOSX_BUNDLE_BUNDLE_NAME ${BINARY_NAME}
         MACOSX_BUNDLE_INFO_PLIST resources/assfonts.plist)
 endif()
 
@@ -41,6 +40,7 @@ if(APPLE)
 
 install(TARGETS ${TARGET_NAME}
         CONFIGURATIONS Release
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 elseif()
