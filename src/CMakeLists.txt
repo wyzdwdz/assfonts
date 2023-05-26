@@ -37,6 +37,16 @@ target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})
 
 set_target_properties(${TARGET_NAME} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
 
+if(APPLE)
+
+install(TARGETS ${TARGET_NAME}
+        CONFIGURATIONS Release
+        BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+elseif()
+
 install(TARGETS ${TARGET_NAME} 
         CONFIGURATIONS Release 
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+endif()
