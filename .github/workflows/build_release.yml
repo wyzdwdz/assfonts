@@ -30,6 +30,7 @@ jobs:
           shell: bash
           run: |
             cd /var/www
+            tar -zxvf .github/cache/conan_cache_x86_64_linux.tar.gz -C $(conan config home) 2>/dev/null
             apt update && apt -y install lld-10
             update-alternatives --install /usr/bin/ld ld /usr/lib/llvm-10/bin/lld 10
             conan config install .github/conan2-linux
@@ -42,6 +43,7 @@ jobs:
             cd ..
             linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts
             appimagetool ./AppDir assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage
+            tar -czvf .github/cache/conan_cache_x86_64_linux.tar.gz $(conan config home)
 
       - name: aarch64 build binary
         if: ${{ matrix.arch == 'aarch64' }}
@@ -52,6 +54,7 @@ jobs:
           shell: bash
           run: |
             cd /var/www
+            tar -zxvf .github/cache/conan_cache_aarch64_linux.tar.gz -C $(conan config home) 2>/dev/null
             apt update && apt -y install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu lld-10
             update-alternatives --install /usr/bin/ld ld /usr/lib/llvm-10/bin/lld 10
             cp -f .github/apt-lists/amd64-sources.list /etc/apt/sources.list
@@ -67,6 +70,7 @@ jobs:
             cmake --build --preset conan-release -j
             cmake --install Release --prefix ../install --strip
             cd ..
+            tar -czvf .github/cache/conan_cache_aarch64_linux.tar.gz $(conan config home)
 
       - name: aarch64 build appimage
         if: ${{ matrix.arch == 'aarch64' }}
@@ -90,6 +94,17 @@ jobs:
           name: release-appimage-${{ matrix.arch }}
           path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Linux.AppImage
           if-no-files-found: error
+
+      - name: git push .github
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: .github
+          author_name: GitHub Action
+          author_email: action@github.com
+          pull: ' '
+          commit: -m
+          message: 'Upload conan cache'
+          push: true
 
   build-windows:
     runs-on: windows-2022
@@ -138,6 +153,7 @@ jobs:
 
       - name: build executable binary
         run: |
+          tar -zxvf .github/cache/conan_cache_${{ matrix.arch }}_windows.tar.gz -C $(conan config home) 2>NUL
           conan config install .github/conan2-windows
           conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
           cd build
@@ -146,6 +162,7 @@ jobs:
           cmake --build --preset conan-release -j
           cmake --install Release --prefix ../install
           cd ..
+          tar -czvf .github/cache/conan_cache_${{ matrix.arch }}_windows.tar.gz $(conan config home)
 
       - name: copy and rename
         run: cp -f ./install/bin/assfonts.exe assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
@@ -164,6 +181,17 @@ jobs:
           name: release-exe-${{ matrix.arch }}
           path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
           if-no-files-found: error
+
+      - name: git push .github
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: .github
+          author_name: GitHub Action
+          author_email: action@github.com
+          pull: ' '
+          commit: -m
+          message: 'Upload conan cache'
+          push: true
 
   release:
     runs-on: ubuntu-22.04

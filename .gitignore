@@ -476,6 +476,8 @@ imgui.ini
 #Appimage
 AppDir/
 *.AppImage
+runtime-*
+*.squashfs
 
 #vscode dev container
 .devcontainer
