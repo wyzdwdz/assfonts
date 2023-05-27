@@ -38,10 +38,12 @@ set_target_properties(${TARGET_NAME} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
 
 if(APPLE)
 
+message(STATUS "cmake install bindir: " ${CMAKE_INSTALL_BINDIR})
+
 install(TARGETS ${TARGET_NAME}
         CONFIGURATIONS Release
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR})
+        RUNTIME DESTINATION bin
+        BUNDLE DESTINATION bundle)
 
 elseif()
 
