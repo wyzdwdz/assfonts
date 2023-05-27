@@ -22,7 +22,7 @@ add_executable(${TARGET_NAME} ${TARGET_SOURCES} ${TARGET_RESOURCES})
 if(APPLE)
     set_target_properties(${TARGET_NAME} PROPERTIES
         MACOSX_BUNDLE ON
-        MACOSX_BUNDLE_INFO_PLIST resources/assfonts.plist)
+        MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/resources/assfonts.plist)
 endif()
 
 target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} assfonts)
