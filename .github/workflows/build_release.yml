@@ -43,7 +43,9 @@ jobs:
             cd ..
             linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts
             appimagetool ./AppDir assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage
-            tar -czvf .github/cache/conan_cache_x86_64_linux.tar.gz $(conan config home)
+            cd .github/cache
+            tar -czvf conan_cache_x86_64_linux.tar.gz $(conan config home)
+            cd ../..
 
       - name: aarch64 build binary
         if: ${{ matrix.arch == 'aarch64' }}
@@ -70,7 +72,9 @@ jobs:
             cmake --build --preset conan-release -j
             cmake --install Release --prefix ../install --strip
             cd ..
-            tar -czvf .github/cache/conan_cache_aarch64_linux.tar.gz $(conan config home)
+            cd .github/cache
+            tar -czvf conan_cache_aarch64_linux.tar.gz $(conan config home)
+            cd ../..
 
       - name: aarch64 build appimage
         if: ${{ matrix.arch == 'aarch64' }}
@@ -153,7 +157,7 @@ jobs:
 
       - name: build executable binary
         run: |
-          tar -zxvf .github/cache/conan_cache_${{ matrix.arch }}_windows.tar.gz -C $(conan config home) 2>NUL
+          tar -zxvf .github/cache/conan_cache_${{ matrix.arch }}_windows.tar.gz -C $(conan config home) 2> nul
           conan config install .github/conan2-windows
           conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
           cd build
@@ -162,7 +166,9 @@ jobs:
           cmake --build --preset conan-release -j
           cmake --install Release --prefix ../install
           cd ..
+          cd .github/cache
           tar -czvf .github/cache/conan_cache_${{ matrix.arch }}_windows.tar.gz $(conan config home)
+          cd ../..
 
       - name: copy and rename
         run: cp -f ./install/bin/assfonts.exe assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
