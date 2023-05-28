@@ -31,7 +31,7 @@ jobs:
           shell: bash
           run: |
             cd /var/www
-            tar -zxvf .github/cache/conan_cache_x86_64_linux.tar.gz -C $(conan config home) 2>/dev/null
+            if [ -f .github/cache/conan_cache_x86_64_linux.tar.gz ]; then tar -zxf .github/cache/conan_cache_x86_64_linux.tar.gz -C $(conan config home); fi
             apt update && apt -y install lld-10
             update-alternatives --install /usr/bin/ld ld /usr/lib/llvm-10/bin/lld 10
             conan config install .github/conan2-linux
@@ -45,7 +45,7 @@ jobs:
             linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts
             appimagetool ./AppDir assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage
             cd .github/cache
-            tar -czvf conan_cache_x86_64_linux.tar.gz $(conan config home)
+            tar -czf conan_cache_x86_64_linux.tar.gz $(conan config home)
             cd ../..
 
       - name: aarch64 build binary
@@ -57,7 +57,7 @@ jobs:
           shell: bash
           run: |
             cd /var/www
-            tar -zxvf .github/cache/conan_cache_aarch64_linux.tar.gz -C $(conan config home) 2>/dev/null
+            if [ -f .github/cache/conan_cache_aarch64_linux.tar.gz ]; then tar -zxf .github/cache/conan_cache_aarch64_linux.tar.gz -C $(conan config home); fi
             apt update && apt -y install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu lld-10
             update-alternatives --install /usr/bin/ld ld /usr/lib/llvm-10/bin/lld 10
             cp -f .github/apt-lists/amd64-sources.list /etc/apt/sources.list
@@ -74,7 +74,7 @@ jobs:
             cmake --install Release --prefix ../install --strip
             cd ..
             cd .github/cache
-            tar -czvf conan_cache_aarch64_linux.tar.gz $(conan config home)
+            tar -czf conan_cache_aarch64_linux.tar.gz $(conan config home)
             cd ../..
 
       - name: aarch64 build appimage
@@ -158,7 +158,7 @@ jobs:
 
       - name: build executable binary
         run: |
-          tar -zxvf .github/cache/conan_cache_${{ matrix.arch }}_windows.tar.gz -C $(conan config home) 2>/dev/null
+          if [ -f .github/cache/conan_cache_${{ matrix.arch }}_windows.tar.gz ]; then tar -zxf .github/cache/conan_cache_${{ matrix.arch }}_windows.tar.gz -C $(conan config home); fi
           conan config install .github/conan2-windows
           conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
           cd build
