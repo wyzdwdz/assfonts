@@ -108,10 +108,10 @@ jobs:
           add: .github
           author_name: GitHub Action
           author_email: action@github.com
-          pull: ' '
           commit: -m
           message: 'Upload conan cache'
           push: true
+          tag_push: '--force'
 
   build-windows:
     runs-on: windows-2022
@@ -198,10 +198,10 @@ jobs:
           add: .github
           author_name: GitHub Action
           author_email: action@github.com
-          pull: ' '
           commit: -m
           message: 'Upload conan cache'
           push: true
+          tag_push: '--force'
 
   release:
     runs-on: ubuntu-22.04
