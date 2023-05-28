@@ -44,6 +44,7 @@ jobs:
             cd ..
             linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts
             appimagetool ./AppDir assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage
+            if [ ! -d .github/cache ]; then mkdir .github/cache; fi
             cd .github/cache
             tar -czf conan_cache_x86_64_linux.tar.gz $(conan config home)
             cd ../..
@@ -73,6 +74,7 @@ jobs:
             cmake --build --preset conan-release -j
             cmake --install Release --prefix ../install --strip
             cd ..
+            if [ ! -d .github/cache ]; then mkdir .github/cache; fi
             cd .github/cache
             tar -czf conan_cache_aarch64_linux.tar.gz $(conan config home)
             cd ../..
@@ -167,6 +169,7 @@ jobs:
           cmake --build --preset conan-release -j
           cmake --install Release --prefix ../install
           cd ..
+          if [ ! -d .github/cache ]; then mkdir .github/cache; fi
           cd .github/cache
           tar -czvf .github/cache/conan_cache_${{ matrix.arch }}_windows.tar.gz $(conan config home)
           cd ../..
