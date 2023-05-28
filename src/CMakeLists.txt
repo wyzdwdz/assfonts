@@ -37,18 +37,12 @@ target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})
 set_target_properties(${TARGET_NAME} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
 
 if(APPLE)
-
-message(STATUS "cmake install bindir: " ${CMAKE_INSTALL_BINDIR})
-
-install(TARGETS ${TARGET_NAME}
-        CONFIGURATIONS Release
-        RUNTIME DESTINATION bin
-        BUNDLE DESTINATION bundle)
-
-elseif()
-
-install(TARGETS ${TARGET_NAME} 
-        CONFIGURATIONS Release 
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
+    install(TARGETS ${TARGET_NAME}
+            CONFIGURATIONS Release
+            RUNTIME DESTINATION bin
+            BUNDLE DESTINATION .)
+else()
+    install(TARGETS ${TARGET_NAME} 
+            CONFIGURATIONS Release 
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
