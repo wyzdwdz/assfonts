@@ -19,12 +19,13 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
 
-      - name: conan cache
-        uses: actions/cache@v3
+      - name: restore conan cache
+        uses: actions/cache/restore@v3
         with:
           path: .conan2/p
-          key: conan2-linux-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
-          restore-keys: conan2-linux-${{ matrix.arch }}
+          key: conan2-linux-${{ matrix.arch }}
+          restore-keys: |
+            conan2-linux-${{ matrix.arch }}
         
       - name: set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -101,6 +102,15 @@ jobs:
           path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Linux.AppImage
           if-no-files-found: error
 
+      - name: set read permission to conan cache
+        run: sudo chmod -R a+r .conan2/p
+
+      - name: save conan cache
+        uses: actions/cache/save@v3
+        with:
+          path: .conan2/p
+          key: conan2-linux-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
+
   build-windows:
     runs-on: windows-2022
     defaults:
@@ -115,12 +125,13 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
 
-      - name: conan cache
-        uses: actions/cache@v3
+      - name: restore conan cache
+        uses: actions/cache/restore@v3
         with:
           path: ~/.conan2/p
-          key: conan2-windows-${{ matrix.arch }}-${{ hashFiles('~/.conan2/p/cache.sqlite3') }}
-          restore-keys: conan2-windows-${{ matrix.arch }}
+          key: conan2-windows-${{ matrix.arch }}
+          restore-keys: |
+            conan2-windows-${{ matrix.arch }}
 
       - name: x86_64 install msvc
         if: ${{ matrix.arch == 'x86_64' }}
@@ -181,6 +192,12 @@ jobs:
           name: release-exe-${{ matrix.arch }}
           path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
           if-no-files-found: error
+
+      - name: save conan cache
+        uses: actions/cache/save@v3
+        with:
+          path: ~/.conan2/p
+          key: conan2-windows-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
 
   release:
     runs-on: ubuntu-22.04
