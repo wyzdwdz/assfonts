@@ -1,9 +1,8 @@
 name: Build Release
 run-name: Build Release by ${{ github.actor }}
-# on: 
-#   release:
-#     types: [ published ]
-on: [ push ]
+on: 
+  release:
+    types: [ published ]
 jobs:
   build-linux:
     runs-on: ubuntu-22.04
@@ -197,7 +196,11 @@ jobs:
         uses: actions/cache/save@v3
         with:
           path: ~/.conan2/p
+<<<<<<< HEAD
+          key: conan2-windows-${{ matrix.arch }}-${{ hashFiles('~/.conan2/p/cache.sqlite3') }}
+=======
           key: conan2-windows-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
+>>>>>>> 6dcdbfe1d639a2681cfce30eb700710d02cc2b83
 
   release:
     runs-on: ubuntu-22.04
