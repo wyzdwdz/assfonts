@@ -108,7 +108,6 @@ jobs:
           add: .github
           author_name: GitHub Action
           author_email: action@github.com
-          commit: -m
           message: 'Upload conan cache'
           push: true
           tag_push: '--force'
@@ -171,7 +170,7 @@ jobs:
           cd ..
           if [ ! -d .github/cache ]; then mkdir .github/cache; fi
           cd .github/cache
-          tar -czvf .github/cache/conan_cache_${{ matrix.arch }}_windows.tar.gz $(conan config home)
+          tar -czf conan_cache_${{ matrix.arch }}_windows.tar.gz $(conan config home)
           cd ../..
 
       - name: copy and rename
@@ -198,7 +197,6 @@ jobs:
           add: .github
           author_name: GitHub Action
           author_email: action@github.com
-          commit: -m
           message: 'Upload conan cache'
           push: true
           tag_push: '--force'
