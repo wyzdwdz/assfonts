@@ -34,8 +34,16 @@
 
 #include "ass_harfbuzz.h"
 
-static const std::u32string ADDITIONAL_CODEPOINTS =
-    U"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+static const std::u32string ADDITIONAL_CODEPOINTS = []() {
+  std::u32string codepoints;
+  for (char32_t ch = 0x0020; ch <= 0x007e; ++ch) {
+    codepoints.push_back(ch);
+  }
+  for (char32_t ch = 0xff01; ch <= 0xff5e; ++ch) {
+    codepoints.push_back(ch);
+  }
+  return codepoints;
+}();
 
 namespace fs = ghc::filesystem;
 

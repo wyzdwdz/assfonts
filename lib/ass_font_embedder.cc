@@ -116,7 +116,7 @@ bool AssFontEmbedder::WriteRenamed(AString& path,
                                    std::vector<std::string>& text) {
   fs::path input_path(fs_.ap_.get_ass_path());
   fs::path output_path(output_dir_path_ + fs::path::preferred_separator +
-                       input_path.stem().native() + _ST(".renamed") +
+                       input_path.stem().native() + _ST(".rename") +
                        input_path.extension().native());
   path = output_path.native();
   std::ofstream output_ass(path);
@@ -127,13 +127,15 @@ bool AssFontEmbedder::WriteRenamed(AString& path,
   RegexInit();
   WriteRenameInfo(text);
   auto tmp = fs_.ap_.get_text();
+  for (auto& line : tmp) {
+    FontRename(line);
+  }
   text.insert(text.end(), tmp.begin(), tmp.end());
   unsigned int counter = 0;
   for (auto& line : text) {
     if (counter != 0) {
       output_ass << "\n";
     }
-    FontRename(line);
     output_ass << line;
     ++counter;
   }
