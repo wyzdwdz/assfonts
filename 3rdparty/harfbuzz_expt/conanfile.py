@@ -122,7 +122,7 @@ class HarfbuzzExptConan(ConanFile):
             if is_msvc(self) and is_vs_2017() and self.settings.build_type == "Debug":
                 # Mitigate https://learn.microsoft.com/en-us/cpp/build/reference/zf?view=msvc-170
                 return "vs", ["/bigobj"]
-            return "ninja", []
+            return "ninja", ["/bigobj"]
 
         VirtualBuildEnv(self).generate()
         if self.options.with_glib and can_run(self):
