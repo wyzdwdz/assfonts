@@ -20,6 +20,7 @@ do
 done
 
 conan profile detect -vquiet
+conan export --version 7.1.0 -nr 3rdparty/harfbuzz_expt
 
 if (( $EUID != 0 ))
 then        

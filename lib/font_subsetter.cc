@@ -23,9 +23,13 @@
 #include <climits>
 #include <exception>
 #include <fstream>
+#include <random>
 
 #include <fmt/format.h>
+
+#define HB_EXPERIMENTAL_API
 #include <harfbuzz/hb-subset.h>
+
 #include <ghc/filesystem.hpp>
 
 #include "ass_harfbuzz.h"
@@ -41,29 +45,34 @@ void FontSubsetter::SetSubfontDir(const AString& subfont_dir) {
   subfont_dir_ = subfont_dir;
 }
 
-bool FontSubsetter::Run(const bool& is_no_subset) {
+bool FontSubsetter::Run(const bool is_no_subset, const bool is_rename) {
   if (is_no_subset) {
     bool have_missing = false;
-    AString path;
-    long index = 0;
+    FontSubsetInfo subfont_info;
     for (const auto& font_set : ap_.font_sets_) {
 #ifdef _WIN32
       AString fontname = U8ToWide(font_set.first.fontname);
 #else
       AString fontname(font_set.first.fontname);
 #endif
-      if (!FindFont(font_set, fp_.font_list_, path, index) &&
-          !FindFont(font_set, fp_.font_list_in_db_, path, index)) {
+      if (!FindFont(font_set, fp_.font_list_, subfont_info.font_path.path,
+                    subfont_info.font_path.index) &&
+          !FindFont(font_set, fp_.font_list_in_db_, subfont_info.font_path.path,
+                    subfont_info.font_path.index)) {
         logger_->Warn(_ST("Missing the font: \"{}\" ({},{})"), fontname,
                       font_set.first.bold, font_set.first.italic);
         have_missing = true;
       } else {
         logger_->Info(_ST("Found font: \"{}\" ({},{}) --> \"{}\"[{}]"),
                       fontname, font_set.first.bold, font_set.first.italic,
-                      path, index);
-        CheckGlyph(path, index, font_set.second);
+                      subfont_info.font_path.path,
+                      subfont_info.font_path.index);
+        CheckGlyph(subfont_info.font_path.path, subfont_info.font_path.index,
+                   font_set.second);
       }
-      subfonts_path_.emplace_back(path);
+      subfont_info.fonts_desc.emplace_back(font_set.first);
+      subfont_info.subfont_path = subfont_info.font_path.path;
+      subfonts_info_.emplace_back(subfont_info);
     }
     if (have_missing) {
       logger_->Error(_ST("Found missing fonts. Check warning info above."));
@@ -71,8 +80,11 @@ bool FontSubsetter::Run(const bool& is_no_subset) {
     }
     return true;
   }
-  if (!set_subset_font_codepoint_sets()) {
+  if (!set_subfonts_info()) {
     return false;
+  }
+  if (is_rename) {
+    SetNewname();
   }
   fs::path dir_path(subfont_dir_);
   if (!fs::exists(dir_path)) {
@@ -86,10 +98,10 @@ bool FontSubsetter::Run(const bool& is_no_subset) {
       return false;
     }
   }
-  for (const auto& subset_font : subset_font_codepoint_sets_) {
-    if (!CreateSubfont(subset_font)) {
-      logger_->Error(_ST("Subset failed: \"{}\"[{}]"), subset_font.first.path,
-                     subset_font.first.index);
+  for (auto& subset_font : subfonts_info_) {
+    if (!CreateSubfont(subset_font, is_rename)) {
+      logger_->Error(_ST("Subset failed: \"{}\"[{}]"),
+                     subset_font.font_path.path, subset_font.font_path.index);
       return false;
     }
   }
@@ -98,8 +110,7 @@ bool FontSubsetter::Run(const bool& is_no_subset) {
 
 void FontSubsetter::Clear() {
   subfont_dir_.clear();
-  subset_font_codepoint_sets_.clear();
-  subfonts_path_.clear();
+  subfonts_info_.clear();
 }
 
 bool FontSubsetter::FindFont(
@@ -206,7 +217,7 @@ bool FontSubsetter::FindFont(
   return is_found;
 }
 
-bool FontSubsetter::set_subset_font_codepoint_sets() {
+bool FontSubsetter::set_subfonts_info() {
   bool have_missing = false;
   for (const auto& font_set : ap_.font_sets_) {
     FontPath font_path;
@@ -235,12 +246,21 @@ bool FontSubsetter::set_subset_font_codepoint_sets() {
     }
     codepoint_set.insert(ADDITIONAL_CODEPOINTS.begin(),
                          ADDITIONAL_CODEPOINTS.end());
-    if (subset_font_codepoint_sets_.find(font_path) ==
-        subset_font_codepoint_sets_.end()) {
-      subset_font_codepoint_sets_[font_path] = codepoint_set;
+    auto subfonts_info_iter =
+        std::find_if(subfonts_info_.begin(), subfonts_info_.end(),
+                     [&](const FontSubsetInfo& f) -> bool {
+                       return f.font_path == font_path;
+                     });
+    if (subfonts_info_iter == subfonts_info_.end()) {
+      FontSubsetInfo subfont_info;
+      subfont_info.fonts_desc.emplace_back(font_set.first);
+      subfont_info.codepoints = codepoint_set;
+      subfont_info.font_path = font_path;
+      subfonts_info_.emplace_back(subfont_info);
     } else {
-      subset_font_codepoint_sets_[font_path].insert(codepoint_set.begin(),
-                                                    codepoint_set.end());
+      (*subfonts_info_iter).fonts_desc.emplace_back(font_set.first);
+      (*subfonts_info_iter)
+          .codepoints.insert(codepoint_set.begin(), codepoint_set.end());
     }
   }
   if (have_missing) {
@@ -250,37 +270,55 @@ bool FontSubsetter::set_subset_font_codepoint_sets() {
   return true;
 }
 
-bool FontSubsetter::CreateSubfont(
-    const std::pair<FontPath, std::set<uint32_t>>& subset_font) {
-  fs::path input_filepath(subset_font.first.path);
+bool FontSubsetter::CreateSubfont(FontSubsetInfo& subset_font,
+                                  const bool is_rename) {
+  AString subfont_name_suffix;
+  if (is_rename) {
+#ifdef _WIN32
+    subfont_name_suffix = U8ToWide(subset_font.newname);
+#else
+    subfont_name_suffix = subset_font.newname;
+#endif
+  } else {
+    subfont_name_suffix = _ST("subset");
+  }
+  fs::path input_filepath(subset_font.font_path.path);
   fs::path output_filepath(
       subfont_dir_ + fs::path::preferred_separator +
       input_filepath.stem().native() + _ST("[") +
-      ToAString(subset_font.first.index) + _ST("]_subset") +
+      ToAString(subset_font.font_path.index) + _ST("]_") + subfont_name_suffix +
       ((ToLower(input_filepath.extension().native()) == _ST(".otf") ||
         ToLower(input_filepath.extension().native()) == _ST(".otc"))
            ? _ST(".otf")
            : _ST(".ttf")));
-  std::ifstream is(subset_font.first.path, std::ios::binary);
-  const auto font_size = fs::file_size(subset_font.first.path);
+  std::ifstream is(subset_font.font_path.path, std::ios::binary);
+  const auto font_size = fs::file_size(subset_font.font_path.path);
   std::string font_data(font_size, '\0');
   is.read(&font_data[0], font_size);
   HbBlob hb_blob(hb_blob_create_or_fail(&font_data[0],
                                         static_cast<unsigned int>(font_size),
                                         HB_MEMORY_MODE_READONLY, NULL, NULL));
-  HbFace hb_face(hb_face_create(hb_blob.get(), subset_font.first.index));
+  HbFace hb_face(hb_face_create(hb_blob.get(), subset_font.font_path.index));
   HbSet codepoint_set(hb_set_create());
-  for (const auto& codepoint : subset_font.second) {
+  for (const auto& codepoint : subset_font.codepoints) {
     hb_set_add(codepoint_set.get(), codepoint);
   }
   HbSubsetInput input(hb_subset_input_create_or_fail());
   hb_set_t* input_codepoints =
       hb_subset_input_set(input.get(), HB_SUBSET_SETS_UNICODE);
-  hb_set_t* input_namelangid =
-      hb_subset_input_set(input.get(), HB_SUBSET_SETS_NAME_LANG_ID);
-  hb_set_clear(input_namelangid);
-  hb_set_invert(input_namelangid);
   hb_set_union(input_codepoints, codepoint_set.get());
+  if (is_rename) {
+    if (!hb_subset_input_override_name_table(
+            input.get(), HB_OT_NAME_ID_FONT_FAMILY, 3, 1, 0x0409, subset_font.newname.c_str(),
+            subset_font.newname.length())) {
+      return false;
+    }
+  } else {
+    hb_set_t* input_namelangid =
+        hb_subset_input_set(input.get(), HB_SUBSET_SETS_NAME_LANG_ID);
+    hb_set_clear(input_namelangid);
+    hb_set_invert(input_namelangid);
+  }
   HbFace subset_face(hb_subset_or_fail(hb_face.get(), input.get()));
   if (subset_face.get() == nullptr) {
     return false;
@@ -296,7 +334,7 @@ bool FontSubsetter::CreateSubfont(
   if (len == 0) {
     return false;
   }
-  subfonts_path_.emplace_back(output_filepath.native());
+  subset_font.subfont_path = output_filepath.native();
   return true;
 }
 
@@ -333,6 +371,44 @@ bool FontSubsetter::CheckGlyph(const AString& font_path, const long& font_index,
 
 bool FontSubsetter::LowerCmp(const std::string& a, const std::string& b) {
   return (ToLower(a) == ToLower(b));
+}
+
+void FontSubsetter::SetNewname() {
+  for (auto subfonts_info_iter = subfonts_info_.begin();
+       subfonts_info_iter != subfonts_info_.end(); ++subfonts_info_iter) {
+    if ((*subfonts_info_iter).newname.empty()) {
+      (*subfonts_info_iter).newname = RandomName(8);
+    } else {
+      continue;
+    }
+    for (const auto& font_desc : (*subfonts_info_iter).fonts_desc) {
+      for (auto iter_tmp = subfonts_info_iter; iter_tmp != subfonts_info_.end();
+           ++iter_tmp) {
+        if (!(*iter_tmp).newname.empty()) {
+          continue;
+        }
+        for (const auto& font_desc_tmp : (*iter_tmp).fonts_desc) {
+          if (font_desc_tmp.fontname == font_desc.fontname) {
+            (*iter_tmp).newname = (*subfonts_info_iter).newname;
+            break;
+          }
+        }
+      }
+    }
+  }
+}
+
+std::string FontSubsetter::RandomName(const int len) {
+  auto e = std::mt19937{};
+  const auto hes = std::random_device{}();
+  e.seed(hes);
+  std::string random_name;
+  for (int i = 0; i < len; ++i) {
+    auto char_distr = std::uniform_int_distribution<char>{65, 90};
+    const char ch = char_distr(e);
+    random_name.push_back(ch);
+  }
+  return random_name;
 }
 
 }  // namespace ass

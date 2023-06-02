@@ -10,7 +10,8 @@ set(TARGET_SOURCES main.cc
                    backends/imgui_impl_opengl3.cpp)
 
 if(WIN32)
-    set(TARGET_RESOURCES resources/assfonts.rc)
+    set(TARGET_RESOURCES resources/assfonts.rc
+                         resources/assfonts.manifest)
 endif()
 
 set(TARGET_NAME assfonts_gui)

@@ -58,7 +58,7 @@ class FontSubsetter {
   };
   ~FontSubsetter() { FT_Done_FreeType(ft_library_); }
   void SetSubfontDir(const AString& subfont_dir);
-  bool Run(const bool& is_no_subset);
+  bool Run(const bool is_no_subset, const bool is_rename = false);
   void Clear();
 
  private:
@@ -69,25 +69,38 @@ class FontSubsetter {
     bool operator<(const FontPath& s) const {
       return (path < s.path) || (path == s.path && index < s.index);
     }
+
+    bool operator==(const FontPath& s) const {
+      return (path == s.path) && (index == s.index);
+    }
   };
+
+  struct FontSubsetInfo {
+    std::vector<AssParser::FontDesc> fonts_desc;
+    std::set<uint32_t> codepoints;
+    FontPath font_path;
+    std::string newname;
+    AString subfont_path;
+  };
+
   FT_Library ft_library_;
   const AssParser& ap_;
   const FontParser& fp_;
   std::shared_ptr<Logger> logger_;
   AString subfont_dir_;
-  std::map<FontPath, std::set<uint32_t>> subset_font_codepoint_sets_;
-  std::vector<AString> subfonts_path_;
+  std::vector<FontSubsetInfo> subfonts_info_;
 
   bool FindFont(
       const std::pair<AssParser::FontDesc, std::set<char32_t>>& font_set,
       const std::unordered_multimap<AString, FontParser::FontInfo>& font_list,
       AString& found_path, long& found_index);
-  bool set_subset_font_codepoint_sets();
-  bool CreateSubfont(
-      const std::pair<FontPath, std::set<uint32_t>>& subset_font);
+  bool set_subfonts_info();
+  bool CreateSubfont(FontSubsetInfo& subset_font, const bool is_rename);
   bool CheckGlyph(const AString& font_path, const long& font_index,
                   const std::set<char32_t>& codepoint_set);
   bool LowerCmp(const std::string& a, const std::string& b);
+  void SetNewname();
+  std::string RandomName(const int len);
 
   friend class AssFontEmbedder;
 };

@@ -20,15 +20,20 @@
 #ifndef ASSFONTS_ASSFONTEMBEDDER_H_
 #define ASSFONTS_ASSFONTEMBEDDER_H_
 
+#include <fstream>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "ass_logger.h"
 #include "ass_string.h"
 #include "font_subsetter.h"
+#include "jpcre2.hpp"
 
 namespace ass {
+
+using jp = jpcre2::select<char>;
 
 class AssFontEmbedder {
  public:
@@ -37,15 +42,19 @@ class AssFontEmbedder {
   ~AssFontEmbedder() = default;
 
   void set_output_dir_path(const AString& output_ass_path);
-  bool Run();
+  bool Run(const bool is_embed_only, const bool is_rename = false);
   void Clear();
 
  private:
   const FontSubsetter& fs_;
   std::shared_ptr<Logger> logger_;
   AString output_dir_path_;
+  std::vector<std::pair<jp::Regex, std::string>> re_list_;
   std::string UUEncode(const char* begin, const char* end,
                        bool insert_linebreaks);
+  void RegexInit();
+  void WriteRenameInfo(std::ofstream& os);
+  void FontRename(std::string& line);
 };
 
 };  // namespace ass

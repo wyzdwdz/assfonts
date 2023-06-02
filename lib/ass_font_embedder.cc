@@ -20,7 +20,6 @@
 #include "ass_font_embedder.h"
 
 #include <algorithm>
-#include <fstream>
 #include <iterator>
 #include <regex>
 #include <sstream>
@@ -35,7 +34,7 @@ void AssFontEmbedder::set_output_dir_path(const AString& output_dir_path) {
   output_dir_path_ = output_dir_path;
 }
 
-bool AssFontEmbedder::Run() {
+bool AssFontEmbedder::Run(const bool is_embed_only, const bool is_rename) {
   fs::path input_path(fs_.ap_.get_ass_path());
   fs::path output_path(output_dir_path_ + fs::path::preferred_separator +
                        input_path.stem().native() + _ST(".assfonts") +
@@ -48,13 +47,20 @@ bool AssFontEmbedder::Run() {
   }
   auto text = fs_.ap_.get_text();
   size_t num_line = 0;
-  for (const auto& line : text) {
+  if (!is_embed_only && is_rename) {
+    RegexInit();
+    WriteRenameInfo(output_ass);
+  }
+  for (auto& line : text) {
     ++num_line;
+    if (!is_embed_only && is_rename) {
+      FontRename(line);
+    }
     if (Trim(ToLower(line)) == "[events]") {
       output_ass << "[Fonts]";
       bool has_none_ttf = false;
-      for (const auto& font : fs_.subfonts_path_) {
-        fs::path font_path(font);
+      for (const auto& font : fs_.subfonts_info_) {
+        fs::path font_path(font.subfont_path);
         if (ToLower(font_path.extension().native()) != _ST(".ttf")) {
           logger_->Warn(_ST("\"{}\" is not a .ttf font."), font_path.native());
           has_none_ttf = true;
@@ -66,7 +72,7 @@ bool AssFontEmbedder::Run() {
 #else
         std::string fontname(a_fontname);
 #endif
-        std::ifstream is(font, std::ios::binary);
+        std::ifstream is(font.subfont_path, std::ios::binary);
         std::ostringstream ostrm;
         ostrm << is.rdbuf();
         std::string font_data(ostrm.str());
@@ -140,6 +146,29 @@ std::string AssFontEmbedder::UUEncode(const char* begin, const char* end,
     }
   }
   return ret;
+}
+
+void AssFontEmbedder::RegexInit() {
+  for (const auto& subfont_info : fs_.subfonts_info_) {
+    for (const auto& font_desc : subfont_info.fonts_desc) {
+      jp::Regex re(font_desc.fontname, "S");
+      re_list_.emplace_back(std::make_pair(re, subfont_info.newname));
+    }
+  }
+}
+
+void AssFontEmbedder::WriteRenameInfo(std::ofstream& os) {
+  os << "[Assfonts Rename Info]\n";
+  for (const auto& re : re_list_) {
+    os << re.first.getPattern() + " ---- " + re.second + "\n";
+  }
+  os << "\n";
+}
+
+void AssFontEmbedder::FontRename(std::string& line) {
+  for (auto& re : re_list_) {
+    line = re.first.replace(line, re.second, "g");
+  }
 }
 
 }  // namespace ass

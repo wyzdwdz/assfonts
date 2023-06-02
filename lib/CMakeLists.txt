@@ -1,6 +1,6 @@
 ﻿cmake_minimum_required (VERSION 3.16)
 
-set(THIRD_PARTY_LIBS harfbuzz::harfbuzz
+set(THIRD_PARTY_LIBS harfbuzz_expt::harfbuzz_expt
                      Freetype::Freetype
                      nlohmann_json::nlohmann_json
                      Iconv::Iconv
@@ -8,7 +8,8 @@ set(THIRD_PARTY_LIBS harfbuzz::harfbuzz
                      threadpool::threadpool
                      ced
                      libasshdr
-                     ghcFilesystem::ghc_filesystem)
+                     ghcFilesystem::ghc_filesystem
+                     pcre2::pcre2)
 
 set(TARGET_SOURCES font_parser.cc
                    ass_parser.cc

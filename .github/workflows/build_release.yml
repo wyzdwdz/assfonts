@@ -41,6 +41,7 @@ jobs:
             export CONAN_HOME=/var/www/.conan2
             apt update && apt -y install lld-10
             update-alternatives --install /usr/bin/ld ld /usr/lib/llvm-10/bin/lld 10
+            conan export --version 7.1.0 -nr 3rdparty/harfbuzz_expt
             conan config install .github/conan2-linux
             conan install . -b missing -pr:h x86_64 -pr:b x86_64
             cd build
@@ -69,6 +70,7 @@ jobs:
             dpkg --add-architecture arm64
             apt update
             export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
+            conan export --version 7.1.0 -nr 3rdparty/harfbuzz_expt
             conan config install .github/conan2-linux
             conan install . -b missing -pr:h armv8 -pr:b x86_64
             cd build
@@ -165,6 +167,7 @@ jobs:
 
       - name: build executable binary
         run: |
+          conan export --version 7.1.0 -nr 3rdparty/harfbuzz_expt
           conan config install .github/conan2-windows
           conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
           cd build
@@ -196,11 +199,7 @@ jobs:
         uses: actions/cache/save@v3
         with:
           path: ~/.conan2/p
-<<<<<<< HEAD
           key: conan2-windows-${{ matrix.arch }}-${{ hashFiles('~/.conan2/p/cache.sqlite3') }}
-=======
-          key: conan2-windows-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
->>>>>>> 6dcdbfe1d639a2681cfce30eb700710d02cc2b83
 
   release:
     runs-on: ubuntu-22.04

@@ -4,7 +4,7 @@ project (assfonts CXX C)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/3rdparty)
 
-find_package(harfbuzz REQUIRED)
+find_package(harfbuzz_expt REQUIRED)
 find_package(freetype REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(Iconv REQUIRED)
@@ -13,6 +13,7 @@ find_package(CLI11 REQUIRED)
 find_package(threadpool REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(ghc_filesystem REQUIRED)
+find_package(PCRE2 REQUIRED)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     if(CMAKE_BUILD_TYPE MATCHES "Debug")

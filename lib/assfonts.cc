@@ -63,8 +63,8 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
                  const char* output_path, const char* fonts_path,
                  const char* db_path, const unsigned int brightness,
                  const unsigned int is_subset_only,
-                 const unsigned int is_embed_only, const AssfontsLogCallback cb,
-                 const unsigned int log_level) {
+                 const unsigned int is_embed_only, const unsigned int is_rename,
+                 const AssfontsLogCallback cb, const unsigned int log_level) {
   auto logger = std::make_shared<ass::Logger>(ass::Logger(cb, log_level));
 
   if (num_paths == 0) {
@@ -132,14 +132,14 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
                        input.stem().native() + _ST("_subsetted"));
     }
 
-    if (!fs.Run(is_embed_only)) {
+    if (!fs.Run(is_embed_only, is_rename)) {
       continue;
     }
 
     if (!is_subset_only) {
       afe.set_output_dir_path(output.native());
 
-      if (!afe.Run()) {
+      if (!afe.Run(is_embed_only, is_rename)) {
         continue;
       }
     }

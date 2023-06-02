@@ -63,7 +63,14 @@ static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 static std::string input_text_buffer;
 static std::string output_text_buffer;
 static std::string font_text_buffer;
-static std::string database_text_buffer = ".";
+
+#ifdef _WIN32
+static std::string database_text_buffer =
+    ass::WideToU8(fs::current_path().native());
+#else
+static std::string database_text_buffer = fs::current_path().native();
+#endif
+
 static CircularBuffer<std::pair<unsigned int, std::string>> log_text_buffer(
     8 * 1024);
 
@@ -76,6 +83,7 @@ static bool is_font_text_locked = false;
 static int hdr_state = NO_HDR;
 static bool is_subset_only = false;
 static bool is_embed_only = false;
+static bool is_rename = false;
 
 static bool is_running = false;
 
@@ -116,7 +124,13 @@ void Start();
 std::string Trim(const std::string& str);
 
 int main() {
-  std::setlocale(LC_ALL, ".UTF8");
+  auto loc = std::setlocale(LC_ALL, ".UTF8");
+  if (loc == nullptr) {
+    loc = std::setlocale(LC_ALL, "");
+  }
+  if (loc == nullptr) {
+    return -1;
+  }
 
   if (!glfwInit()) {
     return -1;
@@ -484,6 +498,17 @@ void SettingGroupRender(const ScaleLambda& Scale) {
   if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
     ImGui::SetTooltip("Embed fonts into subtitle but not subset them");
   }
+  if (is_embed_only) {
+    is_rename = false;
+  }
+
+  ImGui::SameLine(0, 2 * ImGui::GetStyle().ItemSpacing.x);
+  ImGui::Checkbox("Subfonts rename", &is_rename);
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
+    ImGui::SetTooltip(
+        "Rename subsetted fonts to ensure the one-to-one\n"
+        "correspondence between one subtitle and one series of fonts");
+  }
 
   ImGui::EndGroup();
 }
@@ -738,7 +763,7 @@ void Start() {
 
     pos = (pos_next != std::string::npos) ? pos_next + 1 : pos_next;
   }
-  
+
   auto input_paths = std::unique_ptr<char*[]>(new char*[input_vec.size()]);
   for (size_t idx = 0; idx < input_vec.size(); ++idx) {
     input_paths[idx] = const_cast<char*>(input_vec[idx].c_str());
@@ -762,7 +787,7 @@ void Start() {
   AssfontsRun(const_cast<const char**>(input_paths.get()), input_vec.size(),
               output_text_buffer.c_str(), font_text_buffer.c_str(),
               database_text_buffer.c_str(), brightness, is_subset_only,
-              is_embed_only, LogCallback, ASSFONTS_INFO);
+              is_embed_only, is_rename, LogCallback, ASSFONTS_INFO);
 
   LogCallback("\n", ASSFONTS_TEXT);
 

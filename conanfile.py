@@ -4,7 +4,7 @@ from conan.tools.cmake import CMakeDeps, CMakeToolchain
 
 class Assfonts(ConanFile):
     name = "assfonts"
-    version = "0.3.8"
+    version = "0.4.0"
 
     license = "GNU General Public License v2.0"
     author = "wyzdwdz"
@@ -15,7 +15,7 @@ class Assfonts(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 
     def requirements(self):
-        self.requires("harfbuzz/7.1.0")
+        self.requires("harfbuzz_expt/7.1.0")
         self.requires("freetype/2.13.0")
         self.requires("nlohmann_json/3.11.2")
         self.requires("libiconv/1.17")
@@ -31,7 +31,7 @@ class Assfonts(ConanFile):
 
     def configure(self):
         self.options["*"].shared = False
-        self.options["harfbuzz"].with_subset = True
+        self.options["harfbuzz_expt"].with_subset = True
         self.options["pcre2"].support_jit=True
 
     def layout(self):
