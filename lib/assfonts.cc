@@ -136,12 +136,9 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
       continue;
     }
 
-    if (!is_subset_only) {
-      afe.set_output_dir_path(output.native());
-
-      if (!afe.Run(is_embed_only, is_rename)) {
-        continue;
-      }
+    afe.set_output_dir_path(output.native());
+    if (!afe.Run(is_subset_only, is_embed_only, is_rename)) {
+      continue;
     }
 
     ap.Clear();

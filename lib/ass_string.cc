@@ -257,7 +257,7 @@ int StringToInt(const std::string& str) {
   } catch (const std::exception&) {
     res = 0;
   }
-  
+
   return res;
 }
 

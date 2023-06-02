@@ -34,8 +34,26 @@ void AssFontEmbedder::set_output_dir_path(const AString& output_dir_path) {
   output_dir_path_ = output_dir_path;
 }
 
-bool AssFontEmbedder::Run(const bool is_embed_only, const bool is_rename) {
-  fs::path input_path(fs_.ap_.get_ass_path());
+bool AssFontEmbedder::Run(const bool is_subset_only, const bool is_embed_only,
+                          const bool is_rename) {
+  fs::path input_path;
+  std::vector<std::string> text;
+
+  if (!is_embed_only && is_rename) {
+    AString path;
+    if (!WriteRenamed(path, text)) {
+      return false;
+    }
+    input_path = fs::path(path);
+  } else {
+    input_path = fs::path(fs_.ap_.get_ass_path());
+    text = fs_.ap_.get_text();
+  }
+
+  if (is_subset_only) {
+    return true;
+  }
+
   fs::path output_path(output_dir_path_ + fs::path::preferred_separator +
                        input_path.stem().native() + _ST(".assfonts") +
                        input_path.extension().native());
@@ -45,17 +63,9 @@ bool AssFontEmbedder::Run(const bool is_embed_only, const bool is_rename) {
     logger_->Error(_ST("\"{}\" cannot be created."), output_path.native());
     return false;
   }
-  auto text = fs_.ap_.get_text();
   size_t num_line = 0;
-  if (!is_embed_only && is_rename) {
-    RegexInit();
-    WriteRenameInfo(output_ass);
-  }
   for (auto& line : text) {
     ++num_line;
-    if (!is_embed_only && is_rename) {
-      FontRename(line);
-    }
     if (Trim(ToLower(line)) == "[events]") {
       output_ass << "[Fonts]";
       bool has_none_ttf = false;
@@ -98,6 +108,36 @@ bool AssFontEmbedder::Run(const bool is_embed_only, const bool is_rename) {
     }
   }
   logger_->Info(_ST("Create font-embeded subtitle: \"{}\""),
+                output_path.native());
+  return true;
+}
+
+bool AssFontEmbedder::WriteRenamed(AString& path,
+                                   std::vector<std::string>& text) {
+  fs::path input_path(fs_.ap_.get_ass_path());
+  fs::path output_path(output_dir_path_ + fs::path::preferred_separator +
+                       input_path.stem().native() + _ST(".renamed") +
+                       input_path.extension().native());
+  path = output_path.native();
+  std::ofstream output_ass(path);
+  if (!output_ass.is_open()) {
+    logger_->Error(_ST("\"{}\" cannot be created."), output_path.native());
+    return false;
+  }
+  RegexInit();
+  WriteRenameInfo(text);
+  auto tmp = fs_.ap_.get_text();
+  text.insert(text.end(), tmp.begin(), tmp.end());
+  unsigned int counter = 0;
+  for (auto& line : text) {
+    if (counter != 0) {
+      output_ass << "\n";
+    }
+    FontRename(line);
+    output_ass << line;
+    ++counter;
+  }
+  logger_->Info(_ST("Create font-renamed subtitle: \"{}\""),
                 output_path.native());
   return true;
 }
@@ -157,12 +197,13 @@ void AssFontEmbedder::RegexInit() {
   }
 }
 
-void AssFontEmbedder::WriteRenameInfo(std::ofstream& os) {
-  os << "[Assfonts Rename Info]\n";
+void AssFontEmbedder::WriteRenameInfo(std::vector<std::string>& text) {
+  text.emplace_back(std::string("[Assfonts Rename Info]"));
   for (const auto& re : re_list_) {
-    os << re.first.getPattern() + " ---- " + re.second + "\n";
+    text.emplace_back(
+        std::string(re.first.getPattern() + " ---- " + re.second));
   }
-  os << "\n";
+  text.emplace_back(std::string(""));
 }
 
 void AssFontEmbedder::FontRename(std::string& line) {

@@ -309,8 +309,8 @@ bool FontSubsetter::CreateSubfont(FontSubsetInfo& subset_font,
   hb_set_union(input_codepoints, codepoint_set.get());
   if (is_rename) {
     if (!hb_subset_input_override_name_table(
-            input.get(), HB_OT_NAME_ID_FONT_FAMILY, 3, 1, 0x0409, subset_font.newname.c_str(),
-            subset_font.newname.length())) {
+            input.get(), HB_OT_NAME_ID_FONT_FAMILY, 3, 1, 0x0409,
+            subset_font.newname.c_str(), subset_font.newname.length())) {
       return false;
     }
   } else {
@@ -404,8 +404,8 @@ std::string FontSubsetter::RandomName(const int len) {
   e.seed(hes);
   std::string random_name;
   for (int i = 0; i < len; ++i) {
-    auto char_distr = std::uniform_int_distribution<char>{65, 90};
-    const char ch = char_distr(e);
+    auto char_distr = std::uniform_int_distribution<int>{65, 90};
+    const char ch = static_cast<char>(char_distr(e));
     random_name.push_back(ch);
   }
   return random_name;

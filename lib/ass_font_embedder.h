@@ -42,7 +42,8 @@ class AssFontEmbedder {
   ~AssFontEmbedder() = default;
 
   void set_output_dir_path(const AString& output_ass_path);
-  bool Run(const bool is_embed_only, const bool is_rename = false);
+  bool Run(const bool is_subset_only, const bool is_embed_only,
+           const bool is_rename = false);
   void Clear();
 
  private:
@@ -53,8 +54,9 @@ class AssFontEmbedder {
   std::string UUEncode(const char* begin, const char* end,
                        bool insert_linebreaks);
   void RegexInit();
-  void WriteRenameInfo(std::ofstream& os);
+  void WriteRenameInfo(std::vector<std::string>& text);
   void FontRename(std::string& line);
+  bool WriteRenamed(AString& path, std::vector<std::string>& text);
 };
 
 };  // namespace ass

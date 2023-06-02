@@ -63,13 +63,7 @@ static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 static std::string input_text_buffer;
 static std::string output_text_buffer;
 static std::string font_text_buffer;
-
-#ifdef _WIN32
-static std::string database_text_buffer =
-    ass::WideToU8(fs::current_path().native());
-#else
-static std::string database_text_buffer = fs::current_path().native();
-#endif
+static std::string database_text_buffer = fs::current_path().u8string();
 
 static CircularBuffer<std::pair<unsigned int, std::string>> log_text_buffer(
     8 * 1024);
