@@ -2,7 +2,7 @@ Overview of changes leading to v0.4.0
 Friday, June 2, 2023
 ====================================
 - Add new feature: "Subfonts rename"
-- Fix bug: xysubfilter can't render vertial ellipsis
+- Fix bug: xysubfilter can't render vertical ellipsis
 - Set new default branch: imgui
 
 Overview of changes leading to v0.3.8
