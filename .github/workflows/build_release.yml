@@ -130,7 +130,7 @@ jobs:
       - name: restore conan cache
         uses: actions/cache/restore@v3
         with:
-          path: ~/.conan2/p
+          path: .conan2/p
           key: conan2-windows-${{ matrix.arch }}
           restore-keys: |
             conan2-windows-${{ matrix.arch }}
@@ -155,6 +155,9 @@ jobs:
         uses: turtlebrowser/get-conan@main
         with:
           version: 2.0.4
+
+      - name: change CONAN_HOME
+        run: echo "CONAN_HOME=${{ github.workspace }}/.conan2" >> "$GITHUB_ENV"
 
       - name: aarch64 fix conan recipes
         if: ${{ matrix.arch == 'aarch64' }}
@@ -200,7 +203,7 @@ jobs:
         uses: actions/cache/save@v3
         with:
           path: ~/.conan2/p
-          key: conan2-windows-${{ matrix.arch }}-${{ hashFiles('~/.conan2/p/cache.sqlite3') }}
+          key: conan2-windows-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
 
   release:
     runs-on: ubuntu-22.04
