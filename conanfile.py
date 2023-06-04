@@ -25,6 +25,7 @@ class Assfonts(ConanFile):
         self.requires("threadpool/20140926")
         self.requires("glfw/3.3.8")
         self.requires("ghc-filesystem/1.5.14")
+        self.requires("libcurl/8.1.1")
 
     def build_requirements(self):
         self.tool_requires("cmake/3.26.3")

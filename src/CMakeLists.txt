@@ -3,7 +3,8 @@
 set(THIRD_PARTY_LIBS ImGuiFileDialog
                      imgui
                      glfw
-                     ghcFilesystem::ghc_filesystem)
+                     ghcFilesystem::ghc_filesystem
+                     CURL::libcurl)
 
 set(TARGET_SOURCES main.cc
                    backends/imgui_impl_glfw.cpp

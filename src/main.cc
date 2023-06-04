@@ -27,6 +27,7 @@
 #include <utility>
 
 #include <ImGuiFileDialog.h>
+#include <curl/curl.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -85,7 +86,47 @@ static bool is_show_log = false;
 static bool is_show_space = false;
 static int show_log_level = ASSFONTS_INFO;
 
+static bool is_show_update_message_box = false;
+static int latest_major = 0;
+static int latest_minor = 0;
+static int latest_patch = 0;
+
+class Curl {
+ public:
+  Curl() { curl_ = curl_easy_init(); }
+  ~Curl() { curl_easy_cleanup(curl_); }
+
+  bool Download(const std::string& url, std::string& data) {
+    curl_easy_setopt(curl_, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+    curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &data);
+    curl_easy_setopt(curl_, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+    CURLcode res = curl_easy_perform(curl_);
+    if (res == CURLE_OK) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+ private:
+  CURL* curl_;
+
+  static size_t WriteMemoryCallback(void* contents, size_t size, size_t nmemb,
+                                    void* userp) {
+    size_t realsize = size * nmemb;
+    auto& mem = *static_cast<std::string*>(userp);
+    mem.append(static_cast<char*>(contents), realsize);
+    return realsize;
+  }
+};
+
 void AppInit();
+void ShowVersion();
+void CheckUpdate();
+
+void UpdateMessageBoxRender();
+bool OpenWebsite(const std::string& url);
 
 void AppRender(GLFWwindow* window, ImGuiIO& io, const ScaleLambda& Scale);
 
@@ -97,10 +138,10 @@ void FontGroupRender(const ScaleLambda& Scale);
 void DatabaseGroupRender(const ScaleLambda& Scale);
 void SettingGroupRender(const ScaleLambda& Scale);
 void RunGroupRender(GLFWwindow* window, const ScaleLambda& Scale);
-void LogGroupRender(GLFWwindow* window, const ScaleLambda& Scale);
+void LogGroupRender(const ScaleLambda& Scale);
 
 void LogCallback(const char* msg, const unsigned int log_level);
-void LogToClipBoard(GLFWwindow* window);
+void LogToClipBoard();
 
 void DropCallback(GLFWwindow* window, int count, const char** paths);
 
@@ -116,6 +157,7 @@ void BuildDatabase();
 void Start();
 
 std::string Trim(const std::string& str);
+std::vector<std::string> Split(std::string s, std::string delimiter);
 
 int main() {
   auto loc = std::setlocale(LC_ALL, ".UTF8");
@@ -225,12 +267,93 @@ int main() {
 }
 
 void AppInit() {
+  ShowVersion();
+  CheckUpdate();
+}
+
+void ShowVersion() {
   std::string version_info = "assfonts -- version " +
                              std::to_string(ASSFONTS_VERSION_MAJOR) + "." +
                              std::to_string(ASSFONTS_VERSION_MINOR) + "." +
                              std::to_string(ASSFONTS_VERSION_PATCH) + "\n";
   LogCallback(version_info.c_str(), ASSFONTS_TEXT);
   LogCallback("\n", ASSFONTS_TEXT);
+}
+
+void CheckUpdate() {
+  Curl curl;
+
+  std::string data;
+  if (!curl.Download(
+          "https://raw.githubusercontent.com/wyzdwdz/assfonts/imgui/VERSION",
+          data)) {
+    return;
+  }
+
+  std::string version = Trim(data);
+  std::vector<std::string> split_res;
+  split_res = Split(version, ".");
+  latest_major = std::stoi(split_res.at(0));
+  latest_minor = std::stoi(split_res.at(1));
+  latest_patch = std::stoi(split_res.at(2));
+
+  if (latest_major > ASSFONTS_VERSION_MAJOR ||
+      latest_minor > ASSFONTS_VERSION_MINOR ||
+      latest_patch > ASSFONTS_VERSION_PATCH) {
+    is_show_update_message_box = true;
+  }
+}
+
+void UpdateMessageBoxRender() {
+  std::string version = "v" + std::to_string(latest_major) + "." +
+                        std::to_string(latest_minor) + "." +
+                        std::to_string(latest_patch);
+
+  ImGui::TextUnformatted(std::string("Found new version: " + version).c_str());
+
+  std::string url =
+      "https://github.com/wyzdwdz/assfonts/releases/tag/" + version;
+  ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.0f, 1.0f, 1.0f));
+  ImGui::TextUnformatted(url.c_str());
+  ImGui::PopStyleColor();
+
+  ImVec2 lineEnd = ImGui::GetItemRectMax();
+  lineEnd.y = lineEnd.y - ImGui::GetItemRectSize().y / 16 * 2;
+  ImVec2 lineStart = lineEnd;
+  lineStart.x = ImGui::GetItemRectMin().x;
+  ImGui::GetWindowDrawList()->AddLine(lineStart, lineEnd,
+                                      ImColor(0.0f, 0.0f, 1.0f, 1.0f));
+
+  if (ImGui::IsItemHovered(ImGuiHoveredFlags_RectOnly)) {
+    ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+      OpenWebsite(url);
+    }
+  }
+
+  ImGui::Spacing();
+  ImGui::Spacing();
+  ImGui::Spacing();
+  ImGui::Indent(30.5 * ImGui::GetStyle().IndentSpacing / 2);
+  if (ImGui::Button(" Exit ")) {
+    is_show_update_message_box = false;
+  }
+}
+
+bool OpenWebsite(const std::string& url) {
+#ifdef __linux__
+  int res = system(std::string("xdg-open \"" + url + "\"").c_str());
+#elif _WIN32
+  int res = system(std::string("start \"" + url + "\"").c_str());
+#elif __APPLE__
+  int res = system(std::string("open \"" + url + "\"").c_str());
+#endif
+
+  if (res == -1) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 void AppRender(GLFWwindow* window, ImGuiIO& io, const ScaleLambda& Scale) {
@@ -253,6 +376,26 @@ void AppRender(GLFWwindow* window, ImGuiIO& io, const ScaleLambda& Scale) {
           ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollWithMouse)) {
     TabBarRender(window, Scale);
     ImGui::End();
+  }
+
+  if (is_show_update_message_box) {
+    int width, height, xpos, ypos;
+    glfwGetWindowSize(window, &width, &height);
+    glfwGetWindowPos(window, &xpos, &ypos);
+
+    ImVec2 next_size = ImVec2(Scale(378.0f), Scale(123.0f));
+
+    if (ImGui::Begin("Warning", nullptr,
+                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar |
+                         ImGuiWindowFlags_NoCollapse)) {
+      ImGui::SetWindowPos(ImVec2(xpos + (width - next_size.x) / 2,
+                                 ypos + (height - next_size.y) / 2),
+                          ImGuiCond_Once);
+      ImGui::SetWindowSize(next_size);
+
+      UpdateMessageBoxRender();
+      ImGui::End();
+    }
   }
 
   ImGui::Render();
@@ -293,7 +436,7 @@ void TabBarRender(GLFWwindow* window, const ScaleLambda& Scale) {
     }
 
     if (ImGui::BeginTabItem(" Log ", nullptr, log_tab_item_flags)) {
-      LogGroupRender(window, Scale);
+      LogGroupRender(Scale);
       ImGui::EndTabItem();
     }
 
@@ -539,7 +682,7 @@ void RunGroupRender(GLFWwindow* window, const ScaleLambda& Scale) {
   ImGui::EndGroup();
 }
 
-void LogGroupRender(GLFWwindow* window, const ScaleLambda& Scale) {
+void LogGroupRender(const ScaleLambda& Scale) {
   ImGui::Spacing();
   ImGui::BeginGroup();
 
@@ -549,7 +692,7 @@ void LogGroupRender(GLFWwindow* window, const ScaleLambda& Scale) {
 
   ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
   if (ImGui::Button("Copy", ImVec2(Scale(55.0f), Scale(0.0f)))) {
-    LogToClipBoard(window);
+    LogToClipBoard();
   }
 
   ImGui::SameLine(0, 2 * ImGui::GetStyle().ItemSpacing.x);
@@ -616,7 +759,7 @@ void LogCallback(const char* msg, const unsigned int log_level) {
   log_text_buffer.push_back(make_pair(log_level, std::string(msg)));
 }
 
-void LogToClipBoard(GLFWwindow* window) {
+void LogToClipBoard() {
   std::string paste_text;
 
   for (const auto& log : log_text_buffer) {
@@ -629,7 +772,7 @@ void LogToClipBoard(GLFWwindow* window) {
     }
   }
 
-  glfwSetClipboardString(window, Trim(paste_text).c_str());
+  ImGui::SetClipboardText(Trim(paste_text).c_str());
 }
 
 void DropCallback(GLFWwindow* window, int count, const char** paths) {
@@ -800,5 +943,20 @@ std::string Trim(const std::string& str) {
                 .base(),
             res.end());
 
+  return res;
+}
+
+std::vector<std::string> Split(std::string s, std::string delimiter) {
+  size_t pos_start = 0, pos_end, delim_len = delimiter.length();
+  std::string token;
+  std::vector<std::string> res;
+
+  while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos) {
+    token = s.substr(pos_start, pos_end - pos_start);
+    pos_start = pos_end + delim_len;
+    res.push_back(token);
+  }
+
+  res.push_back(s.substr(pos_start));
   return res;
 }
