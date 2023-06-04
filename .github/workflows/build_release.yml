@@ -122,7 +122,7 @@ jobs:
       matrix:
         include:
           - { arch: x86_64, profile: x86_64 }
-          - { arch: aarch64, profile: armv8 }
+          # - { arch: aarch64, profile: armv8 }
     steps:
       - name: checkout
         uses: actions/checkout@v3
