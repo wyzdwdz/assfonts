@@ -8,8 +8,10 @@ compiler.version=193
 os=Windows
 
 [buildenv]
-CC=cl
-CXX=cl
+CC="C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.36.32532\bin\HostX64\ARM64\cl.exe"
+CXX="C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.36.32532\bin\HostX64\ARM64\cl.exe"
+LD="C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.36.32532\bin\HostX64\ARM64\link.exe"
+RC="C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.36.32532\bin\HostX64\ARM64\rc.exe"
 
 [conf]
 tools.system.package_manager:mode=install
