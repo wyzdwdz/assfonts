@@ -1,0 +1,29 @@
+name: Refresh Cache
+run-name: Refresh Cache by ${{ github.actor }}
+on: 
+  schedule:
+    - cron: '0 0 */5 * *'
+jobs:
+    refresh:
+      runs-on: ubuntu-latest
+      defaults:
+        run:
+          shell: bash
+      strategy:
+        matrix:
+          include:
+          - { suffix: linux-x86_64 }
+          - { suffix: linux-aarch64 }
+          - { suffix: windows-x86_64 }
+          - { suffix: windows-aarch64 }
+      steps:
+        - name: checkout
+          uses: actions/checkout@v3
+
+        - name: restore conan cache
+          uses: actions/cache/restore@v3
+          with:
+            path: .conan2/p
+            key: conan2-${{ matrix.suffix }}
+            restore-keys: |
+              conan2-${{ matrix.suffix }}
