@@ -35,6 +35,11 @@ class Assfonts(ConanFile):
         self.options["harfbuzz_expt"].with_subset = True
         self.options["pcre2"].support_jit=True
 
+        if self.settings.os == "Windows":
+            self.options["libcurl"].with_ssl = "schannel"
+        elif self.settings.os == "Macos":
+            self.options["libcurl"].with_ssl = "darwinssl"
+
     def layout(self):
         self.folders.build = f"build/{str(self.settings.build_type)}"
         self.folders.generators = "build"

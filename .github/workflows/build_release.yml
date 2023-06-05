@@ -122,7 +122,7 @@ jobs:
       matrix:
         include:
           - { arch: x86_64, profile: x86_64 }
-          # - { arch: aarch64, profile: armv8 }
+          - { arch: aarch64, profile: armv8 }
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -227,17 +227,17 @@ jobs:
         with:
           name: release-exe-x86_64
 
-      # - name: download exe aarch64
-      #   uses: actions/download-artifact@v3
-      #   with:
-      #     name: release-exe-aarch64
+      - name: download exe aarch64
+        uses: actions/download-artifact@v3
+        with:
+          name: release-exe-aarch64
 
       - name: calculate hash
         run: |
           sha256sum assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage > assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage.sha256sum
           sha256sum assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage > assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage.sha256sum
           sha256sum assfonts-${{ github.ref_name }}-x86_64-Windows.exe > assfonts-${{ github.ref_name }}-x86_64-Windows.exe.sha256sum
-          # sha256sum assfonts-${{ github.ref_name }}-aarch64-Windows.exe > assfonts-${{ github.ref_name }}-aarch64-Windows.exe.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-aarch64-Windows.exe > assfonts-${{ github.ref_name }}-aarch64-Windows.exe.sha256sum
 
       - name: edit release
         uses: svenstaro/upload-release-action@v2
