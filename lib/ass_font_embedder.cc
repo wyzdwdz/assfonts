@@ -124,13 +124,23 @@ bool AssFontEmbedder::WriteRenamed(AString& path,
     logger_->Error(_ST("\"{}\" cannot be created."), output_path.native());
     return false;
   }
+
+  std::vector<std::string> font_info;
   RegexInit();
-  WriteRenameInfo(text);
-  auto tmp = fs_.ap_.get_text();
-  for (auto& line : tmp) {
+  WriteRenameInfo(font_info);
+  text = fs_.ap_.get_text();
+  for (auto& line : text) {
     FontRename(line);
   }
-  text.insert(text.end(), tmp.begin(), tmp.end());
+
+  for (auto iter = text.begin(); iter != text.end(); ++iter) {
+    std::string tmp = Trim(ToLower(*iter));
+    if (tmp == "[v4 styles]" || tmp == "[v4+ styles]") {
+      text.insert(iter, font_info.begin(), font_info.end());
+      break;
+    }
+  }
+
   unsigned int counter = 0;
   for (auto& line : text) {
     if (counter != 0) {
