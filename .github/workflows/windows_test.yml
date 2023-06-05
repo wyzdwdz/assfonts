@@ -58,6 +58,8 @@ jobs:
         if: ${{ matrix.arch == 'aarch64' }}
         run: echo $(realpath .github/tools) >> $GITHUB_PATH
 
+      - run: ls -a "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Tools\MSVC\14.36.32532\bin\HostX64\ARM64"
+
       - name: build executable binary
         run: |
             conan export --version 7.3.0 -nr 3rdparty/harfbuzz_expt
