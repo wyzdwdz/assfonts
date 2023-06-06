@@ -44,7 +44,7 @@ jobs:
           cd build
           source conanbuild.sh
           cmake .. --preset conan-release
-          cmake --build . --target package -j
+          cmake --build Release --target package -j
           cmake --install . --prefix ../install --strip
           cd ..
           ls -a ./install
