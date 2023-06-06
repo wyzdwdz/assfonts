@@ -44,6 +44,8 @@ if(APPLE)
             RUNTIME DESTINATION bin
             BUNDLE DESTINATION .)
 
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/${BINARY_NAME}.app")
+    set(DIRS ${CMAKE_BINARY_DIR})
     set(CPACK_GENERATOR "DRAGNDROP")
     include(CPack)
 else()
