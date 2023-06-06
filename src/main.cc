@@ -164,6 +164,9 @@ void OnStart();
 void BuildDatabase();
 void Start();
 
+bool GetParentPathFromTextBuffer(const std::string& text_buffer,
+                                 std::string& output);
+
 std::string Trim(const std::string& str);
 std::vector<std::string> Split(std::string s, std::string delimiter);
 
@@ -500,6 +503,8 @@ void InputGroupRender(const ScaleLambda& Scale) {
 
   ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
   if (ImGui::Button(u8"\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
+    GetParentPathFromTextBuffer(input_text_buffer, input_dialogue_path);
+
     ImGuiFileDialog::Instance()->OpenDialog(
         "ChooseInputDlgKey", "Choose File - Input ASS files", ".ass,.ssa",
         input_dialogue_path, home_path, "", 128, nullptr,
@@ -556,6 +561,8 @@ void OutputGroupRender(const ScaleLambda& Scale) {
 
   ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
   if (ImGui::Button(u8"\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
+    GetParentPathFromTextBuffer(output_text_buffer, output_dialogue_path);
+
     ImGuiFileDialog::Instance()->OpenDialog(
         "ChooseOutputDlgKey", "Choose Directory - Output directory", nullptr,
         output_dialogue_path, home_path, ".", 1, nullptr);
@@ -605,6 +612,8 @@ void FontGroupRender(const ScaleLambda& Scale) {
 
   ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
   if (ImGui::Button(u8"\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
+    GetParentPathFromTextBuffer(font_text_buffer, font_dialogue_path);
+
     ImGuiFileDialog::Instance()->OpenDialog(
         "ChooseFontDlgKey", "Choose Directory - Font directory", nullptr,
         font_dialogue_path, home_path, ".", 1, nullptr);
@@ -649,6 +658,8 @@ void DatabaseGroupRender(const ScaleLambda& Scale) {
 
   ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
   if (ImGui::Button(u8"\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
+    GetParentPathFromTextBuffer(database_text_buffer, database_dialogue_path);
+
     ImGuiFileDialog::Instance()->OpenDialog(
         "ChooseDatabaseDlgKey", "Choose Directory - Database directory",
         nullptr, database_dialogue_path, home_path, ".", 1, nullptr);
@@ -996,6 +1007,26 @@ void Start() {
   LogCallback("\n", ASSFONTS_TEXT);
 
   is_running = false;
+}
+
+bool GetParentPathFromTextBuffer(const std::string& text_buffer,
+                                 std::string& output) {
+  fs::path tmp_path =
+      fs::path(Trim(text_buffer.substr(0, text_buffer.find(';'))));
+  fs::path parent_path;
+
+  if (fs::is_directory(tmp_path)) {
+    parent_path = tmp_path;
+  } else {
+    parent_path = tmp_path.parent_path();
+  }
+
+  if (fs::is_directory(parent_path)) {
+    output = fs::absolute(parent_path).u8string();
+    return true;
+  }
+
+  return false;
 }
 
 std::string Trim(const std::string& str) {
