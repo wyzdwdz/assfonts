@@ -12,8 +12,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - { arch: x86_64 }
-          - { arch: aarch64 }
+          - { arch: x86_64, profile: x86_64 }
+          - { arch: aarch64, profile: armv8 }
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -43,7 +43,7 @@ jobs:
             update-alternatives --install /usr/bin/ld ld /usr/lib/llvm-10/bin/lld 10
             conan export --version 7.3.0 -nr 3rdparty/harfbuzz_expt
             conan config install .github/conan2-linux
-            conan install . -b missing -pr:h x86_64 -pr:b x86_64
+            conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
             cd build
             source conanbuild.sh
             cmake .. --preset conan-release
@@ -72,7 +72,7 @@ jobs:
             export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
             conan export --version 7.3.0 -nr 3rdparty/harfbuzz_expt
             conan config install .github/conan2-linux
-            conan install . -b missing -pr:h armv8 -pr:b x86_64
+            conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
             cd build
             source conanbuild.sh
             cmake .. --preset conan-release
