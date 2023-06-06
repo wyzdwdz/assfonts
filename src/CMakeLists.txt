@@ -46,7 +46,7 @@ if(APPLE)
 
     set(APPS "\${CMAKE_INSTALL_PREFIX}/${BINARY_NAME}.app")
     set(DIRS ${CMAKE_BINARY_DIR})
-    set(CPACK_GENERATOR "DRAGNDROP")
+    set(CPACK_GENERATOR "DragNDrop")
     include(CPack)
 else()
     install(TARGETS ${TARGET_NAME} 
