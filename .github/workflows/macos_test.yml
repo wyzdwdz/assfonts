@@ -44,16 +44,53 @@ jobs:
           cd build
           source conanbuild.sh
           cmake .. --preset conan-release
-          cmake --build Release --target package -j
-          cmake --install . --prefix ../install --strip
+          cmake --build --preset conan-release --target package -j
+          cmake --install Release --prefix ../install --strip
           cd ..
-          ls -a ./install
-          ls -a .
-          ls -a ./build
-          ls -a ./build/Release
+
+      - name: rename
+        run: mv -f assfonts.dmg assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
+
+      - name: upload exe
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-dmg-${{ matrix.arch }}
+          path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
+          if-no-files-found: error
 
       # - name: save conan cache
       #   uses: actions/cache/save@v3
       #   with:
       #       path: .conan2/p
       #       key: conan2-macos-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
+
+  release:
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        shell: bash
+    needs: [ build-macos ]
+    steps:
+      - name: download dmg x86_64
+        uses: actions/download-artifact@v3
+        with:
+          name: release-dmg-x86_64
+
+      - name: download dmg aarch64
+        uses: actions/download-artifact@v3
+        with:
+          name: release-dmg-aarch64
+
+      - name: calculate hash
+        run: |
+          sha256sum assfonts-${{ github.ref_name }}-x86_64-macOS.dmg > assfonts-${{ github.ref_name }}-x86_64-macOS.dmg.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-aarch64-macOS.dmg > assfonts-${{ github.ref_name }}-aarch64-macOS.dmg.sha256sum
+
+      - name: edit release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: assfonts-${{ github.ref_name }}-*
+          tag: ${{ github.ref }}
+          overwrite: false
+          file_glob: true
