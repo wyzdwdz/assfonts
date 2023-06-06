@@ -43,6 +43,9 @@ if(APPLE)
             CONFIGURATIONS Release
             RUNTIME DESTINATION bin
             BUNDLE DESTINATION .)
+
+    set(CPACK_GENERATOR "DRAGNDROP")
+    include(CPack)
 else()
     install(TARGETS ${TARGET_NAME} 
             CONFIGURATIONS Release 
