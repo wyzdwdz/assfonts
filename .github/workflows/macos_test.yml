@@ -48,6 +48,9 @@ jobs:
           cmake --install . --prefix ../install --strip
           cd ..
           ls -a ./install
+          ls -a .
+          ls -a ./build
+          ls -a ./build/Release
 
       # - name: save conan cache
       #   uses: actions/cache/save@v3
