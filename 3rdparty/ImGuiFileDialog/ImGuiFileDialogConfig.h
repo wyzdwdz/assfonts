@@ -74,6 +74,7 @@
 //#define buttonDriveString "Drives"
 //#define buttonEditPathString "Edit path\nYou can also right click on path buttons"
 //#define buttonResetPathString "Reset to current directory"
+#define buttonResetPathString "Reset to home directory"
 //#define buttonCreateDirString "Create Directory"
 //#define OverWriteDialogTitleString "The file Already Exist !"
 //#define OverWriteDialogMessageString "Would you like to OverWrite it ?"

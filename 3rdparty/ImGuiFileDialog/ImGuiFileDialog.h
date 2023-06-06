@@ -1228,6 +1228,8 @@ namespace IGFD
 
 		std::string puFsRoot;
 
+		std::string puHomepath = ".";
+
 	private:
 		static std::string prRoundNumber(double vvalue, int n);											// custom rounding number
 		static std::string prFormatFileSize(size_t vByteSize);											// format file size field
@@ -1558,6 +1560,17 @@ namespace IGFD
 			const int& vCountSelectionMax = 1,						// count selection max
 			UserDatas vUserDatas = nullptr,							// user datas (can be retrieved in pane)
 			ImGuiFileDialogFlags vFlags = 0);						// ImGuiFileDialogFlags 
+
+		void OpenDialog(											// open simple dialog (path and fileName can be specified)
+			const std::string& vKey,								// key dialog
+			const std::string& vTitle,								// title
+			const char* vFilters,									// filters
+			const std::string& vPath,								// path
+			const std::string& vHomePath,                           // home path
+			const std::string& vFileName,							// defaut file name
+			const int& vCountSelectionMax = 1,						// count selection max
+			UserDatas vUserDatas = nullptr,							// user datas (can be retrieved in pane)
+			ImGuiFileDialogFlags vFlags = 0);						// ImGuiFileDialogFlags
 
 		// with pane
 		void OpenDialog(											// open dialog with custom right pane (path and fileName can be specified)

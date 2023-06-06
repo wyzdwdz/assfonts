@@ -2497,7 +2497,8 @@ namespace IGFD
 	{
 		if (IMGUI_BUTTON(resetButtonString))
 		{
-			SetCurrentPath(".");
+			// SetCurrentPath(".");
+			SetCurrentPath(vFileDialogInternal.puFileManager.puHomepath);
 			OpenCurrentPath(vFileDialogInternal);
 		}
 		if (ImGui::IsItemHovered())
@@ -3703,9 +3704,9 @@ namespace IGFD
 		prFileDialogInternal.puFilterManager.ParseFilters(vFilters);
 
 		prFileDialogInternal.puFileManager.puDLGDirectoryMode = (vFilters == nullptr);
-		if (vPath.empty())
+		if (vPath.empty()) 
 			prFileDialogInternal.puFileManager.puDLGpath = prFileDialogInternal.puFileManager.GetCurrentPath();
-		else
+		else 
 			prFileDialogInternal.puFileManager.puDLGpath = vPath;
 		prFileDialogInternal.puFileManager.SetCurrentPath(vPath);
 		prFileDialogInternal.puFileManager.puDLGcountSelectionMax = (size_t)vCountSelectionMax;
@@ -3764,6 +3765,48 @@ namespace IGFD
 		prFileDialogInternal.puFileManager.ClearAll();
 
 		prFileDialogInternal.puShowDialog = true;
+	}
+
+	void IGFD::FileDialog::OpenDialog(
+		const std::string& vKey,
+		const std::string& vTitle,
+		const char* vFilters,
+		const std::string& vPath,
+		const std::string& vHomePath,
+		const std::string& vFileName,
+		const int& vCountSelectionMax,
+		UserDatas vUserDatas,
+		ImGuiFileDialogFlags vFlags)
+	{
+		if (prFileDialogInternal.puShowDialog) // if already opened, quit
+			return;
+
+		prFileDialogInternal.ResetForNewDialog();
+
+		prFileDialogInternal.puDLGkey = vKey;
+		prFileDialogInternal.puDLGtitle = vTitle;
+		prFileDialogInternal.puDLGuserDatas = vUserDatas;
+		prFileDialogInternal.puDLGflags = vFlags;
+		prFileDialogInternal.puDLGoptionsPane = nullptr;
+		prFileDialogInternal.puDLGoptionsPaneWidth = 0.0f;
+
+		prFileDialogInternal.puFilterManager.puDLGdefaultExt.clear();
+		prFileDialogInternal.puFilterManager.ParseFilters(vFilters);
+
+		prFileDialogInternal.puFileManager.puDLGDirectoryMode = (vFilters == nullptr);
+		if (vPath.empty()) 
+			prFileDialogInternal.puFileManager.puDLGpath = prFileDialogInternal.puFileManager.GetCurrentPath();
+		else 
+			prFileDialogInternal.puFileManager.puDLGpath = vPath;
+		if (!vHomePath.empty())
+			prFileDialogInternal.puFileManager.puHomepath = vHomePath;
+		prFileDialogInternal.puFileManager.SetCurrentPath(vPath);
+		prFileDialogInternal.puFileManager.puDLGcountSelectionMax = (size_t)vCountSelectionMax;
+		prFileDialogInternal.puFileManager.SetDefaultFileName(vFileName);
+
+		prFileDialogInternal.puFileManager.ClearAll();
+
+		prFileDialogInternal.puShowDialog = true;					// open dialog
 	}
 
 	// with pane
@@ -4375,7 +4418,7 @@ namespace IGFD
 					}
 					else
 					{
-						fdi.puPathClicked = fdi.SelectDirectory(vInfos);
+						// fdi.puPathClicked = fdi.SelectDirectory(vInfos);
 					}
 				}
 				else // no nav system => classic behavior

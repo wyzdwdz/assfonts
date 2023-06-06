@@ -91,6 +91,12 @@ static int latest_major = 0;
 static int latest_minor = 0;
 static int latest_patch = 0;
 
+static std::string home_path;
+static std::string input_dialogue_path;
+static std::string output_dialogue_path;
+static std::string font_dialogue_path;
+static std::string database_dialogue_path;
+
 class Curl {
  public:
   Curl() { curl_ = curl_easy_init(); }
@@ -124,6 +130,8 @@ class Curl {
 void AppInit();
 void ShowVersion();
 void CheckUpdate();
+void GetHomePath();
+void SetDefaultDialoguePath();
 
 void UpdateMessageBoxRender();
 bool OpenWebsite(const std::string& url);
@@ -269,6 +277,8 @@ int main() {
 void AppInit() {
   ShowVersion();
   CheckUpdate();
+  GetHomePath();
+  SetDefaultDialoguePath();
 }
 
 void ShowVersion() {
@@ -354,6 +364,34 @@ bool OpenWebsite(const std::string& url) {
   } else {
     return true;
   }
+}
+
+void GetHomePath() {
+#ifdef _WIN32
+  char* tmp = getenv("USERPROFILE");
+  if (tmp != nullptr) {
+    home_path = std::string(tmp);
+  }
+  if (home_path.empty()) {
+    tmp = getenv("HOMEDRIVE");
+    char* tmp_1 = getenv("HOMEPATH");
+    if (tmp != nullptr && tmp_1 != nullptr) {
+      home_path = std::string(tmp) + std::string(tmp_1);
+    }
+  }
+#else
+  char* tmp = getenv("HOME");
+  if (tmp != nullptr) {
+    home_path = std::string(tmp);
+  }
+#endif
+}
+
+void SetDefaultDialoguePath() {
+  input_dialogue_path = home_path;
+  output_dialogue_path = home_path;
+  font_dialogue_path = home_path;
+  database_dialogue_path = home_path;
 }
 
 void AppRender(GLFWwindow* window, ImGuiIO& io, const ScaleLambda& Scale) {
@@ -463,14 +501,22 @@ void InputGroupRender(const ScaleLambda& Scale) {
   ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
   if (ImGui::Button(u8"\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
     ImGuiFileDialog::Instance()->OpenDialog(
-        "ChooseInputDlgKey", "Choose File - Input ASS files", ".ass,.ssa", ".",
-        128, nullptr, ImGuiFileDialogFlags_CaseInsensitiveExtention);
+        "ChooseInputDlgKey", "Choose File - Input ASS files", ".ass,.ssa",
+        input_dialogue_path, home_path, "", 128, nullptr,
+        ImGuiFileDialogFlags_CaseInsensitiveExtention);
   }
 
   if (ImGuiFileDialog::Instance()->Display(
           "ChooseInputDlgKey", ImGuiWindowFlags_NoCollapse,
           ImVec2(Scale(500.0f), Scale(300.0f)))) {
-    if (ImGuiFileDialog::Instance()->IsOk()) {
+    bool res = ImGuiFileDialog::Instance()->IsOk();
+
+    input_dialogue_path = ImGuiFileDialog::Instance()->GetCurrentPath();
+    if (input_dialogue_path.empty()) {
+      input_dialogue_path = home_path;
+    }
+
+    if (res) {
       input_text_buffer.clear();
 
       auto selections = ImGuiFileDialog::Instance()->GetSelection();
@@ -512,13 +558,20 @@ void OutputGroupRender(const ScaleLambda& Scale) {
   if (ImGui::Button(u8"\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
     ImGuiFileDialog::Instance()->OpenDialog(
         "ChooseOutputDlgKey", "Choose Directory - Output directory", nullptr,
-        ".", 1, nullptr);
+        output_dialogue_path, home_path, ".", 1, nullptr);
   }
 
   if (ImGuiFileDialog::Instance()->Display(
           "ChooseOutputDlgKey", ImGuiWindowFlags_NoCollapse,
           ImVec2(Scale(500.0f), Scale(300.0f)))) {
-    if (ImGuiFileDialog::Instance()->IsOk()) {
+    bool res = ImGuiFileDialog::Instance()->IsOk();
+
+    output_dialogue_path = ImGuiFileDialog::Instance()->GetCurrentPath();
+    if (output_dialogue_path.empty()) {
+      output_dialogue_path = home_path;
+    }
+
+    if (res) {
       output_text_buffer = ImGuiFileDialog::Instance()->GetCurrentPath();
     }
 
@@ -552,15 +605,22 @@ void FontGroupRender(const ScaleLambda& Scale) {
 
   ImGui::SameLine(0, 1 * ImGui::GetStyle().ItemSpacing.x);
   if (ImGui::Button(u8"\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
-    ImGuiFileDialog::Instance()->OpenDialog("ChooseFontDlgKey",
-                                            "Choose Directory - Font directory",
-                                            nullptr, ".", 1, nullptr);
+    ImGuiFileDialog::Instance()->OpenDialog(
+        "ChooseFontDlgKey", "Choose Directory - Font directory", nullptr,
+        font_dialogue_path, home_path, ".", 1, nullptr);
   }
 
   if (ImGuiFileDialog::Instance()->Display(
           "ChooseFontDlgKey", ImGuiWindowFlags_NoCollapse,
           ImVec2(Scale(500.0f), Scale(300.0f)))) {
-    if (ImGuiFileDialog::Instance()->IsOk()) {
+    bool res = ImGuiFileDialog::Instance()->IsOk();
+
+    font_dialogue_path = ImGuiFileDialog::Instance()->GetCurrentPath();
+    if (font_dialogue_path.empty()) {
+      font_dialogue_path = home_path;
+    }
+
+    if (res) {
       font_text_buffer = ImGuiFileDialog::Instance()->GetCurrentPath();
     }
 
@@ -591,13 +651,20 @@ void DatabaseGroupRender(const ScaleLambda& Scale) {
   if (ImGui::Button(u8"\u2026", ImVec2(Scale(30.0f), Scale(0.0f)))) {
     ImGuiFileDialog::Instance()->OpenDialog(
         "ChooseDatabaseDlgKey", "Choose Directory - Database directory",
-        nullptr, ".", 1, nullptr);
+        nullptr, database_dialogue_path, home_path, ".", 1, nullptr);
   }
 
   if (ImGuiFileDialog::Instance()->Display(
           "ChooseDatabaseDlgKey", ImGuiWindowFlags_NoCollapse,
           ImVec2(Scale(500.0f), Scale(300.0f)))) {
-    if (ImGuiFileDialog::Instance()->IsOk()) {
+    bool res = ImGuiFileDialog::Instance()->IsOk();
+
+    database_dialogue_path = ImGuiFileDialog::Instance()->GetCurrentPath();
+    if (database_dialogue_path.empty()) {
+      database_dialogue_path = home_path;
+    }
+
+    if (res) {
       database_text_buffer = ImGuiFileDialog::Instance()->GetCurrentPath();
     }
 
