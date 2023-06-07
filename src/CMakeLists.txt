@@ -39,7 +39,7 @@ target_include_directories(${TARGET_NAME} PRIVATE backends
                                                   resources)
 
 if(APPLE)
-    target_link_options(${TARGET_NAME} PRIVATE "-framework Foundation")
+    target_link_options(${TARGET_NAME} PRIVATE -framework Foundation)
 endif()
 
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
