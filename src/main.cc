@@ -70,7 +70,7 @@ static std::string save_files_path = []() {
   fs::path path = fs::path(GetAppSupportDir()) / "assfonts";
 
   std::error_code ec;
-  fs::create_directory(path, &ec);
+  fs::create_directory(path, ec);
 
   return path.u8string();
 #else
