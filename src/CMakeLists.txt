@@ -14,9 +14,11 @@ if(WIN32)
     set(TARGET_RESOURCES resources/assfonts.rc
                          resources/assfonts.manifest)
 elseif(APPLE)
+    list(APPEND TARGET_SOURCES get_app_support_dir.mm)
     set(TARGET_RESOURCES resources/icon.icns)
     set_source_files_properties(${TARGET_RESOURCES} PROPERTIES
                                 MACOSX_PACKAGE_LOCATION "Resources")
+else()
 endif()
 
 set(TARGET_NAME assfonts_gui)
@@ -35,6 +37,10 @@ target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} assfonts)
 
 target_include_directories(${TARGET_NAME} PRIVATE backends
                                                   resources)
+
+if(APPLE)
+    target_link_options(${TARGET_NAME} PRIVATE "-framework Foundation")
+endif()
 
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
 

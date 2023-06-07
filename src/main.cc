@@ -49,6 +49,10 @@
 #include "NotoSansCJK_Regular.hxx"
 #include "icon.hxx"
 
+#ifdef __APPLE__
+#include "get_app_support_dir.h"
+#endif
+
 #ifdef _WIN32
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #endif
@@ -61,10 +65,23 @@ enum HdrComboState { NO_HDR = 0, HDR_LOW, HDR_HIGH };
 
 static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+static std::string save_files_path = []() {
+#ifdef __APPLE__
+  fs::path path = fs::path(GetAppSupportDir()) / "assfonts";
+
+  std::error_code ec;
+  fs::create_directory(path, &ec);
+
+  return path.u8string();
+#else
+  return fs::current_path().u8string();
+#endif
+}();
+
 static std::string input_text_buffer;
 static std::string output_text_buffer;
 static std::string font_text_buffer;
-static std::string database_text_buffer = fs::current_path().u8string();
+static std::string database_text_buffer = save_files_path;
 
 static CircularBuffer<std::pair<unsigned int, std::string>> log_text_buffer(
     8 * 1024);
