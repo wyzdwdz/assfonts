@@ -51,7 +51,7 @@ jobs:
 
       - name: rename
         # run: mv -f assfonts.dmg assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
-        run: cp -f ./install/assfonts assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS
+        run: cp -f ./build/Release/src/assfonts assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS
 
       - name: upload dmg
         uses: actions/upload-artifact@v3
