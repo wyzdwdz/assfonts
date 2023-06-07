@@ -44,18 +44,21 @@ jobs:
           cd build
           source conanbuild.sh
           cmake .. --preset conan-release
-          cmake --build --preset conan-release --target package -j
+          # cmake --build --preset conan-release --target package -j
+          cmake --build --preset conan-release -j
           cmake --install Release --prefix ../install --strip
           cd ..
 
       - name: rename
-        run: mv -f assfonts.dmg assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
+        # run: mv -f assfonts.dmg assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
+        run: cp -f ./install/assfonts assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS
 
-      - name: upload exe
+      - name: upload dmg
         uses: actions/upload-artifact@v3
         with:
           name: release-dmg-${{ matrix.arch }}
-          path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
+          # path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
+          path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS
           if-no-files-found: error
 
       # - name: save conan cache
@@ -83,8 +86,10 @@ jobs:
 
       - name: calculate hash
         run: |
-          sha256sum assfonts-${{ github.ref_name }}-x86_64-macOS.dmg > assfonts-${{ github.ref_name }}-x86_64-macOS.dmg.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-aarch64-macOS.dmg > assfonts-${{ github.ref_name }}-aarch64-macOS.dmg.sha256sum
+          # sha256sum assfonts-${{ github.ref_name }}-x86_64-macOS.dmg > assfonts-${{ github.ref_name }}-x86_64-macOS.dmg.sha256sum
+          # sha256sum assfonts-${{ github.ref_name }}-aarch64-macOS.dmg > assfonts-${{ github.ref_name }}-aarch64-macOS.dmg.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-x86_64-macOS > assfonts-${{ github.ref_name }}-x86_64-macOS.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-aarch64-macOS > assfonts-${{ github.ref_name }}-aarch64-macOS.sha256sum
 
       - name: edit release
         uses: svenstaro/upload-release-action@v2
@@ -94,3 +99,4 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: false
           file_glob: true
+          make_latest: false

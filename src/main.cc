@@ -127,6 +127,10 @@ class Curl {
   }
 };
 
+static void GlfwErrorCallback(int error, const char* description) {
+  fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+}
+
 void AppInit();
 void ShowVersion();
 void CheckUpdate();
@@ -179,6 +183,7 @@ int main() {
     return -1;
   }
 
+  glfwSetErrorCallback(GlfwErrorCallback);
   if (!glfwInit()) {
     return -1;
   }
