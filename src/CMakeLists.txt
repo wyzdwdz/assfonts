@@ -13,6 +13,10 @@ set(TARGET_SOURCES main.cc
 if(WIN32)
     set(TARGET_RESOURCES resources/assfonts.rc
                          resources/assfonts.manifest)
+elseif(APPLE)
+    set(TARGET_RESOURCES resources/icon.icns)
+    set_source_files_properties(${TARGET_RESOURCES} PROPERTIES
+                                MACOSX_PACKAGE_LOCATION "Resources")
 endif()
 
 set(TARGET_NAME assfonts_gui)
@@ -21,11 +25,11 @@ set(BINARY_NAME assfonts)
 						  
 add_executable(${TARGET_NAME} ${TARGET_SOURCES} ${TARGET_RESOURCES})
 
-# if(APPLE)
-#     set_target_properties(${TARGET_NAME} PROPERTIES
-#         MACOSX_BUNDLE ON
-#         MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/resources/assfonts.plist)
-# endif()
+if(APPLE)
+    set_target_properties(${TARGET_NAME} PROPERTIES
+        MACOSX_BUNDLE ON
+        MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/resources/assfonts.plist)
+endif()
 
 target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} assfonts)
 
@@ -41,8 +45,8 @@ set_target_properties(${TARGET_NAME} PROPERTIES OUTPUT_NAME ${BINARY_NAME})
 if(APPLE)
     install(TARGETS ${TARGET_NAME}
             CONFIGURATIONS Release
-            RUNTIME DESTINATION bin)
-            # BUNDLE DESTINATION .)
+            RUNTIME DESTINATION bin
+            BUNDLE DESTINATION .)
 
     set(CPACK_PACKAGE_NAME ${BINARY_NAME})
     set(CPACK_PACKAGE_NAMECPACK_PACKAGE_VENDOR "wyzdwdz@gmail.com")
@@ -52,11 +56,10 @@ if(APPLE)
     set(CPACK_PACKAGE_DESCRIPTION "Subset fonts and embed them into an ASS subtitle")
     set(CPACK_PACKAGE_FILE_NAME ${BINARY_NAME})
     set(CPACK_STRIP_FILES TRUE)
-    # set(CPACK_RESOURCE_FILE_LICENSE ${PROJECT_SOURCE_DIR}/LICENSE.txt)
     set(CPACK_PACKAGE_ICON ${PROJECT_SOURCE_DIR}/src/resources/icon.icns)
     set(CPACK_PACKAGE_DIRECTORY ${PROJECT_SOURCE_DIR})
     set(CPACK_GENERATOR "DragNDrop")
-    # include(CPack)
+    include(CPack)
 else()
     install(TARGETS ${TARGET_NAME} 
             CONFIGURATIONS Release 
