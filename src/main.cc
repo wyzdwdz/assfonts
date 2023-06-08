@@ -51,6 +51,9 @@
 
 #ifdef __APPLE__
 #include "get_app_support_dir.h"
+#elif _WIN32
+#include <Shlobj.h>
+#else
 #endif
 
 #ifdef _WIN32
@@ -68,14 +71,21 @@ static ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 static std::string save_files_path = []() {
 #ifdef __APPLE__
   fs::path path = fs::path(GetAppSupportDir()) / "assfonts";
+#elif __linux__
+  fs::path path = fs::path(getenv("HOME")) / ".local" / "share" / "assfonts";
+#elif _WIN32
+  TCHAR sz_path[MAX_PATH];
+  SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, sz_path);
+
+  fs::path path = fs::path(sz_path) / "assfonts";
+#else
+  fs::path path = fs::current_path();
+#endif
 
   std::error_code ec;
   fs::create_directory(path, ec);
 
   return path.u8string();
-#else
-  return fs::current_path().u8string();
-#endif
 }();
 
 static std::string input_text_buffer;
@@ -259,6 +269,8 @@ int main() {
   io.ConfigViewportsNoAutoMerge = true;
   io.ConfigViewportsNoTaskBarIcon = true;
 
+  io.IniFilename = nullptr;
+
   ImGui::StyleColorsLight();
 
   ImGuiStyle& style = ImGui::GetStyle();
@@ -280,8 +292,6 @@ int main() {
   io.Fonts->AddFontFromMemoryCompressedTTF(
       NotoSansCJK_Regular_compressed_data, NotoSansCJK_Regular_compressed_size,
       Scale(18.0f), nullptr, combined_glyph_ranges.Data);
-
-  io.IniFilename = nullptr;
 
   AppInit();
 

@@ -33,6 +33,7 @@
 #include <ghc/filesystem.hpp>
 
 #include "ass_harfbuzz.h"
+#include "assfonts.h"
 
 static const std::u32string ADDITIONAL_CODEPOINTS = []() {
   std::u32string codepoints;
@@ -319,6 +320,25 @@ bool FontSubsetter::CreateSubfont(FontSubsetInfo& subset_font,
     if (!hb_subset_input_override_name_table(
             input.get(), HB_OT_NAME_ID_FONT_FAMILY, 3, 1, 0x0409,
             subset_font.newname.c_str(), subset_font.newname.length())) {
+      return false;
+    }
+    if (!hb_subset_input_override_name_table(
+            input.get(), HB_OT_NAME_ID_FULL_NAME, 3, 1, 0x0409,
+            subset_font.newname.c_str(), subset_font.newname.length())) {
+      return false;
+    }
+    if (!hb_subset_input_override_name_table(
+            input.get(), HB_OT_NAME_ID_UNIQUE_ID, 3, 1, 0x0409,
+            subset_font.newname.c_str(), subset_font.newname.length())) {
+      return false;
+    }
+    if (!hb_subset_input_override_name_table(
+            input.get(), HB_OT_NAME_ID_COPYRIGHT, 3, 1, 0x0409,
+            fmt::format("Processed by assfonts v{}.{}.{}",
+                        ASSFONTS_VERSION_MAJOR, ASSFONTS_VERSION_MINOR,
+                        ASSFONTS_VERSION_PATCH)
+                .c_str(),
+            -1)) {
       return false;
     }
   } else {
