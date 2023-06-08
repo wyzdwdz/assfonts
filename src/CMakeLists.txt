@@ -7,6 +7,7 @@ set(THIRD_PARTY_LIBS ImGuiFileDialog
                      CURL::libcurl)
 
 set(TARGET_SOURCES main.cc
+                   atlas_cache.cc
                    backends/imgui_impl_glfw.cpp
                    backends/imgui_impl_opengl3.cpp)
 

@@ -41,6 +41,7 @@
 #include <GLFW/glfw3.h>
 
 #include "assfonts.h"
+#include "atlas_cache.h"
 #include "circular_buffer.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -271,6 +272,29 @@ int main() {
 
   io.IniFilename = nullptr;
 
+  std::string cache_path =
+      (fs::path(save_files_path) / "atlas_cache.bin").u8string();
+  auto cache_ptr = std::unique_ptr<AtlasCache>(new AtlasCache);
+  if (cache_ptr->LoadFontAtlasCache(cache_path, Scale(18.0f))) {
+    cache_ptr->RestoreFontAtlas(Scale(18.0f));
+    cache_ptr.release();
+
+  } else {
+    ImFontGlyphRangesBuilder glyph_range_builder;
+    ImVector<ImWchar> combined_glyph_ranges;
+    glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesChineseFull());
+    glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
+    glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesKorean());
+    glyph_range_builder.BuildRanges(&combined_glyph_ranges);
+    io.Fonts->AddFontFromMemoryCompressedTTF(
+        NotoSansCJK_Regular_compressed_data,
+        NotoSansCJK_Regular_compressed_size, Scale(18.0f), nullptr,
+        combined_glyph_ranges.Data);
+    io.Fonts->Build();
+
+    cache_ptr->SaveFontAtlas(cache_path, Scale(18.0f), true);
+  }
+
   ImGui::StyleColorsLight();
 
   ImGuiStyle& style = ImGui::GetStyle();
@@ -282,16 +306,6 @@ int main() {
 
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
-
-  ImFontGlyphRangesBuilder glyph_range_builder;
-  ImVector<ImWchar> combined_glyph_ranges;
-  glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesChineseFull());
-  glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
-  glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesKorean());
-  glyph_range_builder.BuildRanges(&combined_glyph_ranges);
-  io.Fonts->AddFontFromMemoryCompressedTTF(
-      NotoSansCJK_Regular_compressed_data, NotoSansCJK_Regular_compressed_size,
-      Scale(18.0f), nullptr, combined_glyph_ranges.Data);
 
   AppInit();
 
