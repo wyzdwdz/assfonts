@@ -24,7 +24,7 @@ Package Manager ---- Conan version 2.0.4
 
 ### How to build
 
-Linux
+Linux and macOS
 
 ```
 chmod +x build.sh
