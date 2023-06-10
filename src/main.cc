@@ -159,6 +159,8 @@ static void GlfwErrorCallback(int error, const char* description) {
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
+void LoadFontAtlas(ImGuiIO& io, const ScaleLambda& Scale);
+
 void AppInit();
 void ShowVersion();
 void CheckUpdate();
@@ -272,28 +274,7 @@ int main() {
 
   io.IniFilename = nullptr;
 
-  std::string cache_path =
-      (fs::path(save_files_path) / "atlas_cache.bin").u8string();
-  auto cache_ptr = std::unique_ptr<AtlasCache>(new AtlasCache);
-  if (cache_ptr->LoadFontAtlasCache(cache_path, Scale(18.0f))) {
-    cache_ptr->RestoreFontAtlas(Scale(18.0f));
-    cache_ptr.release();
-
-  } else {
-    ImFontGlyphRangesBuilder glyph_range_builder;
-    ImVector<ImWchar> combined_glyph_ranges;
-    glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesChineseFull());
-    glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
-    glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesKorean());
-    glyph_range_builder.BuildRanges(&combined_glyph_ranges);
-    io.Fonts->AddFontFromMemoryCompressedTTF(
-        NotoSansCJK_Regular_compressed_data,
-        NotoSansCJK_Regular_compressed_size, Scale(18.0f), nullptr,
-        combined_glyph_ranges.Data);
-    io.Fonts->Build();
-
-    cache_ptr->SaveFontAtlas(cache_path, Scale(18.0f), true);
-  }
+  LoadFontAtlas(io, Scale);
 
   ImGui::StyleColorsLight();
 
@@ -321,6 +302,33 @@ int main() {
   glfwTerminate();
 
   return 0;
+}
+
+void LoadFontAtlas(ImGuiIO& io, const ScaleLambda& Scale) {
+  std::string cache_path =
+      (fs::path(save_files_path) / "atlas_cache.bin").u8string();
+  auto cache_ptr = std::unique_ptr<AtlasCache>(new AtlasCache);
+
+  if (cache_ptr->LoadFontAtlasCache(cache_path, Scale(18.0f))) {
+    cache_ptr->RestoreFontAtlas(Scale(18.0f));
+
+  } else { 
+    ImFontGlyphRangesBuilder glyph_range_builder;
+    ImVector<ImWchar> combined_glyph_ranges;
+
+    glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesChineseFull());
+    glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesJapanese());
+    glyph_range_builder.AddRanges(io.Fonts->GetGlyphRangesKorean());
+    glyph_range_builder.BuildRanges(&combined_glyph_ranges);
+
+    io.Fonts->AddFontFromMemoryCompressedTTF(
+        NotoSansCJK_Regular_compressed_data,
+        NotoSansCJK_Regular_compressed_size, Scale(18.0f), nullptr,
+        combined_glyph_ranges.Data);
+    io.Fonts->Build();
+
+    cache_ptr->SaveFontAtlas(cache_path, Scale(18.0f), true);
+  }
 }
 
 void AppInit() {
@@ -418,18 +426,22 @@ bool OpenWebsite(const std::string& url) {
 void GetHomePath() {
 #ifdef _WIN32
   char* tmp = getenv("USERPROFILE");
+
   if (tmp != nullptr) {
     home_path = std::string(tmp);
   }
+
   if (home_path.empty()) {
     tmp = getenv("HOMEDRIVE");
     char* tmp_1 = getenv("HOMEPATH");
+
     if (tmp != nullptr && tmp_1 != nullptr) {
       home_path = std::string(tmp) + std::string(tmp_1);
     }
   }
 #else
   char* tmp = getenv("HOME");
+
   if (tmp != nullptr) {
     home_path = std::string(tmp);
   }
@@ -444,6 +456,8 @@ void SetDefaultDialoguePath() {
 }
 
 void AppRender(GLFWwindow* window, ImGuiIO& io, const ScaleLambda& Scale) {
+  // IdleBySleeping();
+
   glfwPollEvents();
 
   ImGui_ImplOpenGL3_NewFrame();
