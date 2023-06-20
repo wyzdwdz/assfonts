@@ -2,7 +2,7 @@ name: Refresh Cache
 run-name: Refresh Cache by ${{ github.actor }}
 on: 
   schedule:
-    - cron: '0 0 */5 * *'
+    - cron: '0 0 */1 * *'
 jobs:
     refresh:
       runs-on: ubuntu-latest
