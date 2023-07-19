@@ -1,10 +1,10 @@
 from conan import ConanFile
-from conan.tools.cmake import CMakeDeps, CMakeToolchain
+from conan.tools.cmake import CMakeDeps, CMakeToolchain, cmake_layout
 
 
 class Assfonts(ConanFile):
     name = "assfonts"
-    version = "0.4.1"
+    version = "0.5.0"
 
     license = "GNU General Public License v2.0"
     author = "wyzdwdz"
@@ -15,7 +15,7 @@ class Assfonts(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 
     def requirements(self):
-        self.requires("harfbuzz_expt/7.3.0")
+        self.requires("harfbuzz/7.3.0")
         self.requires("freetype/2.13.0")
         self.requires("nlohmann_json/3.11.2")
         self.requires("libiconv/1.17")
@@ -23,17 +23,17 @@ class Assfonts(ConanFile):
         self.requires("cli11/2.3.2")
         self.requires("pcre2/10.42")
         self.requires("threadpool/20140926")
-        self.requires("glfw/3.3.8")
         self.requires("ghc-filesystem/1.5.14")
-        self.requires("libcurl/8.1.1")
+        self.requires("qt/5.15.9")
 
     def build_requirements(self):
         self.tool_requires("cmake/3.26.3")
 
     def configure(self):
         self.options["*"].shared = False
-        self.options["harfbuzz_expt"].with_subset = True
-        self.options["pcre2"].support_jit=True
+        self.options["harfbuzz"].with_subset = True
+        self.options["pcre2"].support_jit = True
+        self.options["qt"].with_harfbuzz = True
 
         if self.settings.os == "Windows":
             self.options["libcurl"].with_ssl = "schannel"
@@ -41,8 +41,7 @@ class Assfonts(ConanFile):
             self.options["libcurl"].with_ssl = "darwinssl"
 
     def layout(self):
-        self.folders.build = f"build/{str(self.settings.build_type)}"
-        self.folders.generators = "build"
+        cmake_layout(self)
 
     def generate(self):
         dp = CMakeDeps(self)

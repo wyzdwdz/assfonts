@@ -21,6 +21,7 @@ done
 
 conan profile detect -vquiet
 conan export --version 7.3.0 -nr 3rdparty/harfbuzz_expt
+conan export --version 5.15.9 -nr 3rdparty/qt_harfbuzz_expt
 
 if (( $EUID != 0 ))
 then        

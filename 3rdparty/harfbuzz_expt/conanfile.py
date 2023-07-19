@@ -15,8 +15,8 @@ import os
 required_conan_version = ">=1.54.0"
 
 
-class HarfbuzzExptConan(ConanFile):
-    name = "harfbuzz_expt"
+class HarfbuzzConan(ConanFile):
+    name = "harfbuzz"
     description = "HarfBuzz is an OpenType text shaping engine."
     topics = ("opentype", "text", "engine")
     url = "https://github.com/conan-io/conan-center-index"
@@ -177,9 +177,9 @@ class HarfbuzzExptConan(ConanFile):
         fix_msvc_libname(self)
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "harfbuzz_expt")
-        self.cpp_info.set_property("cmake_target_name", "harfbuzz_expt::harfbuzz_expt")
-        self.cpp_info.set_property("pkg_config_name", "harfbuzz_expt")
+        self.cpp_info.set_property("cmake_file_name", "harfbuzz")
+        self.cpp_info.set_property("cmake_target_name", "harfbuzz::harfbuzz")
+        self.cpp_info.set_property("pkg_config_name", "harfbuzz")
         if self.options.with_icu:
             self.cpp_info.libs.append("harfbuzz-icu")
         if self.options.with_subset:

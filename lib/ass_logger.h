@@ -33,7 +33,7 @@ namespace ass {
 
 class Logger {
  public:
-  Logger(AssfontsLogCallback cb, unsigned int log_level)
+  Logger(AssfontsLogCallback cb, ASSFONTS_LOG_LEVEL log_level)
       : cb_(cb), log_level_(log_level){};
   ~Logger() = default;
 
@@ -91,10 +91,11 @@ class Logger {
 
  private:
   AssfontsLogCallback cb_;
-  unsigned int log_level_;
+  ASSFONTS_LOG_LEVEL log_level_;
 
   template <typename... T>
-  void Log(unsigned int log_level, fmt::format_string<T...> fmt, T&&... args) {
+  void Log(ASSFONTS_LOG_LEVEL log_level, fmt::format_string<T...> fmt,
+           T&&... args) {
     std::string msg;
 
     switch (log_level) {
@@ -116,13 +117,12 @@ class Logger {
 
     msg.append(fmt::format(fmt, std::forward<T>(args)...));
 
-    msg.push_back('\n');
-
     cb_(msg.c_str(), log_level);
   }
 
   template <typename... T>
-  void Log(unsigned int log_level, fmt::wformat_string<T...> fmt, T&&... args) {
+  void Log(ASSFONTS_LOG_LEVEL log_level, fmt::wformat_string<T...> fmt,
+           T&&... args) {
     std::string msg;
 
     switch (log_level) {
@@ -143,8 +143,6 @@ class Logger {
     }
 
     msg.append(WideToU8(fmt::format(fmt, std::forward<T>(args)...)));
-
-    msg.push_back('\n');
 
     cb_(msg.c_str(), log_level);
   }

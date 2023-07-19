@@ -34,7 +34,7 @@ namespace fs = ghc::filesystem;
 
 void AssfontsBuildDB(const char* fonts_path, const char* db_path,
                      const AssfontsLogCallback cb,
-                     const unsigned int log_level) {
+                     const enum ASSFONTS_LOG_LEVEL log_level) {
   auto logger = std::make_shared<ass::Logger>(ass::Logger(cb, log_level));
 
   if (*fonts_path == '\0') {
@@ -64,7 +64,8 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
                  const char* db_path, const unsigned int brightness,
                  const unsigned int is_subset_only,
                  const unsigned int is_embed_only, const unsigned int is_rename,
-                 const AssfontsLogCallback cb, const unsigned int log_level) {
+                 const AssfontsLogCallback cb,
+                 const enum ASSFONTS_LOG_LEVEL log_level) {
   auto logger = std::make_shared<ass::Logger>(ass::Logger(cb, log_level));
 
   if (num_paths == 0) {

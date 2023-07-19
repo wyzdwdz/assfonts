@@ -1,0 +1,129 @@
+#pragma once
+
+#include <QBoxLayout>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMainWindow>
+#include <QMutex>
+#include <QPushButton>
+#include <QTextEdit>
+#include <QThread>
+
+#include "check_window.h"
+#include "log_highlighter.h"
+#include "task_runner.h"
+
+class MainWindow : public QMainWindow {
+  Q_OBJECT
+
+ public:
+  MainWindow(QWidget* parent = nullptr) : QMainWindow(parent) {
+    setWindowTitle(tr("assfonts"));
+    setWindowIcon(QIcon(":/icon.png"));
+    resize(700, 700);
+
+    InitMenu();
+    InitMainWindowLayout();
+    InitToolTips();
+    InitWorker();
+    InitAllConnects();
+  }
+
+  ~MainWindow() {
+    thread_.quit();
+    thread_.wait();
+  }
+
+ signals:
+  void OnSendBuild(QString fonts_path, QString db_path);
+  void OnSendStart(QString inputs_path, QString output_path, QString fonts_path,
+                   QString db_path, unsigned int brightness,
+                   bool is_subset_only, bool is_embed_only, bool is_rename);
+
+ private:
+  struct LogItem {
+    ASSFONTS_LOG_LEVEL level;
+    QString text;
+  };
+
+  QMenu* log_menu_;
+  QMenu* info_menu_;
+
+  QAction* clear_action_;
+  QAction* space_action_;
+  QAction* check_action_;
+
+  QMenu* min_level_menu_;
+  QAction* min_info_action_;
+  QAction* min_warn_action_;
+  QAction* min_error_action_;
+
+  QLabel* input_label_;
+  QLabel* output_label_;
+  QLabel* font_label_;
+  QLabel* database_label_;
+
+  QLineEdit* input_line_;
+  QLineEdit* output_line_;
+  QLineEdit* font_line_;
+  QLineEdit* database_line_;
+
+  QPushButton* input_button_;
+  QPushButton* output_button_;
+  QPushButton* font_button_;
+  QPushButton* database_button_;
+
+  QComboBox* hdr_combo_;
+  QCheckBox* subset_checkbox_;
+  QCheckBox* embed_checkbox_;
+  QCheckBox* rename_checkbox_;
+
+  QPushButton* build_button_;
+  QPushButton* start_button_;
+
+  QTextEdit* log_text_;
+  LogHighlighter* log_highlighter_;
+  QVector<LogItem> log_buffer_;
+
+  QThread thread_;
+  TaskRunner* worker_;
+
+  CheckWindow* check_window_ = nullptr;
+
+  void InitMenu();
+  void InitMainWindowLayout();
+
+  void AddInputLayout(QVBoxLayout* layout);
+  void AddOutputLayout(QVBoxLayout* layout);
+  void AddFontLayout(QVBoxLayout* layout);
+  void AddDatabaseLayout(QVBoxLayout* layout);
+  void AddButtonsLayout(QVBoxLayout* layout);
+  void AddLogLayout(QVBoxLayout* layout);
+
+  void InitToolTips();
+
+  void InitAllConnects();
+  void InitWorker();
+
+  void OnInputButtonReleased();
+  void OnOutputButtonReleased();
+  void OnFontButtonReleased();
+  void OnDatabaseButtonReleased();
+
+  void OnBuildButtonReleased();
+  void OnStartButtonReleased();
+
+  void OnReceiveLog(QString msg, ASSFONTS_LOG_LEVEL log_level);
+
+  void OnClearActionTrigger();
+
+  void OnInfoActionTrigger(bool checked);
+  void OnWarnActionTrigger(bool checked);
+  void OnErrorActionTrigger(bool checked);
+
+  void OnCheckActionTrigger();
+
+  void RefreshLogText();
+};
