@@ -88,7 +88,7 @@ class LibpqConan(ConanFile):
             env = Environment()
             env.define("CONFIG", config)
             
-            if self.settings.os = "aarch64":
+            if self.settings.arch == "armv8":
 				env.define("PLATFORM", "ARM")
             
             env.vars(self).save_script("conanbuild_msvc")
