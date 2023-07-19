@@ -21,7 +21,6 @@ done
 
 conan profile detect -vquiet
 conan export --version 7.3.0 -nr 3rdparty/harfbuzz_expt
-conan export --version 5.15.9 -nr 3rdparty/qt_harfbuzz_expt
 
 if (( $EUID != 0 ))
 then        
@@ -30,8 +29,9 @@ else
     conan install . -b missing -s build_type=${BUILD_TYPE} -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=False
 fi
 
-cd build
-source conanbuild.sh
-cmake .. --preset conan-${BUILD_TYPE,,}
+source ./build/generators/conanbuild.sh
+cmake --preset conan-${BUILD_TYPE,,}
 cmake --build --preset conan-${BUILD_TYPE,,} -j
-cmake --install ${BUILD_TYPE} --prefix ${INSTALL_PREFIX} --strip
+cd build
+cmake --install . --prefix ${INSTALL_PREFIX} --strip
+cd ..
