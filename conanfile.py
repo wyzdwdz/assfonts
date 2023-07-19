@@ -27,6 +27,7 @@ class Assfonts(ConanFile):
         self.requires("qt/5.15.9")
 
         self.requires("libpng/1.6.40", override=True)
+        self.requires("libmysqlclient/8.0.17", override=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/3.26.3")
