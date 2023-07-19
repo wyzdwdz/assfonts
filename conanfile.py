@@ -36,7 +36,10 @@ class Assfonts(ConanFile):
         self.options["*"].shared = False
         self.options["harfbuzz"].with_subset = True
         self.options["pcre2"].support_jit = True
+
         self.options["qt"].with_harfbuzz = True
+        self.options["qt"].with_pq = False
+        self.options["qt"].with_mysql = False
 
         if self.settings.os == "Windows":
             self.options["libcurl"].with_ssl = "schannel"
