@@ -164,6 +164,7 @@ jobs:
         run: |
           conan export .github/recipes/libffi_fix -nr --version 3.4.4
           conan export .github/recipes/libiconv_fix -nr --version 1.17
+          conan export .github/recipes/libpq_fix -nr --version 1.17
 
       - name: aarch64 add tools to PATH
         if: ${{ matrix.arch == 'aarch64' }}
