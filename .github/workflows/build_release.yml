@@ -47,7 +47,7 @@ jobs:
             source ./build/generators/conanbuild.sh
             cmake --preset conan-release
             cmake --build --preset conan-release -j
-            cmake --install build --prefix install --strip
+            cmake --install build/Release --prefix install --strip
             linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts --custom-apprun=./src/resources/AppRun
             appimagetool ./AppDir assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage
 
@@ -74,7 +74,7 @@ jobs:
             source ./buid/generators/conanbuild.sh
             cmake --preset conan-release
             cmake --build --preset conan-release -j
-            cmake --install build --prefix install --strip
+            cmake --install build/Release --prefix install --strip
 
       - name: aarch64 build appimage
         if: ${{ matrix.arch == 'aarch64' }}

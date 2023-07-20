@@ -32,4 +32,4 @@ fi
 source ./build/generators/conanbuild.sh
 cmake --preset conan-${BUILD_TYPE,,}
 cmake --build --preset conan-${BUILD_TYPE,,} -j
-cmake --install build --prefix ${INSTALL_PREFIX} --strip
+cmake --install build/${BUILD_TYPE} --prefix ${INSTALL_PREFIX} --strip
