@@ -101,9 +101,11 @@ void MainWindow::AddInputLayout(QVBoxLayout* layout) {
   QHBoxLayout* hlayout = new QHBoxLayout;
 
   input_line_ = new QLineEdit;
+  input_line_->setMinimumHeight(25);
   hlayout->addWidget(input_line_);
 
-  input_button_ = new QPushButton(tr("..."));
+  input_button_ = new QPushButton("...");
+  input_button_->setFixedSize(25, 25);
   hlayout->addWidget(input_button_);
 
   vlayout->addLayout(hlayout);
@@ -127,9 +129,11 @@ void MainWindow::AddOutputLayout(QVBoxLayout* layout) {
   QHBoxLayout* hlayout = new QHBoxLayout;
 
   output_line_ = new QLineEdit;
+  output_line_->setMinimumHeight(25);
   hlayout->addWidget(output_line_);
 
-  output_button_ = new QPushButton(tr("..."));
+  output_button_ = new QPushButton("...");
+  output_button_->setFixedSize(25, 25);
   hlayout->addWidget(output_button_);
 
   vlayout->addLayout(hlayout);
@@ -153,9 +157,11 @@ void MainWindow::AddFontLayout(QVBoxLayout* layout) {
   QHBoxLayout* hlayout = new QHBoxLayout;
 
   font_line_ = new QLineEdit;
+  font_line_->setMinimumHeight(25);
   hlayout->addWidget(font_line_);
 
-  font_button_ = new QPushButton(tr("..."));
+  font_button_ = new QPushButton("...");
+  font_button_->setFixedSize(25, 25);
   hlayout->addWidget(font_button_);
 
   vlayout->addLayout(hlayout);
@@ -179,6 +185,7 @@ void MainWindow::AddDatabaseLayout(QVBoxLayout* layout) {
   QHBoxLayout* hlayout = new QHBoxLayout;
 
   database_line_ = new QLineEdit;
+  database_line_->setMinimumHeight(25);
 
   QString appdata_path =
       QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).at(0);
@@ -192,7 +199,8 @@ void MainWindow::AddDatabaseLayout(QVBoxLayout* layout) {
 
   hlayout->addWidget(database_line_);
 
-  database_button_ = new QPushButton(tr("..."));
+  database_button_ = new QPushButton("...");
+  database_button_->setFixedSize(25, 25);
   hlayout->addWidget(database_button_);
 
   vlayout->addLayout(hlayout);
@@ -211,6 +219,7 @@ void MainWindow::AddButtonsLayout(QVBoxLayout* layout) {
   hdr_combo_->addItem(tr("No HDR"));
   hdr_combo_->addItem(tr("HDR Low"));
   hdr_combo_->addItem(tr("HDR High"));
+  hdr_combo_->setMinimumSize(90, 25);
   hlayout->addWidget(hdr_combo_, 0, Qt::AlignVCenter);
   hlayout->addSpacing(16);
 
@@ -228,7 +237,7 @@ void MainWindow::AddButtonsLayout(QVBoxLayout* layout) {
   hlayout->addStretch();
 
   build_button_ = new QPushButton(tr("Build Database"));
-  build_button_->setFixedSize(QSize(110, 50));
+  build_button_->setMinimumSize(110, 50);
   hlayout->addWidget(build_button_, 0, Qt::AlignVCenter);
   hlayout->addSpacing(10);
 
@@ -238,7 +247,7 @@ void MainWindow::AddButtonsLayout(QVBoxLayout* layout) {
   font.setWeight(QFont::Bold);
   start_button_->setFont(font);
 
-  start_button_->setFixedSize(QSize(80, 50));
+  start_button_->setMinimumSize(80, 50);
   hlayout->addWidget(start_button_, 0, Qt::AlignVCenter);
 
   hlayout->addSpacing(8);
@@ -501,5 +510,24 @@ void MainWindow::RefreshLogText() {
     }
 
     log_text_->append(item.text);
+  }
+}
+
+void MainWindow::ResizeHelper(QWidget* widget, const int width,
+                              const int height, const bool is_fixed) {
+  QSize hint_size = widget->sizeHint();
+
+  if (width > hint_size.width()) {
+    hint_size.setWidth(width);
+  }
+
+  if (height > hint_size.height()) {
+    hint_size.setHeight(height);
+  }
+
+  if (is_fixed) {
+    widget->setFixedSize(hint_size);
+  } else {
+    widget->setMinimumSize(hint_size);
   }
 }

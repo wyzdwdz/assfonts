@@ -41,13 +41,14 @@ class MainWindow : public QMainWindow {
   MainWindow(QWidget* parent = nullptr) : QMainWindow(parent) {
     setWindowTitle(tr("assfonts"));
     setWindowIcon(QIcon(":/icon.png"));
-    resize(700, 700);
 
     InitMenu();
     InitMainWindowLayout();
     InitToolTips();
     InitWorker();
     InitAllConnects();
+
+    ResizeHelper(this, 700, 700);
   }
 
   ~MainWindow() {
@@ -145,4 +146,7 @@ class MainWindow : public QMainWindow {
   void OnCheckActionTrigger();
 
   void RefreshLogText();
+
+  void ResizeHelper(QWidget* widget, const int width, const int height,
+                    const bool is_fixed = false);
 };

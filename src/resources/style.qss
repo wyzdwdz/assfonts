@@ -3,21 +3,7 @@
 }
 
 QLineEdit {
-	height: 24px;
-	min-height: 24px;
 	font-size: 13px;
-}
-
-QPushButton {
-    width: 26px;
-	max-width: 26px;
-	height: 25px;
-	max-height: 25px;
-}
-
-QComboBox {
-	width: 90px;
-	height: 25px;
 }
 
 QCheckBox::indicator {

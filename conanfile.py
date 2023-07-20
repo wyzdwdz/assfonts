@@ -42,7 +42,7 @@ class Assfonts(ConanFile):
         self.options["qt"].with_mysql = False
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, "Multi-Config")
 
     def generate(self):
         dp = CMakeDeps(self)

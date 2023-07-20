@@ -1,0 +1,10 @@
+#!/bin/bash
+
+APPDIR=$(dirname "$(readlink -f "$0")")
+
+export PATH="$APPDIR/usr/bin:$PATH"
+export LD_LIBRARY_PATH="$APPDIR/usr/lib:$LD_LIBRARY_PATH"
+export QT_QPA_PLATFORM=xcb
+export FONTCONFIG_PATH=/etc/fonts
+
+exec "$APPDIR/usr/bin/assfonts" "$@"

@@ -31,9 +31,10 @@ class CheckWindow : public QDialog {
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     setWindowTitle(tr("Check update"));
     setWindowIcon(QIcon(":/icon.png"));
-    setFixedSize(QSize(380, 140));
 
     InitLayout();
+
+    setFixedSize(sizeHint().grownBy(QMargins(20, 10, 20, 10)));
   }
 
  private:

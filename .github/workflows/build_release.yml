@@ -48,7 +48,7 @@ jobs:
             cmake --preset conan-release
             cmake --build --preset conan-release -j
             cmake --install build --prefix install --strip
-            linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts
+            linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts --custom-apprun=./src/resources/AppRun
             appimagetool ./AppDir assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage
 
       - name: aarch64 build binary
@@ -86,7 +86,7 @@ jobs:
           run: |
             cd /var/www
             apt update && apt -y install squashfs-tools
-            linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts
+            linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts --custom-apprun=./src/resources/AppRun
             ln -sf assfonts.png ./AppDir/.DirIcon
             mksquashfs ./AppDir AppDir.squashfs -root-owned -noappend
             wget https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-aarch64

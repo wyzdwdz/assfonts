@@ -76,7 +76,7 @@ bool CheckWindow::GetLatestVersion(QString& latest_version) {
   QNetworkReply* reply = manager.get(QNetworkRequest(QUrl(VERSION_URL)));
 
   QEventLoop loop;
-  connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+  QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
   loop.exec();
 
   if (reply->error() == QNetworkReply::NoError) {
