@@ -41,15 +41,13 @@ jobs:
             export CONAN_HOME=/var/www/.conan2
             apt update && apt -y install lld-10
             update-alternatives --install /usr/bin/ld ld /usr/lib/llvm-10/bin/lld 10
-            conan export --version 7.3.0 -nr 3rdparty/harfbuzz_expt
+            conan export --version 8.0.1 -nr 3rdparty/harfbuzz_expt
             conan config install .github/conan2-linux
             conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
             source ./build/generators/conanbuild.sh
             cmake --preset conan-release
             cmake --build --preset conan-release -j
-            cd build
-            cmake --install . --prefix ../install --strip
-            cd ..
+            cmake --install build --prefix install --strip
             linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts
             appimagetool ./AppDir assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage
 
@@ -70,15 +68,13 @@ jobs:
             dpkg --add-architecture arm64
             apt update
             export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
-            conan export --version 7.3.0 -nr 3rdparty/harfbuzz_expt
+            conan export --version 8.0.1 -nr 3rdparty/harfbuzz_expt
             conan config install .github/conan2-linux
             conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
             source ./buid/generators/conanbuild.sh
             cmake --preset conan-release
             cmake --build --preset conan-release -j
-            cd build
-            cmake --install . --prefix ../install --strip
-            cd ..
+            cmake --install build --prefix install --strip
 
       - name: aarch64 build appimage
         if: ${{ matrix.arch == 'aarch64' }}
@@ -171,15 +167,13 @@ jobs:
 
       - name: build executable binary
         run: |
-          conan export --version 7.3.0 -nr 3rdparty/harfbuzz_expt
+          conan export --version 8.0.1 -nr 3rdparty/harfbuzz_expt
           conan config install .github/conan2-windows
           conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
           ./build/generators/conanbuild.bat
           cmake --preset conan-default
           cmake --build --preset conan-release -j
-          cd build
-          cmake --install . --prefix ../install
-          cd ..
+          cmake --install build --prefix install
 
       - name: copy and rename
         run: cp -f ./install/bin/assfonts.exe assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
@@ -241,7 +235,7 @@ jobs:
 
       - name: build executable binary
         run: |
-          conan export --version 7.3.0 -nr 3rdparty/harfbuzz_expt
+          conan export --version 8.0.1 -nr 3rdparty/harfbuzz_expt
           conan config install .github/conan2-macos
           conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
           source ./build/generators/conanbuild.sh

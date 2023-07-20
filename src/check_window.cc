@@ -28,9 +28,9 @@
 
 #include <assfonts.h>
 
-constexpr char* VERSION_URL =
+constexpr char VERSION_URL[] =
     "https://raw.githubusercontent.com/wyzdwdz/assfonts/qt/VERSION";
-constexpr char* DOWNLOAD_URL =
+constexpr char DOWNLOAD_URL[] =
     "https://github.com/wyzdwdz/assfonts/releases/latest";
 
 void CheckWindow::InitLayout() {

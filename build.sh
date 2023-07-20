@@ -20,7 +20,7 @@ do
 done
 
 conan profile detect -vquiet
-conan export --version 7.3.0 -nr 3rdparty/harfbuzz_expt
+conan export --version 8.0.1 -nr 3rdparty/harfbuzz_expt
 
 if (( $EUID != 0 ))
 then        
@@ -32,6 +32,4 @@ fi
 source ./build/generators/conanbuild.sh
 cmake --preset conan-${BUILD_TYPE,,}
 cmake --build --preset conan-${BUILD_TYPE,,} -j
-cd build
-cmake --install . --prefix ${INSTALL_PREFIX} --strip
-cd ..
+cmake --install build --prefix ${INSTALL_PREFIX} --strip
