@@ -163,7 +163,7 @@ jobs:
 
       - name: aarch64 add tools to PATH
         if: ${{ matrix.arch == 'aarch64' }}
-        run: Add-Content -Path $env:GITHUB_PATH -Value (Get-Location -PSProvider FileSystem).Path + "\.github\tools"
+        run: Add-Content -Path $env:GITHUB_PATH -Value ((Get-Location -PSProvider FileSystem).Path + "\.github\tools")
 
       - name: build executable binary
         run: |
