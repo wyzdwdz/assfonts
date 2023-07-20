@@ -54,7 +54,7 @@ void CheckWindow::AddLabels(QGridLayout* layout) {
   layout->addWidget(current_version_label_num, 0, 1);
 
   QString latest_version;
-  bool is_success = GetLatestVersion(latest_version);
+  GetLatestVersion(latest_version);
 
   QLabel* latest_version_label = new QLabel(tr("Latest version: "));
   QLabel* latest_version_label_num = new QLabel(latest_version);

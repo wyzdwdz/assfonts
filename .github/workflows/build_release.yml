@@ -113,7 +113,7 @@ jobs:
     runs-on: windows-2022
     defaults:
       run:
-        shell: bash
+        shell: powershell
     strategy:
       matrix:
         include:
@@ -153,30 +153,30 @@ jobs:
           version: 2.0.4
 
       - name: set CONAN_HOME
-        run: echo "CONAN_HOME=${{ github.workspace }}/.conan2" >> "$GITHUB_ENV"
+        run: Add-Content -Path $env:GITHUB_ENV -Value "CONAN_HOME=${{ github.workspace }}\.conan2"
 
       - name: aarch64 fix conan recipes
         if: ${{ matrix.arch == 'aarch64' }}
         run: |
-          conan export .github/recipes/libffi_fix -nr --version 3.4.4
-          conan export .github/recipes/libiconv_fix -nr --version 1.17
+          conan export .github\recipes\libffi_fix -nr --version 3.4.4
+          conan export .github\recipes\libiconv_fix -nr --version 1.17
 
       - name: aarch64 add tools to PATH
         if: ${{ matrix.arch == 'aarch64' }}
-        run: echo $(realpath .github/tools) >> $GITHUB_PATH
+        run: Add-Content -Path $env:GITHUB_PATH -Value (Get-Location -PSProvider FileSystem).Path + "\.github\tools"
 
       - name: build executable binary
         run: |
-          conan export --version 8.0.1 -nr 3rdparty/harfbuzz_expt
-          conan config install .github/conan2-windows
+          conan export --version 8.0.1 -nr 3rdparty\harfbuzz_expt
+          conan config install .github\conan2-windows
           conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
-          ./build/generators/conanbuild.bat
+          .\build\generators\conanbuild.bat
           cmake --preset conan-default
           cmake --build --preset conan-release -j
           cmake --install build --prefix install
 
       - name: copy and rename
-        run: cp -f ./install/bin/assfonts.exe assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
+        run: Copy-Item -Path ".\install\bin\assfonts.exe" -Destination "assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe" -Force
 
       - name: x86_64 upx compress
         if: ${{ matrix.arch == 'x86_64' }}

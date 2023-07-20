@@ -27,6 +27,7 @@ class Assfonts(ConanFile):
         self.requires("qt/5.15.10")
 
         self.requires("libpng/1.6.40", override=True)
+        self.requires("openssl/1.1.1u", override=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/3.26.3")
@@ -39,8 +40,6 @@ class Assfonts(ConanFile):
         self.options["qt"].with_harfbuzz = True
         self.options["qt"].with_pq = False
         self.options["qt"].with_mysql = False
-        if self.settings.os == "Windows":
-            self.options["qt"].openssl = False
 
     def layout(self):
         cmake_layout(self)

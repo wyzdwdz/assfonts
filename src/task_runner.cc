@@ -57,7 +57,7 @@ void TaskRunner::OnStartRun(const QString inputs_path,
   auto inputs_char_list =
       std::unique_ptr<char*[]>(new char*[inputs_list.size()]);
 
-  for (size_t idx = 0; idx < inputs_list.size(); ++idx) {
+  for (int idx = 0; idx < inputs_list.size(); ++idx) {
     inputs_char_list[idx] = const_cast<char*>(inputs_byte.at(idx).constData());
   }
 
