@@ -574,7 +574,6 @@ class QtConan(ConanFile):
         ms.generate()
         vbe = VirtualBuildEnv(self)
         vbe.generate()
-        print(vbe.vars().items())
         if not cross_building(self):
             vre = VirtualRunEnv(self)
             vre.generate(scope="build")
