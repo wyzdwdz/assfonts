@@ -2,10 +2,6 @@
 	font-size: 14px;
 }
 
-QLineEdit {
-	font-size: 13px;
-}
-
 QCheckBox::indicator {
 	width: 18px;
 	height: 18px;
