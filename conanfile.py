@@ -15,29 +15,29 @@ class Assfonts(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 
     def requirements(self):
-        self.requires("harfbuzz/8.0.1")
-        self.requires("freetype/2.13.0")
-        self.requires("nlohmann_json/3.11.2")
-        self.requires("libiconv/1.17")
-        self.requires("fmt/10.0.0")
-        self.requires("cli11/2.3.2")
-        self.requires("pcre2/10.42")
-        self.requires("threadpool/20140926")
-        self.requires("ghc-filesystem/1.5.14")
+        # self.requires("harfbuzz/8.0.1")
+        # self.requires("freetype/2.13.0")
+        # self.requires("nlohmann_json/3.11.2")
+        # self.requires("libiconv/1.17")
+        # self.requires("fmt/10.0.0")
+        # self.requires("cli11/2.3.2")
+        # self.requires("pcre2/10.42")
+        # self.requires("threadpool/20140926")
+        # self.requires("ghc-filesystem/1.5.14")
         self.requires("qt/5.15.10")
 
-        self.requires("libpng/1.6.40", override=True)
-        self.requires("openssl/1.1.1u", override=True)
+        # self.requires("libpng/1.6.40", override=True)
+        # self.requires("openssl/1.1.1u", override=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/3.26.3")
 
     def configure(self):
         self.options["*"].shared = False
-        self.options["harfbuzz"].with_subset = True
-        self.options["pcre2"].support_jit = True
+        # self.options["harfbuzz"].with_subset = True
+        # self.options["pcre2"].support_jit = True
 
-        self.options["qt"].with_harfbuzz = True
+        # self.options["qt"].with_harfbuzz = True
         self.options["qt"].with_pq = False
         self.options["qt"].with_mysql = False
 
