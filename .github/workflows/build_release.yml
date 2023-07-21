@@ -44,7 +44,7 @@ jobs:
             conan export --version 8.0.1 -nr 3rdparty/harfbuzz_expt
             conan config install .github/conan2-linux
             conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
-            source ./build/generators/conanbuild.sh
+            source ./build/Release/generators/conanbuild.sh
             cmake --preset conan-release
             cmake --build --preset conan-release -j
             cmake --install build/Release --prefix install --strip
@@ -71,7 +71,7 @@ jobs:
             conan export --version 8.0.1 -nr 3rdparty/harfbuzz_expt
             conan config install .github/conan2-linux
             conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
-            source ./buid/generators/conanbuild.sh
+            source ./buid/Release/generators/conanbuild.sh
             cmake --preset conan-release
             cmake --build --preset conan-release -j
             cmake --install build/Release --prefix install --strip
@@ -131,17 +131,17 @@ jobs:
           restore-keys: |
             conan2-windows-${{ matrix.arch }}
 
-      - name: x86_64 install msvc
-        if: ${{ matrix.arch == 'x86_64' }}
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
+    #  - name: x86_64 install msvc
+       # if: ${{ matrix.arch == 'x86_64' }}
+      #  uses: ilammy/msvc-dev-cmd@v1
+     #   with:
+       #   arch: x64
 
-      - name: arm64 install msvc
-        if: ${{ matrix.arch == 'aarch64' }}
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: amd64_arm64
+     # - name: arm64 install msvc
+     #   if: ${{ matrix.arch == 'aarch64' }}
+    #    uses: ilammy/msvc-dev-cmd@v1
+      #  with:
+       #   arch: amd64_arm64
 
       - name: install cmake
         uses: lukka/get-cmake@latest
