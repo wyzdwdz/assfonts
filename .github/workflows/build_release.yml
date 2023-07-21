@@ -71,7 +71,7 @@ jobs:
             conan export --version 8.0.1 -nr 3rdparty/harfbuzz_expt
             conan config install .github/conan2-linux
             conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
-            source ./buid/Release/generators/conanbuild.sh
+            source ./build/Release/generators/conanbuild.sh
             cmake --preset conan-release
             cmake --build --preset conan-release -j
             cmake --install build/Release --prefix install --strip
