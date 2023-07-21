@@ -12,12 +12,12 @@ jobs:
       strategy:
         matrix:
           include:
-          - { suffix: linux-x86_64 }
-          - { suffix: linux-aarch64 }
-          - { suffix: windows-x86_64 }
-          - { suffix: windows-aarch64 }
-          - { suffix: macos-x86_64 }
-          - { suffix: macos-aarch64 }
+          - { suffix: linux-x86_64- }
+          - { suffix: linux-aarch64- }
+          - { suffix: windows-x86_64- }
+          - { suffix: windows-aarch64- }
+          - { suffix: macos-x86_64- }
+          - { suffix: macos-aarch64- }
       steps:
         - name: checkout
           uses: actions/checkout@v3
