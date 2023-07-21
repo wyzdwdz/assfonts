@@ -29,7 +29,7 @@
 #include <assfonts.h>
 
 constexpr char VERSION_URL[] =
-    "https://raw.githubusercontent.com/wyzdwdz/assfonts/qt/VERSION";
+    "https://raw.githubusercontent.com/wyzdwdz/assfonts/HEAD/VERSION";
 constexpr char DOWNLOAD_URL[] =
     "https://github.com/wyzdwdz/assfonts/releases/latest";
 
