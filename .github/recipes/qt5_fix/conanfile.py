@@ -857,7 +857,10 @@ class QtConan(ConanFile):
         if self.settings.os == "Macos":
             args += ["-no-framework"]
             if self.settings.arch == "armv8":
-                args.append('QMAKE_APPLE_DEVICE_ARCHS="arm64"')
+                if cross_building(self) and self.settings_build.arch == "x86_64":
+                    args.append('QMAKE_APPLE_DEVICE_ARCHS="arm64 x86_64"')
+                else:
+                    args.append('QMAKE_APPLE_DEVICE_ARCHS="arm64"')
         elif self.settings.os == "Android":
             args += [f"-android-ndk-platform android-{self.settings.os.api_level}"]
             args += [f"-android-abis {android_abi(self)}"]

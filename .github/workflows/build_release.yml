@@ -87,7 +87,7 @@ jobs:
             cd /var/www
             conan export --version 8.0.1 -nr 3rdparty/harfbuzz_expt
             conan config install .github/conan2-linux
-            conan install . -pr ${{ matrix.profile }}
+            conan install . -pr:h ${{ matrix.profile }} -pr:b ${{ matrix.profile }}
             apt update && apt -y install squashfs-tools
             linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts --custom-apprun=./src/resources/AppRun
             ln -sf assfonts.png ./AppDir/.DirIcon
@@ -191,77 +191,76 @@ jobs:
           path: .conan2/p
           key: conan2-windows-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
 
-  # build-macos:
-  #   runs-on: macos-12
-  #   defaults:
-  #     run:
-  #       shell: bash
-  #   strategy:
-  #     matrix:
-  #       include:
-  #         - { arch: x86_64, profile: x86_64 }
-  #         - { arch: aarch64, profile: armv8 }
-  #   steps:
-  #     - name: checkout
-  #       uses: actions/checkout@v3
+  build-macos:
+    runs-on: macos-12
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      matrix:
+        include:
+          - { arch: x86_64, profile: x86_64 }
+          - { arch: aarch64, profile: armv8 }
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
 
-  #     - name: restore conan cache
-  #       uses: actions/cache/restore@v3
-  #       with:
-  #           path: .conan2/p
-  #           key: conan2-macos-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
-  #           restore-keys: |
-  #             conan2-macos-${{ matrix.arch }}-
+      - name: restore conan cache
+        uses: actions/cache/restore@v3
+        with:
+            path: .conan2/p
+            key: conan2-macos-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
+            restore-keys: |
+              conan2-macos-${{ matrix.arch }}-
 
-  #     - name: install cmake
-  #       uses: lukka/get-cmake@latest
+      - name: install cmake
+        uses: lukka/get-cmake@latest
 
-  #     - name: install Conan
-  #       id: conan
-  #       uses: turtlebrowser/get-conan@main
-  #       with:
-  #         version: 2.0.4
+      - name: install Conan
+        id: conan
+        uses: turtlebrowser/get-conan@main
+        with:
+          version: 2.0.4
 
-  #     - name: set CONAN_HOME
-  #       run: echo "CONAN_HOME=${{ github.workspace }}/.conan2" >> "$GITHUB_ENV"
+      - name: set CONAN_HOME
+        run: echo "CONAN_HOME=${{ github.workspace }}/.conan2" >> "$GITHUB_ENV"
 
-  #     - name: aarch64 fix conan recipes
-  #       if: ${{ matrix.arch == 'aarch64' }}
-  #       run: |
-  #         conan export .github/recipes/qt5_fix -nr --version 5.15.10
+      - name: aarch64 fix conan recipes
+        if: ${{ matrix.arch == 'aarch64' }}
+        run: |
+          conan export .github/recipes/qt5_fix -nr --version 5.15.10
 
-  #     - name: build executable binary
-  #       run: |
-  #         conan export --version 8.0.1 -nr 3rdparty/harfbuzz_expt
-  #         conan config install .github/conan2-macos
-  #         conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
-  #         source ./build/Release/generators/conanbuild.sh
-  #         cmake --preset conan-release
-  #         cmake --build --preset conan-release --target package -j
+      - name: build executable binary
+        run: |
+          conan export --version 8.0.1 -nr 3rdparty/harfbuzz_expt
+          conan config install .github/conan2-macos
+          conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
+          source ./build/Release/generators/conanbuild.sh
+          cmake --preset conan-release
+          cmake --build --preset conan-release --target package -j
 
-  #     - name: rename
-  #       run: mv -f assfonts.dmg assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
+      - name: rename
+        run: mv -f assfonts.dmg assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
 
-  #     - name: upload dmg
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: release-dmg-${{ matrix.arch }}
-  #         path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
-  #         if-no-files-found: error
+      - name: upload dmg
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-dmg-${{ matrix.arch }}
+          path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
+          if-no-files-found: error
 
-  #     - name: save conan cache
-  #       uses: actions/cache/save@v3
-  #       with:
-  #           path: .conan2/p
-  #           key: conan2-macos-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
+      - name: save conan cache
+        uses: actions/cache/save@v3
+        with:
+            path: .conan2/p
+            key: conan2-macos-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
 
   release:
     runs-on: ubuntu-22.04
     defaults:
       run:
         shell: bash
-    needs: [ build-linux, build-windows ]
-    # needs: [ build-linux, build-windows, build-macos ]
+    needs: [ build-linux, build-windows, build-macos ]
     steps:
       - name: download AppImages x86_64
         uses: actions/download-artifact@v3
@@ -283,15 +282,15 @@ jobs:
         with:
           name: release-exe-aarch64
 
-      # - name: download dmg x86_64
-      #   uses: actions/download-artifact@v3
-      #   with:
-      #     name: release-dmg-x86_64
+      - name: download dmg x86_64
+        uses: actions/download-artifact@v3
+        with:
+          name: release-dmg-x86_64
   
-      # - name: download dmg aarch64
-      #   uses: actions/download-artifact@v3
-      #   with:
-      #     name: release-dmg-aarch64
+      - name: download dmg aarch64
+        uses: actions/download-artifact@v3
+        with:
+          name: release-dmg-aarch64
 
       - name: calculate hash
         run: |
@@ -299,8 +298,8 @@ jobs:
           sha256sum assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage > assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage.sha256sum
           sha256sum assfonts-${{ github.ref_name }}-x86_64-Windows.exe > assfonts-${{ github.ref_name }}-x86_64-Windows.exe.sha256sum
           sha256sum assfonts-${{ github.ref_name }}-aarch64-Windows.exe > assfonts-${{ github.ref_name }}-aarch64-Windows.exe.sha256sum
-          # sha256sum assfonts-${{ github.ref_name }}-x86_64-macOS.dmg > assfonts-${{ github.ref_name }}-x86_64-macOS.dmg.sha256sum
-          # sha256sum assfonts-${{ github.ref_name }}-aarch64-macOS.dmg > assfonts-${{ github.ref_name }}-aarch64-macOS.dmg.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-x86_64-macOS.dmg > assfonts-${{ github.ref_name }}-x86_64-macOS.dmg.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-aarch64-macOS.dmg > assfonts-${{ github.ref_name }}-aarch64-macOS.dmg.sha256sum
 
       - name: edit release
         uses: svenstaro/upload-release-action@v2
