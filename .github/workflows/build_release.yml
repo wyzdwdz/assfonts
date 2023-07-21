@@ -244,7 +244,7 @@ jobs:
   #         conan export --version 8.0.1 -nr 3rdparty/harfbuzz_expt
   #         conan config install .github/conan2-macos
   #         conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
-  #         source ./build/generators/conanbuild.sh
+  #         source ./build/Release/generators/conanbuild.sh
   #         cmake --preset conan-release
   #         cmake --build --preset conan-release --target package -j
 
