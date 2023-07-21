@@ -85,7 +85,7 @@ jobs:
           shell: bash
           run: |
             cd /var/www
-            apt update && apt -y install squashfs-tools
+            apt update && apt -y install squashfs-tools libxcb-xinerama0
             linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts --custom-apprun=./src/resources/AppRun
             ln -sf assfonts.png ./AppDir/.DirIcon
             mksquashfs ./AppDir AppDir.squashfs -root-owned -noappend
