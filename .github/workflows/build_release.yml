@@ -101,7 +101,7 @@ jobs:
           if-no-files-found: error
 
       - name: set read permission to conan cache
-        run: sudo chmod -R a+r .conan2/p
+        run: sudo chmod -R 777 .conan2/p
 
       - name: save conan cache
         uses: actions/cache/save@v3
