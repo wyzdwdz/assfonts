@@ -19,11 +19,14 @@
 
 #include "main_window.h"
 
+#include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMenuBar>
 #include <QMetaType>
 #include <QStandardPaths>
+
+constexpr char APP_NAME[] = "assfonts";
 
 void MainWindow::InitMenu() {
   QMenuBar* menu_bar = new QMenuBar;
@@ -187,15 +190,16 @@ void MainWindow::AddDatabaseLayout(QVBoxLayout* layout) {
   database_line_ = new QLineEdit;
   database_line_->setMinimumHeight(25);
 
-  QString appdata_path =
-      QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).at(0);
+  QString generic_data_path =
+      QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)
+          .at(0);
 
-  QDir qdir;
-  if (!qdir.exists(appdata_path)) {
-    qdir.mkdir(appdata_path);
+  QDir appdata_dir(generic_data_path + QDir::separator() + APP_NAME);
+  if (!appdata_dir.exists()) {
+    appdata_dir.mkdir();
   }
 
-  database_line_->setText(appdata_path);
+  database_line_->setText(appdata_dir.cleanPath());
 
   hlayout->addWidget(database_line_);
 
@@ -348,9 +352,18 @@ void MainWindow::InitWorker() {
 }
 
 void MainWindow::OnInputButtonReleased() {
-  QStringList path_list =
-      QFileDialog::getOpenFileNames(this, tr("Choose Files - Input ASS Files"),
-                                    "", tr("Sub Station Alpha (*.ass *.ssa)"));
+  QString start_path;
+  QFileInfo file(input_label_.text().split(";").at(0).trimmed());
+  QDir parent_dir = file.dir();
+  if (parent_dir.exists()) {
+    start_path = parent_dir.cleanPath();
+  } else {
+    start_path = QDir::homePath();
+  }
+
+  QStringList path_list = QFileDialog::getOpenFileNames(
+      this, tr("Choose Files - Input ASS Files"), start_path,
+      tr("Sub Station Alpha (*.ass *.ssa)"));
 
   if (path_list.empty()) {
     return;
@@ -363,37 +376,62 @@ void MainWindow::OnInputButtonReleased() {
       input_line_->insert("; ");
     }
 
-    input_line_->insert(*it);
+    input_line_->insert(QDir::toNativeSeparators(*it));
   }
 
   QFileInfo file_info(path_list.at(0));
-  output_line_->setText(file_info.dir().absolutePath());
+  output_line_->setText(
+      QDir::toNativeSeparators(file_info.dir().absolutePath()));
 }
 
 void MainWindow::OnOutputButtonReleased() {
+  QString start_path;
+  QDir dir(output_label_.text().trimmed());
+  if (dir.exists()) {
+    start_path = dir.cleanPath();
+  } else {
+    start_path = QDir::homePath();
+  }
+
   QString path = QFileDialog::getExistingDirectory(
       this, tr("Choose Directory - Output directory"));
 
   if (!path.isEmpty()) {
-    output_line_->setText(path);
+    output_line_->setText(QDir::toNativeSeparators(path));
   }
 }
 
 void MainWindow::OnFontButtonReleased() {
+  QString start_path;
+  QDir dir(font_label_.text().trimmed());
+  if (dir.exists()) {
+    start_path = dir.cleanPath();
+  } else {
+    start_path = QDir::homePath();
+  }
+
   QString path = QFileDialog::getExistingDirectory(
       this, tr("Choose Directory - Font directory"));
 
   if (!path.isEmpty()) {
-    font_line_->setText(path);
+    font_line_->setText(QDir::toNativeSeparators(path));
   }
 }
 
 void MainWindow::OnDatabaseButtonReleased() {
+  QString start_path;
+  QDir dir(database_label_.text().trimmed());
+  if (dir.exists()) {
+    start_path = dir.cleanPath();
+  } else {
+    start_path = QDir::homePath();
+  }
+
   QString path = QFileDialog::getExistingDirectory(
       this, tr("Choose Directory - Database directory"));
 
   if (!path.isEmpty()) {
-    database_line_->setText(path);
+    database_line_->setText(QDir::toNativeSeparators(path));
   }
 }
 
