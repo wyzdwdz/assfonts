@@ -29,7 +29,7 @@ else
     conan install . -b missing -s build_type=${BUILD_TYPE} -c tools.system.package_manager:mode=install -c tools.system.package_manager:sudo=False
 fi
 
-source ./build/generators/conanbuild.sh
+source ./build/${BUILD_TYPE}/generators/conanbuild.sh
 cmake --preset conan-${BUILD_TYPE,,}
 cmake --build --preset conan-${BUILD_TYPE,,} -j
 cmake --install build/${BUILD_TYPE} --prefix ${INSTALL_PREFIX} --strip
