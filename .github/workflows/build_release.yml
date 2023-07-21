@@ -131,18 +131,6 @@ jobs:
           restore-keys: |
             conan2-windows-${{ matrix.arch }}
 
-    #  - name: x86_64 install msvc
-       # if: ${{ matrix.arch == 'x86_64' }}
-      #  uses: ilammy/msvc-dev-cmd@v1
-     #   with:
-       #   arch: x64
-
-     # - name: arm64 install msvc
-     #   if: ${{ matrix.arch == 'aarch64' }}
-    #    uses: ilammy/msvc-dev-cmd@v1
-      #  with:
-       #   arch: amd64_arm64
-
       - name: install cmake
         uses: lukka/get-cmake@latest
 
