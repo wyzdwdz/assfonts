@@ -2,8 +2,6 @@ name: Build Release
 run-name: Build Release by ${{ github.actor }}
 on: 
   release:
-    branches:
-        - qt5
     types: [ published ]
 jobs:
   build-linux:
