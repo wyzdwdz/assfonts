@@ -567,7 +567,7 @@ class QtConan(ConanFile):
     def generate(self):
         pc = PkgConfigDeps(self)
         pc.generate()
-        if cross_building(self) and self.settings.os == "Windows":
+        if cross_building(self) and self.settings.arch == "armv8" and self.settings.os == "Windows":
             ms = _VCVarsBuild(self)
         else:
             ms = VCVars(self)

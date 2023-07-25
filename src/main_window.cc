@@ -663,6 +663,6 @@ void MainWindow::ResizeHelper(QWidget* widget, const int width,
   if (is_fixed) {
     widget->setFixedSize(hint_size);
   } else {
-    widget->setMinimumSize(hint_size);
+    widget->resize(hint_size);
   }
 }
