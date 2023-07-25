@@ -25,30 +25,27 @@ LogHighlighter::LogHighlighter(QTextDocument* parent)
   warn_format_.setForeground(Qt::blue);
   error_format_.setForeground(Qt::red);
 
-  info_expression_ = QRegExp("^\\[INFO\\].*$");
-  warn_expression_ = QRegExp("^\\[WARN\\].*$");
-  error_expression_ = QRegExp("^\\[ERROR\\].*$");
+  info_expression_ = QRegularExpression("^\\[INFO\\].*$");
+  warn_expression_ = QRegularExpression("^\\[WARN\\].*$");
+  error_expression_ = QRegularExpression("^\\[ERROR\\].*$");
 }
 
 void LogHighlighter::highlightBlock(const QString& text) {
-  int index = text.indexOf(info_expression_);
-  while (index >= 0) {
-    int length = info_expression_.matchedLength();
-    setFormat(index, length, info_format_);
-    index = text.indexOf(info_expression_, index + length);
+  QRegularExpressionMatchIterator i = info_expression_.globalMatch(text);
+  while (i.hasNext()) {
+    QRegularExpressionMatch match = i.next();
+    setFormat(match.capturedStart(), match.capturedLength(), info_format_);
   }
 
-  index = text.indexOf(warn_expression_);
-  while (index >= 0) {
-    int length = warn_expression_.matchedLength();
-    setFormat(index, length, warn_format_);
-    index = text.indexOf(warn_expression_, index + length);
+  i = warn_expression_.globalMatch(text);
+  while (i.hasNext()) {
+    QRegularExpressionMatch match = i.next();
+    setFormat(match.capturedStart(), match.capturedLength(), warn_format_);
   }
 
-  index = text.indexOf(error_expression_);
-  while (index >= 0) {
-    int length = error_expression_.matchedLength();
-    setFormat(index, length, error_format_);
-    index = text.indexOf(error_expression_, index + length);
+  i = error_expression_.globalMatch(text);
+  while (i.hasNext()) {
+    QRegularExpressionMatch match = i.next();
+    setFormat(match.capturedStart(), match.capturedLength(), error_format_);
   }
 }

@@ -17,32 +17,33 @@
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
-#pragma once
+#include "drop_lineedit.h"
 
-#include <QDialog>
-#include <QGridLayout>
-#include <QIcon>
+#include <QMimeData>
 
-class CheckWindow : public QDialog {
-  Q_OBJECT
-
- public:
-  CheckWindow(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags())
-      : QDialog(parent, f) {
-
-    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-    setWindowTitle(tr("Check update"));
-    setWindowIcon(QIcon(":/icon.png"));
-
-    InitLayout();
-
-    setFixedSize(sizeHint().grownBy(QMargins(20, 10, 20, 10)));
+void DropLineEdit::dragEnterEvent(QDragEnterEvent* event) {
+  if (event->mimeData()->hasUrls()) {
+    event->acceptProposedAction();
   }
+}
 
- private:
-  void InitLayout();
+void DropLineEdit::dropEvent(QDropEvent* event) {
+  const QMimeData* mime_data = event->mimeData();
 
-  void AddLabels(QGridLayout* layout);
+  if (mime_data->hasUrls()) {
+    QList<QUrl> url_list = mime_data->urls();
+    QList<QString> path_list;
 
-  bool GetLatestVersion(QString& latest_version);
-};
+    for (const auto& url : url_list) {
+      QString path = url.toLocalFile();
+
+      if (!path.isEmpty()) {
+        path_list.push_back(path);
+      }
+    }
+
+    if (!path_list.isEmpty()) {
+      emit OnSendDrop(path_list);
+    }
+  }
+}

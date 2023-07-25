@@ -49,10 +49,12 @@ class TaskRunner : public QObject {
  signals:
   void OnSendLog(QString msg, ASSFONTS_LOG_LEVEL log_level);
   void OnSendClearFont();
+  void OnSendBuildRelease();
+  void OnSendStartRelease();
 
  private:
   bool is_running_ = false;
 
-  TaskRunner() = default;
+  TaskRunner(QObject* parent = nullptr) : QObject(parent){};
   ~TaskRunner() = default;
 };

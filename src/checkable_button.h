@@ -19,30 +19,25 @@
 
 #pragma once
 
-#include <QDialog>
-#include <QGridLayout>
-#include <QIcon>
+#include <QMouseEvent>
+#include <QPushButton>
 
-class CheckWindow : public QDialog {
+class CheckableButton : public QPushButton {
   Q_OBJECT
 
  public:
-  CheckWindow(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags())
-      : QDialog(parent, f) {
-
-    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-    setWindowTitle(tr("Check update"));
-    setWindowIcon(QIcon(":/icon.png"));
-
-    InitLayout();
-
-    setFixedSize(sizeHint().grownBy(QMargins(20, 10, 20, 10)));
+  CheckableButton(QWidget* parent = nullptr) : QPushButton(parent) {
+    setCheckable(true);
   }
 
- private:
-  void InitLayout();
+  CheckableButton(const QString& text, QWidget* parent = nullptr)
+      : QPushButton(text, parent) {
+    setCheckable(true);
+  }
 
-  void AddLabels(QGridLayout* layout);
+ signals:
+  void OnSendPressed();
 
-  bool GetLatestVersion(QString& latest_version);
+ protected:
+  void mousePressEvent(QMouseEvent* e) override;
 };

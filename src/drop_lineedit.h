@@ -19,30 +19,27 @@
 
 #pragma once
 
-#include <QDialog>
-#include <QGridLayout>
-#include <QIcon>
+#include <QDropEvent>
+#include <QEnterEvent>
+#include <QLineEdit>
 
-class CheckWindow : public QDialog {
+class DropLineEdit : public QLineEdit {
   Q_OBJECT
 
  public:
-  CheckWindow(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags())
-      : QDialog(parent, f) {
-
-    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-    setWindowTitle(tr("Check update"));
-    setWindowIcon(QIcon(":/icon.png"));
-
-    InitLayout();
-
-    setFixedSize(sizeHint().grownBy(QMargins(20, 10, 20, 10)));
+  DropLineEdit(QWidget* parent = nullptr) : QLineEdit(parent) {
+    setAcceptDrops(true);
   }
 
- private:
-  void InitLayout();
+  DropLineEdit(const QString& string, QWidget* parent = nullptr)
+      : QLineEdit(string, parent) {
+    setAcceptDrops(true);
+  }
 
-  void AddLabels(QGridLayout* layout);
+ signals:
+  void OnSendDrop(QList<QString> paths);
 
-  bool GetLatestVersion(QString& latest_version);
+ protected:
+  void dragEnterEvent(QDragEnterEvent* event) override;
+  void dropEvent(QDropEvent* event) override;
 };

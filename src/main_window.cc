@@ -24,6 +24,7 @@
 #include <QFileInfo>
 #include <QMenuBar>
 #include <QMetaType>
+#include <QRegularExpression>
 #include <QStandardPaths>
 
 constexpr char APP_NAME[] = "assfonts";
@@ -103,7 +104,7 @@ void MainWindow::AddInputLayout(QVBoxLayout* layout) {
 
   QHBoxLayout* hlayout = new QHBoxLayout;
 
-  input_line_ = new QLineEdit;
+  input_line_ = new DropLineEdit;
   input_line_->setMinimumHeight(25);
   hlayout->addWidget(input_line_);
 
@@ -131,7 +132,7 @@ void MainWindow::AddOutputLayout(QVBoxLayout* layout) {
 
   QHBoxLayout* hlayout = new QHBoxLayout;
 
-  output_line_ = new QLineEdit;
+  output_line_ = new DropLineEdit;
   output_line_->setMinimumHeight(25);
   hlayout->addWidget(output_line_);
 
@@ -159,7 +160,7 @@ void MainWindow::AddFontLayout(QVBoxLayout* layout) {
 
   QHBoxLayout* hlayout = new QHBoxLayout;
 
-  font_line_ = new QLineEdit;
+  font_line_ = new DropLineEdit;
   font_line_->setMinimumHeight(25);
   hlayout->addWidget(font_line_);
 
@@ -187,7 +188,7 @@ void MainWindow::AddDatabaseLayout(QVBoxLayout* layout) {
 
   QHBoxLayout* hlayout = new QHBoxLayout;
 
-  database_line_ = new QLineEdit;
+  database_line_ = new DropLineEdit;
   database_line_->setMinimumHeight(25);
 
   QString generic_data_path =
@@ -196,10 +197,10 @@ void MainWindow::AddDatabaseLayout(QVBoxLayout* layout) {
 
   QDir appdata_dir(generic_data_path + QDir::separator() + APP_NAME);
   if (!appdata_dir.exists()) {
-    appdata_dir.mkdir();
+    appdata_dir.mkdir(appdata_dir.path());
   }
 
-  database_line_->setText(appdata_dir.cleanPath());
+  database_line_->setText(QDir::toNativeSeparators(appdata_dir.absolutePath()));
 
   hlayout->addWidget(database_line_);
 
@@ -240,12 +241,12 @@ void MainWindow::AddButtonsLayout(QVBoxLayout* layout) {
   hlayout->addSpacing(16);
   hlayout->addStretch();
 
-  build_button_ = new QPushButton(tr("Build Database"));
+  build_button_ = new CheckableButton(tr("Build Database"));
   build_button_->setMinimumSize(110, 50);
   hlayout->addWidget(build_button_, 0, Qt::AlignVCenter);
   hlayout->addSpacing(10);
 
-  start_button_ = new QPushButton(tr("Start"));
+  start_button_ = new CheckableButton(tr("Start"));
 
   QFont font;
   font.setWeight(QFont::Bold);
@@ -303,22 +304,36 @@ void MainWindow::InitToolTips() {
 void MainWindow::InitAllConnects() {
   qRegisterMetaType<ASSFONTS_LOG_LEVEL>("ASSFONTS_LOG_LEVEL");
 
-  connect(input_button_, &QPushButton::released, this,
-          &MainWindow::OnInputButtonReleased);
-  connect(output_button_, &QPushButton::released, this,
-          &MainWindow::OnOutputButtonReleased);
-  connect(font_button_, &QPushButton::released, this,
-          &MainWindow::OnFontButtonReleased);
-  connect(database_button_, &QPushButton::released, this,
-          &MainWindow::OnDatabaseButtonReleased);
+  connect(input_button_, &QPushButton::clicked, this,
+          &MainWindow::OnInputButtonClicked);
+  connect(output_button_, &QPushButton::clicked, this,
+          &MainWindow::OnOutputButtonClicked);
+  connect(font_button_, &QPushButton::clicked, this,
+          &MainWindow::OnFontButtonClicked);
+  connect(database_button_, &QPushButton::clicked, this,
+          &MainWindow::OnDatabaseButtonClicked);
 
-  connect(build_button_, &QPushButton::released, this,
-          &MainWindow::OnBuildButtonReleased);
-  connect(start_button_, &QPushButton::released, this,
-          &MainWindow::OnStartButtonReleased);
+  connect(input_line_, &DropLineEdit::OnSendDrop, this,
+          &MainWindow::OnInputLineDrop);
+  connect(output_line_, &DropLineEdit::OnSendDrop, this,
+          &MainWindow::OnOutputLineDrop);
+  connect(font_line_, &DropLineEdit::OnSendDrop, this,
+          &MainWindow::OnFontLineDrop);
+  connect(database_line_, &DropLineEdit::OnSendDrop, this,
+          &MainWindow::OnDatabaseLineDrop);
+
+  connect(build_button_, &CheckableButton::OnSendPressed, this,
+          &MainWindow::OnBuildButtonPressed);
+  connect(start_button_, &CheckableButton::OnSendPressed, this,
+          &MainWindow::OnStartButtonPressed);
 
   connect(this, &MainWindow::OnSendBuild, worker_, &TaskRunner::OnBuildRun);
   connect(this, &MainWindow::OnSendStart, worker_, &TaskRunner::OnStartRun);
+
+  connect(worker_, &TaskRunner::OnSendBuildRelease, this,
+          [this]() { build_button_->setChecked(false); });
+  connect(worker_, &TaskRunner::OnSendStartRelease, this,
+          [this]() { start_button_->setChecked(false); });
 
   connect(worker_, &TaskRunner::OnSendLog, this, &MainWindow::OnReceiveLog);
 
@@ -340,8 +355,9 @@ void MainWindow::InitAllConnects() {
 
   connect(check_action_, &QAction::triggered, this,
           &MainWindow::OnCheckActionTrigger);
-  connect(check_window_, &QDialog::destroyed, this,
-          [this]() { check_window_ = nullptr; });
+  connect(
+      check_window_, &QDialog::destroyed, this,
+      [this]() { check_window_ = nullptr; }, Qt::QueuedConnection);
 }
 
 void MainWindow::InitWorker() {
@@ -351,12 +367,12 @@ void MainWindow::InitWorker() {
   thread_.start();
 }
 
-void MainWindow::OnInputButtonReleased() {
+void MainWindow::OnInputButtonClicked() {
   QString start_path;
-  QFileInfo file(input_label_.text().split(";").at(0).trimmed());
+  QFileInfo file(input_line_->text().split(";").at(0).trimmed());
   QDir parent_dir = file.dir();
-  if (parent_dir.exists()) {
-    start_path = parent_dir.cleanPath();
+  if (parent_dir.path() != "." && parent_dir.exists()) {
+    start_path = parent_dir.path();
   } else {
     start_path = QDir::homePath();
   }
@@ -384,59 +400,139 @@ void MainWindow::OnInputButtonReleased() {
       QDir::toNativeSeparators(file_info.dir().absolutePath()));
 }
 
-void MainWindow::OnOutputButtonReleased() {
+void MainWindow::OnOutputButtonClicked() {
   QString start_path;
-  QDir dir(output_label_.text().trimmed());
-  if (dir.exists()) {
-    start_path = dir.cleanPath();
+  QDir dir(output_line_->text().trimmed());
+  if (dir.path() != "." && dir.exists()) {
+    start_path = dir.path();
   } else {
     start_path = QDir::homePath();
   }
 
   QString path = QFileDialog::getExistingDirectory(
-      this, tr("Choose Directory - Output directory"));
+      this, tr("Choose Directory - Output directory"), start_path);
 
   if (!path.isEmpty()) {
     output_line_->setText(QDir::toNativeSeparators(path));
   }
 }
 
-void MainWindow::OnFontButtonReleased() {
+void MainWindow::OnFontButtonClicked() {
   QString start_path;
-  QDir dir(font_label_.text().trimmed());
-  if (dir.exists()) {
-    start_path = dir.cleanPath();
+  QDir dir(font_line_->text().trimmed());
+  if (dir.path() != "." && dir.exists()) {
+    start_path = dir.path();
   } else {
     start_path = QDir::homePath();
   }
 
   QString path = QFileDialog::getExistingDirectory(
-      this, tr("Choose Directory - Font directory"));
+      this, tr("Choose Directory - Font directory"), start_path);
 
   if (!path.isEmpty()) {
     font_line_->setText(QDir::toNativeSeparators(path));
   }
 }
 
-void MainWindow::OnDatabaseButtonReleased() {
+void MainWindow::OnDatabaseButtonClicked() {
   QString start_path;
-  QDir dir(database_label_.text().trimmed());
-  if (dir.exists()) {
-    start_path = dir.cleanPath();
+  QDir dir(database_line_->text().trimmed());
+  if (dir.path() != "." && dir.exists()) {
+    start_path = dir.path();
   } else {
     start_path = QDir::homePath();
   }
 
   QString path = QFileDialog::getExistingDirectory(
-      this, tr("Choose Directory - Database directory"));
+      this, tr("Choose Directory - Database directory"), start_path);
 
   if (!path.isEmpty()) {
     database_line_->setText(QDir::toNativeSeparators(path));
   }
 }
 
-void MainWindow::OnBuildButtonReleased() {
+void MainWindow::OnInputLineDrop(QList<QString> paths) {
+  for (auto it = paths.begin(); it != paths.end();) {
+    QFileInfo file_info(*it);
+    QString suffix = file_info.suffix().toLower();
+
+    if (!file_info.isFile() || (suffix != "ass" && suffix != "ssa")) {
+      it = paths.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  if (!paths.isEmpty()) {
+    input_line_->clear();
+  } else {
+    return;
+  }
+
+  for (auto it = paths.begin(); it != paths.end(); ++it) {
+    if (it != paths.begin()) {
+      input_line_->insert("; ");
+    }
+
+    input_line_->insert(QDir::toNativeSeparators(*it));
+  }
+
+  QFileInfo file_info(paths.at(0));
+  output_line_->setText(
+      QDir::toNativeSeparators(file_info.dir().absolutePath()));
+}
+
+void MainWindow::OnOutputLineDrop(QList<QString> paths) {
+  for (auto it = paths.begin(); it != paths.end();) {
+    QDir dir(*it);
+
+    if (!dir.exists()) {
+      it = paths.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  if (!paths.isEmpty()) {
+    output_line_->setText(QDir::toNativeSeparators(paths.at(0)));
+  }
+}
+
+void MainWindow::OnFontLineDrop(QList<QString> paths) {
+  for (auto it = paths.begin(); it != paths.end();) {
+    QDir dir(*it);
+
+    if (!dir.exists()) {
+      it = paths.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  if (!paths.isEmpty()) {
+    font_line_->setText(QDir::toNativeSeparators(paths.at(0)));
+  }
+}
+
+void MainWindow::OnDatabaseLineDrop(QList<QString> paths) {
+  for (auto it = paths.begin(); it != paths.end();) {
+    QDir dir(*it);
+
+    if (!dir.exists()) {
+      it = paths.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  if (!paths.isEmpty()) {
+    database_line_->setText(QDir::toNativeSeparators(paths.at(0)));
+  }
+}
+
+void MainWindow::OnBuildButtonPressed() {
   if (worker_->IsRunning()) {
+    build_button_->setChecked(false);
     return;
   }
 
@@ -444,8 +540,9 @@ void MainWindow::OnBuildButtonReleased() {
                    database_line_->text().trimmed());
 }
 
-void MainWindow::OnStartButtonReleased() {
+void MainWindow::OnStartButtonPressed() {
   if (worker_->IsRunning()) {
+    start_button_->setChecked(false);
     return;
   }
 

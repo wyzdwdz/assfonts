@@ -36,6 +36,8 @@ void TaskRunner::OnBuildRun(const QString fonts_path, const QString db_path) {
 
   emit OnSendClearFont();
 
+  emit OnSendBuildRelease();
+
   is_running_ = false;
 }
 
@@ -68,6 +70,8 @@ void TaskRunner::OnStartRun(const QString inputs_path,
               log_callback, ASSFONTS_INFO);
 
   log_callback("", ASSFONTS_TEXT);
+
+  emit OnSendStartRelease();
 
   is_running_ = false;
 }

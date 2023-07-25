@@ -17,32 +17,20 @@
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
-#pragma once
+#include "checkable_button.h"
 
-#include <QDialog>
-#include <QGridLayout>
-#include <QIcon>
+void CheckableButton::mousePressEvent(QMouseEvent* e) {
+  if (e->button() == Qt::LeftButton) {
+    if (isChecked()) {
+      return;
+    }
 
-class CheckWindow : public QDialog {
-  Q_OBJECT
+    setChecked(true);
+    e->accept();
 
- public:
-  CheckWindow(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags())
-      : QDialog(parent, f) {
+    emit OnSendPressed();
 
-    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-    setWindowTitle(tr("Check update"));
-    setWindowIcon(QIcon(":/icon.png"));
-
-    InitLayout();
-
-    setFixedSize(sizeHint().grownBy(QMargins(20, 10, 20, 10)));
+  } else {
+    QPushButton::mousePressEvent(e);
   }
-
- private:
-  void InitLayout();
-
-  void AddLabels(QGridLayout* layout);
-
-  bool GetLatestVersion(QString& latest_version);
-};
+}

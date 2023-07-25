@@ -6,7 +6,9 @@ set(TARGET_SOURCES main.cc
                    main_window.cc
                    task_runner.cc
                    log_highlighter.cc
-                   check_window.cc)
+                   check_window.cc
+                   drop_lineedit.cc
+                   checkable_button.cc)
 
 if(WIN32)
     set(TARGET_RESOURCES resources/assfonts.rc

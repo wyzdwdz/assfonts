@@ -23,7 +23,6 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QLabel>
-#include <QLineEdit>
 #include <QMainWindow>
 #include <QMutex>
 #include <QPushButton>
@@ -31,6 +30,8 @@
 #include <QThread>
 
 #include "check_window.h"
+#include "checkable_button.h"
+#include "drop_lineedit.h"
 #include "log_highlighter.h"
 #include "task_runner.h"
 
@@ -38,7 +39,10 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
-  MainWindow(QWidget* parent = nullptr) : QMainWindow(parent) {
+  MainWindow(QWidget* parent = nullptr,
+             Qt::WindowFlags flags = Qt::WindowFlags())
+      : QMainWindow(parent, flags) {
+
     setWindowTitle(tr("assfonts"));
     setWindowIcon(QIcon(":/icon.png"));
 
@@ -85,10 +89,10 @@ class MainWindow : public QMainWindow {
   QLabel* font_label_;
   QLabel* database_label_;
 
-  QLineEdit* input_line_;
-  QLineEdit* output_line_;
-  QLineEdit* font_line_;
-  QLineEdit* database_line_;
+  DropLineEdit* input_line_;
+  DropLineEdit* output_line_;
+  DropLineEdit* font_line_;
+  DropLineEdit* database_line_;
 
   QPushButton* input_button_;
   QPushButton* output_button_;
@@ -100,8 +104,8 @@ class MainWindow : public QMainWindow {
   QCheckBox* embed_checkbox_;
   QCheckBox* rename_checkbox_;
 
-  QPushButton* build_button_;
-  QPushButton* start_button_;
+  CheckableButton* build_button_;
+  CheckableButton* start_button_;
 
   QTextEdit* log_text_;
   LogHighlighter* log_highlighter_;
@@ -127,13 +131,18 @@ class MainWindow : public QMainWindow {
   void InitAllConnects();
   void InitWorker();
 
-  void OnInputButtonReleased();
-  void OnOutputButtonReleased();
-  void OnFontButtonReleased();
-  void OnDatabaseButtonReleased();
+  void OnInputButtonClicked();
+  void OnOutputButtonClicked();
+  void OnFontButtonClicked();
+  void OnDatabaseButtonClicked();
 
-  void OnBuildButtonReleased();
-  void OnStartButtonReleased();
+  void OnInputLineDrop(QList<QString> paths);
+  void OnOutputLineDrop(QList<QString> paths);
+  void OnFontLineDrop(QList<QString> paths);
+  void OnDatabaseLineDrop(QList<QString> paths);
+
+  void OnBuildButtonPressed();
+  void OnStartButtonPressed();
 
   void OnReceiveLog(QString msg, ASSFONTS_LOG_LEVEL log_level);
 
