@@ -250,7 +250,6 @@ jobs:
           source ./build/Release/generators/conanbuild.sh
           cmake --preset conan-release
           cmake --build --preset conan-release --target package -j
-          cmake --build --preset conan-release -j
           cmake --install build/Release --prefix install --strip
 
       - name: rename

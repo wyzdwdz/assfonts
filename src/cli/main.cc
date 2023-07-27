@@ -249,7 +249,7 @@ int main(int argc, char** argv) {
 
   auto inputs_char_list = std::unique_ptr<char*[]>(new char*[inputs.size()]);
 
-  for (int idx = 0; idx < inputs.size(); ++idx) {
+  for (size_t idx = 0; idx < inputs.size(); ++idx) {
     inputs_char_list[idx] = const_cast<char*>(inputs.at(idx).c_str());
   }
 
