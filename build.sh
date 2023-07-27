@@ -2,7 +2,7 @@
 
 BUILD_TYPE=Release
 
-INSTALL_PREFIX=$(realpath -m install)
+INSTALL_PREFIX=install
 
 while getopts "b:o:" arg
 do
@@ -11,7 +11,7 @@ do
             BUILD_TYPE=$OPTARG
             ;;
         o)
-            INSTALL_PREFIX=$(realpath -m $OPTARG)
+            INSTALL_PREFIX=$OPTARG
             ;;
         ?)
     exit 1
