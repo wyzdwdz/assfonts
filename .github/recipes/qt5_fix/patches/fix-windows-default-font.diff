@@ -1,0 +1,40 @@
+diff --git a/src/platformsupport/fontdatabases/windows/qwindowsfontdatabase.cpp b/src/platformsupport/fontdatabases/windows/qwindowsfontdatabase.cpp
+index 09d2d91..dbdddad 100644
+--- a/src/platformsupport/fontdatabases/windows/qwindowsfontdatabase.cpp
++++ b/src/platformsupport/fontdatabases/windows/qwindowsfontdatabase.cpp
+@@ -1701,9 +1701,10 @@ void QWindowsFontDatabase::refUniqueFont(const QString &uniqueFont)
+ // ### fixme Qt 6 (QTBUG-58610): See comment at QWindowsFontDatabase::systemDefaultFont()
+ HFONT QWindowsFontDatabase::systemFont()
+ {
+-    static const auto stock_sysfont =
+-        reinterpret_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
+-    return stock_sysfont;
++    NONCLIENTMETRICS ncm;
++    ncm.cbSize = FIELD_OFFSET(NONCLIENTMETRICS, lfMessageFont) + sizeof(LOGFONT);
++    SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0);
++    return CreateFontIndirect(&ncm.lfMessageFont);
+ }
+ 
+ // Creation functions
+@@ -2042,7 +2043,7 @@ QFontEngine *QWindowsFontDatabase::createEngine(const QFontDef &request, const Q
+ 
+ QFont QWindowsFontDatabase::systemDefaultFont()
+ {
+-#if QT_VERSION >= 0x060000
++#if 1
+     // Qt 6: Obtain default GUI font (typically "Segoe UI, 9pt", see QTBUG-58610)
+     NONCLIENTMETRICS ncm;
+     ncm.cbSize = FIELD_OFFSET(NONCLIENTMETRICS, lfMessageFont) + sizeof(LOGFONT);
+diff --git a/src/platformsupport/fontdatabases/windows/qwindowsfontengine.cpp b/src/platformsupport/fontdatabases/windows/qwindowsfontengine.cpp
+index 8cf2243..c0cbbc8 100644
+--- a/src/platformsupport/fontdatabases/windows/qwindowsfontengine.cpp
++++ b/src/platformsupport/fontdatabases/windows/qwindowsfontengine.cpp
+@@ -272,7 +272,7 @@ QWindowsFontEngine::~QWindowsFontEngine()
+         free(widthCache);
+ 
+     // make sure we aren't by accident still selected
+-    SelectObject(m_fontEngineData->hdc, QWindowsFontDatabase::systemFont());
++    SelectObject(m_fontEngineData->hdc, (HFONT)GetStockObject(DEFAULT_GUI_FONT));
+ 
+     if (!DeleteObject(hfont))
+         qErrnoWarning("%s: QFontEngineWin: failed to delete font...", __FUNCTION__);

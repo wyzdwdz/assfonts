@@ -40,6 +40,8 @@ class Assfonts(ConanFile):
         self.options["qt"].with_harfbuzz = True
         self.options["qt"].with_pq = False
         self.options["qt"].with_mysql = False
+        self.options["qt"].with_odbc = False
+        self.options["qt"].with_sqlite3 = False
 
     def layout(self):
         cmake_layout(self)

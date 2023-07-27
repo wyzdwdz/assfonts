@@ -2,5 +2,6 @@
 <qresource prefix="/">
     <file>style.qss</file>
 	<file>icon.png</file>
+	<file>qt/etc/qt.conf</file>
 </qresource>
 </RCC>

@@ -355,9 +355,6 @@ void MainWindow::InitAllConnects() {
 
   connect(check_action_, &QAction::triggered, this,
           &MainWindow::OnCheckActionTrigger);
-  connect(
-      check_window_, &QDialog::destroyed, this,
-      [this]() { check_window_ = nullptr; }, Qt::QueuedConnection);
 }
 
 void MainWindow::InitWorker() {
@@ -612,6 +609,9 @@ void MainWindow::OnErrorActionTrigger(bool checked) {
 void MainWindow::OnCheckActionTrigger() {
   if (check_window_ == nullptr) {
     check_window_ = new CheckWindow(this);
+    check_window_->setAttribute(Qt::WA_DeleteOnClose);
+    connect(check_window_, &QDialog::destroyed, this,
+            [this]() { check_window_ = nullptr; });
   }
 
   check_window_->show();

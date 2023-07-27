@@ -20,7 +20,7 @@ elseif(APPLE)
 else()
 endif()
 
-qt5_add_resources(QT_RESOURCES resources/main.qrc)
+qt5_add_resources(QT_RESOURCES resources/assfonts.qrc)
 
 set(TARGET_NAME assfonts_gui)
 
