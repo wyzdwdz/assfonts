@@ -61,8 +61,6 @@ static std::string save_files_path = []() {
 }();
 
 static void log_callback(const char* msg, const ASSFONTS_LOG_LEVEL log_level) {
-  std::wstring wmsg = nowide::widen(msg);
-
   switch (log_level) {
     case ASSFONTS_INFO:
       nowide::cout << msg << std::endl;
