@@ -19,7 +19,7 @@ set(TARGET_SOURCES font_parser.cc
                    ass_freetype.cc
                    assfonts.cc)
 
-set(TARGET_NAME assfonts)
+set(TARGET_NAME libassfonts)
 
 configure_file(${PROJECT_SOURCE_DIR}/include/assfonts.h.in ${PROJECT_BINARY_DIR}/include/assfonts.h)
 						  
@@ -38,3 +38,5 @@ endif()
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
 
 target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})
+
+set_target_properties(${TARGET_NAME} PROPERTIES PREFIX "")

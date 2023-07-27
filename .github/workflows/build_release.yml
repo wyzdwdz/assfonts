@@ -48,8 +48,10 @@ jobs:
             cmake --preset conan-release
             cmake --build --preset conan-release -j
             cmake --install build/Release --prefix install --strip
-            linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts --custom-apprun=./src/resources/AppRun
-            appimagetool ./AppDir assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage
+            linuxdeploy --appdir=./assfonts_AppDir -e ./install/bin/assfonts
+            appimagetool ./assfonts_AppDir assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage
+            linuxdeploy --appdir=./assfonts-gui_AppDir -e ./install/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
+            appimagetool ./assfonts-gui_AppDir assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage
 
       - name: aarch64 build binary
         if: ${{ matrix.arch == 'aarch64' }}
@@ -89,18 +91,23 @@ jobs:
             conan config install .github/conan2-linux
             conan install . -pr:h ${{ matrix.profile }} -pr:b ${{ matrix.profile }}
             apt update && apt -y install squashfs-tools
-            linuxdeploy --appdir=./AppDir -e ./install/bin/assfonts -d ./src/resources/assfonts.desktop -i ./src/resources/icon.png --icon-filename=assfonts --custom-apprun=./src/resources/AppRun
-            ln -sf assfonts.png ./AppDir/.DirIcon
-            mksquashfs ./AppDir AppDir.squashfs -root-owned -noappend
+            linuxdeploy --appdir=./assfonts_AppDir -e ./install/bin/assfonts
+            mksquashfs ./assfonts_AppDir assfonts_AppDir.squashfs -root-owned -noappend
             wget https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-aarch64
             cat runtime-aarch64 >> assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage
-            cat AppDir.squashfs >> assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage
+            cat assfonts_AppDir.squashfs >> assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage
+            linuxdeploy --appdir=./assfonts-gui_AppDir -e ./install/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
+            ln -sf assfonts-gui.png ./assfonts-gui_AppDir/.DirIcon
+            mksquashfs ./assfonts-gui_AppDir assfonts-gui_AppDir.squashfs -root-owned -noappend
+            wget https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-aarch64
+            cat runtime-aarch64 >> assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
+            cat assfonts-gui_AppDir.squashfs >> assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
 
       - name: upload AppImages
         uses: actions/upload-artifact@v3
         with:
           name: release-appimage-${{ matrix.arch }}
-          path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Linux.AppImage
+          path: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-Linux.AppImage
           if-no-files-found: error
 
       - name: set read permission to conan cache
@@ -171,21 +178,23 @@ jobs:
           cmake --install build --prefix install
 
       - name: copy and rename
-        run: Copy-Item -Path ".\install\bin\assfonts.exe" -Destination "assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe" -Force
+        run: |
+           Copy-Item -Path ".\install\bin\assfonts.exe" -Destination "assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe" -Force
+           Copy-Item -Path ".\install\bin\assfonts-gui.exe" -Destination "assfonts-gui-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe" -Force
 
       - name: x86_64 upx compress
         if: ${{ matrix.arch == 'x86_64' }}
         uses: crazy-max/ghaction-upx@v2
         with:
           version: latest
-          files: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
+          files: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
           args: -fq9
 
       - name: upload exe
         uses: actions/upload-artifact@v3
         with:
           name: release-exe-${{ matrix.arch }}
-          path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
+          path: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
           if-no-files-found: error
 
       - name: save conan cache
@@ -241,15 +250,19 @@ jobs:
           source ./build/Release/generators/conanbuild.sh
           cmake --preset conan-release
           cmake --build --preset conan-release --target package -j
+          cmake --build --preset conan-release -j
+          cmake --install build/Release --prefix install --strip
 
       - name: rename
-        run: mv -f assfonts.dmg assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
+        run: |
+          mv -f ./install/bin/assfonts assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS
+          mv -f assfonts-gui.dmg assfonts-gui-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
 
       - name: upload dmg
         uses: actions/upload-artifact@v3
         with:
           name: release-dmg-${{ matrix.arch }}
-          path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
+          path: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-macOS*
           if-no-files-found: error
 
       - name: save conan cache
@@ -295,14 +308,36 @@ jobs:
         with:
           name: release-dmg-aarch64
 
+      - name: create zips
+        run: |
+          sudo apt-get install -y zip
+          cp -f assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage assfonts.AppImage
+          cp -f assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage assfonts-gui.AppImage
+          zip assfonts-${{ github.ref_name }}-x86_64-Linux.zip assfonts.AppImage assfonts-gui.AppImage
+          cp -f assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage assfonts.AppImage
+          cp -f assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage assfonts-gui.AppImage
+          zip assfonts-${{ github.ref_name }}-aarch64-Linux.zip assfonts.AppImage assfonts-gui.AppImage
+          cp -f assfonts-${{ github.ref_name }}-x86_64-Windows.exe assfonts.exe
+          cp -f assfonts-gui-${{ github.ref_name }}-x86_64-Windows.exe assfonts-gui.exe
+          zip assfonts-${{ github.ref_name }}-x86_64-Windows.zip assfonts.exe assfonts-gui.exe
+          cp -f assfonts-${{ github.ref_name }}-aarch64-Windows.exe assfonts.exe
+          cp -f assfonts-gui-${{ github.ref_name }}-aarch64-Windows.exe assfonts-gui.exe
+          zip assfonts-${{ github.ref_name }}-aarch64-Windows.zip assfonts.exe assfonts-gui.exe
+          cp -f assfonts-${{ github.ref_name }}-x86_64-macOS assfonts
+          cp -f assfonts-gui-${{ github.ref_name }}-x86_64-macOS.dmg assfonts-gui.dmg
+          zip assfonts-${{ github.ref_name }}-x86_64-macOS.zip assfonts assfonts-gui.dmg
+          cp -f assfonts-${{ github.ref_name }}-aarch64-macOS assfonts
+          cp -f assfonts-gui-${{ github.ref_name }}-aarch64-macOS.dmg assfonts-gui.dmg
+          zip assfonts-${{ github.ref_name }}-aarch64-macOS.zip assfonts assfonts-gui.dmg
+
       - name: calculate hash
         run: |
-          sha256sum assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage > assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage > assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-x86_64-Windows.exe > assfonts-${{ github.ref_name }}-x86_64-Windows.exe.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-aarch64-Windows.exe > assfonts-${{ github.ref_name }}-aarch64-Windows.exe.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-x86_64-macOS.dmg > assfonts-${{ github.ref_name }}-x86_64-macOS.dmg.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-aarch64-macOS.dmg > assfonts-${{ github.ref_name }}-aarch64-macOS.dmg.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-x86_64-Linux.zip > assfonts-${{ github.ref_name }}-x86_64-Linux.zip.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-aarch64-Linux.zip > assfonts-${{ github.ref_name }}-aarch64-Linux.zip.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-x86_64-Windows.zip > assfonts-${{ github.ref_name }}-x86_64-Windows.zip.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-aarch64-Windows.zip > assfonts-${{ github.ref_name }}-aarch64-Windows.zip.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-x86_64-macOS.zip > assfonts-${{ github.ref_name }}-x86_64-macOS.zip.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-aarch64-macOS.zip > assfonts-${{ github.ref_name }}-aarch64-macOS.zip.sha256sum
 
       - name: edit release
         uses: svenstaro/upload-release-action@v2

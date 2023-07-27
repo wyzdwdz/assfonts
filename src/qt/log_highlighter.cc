@@ -21,8 +21,7 @@
 
 LogHighlighter::LogHighlighter(QTextDocument* parent)
     : QSyntaxHighlighter(parent) {
-  info_format_.setForeground(Qt::black);
-  warn_format_.setForeground(Qt::blue);
+  warn_format_.setForeground(Qt::magenta);
   error_format_.setForeground(Qt::red);
 
   info_expression_ = QRegularExpression("^\\[INFO\\].*$");

@@ -7,4 +7,4 @@ export LD_LIBRARY_PATH="$APPDIR/usr/lib:$LD_LIBRARY_PATH"
 export QT_QPA_PLATFORM=xcb
 export FONTCONFIG_PATH=/etc/fonts
 
-exec "$APPDIR/usr/bin/assfonts" "$@"
+exec "$APPDIR/usr/bin/assfonts-gui" "$@"

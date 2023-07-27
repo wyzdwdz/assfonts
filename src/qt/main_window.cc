@@ -25,9 +25,38 @@
 #include <QMenuBar>
 #include <QMetaType>
 #include <QRegularExpression>
-#include <QStandardPaths>
+#include <ghc/filesystem.hpp>
 
-constexpr char APP_NAME[] = "assfonts";
+#ifdef __APPLE__
+#include "get_app_support_dir.h"
+#elif _WIN32
+#include <Shlobj.h>
+#else
+#endif
+
+namespace fs = ghc::filesystem;
+
+static std::string save_files_path = []() {
+  fs::path path = fs::current_path();
+
+#ifdef __APPLE__
+  path = fs::path(GetAppSupportDir()) / "assfonts";
+#elif __linux__
+  if (getenv("HOME")) {
+    path = fs::path(getenv("HOME")) / ".local" / "share" / "assfonts";
+  }
+#elif _WIN32
+  TCHAR sz_path[MAX_PATH];
+  SHGetFolderPath(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, sz_path);
+
+  path = fs::path(sz_path) / "assfonts";
+#endif
+
+  std::error_code ec;
+  fs::create_directory(path, ec);
+
+  return path.u8string();
+}();
 
 void MainWindow::InitMenu() {
   QMenuBar* menu_bar = new QMenuBar;
@@ -191,14 +220,7 @@ void MainWindow::AddDatabaseLayout(QVBoxLayout* layout) {
   database_line_ = new DropLineEdit;
   database_line_->setMinimumHeight(25);
 
-  QString generic_data_path =
-      QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation)
-          .at(0);
-
-  QDir appdata_dir(generic_data_path + QDir::separator() + APP_NAME);
-  if (!appdata_dir.exists()) {
-    appdata_dir.mkdir(appdata_dir.path());
-  }
+  QDir appdata_dir(QString::fromStdString(save_files_path));
 
   database_line_->setText(QDir::toNativeSeparators(appdata_dir.absolutePath()));
 

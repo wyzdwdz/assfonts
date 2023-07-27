@@ -2,7 +2,7 @@
 
 project (assfonts CXX C)
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/3rdparty)
+add_subdirectory(3rdparty)
 
 find_package(harfbuzz REQUIRED)
 find_package(freetype REQUIRED)
@@ -31,6 +31,6 @@ endif()
 
 set(CXX_STD_VER cxx_std_11)
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/lib)
-add_subdirectory(${PROJECT_SOURCE_DIR}/src)
-# add_subdirectory(${PROJECT_SOURCE_DIR}/test)
+add_subdirectory(lib)
+add_subdirectory(src)
+# add_subdirectory(test)

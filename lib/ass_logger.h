@@ -39,13 +39,13 @@ class Logger {
 
   template <typename... T>
   void Text(fmt::format_string<T...> fmt, T&&... args) {
-    if (log_level_ <= ASSFONTS_WARN) {
+    if (log_level_ <= ASSFONTS_TEXT) {
       Log(ASSFONTS_TEXT, fmt, std::forward<T>(args)...);
     }
   }
   template <typename... T>
   void Text(fmt::wformat_string<T...> fmt, T&&... args) {
-    if (log_level_ <= ASSFONTS_WARN) {
+    if (log_level_ <= ASSFONTS_TEXT) {
       Log(ASSFONTS_TEXT, fmt, std::forward<T>(args)...);
     }
   }
