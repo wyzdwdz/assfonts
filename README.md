@@ -59,7 +59,7 @@ Options:
   -d, --dbpath      <dir>     Set fonts database path  (Default: current path)
   -s, --subset-only <bool>    Subset fonts but not embed them into subtitle  (default: False)
   -e, --embed-only  <bool>    Embed fonts into subtitle but not subset them (default: False)
-  -r, --rename      <bool>    Rename subsetted fonts (default: False)
+  -r, --rename      <bool>    !!!Experimental!!! Rename subsetted fonts (default: False)
   -l, --luminance   <num>     Set subtitle brightness for HDR contents  (default: 203)
   -v, --verbose     <num>     Set logging level (0 to 3), 0 is off  (Default: 3)
   -h, --help                  Get help info

@@ -212,7 +212,7 @@ int main(int argc, char** argv) {
     << "  -d, --dbpath      <dir>     Set fonts database path  (Default: current path)\n"
     << "  -s, --subset-only <bool>    Subset fonts but not embed them into subtitle  (default: False)\n"
     << "  -e, --embed-only  <bool>    Embed fonts into subtitle but not subset them (default: False)\n"
-    << "  -r, --rename      <bool>    Rename subsetted fonts (default: False)\n"
+    << "  -r, --rename      <bool>    !!!Experimental!!! Rename subsetted fonts (default: False)\n"
     << "  -l, --luminance   <num>     Set subtitle brightness for HDR contents  (default: 203)\n"
     << "  -v, --verbose     <num>     Set logging level (0 to 3), 0 is off  (Default: 3)\n"
     << "  -h, --help                  Get help info\n" << std::endl;

@@ -315,7 +315,8 @@ void MainWindow::InitToolTips() {
       tr("Embed fonts into subtitle but not subset them"));
 
   rename_checkbox_->setToolTip(
-      tr("Rename subsetted fonts to ensure the one-to-one\n"
+      tr("!!!Experimental!!!\n"
+         "Rename subsetted fonts to ensure the one-to-one\n"
          "correspondence between one subtitle and one series of fonts"));
 
   build_button_->setToolTip(tr("Build fonts database"));
