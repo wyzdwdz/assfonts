@@ -48,8 +48,7 @@ jobs:
             cmake --preset conan-release
             cmake --build --preset conan-release -j
             cmake --install build/Release --prefix install --strip
-            linuxdeploy --appdir=./assfonts_AppDir -e ./install/bin/assfonts
-            appimagetool ./assfonts_AppDir assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage
+            cp -f ./install/bin/assfonts assfonts-${{ github.ref_name }}-x86_64-Linux
             linuxdeploy --appdir=./assfonts-gui_AppDir -e ./install/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
             appimagetool ./assfonts-gui_AppDir assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage
 
@@ -91,11 +90,7 @@ jobs:
             conan config install .github/conan2-linux
             conan install . -pr:h ${{ matrix.profile }} -pr:b ${{ matrix.profile }}
             apt update && apt -y install squashfs-tools
-            linuxdeploy --appdir=./assfonts_AppDir -e ./install/bin/assfonts
-            mksquashfs ./assfonts_AppDir assfonts_AppDir.squashfs -root-owned -noappend
-            wget https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-aarch64
-            cat runtime-aarch64 >> assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage
-            cat assfonts_AppDir.squashfs >> assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage
+            cp -f ./install/bin/assfonts assfonts-${{ github.ref_name }}-aarch64-Linux
             linuxdeploy --appdir=./assfonts-gui_AppDir -e ./install/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
             ln -sf assfonts-gui.png ./assfonts-gui_AppDir/.DirIcon
             mksquashfs ./assfonts-gui_AppDir assfonts-gui_AppDir.squashfs -root-owned -noappend
@@ -103,11 +98,18 @@ jobs:
             cat runtime-aarch64 >> assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
             cat assfonts-gui_AppDir.squashfs >> assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
 
-      - name: upload AppImages
+      - name: upx compress
+        uses: crazy-max/ghaction-upx@v2
+        with:
+          version: latest
+          files: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Linux
+          args: --best
+
+      - name: upload Linux
         uses: actions/upload-artifact@v3
         with:
-          name: release-appimage-${{ matrix.arch }}
-          path: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-Linux.AppImage
+          name: release-Linux-${{ matrix.arch }}
+          path: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-Linux*
           if-no-files-found: error
 
       - name: set read permission to conan cache
@@ -188,13 +190,13 @@ jobs:
         with:
           version: latest
           files: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
-          args: -fq9
+          args: --best
 
-      - name: upload exe
+      - name: upload Windows
         uses: actions/upload-artifact@v3
         with:
-          name: release-exe-${{ matrix.arch }}
-          path: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
+          name: release-Windows-${{ matrix.arch }}
+          path: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-Windows*
           if-no-files-found: error
 
       - name: save conan cache
@@ -249,7 +251,7 @@ jobs:
           conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
           source ./build/Release/generators/conanbuild.sh
           cmake --preset conan-release
-          cmake --build --preset conan-release --target package -j
+          cmake --build --preset conan-release --target assfonts package -j
           cmake --install build/Release --prefix install --strip
 
       - name: rename
@@ -257,10 +259,17 @@ jobs:
           mv -f ./install/bin/assfonts assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS
           mv -f assfonts-gui.dmg assfonts-gui-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
 
-      - name: upload dmg
+      - name: upx compress
+        uses: crazy-max/ghaction-upx@v2
+        with:
+          version: latest
+          files: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS
+          args: --best
+
+      - name: upload macOS
         uses: actions/upload-artifact@v3
         with:
-          name: release-dmg-${{ matrix.arch }}
+          name: release-macOS-${{ matrix.arch }}
           path: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-macOS*
           if-no-files-found: error
 
@@ -277,45 +286,45 @@ jobs:
         shell: bash
     needs: [ build-linux, build-windows, build-macos ]
     steps:
-      - name: download AppImages x86_64
+      - name: download Linux x86_64
         uses: actions/download-artifact@v3
         with:
-          name: release-appimage-x86_64
+          name: release-Linux-x86_64
           
-      - name: download AppImages aarch64
+      - name: download Linux aarch64
         uses: actions/download-artifact@v3
         with:
-          name: release-appimage-aarch64
+          name: release-Linux-aarch64
 
-      - name: download exe x86_64
+      - name: download Windows x86_64
         uses: actions/download-artifact@v3
         with:
-          name: release-exe-x86_64
+          name: release-Windows-x86_64
 
-      - name: download exe aarch64
+      - name: download Windows aarch64
         uses: actions/download-artifact@v3
         with:
-          name: release-exe-aarch64
+          name: release-Windows-aarch64
 
-      - name: download dmg x86_64
+      - name: download macOS x86_64
         uses: actions/download-artifact@v3
         with:
-          name: release-dmg-x86_64
+          name: release-macOS-x86_64
   
-      - name: download dmg aarch64
+      - name: download macOS aarch64
         uses: actions/download-artifact@v3
         with:
-          name: release-dmg-aarch64
+          name: release-macOS-aarch64
 
       - name: create zips
         run: |
           sudo apt-get install -y zip
-          cp -f assfonts-${{ github.ref_name }}-x86_64-Linux.AppImage assfonts.AppImage
+          cp -f assfonts-${{ github.ref_name }}-x86_64-Linux assfonts
           cp -f assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage assfonts-gui.AppImage
-          zip assfonts-${{ github.ref_name }}-x86_64-Linux.zip assfonts.AppImage assfonts-gui.AppImage
-          cp -f assfonts-${{ github.ref_name }}-aarch64-Linux.AppImage assfonts.AppImage
+          zip assfonts-${{ github.ref_name }}-x86_64-Linux.zip assfonts assfonts-gui.AppImage
+          cp -f assfonts-${{ github.ref_name }}-aarch64-Linux assfonts
           cp -f assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage assfonts-gui.AppImage
-          zip assfonts-${{ github.ref_name }}-aarch64-Linux.zip assfonts.AppImage assfonts-gui.AppImage
+          zip assfonts-${{ github.ref_name }}-aarch64-Linux.zip assfonts assfonts-gui.AppImage
           cp -f assfonts-${{ github.ref_name }}-x86_64-Windows.exe assfonts.exe
           cp -f assfonts-gui-${{ github.ref_name }}-x86_64-Windows.exe assfonts-gui.exe
           zip assfonts-${{ github.ref_name }}-x86_64-Windows.zip assfonts.exe assfonts-gui.exe

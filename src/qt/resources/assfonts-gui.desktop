@@ -2,7 +2,7 @@
 Categories=Utility;
 Exec=assfonts-gui
 GenericName=assfonts-gui
-Icon=assfont-gui
+Icon=assfonts-gui
 Name=assfonts-gui
 Terminal=false
 Type=Application
