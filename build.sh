@@ -30,6 +30,6 @@ else
 fi
 
 source ./build/${BUILD_TYPE}/generators/conanbuild.sh
-cmake --preset conan-${BUILD_TYPE,,}
-cmake --build --preset conan-${BUILD_TYPE,,} -j
+cmake --preset conan-$(tr '[:upper:]' '[:lower:]' <<< "$BUILD_TYPE")
+cmake --build --preset conan-$(tr '[:upper:]' '[:lower:]' <<< "$BUILD_TYPE") -j
 cmake --install build/${BUILD_TYPE} --prefix ${INSTALL_PREFIX} --strip

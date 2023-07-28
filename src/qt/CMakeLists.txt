@@ -46,7 +46,7 @@ target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})
 
 set_target_properties(${TARGET_NAME} PROPERTIES WIN32_EXECUTABLE ON
                                                 MACOSX_BUNDLE ON
-                                                MACOSX_BUNDLE_INFO_PLIST resources/assfonts-gui.plist)
+                                                MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/qt/resources/assfonts-gui.plist)
 
 if(APPLE)
     install(TARGETS ${TARGET_NAME}
@@ -54,15 +54,15 @@ if(APPLE)
             RUNTIME DESTINATION bin
             BUNDLE DESTINATION .)
 
-    set(CPACK_PACKAGE_NAME ${TARGET_NAME})
+    set(CPACK_PACKAGE_NAME ${CMAKE_PROJECT_NAME})
     set(CPACK_PACKAGE_NAMECPACK_PACKAGE_VENDOR "wyzdwdz@gmail.com")
     set(CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
     set(CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
     set(CPACK_PACKAGE_VERSION_PATCH ${VERSION_PATCH})
     set(CPACK_PACKAGE_DESCRIPTION "Subset fonts and embed them into an ASS subtitle")
-    set(CPACK_PACKAGE_FILE_NAME ${TARGET_NAME})
+    set(CPACK_PACKAGE_FILE_NAME ${CMAKE_PROJECT_NAME})
     set(CPACK_STRIP_FILES TRUE)
-    set(CPACK_PACKAGE_ICON resources/icon.icns)
+    set(CPACK_PACKAGE_ICON ${PROJECT_SOURCE_DIR}/src/qt/resources/icon.icns)
     set(CPACK_PACKAGE_DIRECTORY ${PROJECT_SOURCE_DIR})
     set(CPACK_GENERATOR "DragNDrop")
     include(CPack)

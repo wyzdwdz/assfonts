@@ -98,13 +98,6 @@ jobs:
             cat runtime-aarch64 >> assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
             cat assfonts-gui_AppDir.squashfs >> assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
 
-      - name: upx compress
-        uses: crazy-max/ghaction-upx@v2
-        with:
-          version: latest
-          files: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Linux
-          args: --best
-
       - name: upload Linux
         uses: actions/upload-artifact@v3
         with:
@@ -184,14 +177,6 @@ jobs:
            Copy-Item -Path ".\install\bin\assfonts.exe" -Destination "assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe" -Force
            Copy-Item -Path ".\install\bin\assfonts-gui.exe" -Destination "assfonts-gui-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe" -Force
 
-      - name: x86_64 upx compress
-        if: ${{ matrix.arch == 'x86_64' }}
-        uses: crazy-max/ghaction-upx@v2
-        with:
-          version: latest
-          files: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe
-          args: --best
-
       - name: upload Windows
         uses: actions/upload-artifact@v3
         with:
@@ -251,26 +236,17 @@ jobs:
           conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
           source ./build/Release/generators/conanbuild.sh
           cmake --preset conan-release
-          cmake --build --preset conan-release --target assfonts package -j
-          cmake --install build/Release --prefix install --strip
+          cmake --build --preset conan-release --target package -j
 
       - name: rename
         run: |
-          mv -f ./install/bin/assfonts assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS
-          mv -f assfonts-gui.dmg assfonts-gui-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
-
-      - name: upx compress
-        uses: crazy-max/ghaction-upx@v2
-        with:
-          version: latest
-          files: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS
-          args: --best
+          mv -f assfonts.dmg assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
 
       - name: upload macOS
         uses: actions/upload-artifact@v3
         with:
           name: release-macOS-${{ matrix.arch }}
-          path: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-macOS*
+          path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
           if-no-files-found: error
 
       - name: save conan cache
@@ -319,33 +295,28 @@ jobs:
       - name: create zips
         run: |
           sudo apt-get install -y zip
-          cp -f assfonts-${{ github.ref_name }}-x86_64-Linux assfonts
+          mkdir bin
+          cp -f assfonts-${{ github.ref_name }}-x86_64-Linux ./bin/assfonts
           cp -f assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage assfonts-gui.AppImage
-          zip assfonts-${{ github.ref_name }}-x86_64-Linux.zip assfonts assfonts-gui.AppImage
-          cp -f assfonts-${{ github.ref_name }}-aarch64-Linux assfonts
+          tar -czvf assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz bin/assfonts assfonts-gui.AppImage
+          cp -f assfonts-${{ github.ref_name }}-aarch64-Linux ./bin/assfonts
           cp -f assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage assfonts-gui.AppImage
-          zip assfonts-${{ github.ref_name }}-aarch64-Linux.zip assfonts assfonts-gui.AppImage
+          tar -czvf assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz bin/assfonts assfonts-gui.AppImage
           cp -f assfonts-${{ github.ref_name }}-x86_64-Windows.exe assfonts.exe
           cp -f assfonts-gui-${{ github.ref_name }}-x86_64-Windows.exe assfonts-gui.exe
           zip assfonts-${{ github.ref_name }}-x86_64-Windows.zip assfonts.exe assfonts-gui.exe
           cp -f assfonts-${{ github.ref_name }}-aarch64-Windows.exe assfonts.exe
           cp -f assfonts-gui-${{ github.ref_name }}-aarch64-Windows.exe assfonts-gui.exe
           zip assfonts-${{ github.ref_name }}-aarch64-Windows.zip assfonts.exe assfonts-gui.exe
-          cp -f assfonts-${{ github.ref_name }}-x86_64-macOS assfonts
-          cp -f assfonts-gui-${{ github.ref_name }}-x86_64-macOS.dmg assfonts-gui.dmg
-          zip assfonts-${{ github.ref_name }}-x86_64-macOS.zip assfonts assfonts-gui.dmg
-          cp -f assfonts-${{ github.ref_name }}-aarch64-macOS assfonts
-          cp -f assfonts-gui-${{ github.ref_name }}-aarch64-macOS.dmg assfonts-gui.dmg
-          zip assfonts-${{ github.ref_name }}-aarch64-macOS.zip assfonts assfonts-gui.dmg
 
       - name: calculate hash
         run: |
-          sha256sum assfonts-${{ github.ref_name }}-x86_64-Linux.zip > assfonts-${{ github.ref_name }}-x86_64-Linux.zip.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-aarch64-Linux.zip > assfonts-${{ github.ref_name }}-aarch64-Linux.zip.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz > assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz > assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz.sha256sum
           sha256sum assfonts-${{ github.ref_name }}-x86_64-Windows.zip > assfonts-${{ github.ref_name }}-x86_64-Windows.zip.sha256sum
           sha256sum assfonts-${{ github.ref_name }}-aarch64-Windows.zip > assfonts-${{ github.ref_name }}-aarch64-Windows.zip.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-x86_64-macOS.zip > assfonts-${{ github.ref_name }}-x86_64-macOS.zip.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-aarch64-macOS.zip > assfonts-${{ github.ref_name }}-aarch64-macOS.zip.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-x86_64-macOS.dmg > assfonts-${{ github.ref_name }}-x86_64-macOS.dmg.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-aarch64-macOS.dmg > assfonts-${{ github.ref_name }}-aarch64-macOS.dmg.sha256sum
 
       - name: edit release
         uses: svenstaro/upload-release-action@v2
