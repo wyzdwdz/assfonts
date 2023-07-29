@@ -1,6 +1,6 @@
 # assfonts
 
-[中文说明]([http://freetype.org/](https://bbs.acgrip.com/thread-9897-1-1.html))
+[中文说明](http://freetype.org/](https://bbs.acgrip.com/thread-9897-1-1.html)
 
 Subset fonts and embed them into an ASS subtitle.
 
