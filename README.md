@@ -27,6 +27,8 @@ Package Manager ---- Conan version 2.0.4
 - [ghc::filesystem](https://github.com/gulrak/filesystem)
 
 - [Qt5](https://www.qt.io/)
+  
+- [libcurl](https://curl.se/libcurl/)
 
 ### How to build
 
