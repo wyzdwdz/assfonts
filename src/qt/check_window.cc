@@ -62,7 +62,7 @@ void CheckWindow::InitLayout() {
   QGridLayout* main_layout = new QGridLayout(this);
   main_layout->setAlignment(Qt::AlignCenter);
   main_layout->setVerticalSpacing(15);
-  main_layout->setContentsMargins(25, 15, 25, 18);
+  main_layout->setContentsMargins(25, 15, 25, 20);
 
   AddLabels(main_layout);
 
