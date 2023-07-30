@@ -1,3 +1,11 @@
+Overview of changes leading to v0.5.1
+Sunday, July 30, 2023
+====================================
+- use native font render instead of freetype on Windows
+- fix "check version" window freeze bug
+- use libcurl to fetch latest version instead of QNetwork
+- fix some security vulnerabilities
+
 Overview of changes leading to v0.5.0
 Friday, July 28, 2023
 ====================================
