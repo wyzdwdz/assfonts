@@ -14,6 +14,7 @@ find_package(threadpool REQUIRED)
 find_package(ghc_filesystem REQUIRED)
 find_package(PCRE2 REQUIRED)
 find_package(Qt5 REQUIRED)
+find_package(CURL REQUIRED)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     if(CMAKE_BUILD_TYPE MATCHES "Debug")

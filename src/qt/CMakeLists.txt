@@ -1,7 +1,8 @@
 ﻿cmake_minimum_required (VERSION 3.16)
 
 set(THIRD_PARTY_LIBS qt::qt
-                     ghcFilesystem::ghc_filesystem)
+                     ghcFilesystem::ghc_filesystem
+                     CURL::libcurl)
 
 set(TARGET_SOURCES main.cc
                    main_window.cc

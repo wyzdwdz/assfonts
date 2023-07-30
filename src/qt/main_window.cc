@@ -23,6 +23,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QMenuBar>
+#include <QMessageBox>
 #include <QMetaType>
 #include <QRegularExpression>
 #include <ghc/filesystem.hpp>
@@ -58,33 +59,47 @@ static std::string save_files_path = []() {
   return path.u8string();
 }();
 
+void MainWindow::closeEvent(QCloseEvent* event) {
+  if (worker_->IsRunning()) {
+    QMessageBox::warning(this, "Warning", "Program is still running.");
+
+    event->ignore();
+
+  } else {
+    thread_.quit();
+    thread_.wait();
+
+    event->accept();
+  }
+}
+
 void MainWindow::InitMenu() {
-  QMenuBar* menu_bar = new QMenuBar;
+  QMenuBar* menu_bar = new QMenuBar(this);
   log_menu_ = menu_bar->addMenu(tr("&Log"));
   info_menu_ = menu_bar->addMenu(tr("&Other"));
 
-  clear_action_ = new QAction(tr("&Clear all"));
+  clear_action_ = new QAction(tr("&Clear all"), this);
 
-  space_action_ = new QAction(tr("&Print space"));
+  space_action_ = new QAction(tr("&Print space"), this);
   space_action_->setCheckable(true);
   space_action_->setChecked(true);
 
-  check_action_ = new QAction(tr("&Check update"));
+  check_action_ = new QAction(tr("&Check update"), this);
 
   log_menu_->addAction(clear_action_);
   log_menu_->addAction(space_action_);
 
   min_level_menu_ = log_menu_->addMenu(tr("&Show log level"));
 
-  min_info_action_ = new QAction(tr(">= INFO"));
+  min_info_action_ = new QAction(tr(">= INFO"), this);
   min_info_action_->setCheckable(true);
   min_info_action_->setChecked(true);
 
-  min_warn_action_ = new QAction(tr(">= WARN"));
+  min_warn_action_ = new QAction(tr(">= WARN"), this);
   min_warn_action_->setCheckable(true);
   min_warn_action_->setChecked(false);
 
-  min_error_action_ = new QAction(tr(">= ERROR"));
+  min_error_action_ = new QAction(tr(">= ERROR"), this);
   min_error_action_->setCheckable(true);
   min_error_action_->setChecked(false);
 
@@ -98,11 +113,11 @@ void MainWindow::InitMenu() {
 }
 
 void MainWindow::InitMainWindowLayout() {
-  QHBoxLayout* main_window_hlayout = new QHBoxLayout;
+  QHBoxLayout* main_window_hlayout = new QHBoxLayout(this);
 
   main_window_hlayout->addSpacing(4);
 
-  QVBoxLayout* main_window_vlayout = new QVBoxLayout;
+  QVBoxLayout* main_window_vlayout = new QVBoxLayout(this);
   main_window_vlayout->setAlignment(Qt::AlignTop);
 
   AddInputLayout(main_window_vlayout);
@@ -115,15 +130,15 @@ void MainWindow::InitMainWindowLayout() {
   main_window_hlayout->addLayout(main_window_vlayout);
   main_window_hlayout->addSpacing(4);
 
-  QWidget* widget = new QWidget();
+  QWidget* widget = new QWidget(this);
   widget->setLayout(main_window_hlayout);
   setCentralWidget(widget);
 }
 
 void MainWindow::AddInputLayout(QVBoxLayout* layout) {
-  QVBoxLayout* vlayout = new QVBoxLayout;
+  QVBoxLayout* vlayout = new QVBoxLayout(this);
 
-  input_label_ = new QLabel(tr("Input ASS files"));
+  input_label_ = new QLabel(tr("Input ASS files"), this);
 
   QFont font;
   font.setWeight(QFont::Bold);
@@ -131,13 +146,13 @@ void MainWindow::AddInputLayout(QVBoxLayout* layout) {
 
   vlayout->addWidget(input_label_);
 
-  QHBoxLayout* hlayout = new QHBoxLayout;
+  QHBoxLayout* hlayout = new QHBoxLayout(this);
 
-  input_line_ = new DropLineEdit;
+  input_line_ = new DropLineEdit(this);
   input_line_->setMinimumHeight(25);
   hlayout->addWidget(input_line_);
 
-  input_button_ = new QPushButton("...");
+  input_button_ = new QPushButton("...", this);
   input_button_->setFixedSize(25, 25);
   hlayout->addWidget(input_button_);
 
@@ -149,9 +164,9 @@ void MainWindow::AddInputLayout(QVBoxLayout* layout) {
 }
 
 void MainWindow::AddOutputLayout(QVBoxLayout* layout) {
-  QVBoxLayout* vlayout = new QVBoxLayout;
+  QVBoxLayout* vlayout = new QVBoxLayout(this);
 
-  output_label_ = new QLabel(tr("Output directory"));
+  output_label_ = new QLabel(tr("Output directory"), this);
 
   QFont font;
   font.setWeight(QFont::Bold);
@@ -159,13 +174,13 @@ void MainWindow::AddOutputLayout(QVBoxLayout* layout) {
 
   vlayout->addWidget(output_label_);
 
-  QHBoxLayout* hlayout = new QHBoxLayout;
+  QHBoxLayout* hlayout = new QHBoxLayout(this);
 
-  output_line_ = new DropLineEdit;
+  output_line_ = new DropLineEdit(this);
   output_line_->setMinimumHeight(25);
   hlayout->addWidget(output_line_);
 
-  output_button_ = new QPushButton("...");
+  output_button_ = new QPushButton("...", this);
   output_button_->setFixedSize(25, 25);
   hlayout->addWidget(output_button_);
 
@@ -177,9 +192,9 @@ void MainWindow::AddOutputLayout(QVBoxLayout* layout) {
 }
 
 void MainWindow::AddFontLayout(QVBoxLayout* layout) {
-  QVBoxLayout* vlayout = new QVBoxLayout;
+  QVBoxLayout* vlayout = new QVBoxLayout(this);
 
-  font_label_ = new QLabel(tr("Font directory"));
+  font_label_ = new QLabel(tr("Font directory"), this);
 
   QFont font;
   font.setWeight(QFont::Bold);
@@ -187,13 +202,13 @@ void MainWindow::AddFontLayout(QVBoxLayout* layout) {
 
   vlayout->addWidget(font_label_);
 
-  QHBoxLayout* hlayout = new QHBoxLayout;
+  QHBoxLayout* hlayout = new QHBoxLayout(this);
 
-  font_line_ = new DropLineEdit;
+  font_line_ = new DropLineEdit(this);
   font_line_->setMinimumHeight(25);
   hlayout->addWidget(font_line_);
 
-  font_button_ = new QPushButton("...");
+  font_button_ = new QPushButton("...", this);
   font_button_->setFixedSize(25, 25);
   hlayout->addWidget(font_button_);
 
@@ -205,9 +220,9 @@ void MainWindow::AddFontLayout(QVBoxLayout* layout) {
 }
 
 void MainWindow::AddDatabaseLayout(QVBoxLayout* layout) {
-  QVBoxLayout* vlayout = new QVBoxLayout;
+  QVBoxLayout* vlayout = new QVBoxLayout(this);
 
-  database_label_ = new QLabel(tr("Database directory"));
+  database_label_ = new QLabel(tr("Database directory"), this);
 
   QFont font;
   font.setWeight(QFont::Bold);
@@ -215,9 +230,9 @@ void MainWindow::AddDatabaseLayout(QVBoxLayout* layout) {
 
   vlayout->addWidget(database_label_);
 
-  QHBoxLayout* hlayout = new QHBoxLayout;
+  QHBoxLayout* hlayout = new QHBoxLayout(this);
 
-  database_line_ = new DropLineEdit;
+  database_line_ = new DropLineEdit(this);
   database_line_->setMinimumHeight(25);
 
   QDir appdata_dir(QString::fromStdString(save_files_path));
@@ -226,7 +241,7 @@ void MainWindow::AddDatabaseLayout(QVBoxLayout* layout) {
 
   hlayout->addWidget(database_line_);
 
-  database_button_ = new QPushButton("...");
+  database_button_ = new QPushButton("...", this);
   database_button_->setFixedSize(25, 25);
   hlayout->addWidget(database_button_);
 
@@ -238,11 +253,11 @@ void MainWindow::AddDatabaseLayout(QVBoxLayout* layout) {
 }
 
 void MainWindow::AddButtonsLayout(QVBoxLayout* layout) {
-  QHBoxLayout* hlayout = new QHBoxLayout;
+  QHBoxLayout* hlayout = new QHBoxLayout(this);
 
   hlayout->addSpacing(8);
 
-  hdr_combo_ = new QComboBox;
+  hdr_combo_ = new QComboBox(this);
   hdr_combo_->addItem(tr("No HDR"));
   hdr_combo_->addItem(tr("HDR Low"));
   hdr_combo_->addItem(tr("HDR High"));
@@ -250,25 +265,25 @@ void MainWindow::AddButtonsLayout(QVBoxLayout* layout) {
   hlayout->addWidget(hdr_combo_, 0, Qt::AlignVCenter);
   hlayout->addSpacing(16);
 
-  subset_checkbox_ = new QCheckBox(tr("Subset only"));
+  subset_checkbox_ = new QCheckBox(tr("Subset only"), this);
   hlayout->addWidget(subset_checkbox_, 0, Qt::AlignVCenter);
   hlayout->addSpacing(8);
 
-  embed_checkbox_ = new QCheckBox(tr("Embed only"));
+  embed_checkbox_ = new QCheckBox(tr("Embed only"), this);
   hlayout->addWidget(embed_checkbox_, 0, Qt::AlignVCenter);
   hlayout->addSpacing(8);
 
-  rename_checkbox_ = new QCheckBox(tr("Subfonts rename"));
+  rename_checkbox_ = new QCheckBox(tr("Subfonts rename"), this);
   hlayout->addWidget(rename_checkbox_, 0, Qt::AlignVCenter);
   hlayout->addSpacing(16);
   hlayout->addStretch();
 
-  build_button_ = new CheckableButton(tr("Build Database"));
+  build_button_ = new CheckableButton(tr("Build Database"), this);
   build_button_->setMinimumSize(110, 50);
   hlayout->addWidget(build_button_, 0, Qt::AlignVCenter);
   hlayout->addSpacing(10);
 
-  start_button_ = new CheckableButton(tr("Start"));
+  start_button_ = new CheckableButton(tr("Start"), this);
 
   QFont font;
   font.setWeight(QFont::Bold);
@@ -284,7 +299,7 @@ void MainWindow::AddButtonsLayout(QVBoxLayout* layout) {
 }
 
 void MainWindow::AddLogLayout(QVBoxLayout* layout) {
-  log_text_ = new QTextEdit;
+  log_text_ = new QTextEdit(this);
 
   log_highlighter_ = new LogHighlighter(log_text_->document());
 

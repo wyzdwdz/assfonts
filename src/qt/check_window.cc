@@ -19,12 +19,7 @@
 
 #include "check_window.h"
 
-#include <QEventLoop>
-#include <QLabel>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
-#include <QUrl>
+#include <curl/curl.h>
 
 #include <assfonts.h>
 
@@ -33,10 +28,41 @@ constexpr char VERSION_URL[] =
 constexpr char DOWNLOAD_URL[] =
     "https://github.com/wyzdwdz/assfonts/releases/latest";
 
+class Curl {
+ public:
+  Curl() { curl_ = curl_easy_init(); }
+  ~Curl() { curl_easy_cleanup(curl_); }
+
+  bool Download(const std::string& url, std::string& data) {
+    curl_easy_setopt(curl_, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+    curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &data);
+    curl_easy_setopt(curl_, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+    CURLcode res = curl_easy_perform(curl_);
+    if (res == CURLE_OK) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+ private:
+  CURL* curl_;
+
+  static size_t WriteMemoryCallback(void* contents, size_t size, size_t nmemb,
+                                    void* userp) {
+    size_t realsize = size * nmemb;
+    auto& mem = *static_cast<std::string*>(userp);
+    mem.append(static_cast<char*>(contents), realsize);
+    return realsize;
+  }
+};
+
 void CheckWindow::InitLayout() {
-  QGridLayout* main_layout = new QGridLayout;
+  QGridLayout* main_layout = new QGridLayout(this);
   main_layout->setAlignment(Qt::AlignCenter);
-  main_layout->setVerticalSpacing(18);
+  main_layout->setVerticalSpacing(15);
+  main_layout->setContentsMargins(25, 15, 25, 18);
 
   AddLabels(main_layout);
 
@@ -44,26 +70,25 @@ void CheckWindow::InitLayout() {
 }
 
 void CheckWindow::AddLabels(QGridLayout* layout) {
-  QLabel* current_version_label = new QLabel(tr("Current version: "));
+  QLabel* current_version_label = new QLabel(tr("Current version: "), this);
   QLabel* current_version_label_num =
       new QLabel(QString::number(ASSFONTS_VERSION_MAJOR) + "." +
-                 QString::number(ASSFONTS_VERSION_MINOR) + "." +
-                 QString::number(ASSFONTS_VERSION_PATCH));
+                     QString::number(ASSFONTS_VERSION_MINOR) + "." +
+                     QString::number(ASSFONTS_VERSION_PATCH),
+                 this);
 
   layout->addWidget(current_version_label, 0, 0);
   layout->addWidget(current_version_label_num, 0, 1);
 
-  QString latest_version;
-  GetLatestVersion(latest_version);
-
-  QLabel* latest_version_label = new QLabel(tr("Latest version: "));
-  QLabel* latest_version_label_num = new QLabel(latest_version);
+  QLabel* latest_version_label = new QLabel(tr("Latest version: "), this);
+  latest_version_label_num_ = new QLabel(tr("Fetching ..."), this);
 
   layout->addWidget(latest_version_label, 1, 0);
-  layout->addWidget(latest_version_label_num, 1, 1);
+  layout->addWidget(latest_version_label_num_, 1, 1);
 
-  QLabel* link = new QLabel(QString("<a href=\"") + DOWNLOAD_URL + "\">" +
-                            DOWNLOAD_URL + "</a>");
+  QLabel* link = new QLabel(
+      QString("<a href=\"") + DOWNLOAD_URL + "\">" + DOWNLOAD_URL + "</a>",
+      this);
   link->setTextFormat(Qt::RichText);
   link->setTextInteractionFlags(Qt::TextBrowserInteraction);
   link->setOpenExternalLinks(true);
@@ -71,21 +96,23 @@ void CheckWindow::AddLabels(QGridLayout* layout) {
   layout->addWidget(link, 2, 0, 1, 2);
 }
 
-bool CheckWindow::GetLatestVersion(QString& latest_version) {
-  QNetworkAccessManager manager;
-  QNetworkReply* reply = manager.get(QNetworkRequest(QUrl(VERSION_URL)));
+void CheckWindow::InitFetching() {
+  watcher_ = new QFutureWatcher<QString>(this);
+  connect(watcher_, &QFutureWatcher<QString>::finished, this,
+          [this]() { latest_version_label_num_->setText(watcher_->result()); });
 
-  QEventLoop loop;
-  QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-  loop.exec();
+  QFuture<QString> future =
+      QtConcurrent::run(this, &CheckWindow::GetLatestVersion);
+  watcher_->setFuture(future);
+}
 
-  if (reply->error() == QNetworkReply::NoError) {
-    QByteArray data = reply->readLine();
-    latest_version = QString::fromUtf8(data);
+QString CheckWindow::GetLatestVersion() {
+  Curl curl;
 
-    return true;
-  } else {
-    latest_version = "Not found";
-    return false;
+  std::string data;
+  if (!curl.Download(VERSION_URL, data)) {
+    return tr("Not found");
   }
+
+  return QString::fromStdString(data).trimmed();
 }

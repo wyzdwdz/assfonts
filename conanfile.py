@@ -25,6 +25,7 @@ class Assfonts(ConanFile):
         self.requires("threadpool/20140926")
         self.requires("ghc-filesystem/1.5.14")
         self.requires("qt/5.15.10")
+        self.requires("libcurl/8.2.0")
 
         self.requires("libpng/1.6.40", override=True)
         self.requires("openssl/1.1.1u", override=True)
@@ -43,6 +44,11 @@ class Assfonts(ConanFile):
         self.options["qt"].with_odbc = False
         self.options["qt"].with_sqlite3 = False
 
+        if self.settings.os == "Windows":
+            self.options["libcurl"].with_ssl = "schannel"
+        elif self.settings.os == "Macos":
+            self.options["libcurl"].with_ssl = "darwinssl"
+
     def layout(self):
         cmake_layout(self)
 
@@ -52,8 +58,8 @@ class Assfonts(ConanFile):
 
         tc = CMakeToolchain(self)
 
-        tc.variables["VERSION_MAJOR"] = self.version.split('.')[0]
-        tc.variables["VERSION_MINOR"] = self.version.split('.')[1]
-        tc.variables["VERSION_PATCH"] = self.version.split('.')[2]
-        
+        tc.variables["VERSION_MAJOR"] = self.version.split(".")[0]
+        tc.variables["VERSION_MINOR"] = self.version.split(".")[1]
+        tc.variables["VERSION_PATCH"] = self.version.split(".")[2]
+
         tc.generate()

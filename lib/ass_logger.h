@@ -20,6 +20,7 @@
 #ifndef ASSFONTS_ASSLOGGER_H_
 #define ASSFONTS_ASSLOGGER_H_
 
+#include <algorithm>
 #include <string>
 #include <utility>
 
@@ -117,6 +118,8 @@ class Logger {
 
     msg.append(fmt::format(fmt, std::forward<T>(args)...));
 
+    ReplaceNewline(msg);
+
     cb_(msg.c_str(), log_level);
   }
 
@@ -144,7 +147,14 @@ class Logger {
 
     msg.append(WideToU8(fmt::format(fmt, std::forward<T>(args)...)));
 
+    ReplaceNewline(msg);
+
     cb_(msg.c_str(), log_level);
+  }
+
+  void ReplaceNewline(std::string& str) {
+    std::replace(str.begin(), str.end(), '\n', ' ');
+    str.erase(std::remove(str.begin(), str.end(), '\r'), str.end());
   }
 };
 

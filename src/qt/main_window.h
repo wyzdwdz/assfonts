@@ -55,10 +55,8 @@ class MainWindow : public QMainWindow {
     ResizeHelper(this, 700, 700);
   }
 
-  ~MainWindow() {
-    thread_.quit();
-    thread_.wait();
-  }
+ protected:
+  void closeEvent(QCloseEvent* event) override;
 
  signals:
   void OnSendBuild(QString fonts_path, QString db_path);

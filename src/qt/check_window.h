@@ -22,6 +22,8 @@
 #include <QDialog>
 #include <QGridLayout>
 #include <QIcon>
+#include <QLabel>
+#include <QtConcurrent>
 
 class CheckWindow : public QDialog {
   Q_OBJECT
@@ -36,13 +38,20 @@ class CheckWindow : public QDialog {
 
     InitLayout();
 
-    setFixedSize(sizeHint().grownBy(QMargins(20, 10, 20, 10)));
+    setFixedSize(sizeHint());
+
+    InitFetching();
   }
 
  private:
+  QLabel* latest_version_label_num_;
+  QFutureWatcher<QString>* watcher_;
+
   void InitLayout();
 
   void AddLabels(QGridLayout* layout);
 
-  bool GetLatestVersion(QString& latest_version);
+  void InitFetching();
+
+  QString GetLatestVersion();
 };
