@@ -21,6 +21,7 @@ done
 
 conan profile detect -vquiet
 conan export --version 8.0.1 -nr 3rdparty/harfbuzz_expt
+conan export --version 5.15.10 -nr .github/recipes/qt5_fix
 
 if (( $EUID != 0 ))
 then        

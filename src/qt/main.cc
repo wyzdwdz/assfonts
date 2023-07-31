@@ -26,6 +26,8 @@
 
 #ifdef __linux__
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
+Q_IMPORT_PLUGIN(QIbusPlatformInputContextPlugin)
+Q_IMPORT_PLUGIN(QComposePlatformInputContextPlugin)
 #elif _WIN32
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 #elif __APPLE__

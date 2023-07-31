@@ -1548,6 +1548,12 @@ Examples = bin/datadir/examples""")
         if self.options.qtspeech:
             _create_module("TextToSpeech")
 
+        if self.settings.os == "Linux" and self.options.gui:
+            if self.options.with_dbus:
+                _create_plugin("QIbusPlatformInputContextPlugin", "ibusplatforminputcontextplugin", "platforminputcontexts", ["DBus"])
+
+            _create_plugin("QComposePlatformInputContextPlugin", "composeplatforminputcontextplugin", "platforminputcontexts", [])
+
         if not self.options.shared:
             if self.settings.os == "Windows":
                 self.cpp_info.components["qtCore"].system_libs.append("version")  # qtcore requires "GetFileVersionInfoW" and "VerQueryValueW" which are in "Version.lib" library
