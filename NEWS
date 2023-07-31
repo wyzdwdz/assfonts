@@ -6,10 +6,12 @@ Sunday, July 30, 2023
 - use libcurl to fetch latest version instead of QNetwork
 - fix some security vulnerabilities
 
+
 Overview of changes leading to v0.5.0
 Friday, July 28, 2023
 ====================================
 - new GUI-Toolkit: Qt5
+
 
 Overview of changes leading to v0.4.1
 Monday, June 5, 2023
@@ -18,6 +20,7 @@ Monday, June 5, 2023
 - Add feature: new version detect
 - Add macOS support
 
+
 Overview of changes leading to v0.4.0
 Friday, June 2, 2023
 ====================================
@@ -25,10 +28,12 @@ Friday, June 2, 2023
 - Fix bug: xysubfilter can't render vertical ellipsis
 - Set new default branch: imgui
 
+
 Overview of changes leading to v0.3.8
 Monday, April 17, 2023
 ====================================
 - Fix Windows memory leak
+
 
 Overview of changes leading to v0.3.6 and v0.3.7
 Saturday, April 8, 2023
@@ -37,10 +42,12 @@ Saturday, April 8, 2023
 - Fix font parsing bug
 - Fix ass parsing bugs
 
+
 Overview of changes leading to v0.3.5
 Monday, March 27, 2023
 ====================================
 - Reduce the size of subset fonts
+
 
 Overview of changes leading to v0.3.4
 Sunday, March 26, 2023
@@ -50,11 +57,13 @@ Sunday, March 26, 2023
 - Fix AssParser out of boundry bug
 - Fix bug: xysubfilter will fallback fullwidth characters
 
+
 Overview of changes leading to v0.3.3
 Monday, February 20, 2023
 ====================================
 - Fix exception handling bugs
 - Add GUI help text
+
 
 Overview of changes leading to v0.3.2
 Wednesday, January 25, 2023

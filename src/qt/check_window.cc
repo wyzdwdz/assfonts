@@ -59,7 +59,7 @@ class Curl {
 };
 
 void CheckWindow::InitLayout() {
-  QGridLayout* main_layout = new QGridLayout(this);
+  QGridLayout* main_layout = new QGridLayout;
   main_layout->setAlignment(Qt::AlignCenter);
   main_layout->setVerticalSpacing(15);
   main_layout->setContentsMargins(25, 15, 25, 20);
@@ -70,7 +70,7 @@ void CheckWindow::InitLayout() {
 }
 
 void CheckWindow::AddLabels(QGridLayout* layout) {
-  QLabel* current_version_label = new QLabel(tr("Current version: "), this);
+  QLabel* current_version_label = new QLabel(tr("Current version: "));
   QLabel* current_version_label_num =
       new QLabel(QString::number(ASSFONTS_VERSION_MAJOR) + "." +
                      QString::number(ASSFONTS_VERSION_MINOR) + "." +
@@ -80,15 +80,14 @@ void CheckWindow::AddLabels(QGridLayout* layout) {
   layout->addWidget(current_version_label, 0, 0);
   layout->addWidget(current_version_label_num, 0, 1);
 
-  QLabel* latest_version_label = new QLabel(tr("Latest version: "), this);
-  latest_version_label_num_ = new QLabel(tr("Fetching ..."), this);
+  QLabel* latest_version_label = new QLabel(tr("Latest version: "));
+  latest_version_label_num_ = new QLabel(tr("Fetching ..."));
 
   layout->addWidget(latest_version_label, 1, 0);
   layout->addWidget(latest_version_label_num_, 1, 1);
 
-  QLabel* link = new QLabel(
-      QString("<a href=\"") + DOWNLOAD_URL + "\">" + DOWNLOAD_URL + "</a>",
-      this);
+  QLabel* link = new QLabel(QString("<a href=\"") + DOWNLOAD_URL + "\">" +
+                            DOWNLOAD_URL + "</a>");
   link->setTextFormat(Qt::RichText);
   link->setTextInteractionFlags(Qt::TextBrowserInteraction);
   link->setOpenExternalLinks(true);
