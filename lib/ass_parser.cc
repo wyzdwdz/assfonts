@@ -138,7 +138,7 @@ bool AssParser::Recolorize(const AString& ass_file_path,
   }
 
   unsigned int out_size = buf_u8.size() * 2;
-  std::unique_ptr<char> out_text(new char[out_size]);
+  std::unique_ptr<char[]> out_text(new char[out_size]);
 
   if (!asshdr::AssRecolor(buf_u8.c_str(), buf_u8.size(), out_text.get(),
                           out_size, brightness)) {
@@ -652,9 +652,9 @@ bool AssParser::CleanFonts() {
   }
 
   fs::path input_path(ass_path_);
-  fs::path output_path(output_dir_path_ + fs::path::preferred_separator +
-                       input_path.stem().native() + _ST(".cleaned") +
-                       input_path.extension().native());
+  fs::path output_path = fs::path(output_dir_path_) /
+                         (input_path.stem().native() + _ST(".cleaned") +
+                          input_path.extension().native());
 
   logger_->Info(
       _ST("Found fonts in \"{}\". Delete them and save new file in \"{}\""),

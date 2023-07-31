@@ -112,9 +112,9 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
         continue;
       }
 
-      input = fs::path(output.native() + fs::path::preferred_separator +
-                       input.stem().native() + _ST(".hdr") +
-                       input.extension().native());
+      AString hdr_filename =
+          input.stem().native() + _ST(".hdr") + input.extension().native();
+      input = output / hdr_filename;
     }
 
     if (!ap.ReadFile(input.native())) {

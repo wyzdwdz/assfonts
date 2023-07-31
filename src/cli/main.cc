@@ -65,12 +65,17 @@ static void log_callback(const char* msg, const ASSFONTS_LOG_LEVEL log_level) {
     case ASSFONTS_INFO:
       nowide::cout << msg << std::endl;
       break;
+
     case ASSFONTS_WARN:
-      nowide::cout << rang::fg::yellow << msg << rang::fg::reset << std::endl;
+      nowide::cout << rang::style::bold << rang::fg::cyan << msg
+                   << rang::fg::reset << rang::style::reset << std::endl;
       break;
+
     case ASSFONTS_ERROR:
-      nowide::cout << rang::fg::red << msg << rang::fg::reset << std::endl;
+      nowide::cout << rang::style::bold << rang::fg::red << msg
+                   << rang::fg::reset << rang::style::reset << std::endl;
       break;
+
     default:
       nowide::cout << msg << std::endl;
       break;
