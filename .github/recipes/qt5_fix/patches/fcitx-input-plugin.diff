@@ -17,26 +17,26 @@ index 0000000..2cd5f28
 +TARGET = fcitxplatforminputcontextplugin
 +
 +QT += dbus gui-private xkbcommon_support-private
-+SOURCES += $$PWD/fcitxinputcontextproxy.cpp \
++SOURCES += $$PWD/inputcontextproxy.cpp \
++           $$PWD/inputcontext1proxy.cpp \
++           $$PWD/inputmethodproxy.cpp \
++           $$PWD/inputmethod1proxy.cpp \
++           $$PWD/fcitxinputcontextproxy.cpp \
 +           $$PWD/fcitxqtdbustypes.cpp \
 +           $$PWD/fcitxwatcher.cpp \
 +           $$PWD/qfcitxplatforminputcontext.cpp \
 +           $$PWD/qtkey.cpp \
-+           $$PWD/inputcontextproxy.cpp \
-+           $$PWD/inputcontext1proxy.cpp \
-+           $$PWD/inputmethodproxy.cpp \
-+           $$PWD/inputmethod1proxy.cpp \
 +           $$PWD/main.cpp
 +
-+HEADERS += $$PWD/fcitxinputcontextproxy.h \
++HEADERS += $$PWD/inputcontextproxy.h \
++           $$PWD/inputcontext1proxy.h \
++           $$PWD/inputmethodproxy.h \
++           $$PWD/inputmethod1proxy.h \
++           $$PWD/fcitxinputcontextproxy.h \
 +           $$PWD/fcitxqtdbustypes.h \
 +           $$PWD/fcitxwatcher.h \
 +           $$PWD/qfcitxplatforminputcontext.h \
 +           $$PWD/qtkey.h \
-+           $$PWD/inputcontextproxy.h \
-+           $$PWD/inputcontext1proxy.h \
-+           $$PWD/inputmethodproxy.h \
-+           $$PWD/inputmethod1proxy.h \
 +           $$PWD/main.h
 +
 +OTHER_FILES += $$PWD/fcitx.json
