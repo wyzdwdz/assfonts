@@ -80,6 +80,8 @@ patches:
       "patch_file": "patches/android-new-ndk.diff"
     - "base_path": "qt5/qtbase"
       "patch_file": "patches/fix-windows-default-font.diff"
+    - "base_path": "qt5/qtbase"
+      "patch_file": "patches/fcitx-input-plugin.diff"
   "5.15.9":
     - "base_path": "qt5/qtbase"
       "patch_file": "patches/aa2a39dea5.diff"

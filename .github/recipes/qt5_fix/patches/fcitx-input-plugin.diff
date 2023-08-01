@@ -1,0 +1,2854 @@
+diff --git "a/src/plugins/platforminputcontexts/fcitx/fcitx.json" "b/src/plugins/platforminputcontexts/fcitx/fcitx.json"
+new file mode 100644
+index 0000000..6d2b389
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/fcitx.json"
+@@ -0,0 +1,3 @@
++{
++    "Keys": [ "fcitx" ]
++}
+\ No newline at end of file
+diff --git "a/src/plugins/platforminputcontexts/fcitx/fcitx.pro" "b/src/plugins/platforminputcontexts/fcitx/fcitx.pro"
+new file mode 100644
+index 0000000..53e0263
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/fcitx.pro"
+@@ -0,0 +1,23 @@
++TARGET = fcitxplatforminputcontextplugin
++
++QT += dbus gui-private xkbcommon_support-private
++SOURCES += $$PWD/fcitxinputcontextproxy.cpp \
++           $$PWD/fcitxqtdbustypes.cpp \
++           $$PWD/fcitxwatcher.cpp \
++           $$PWD/qfcitxplatforminputcontext.cpp \
++           $$PWD/qtkey.cpp \
++           $$PWD/main.cpp
++
++HEADERS += $$PWD/fcitxinputcontextproxy.h \
++           $$PWD/fcitxqtdbustypes.h \
++           $$PWD/fcitxwatcher.h \
++           $$PWD/qfcitxplatforminputcontext.h \
++           $$PWD/qtkey.h \
++           $$PWD/main.h
++
++OTHER_FILES += $$PWD/fcitx.json
++
++PLUGIN_TYPE = platforminputcontexts
++PLUGIN_EXTENDS = -
++PLUGIN_CLASS_NAME = QFcitxPlatformInputContextPlugin
++load(qt_plugin)
+diff --git "a/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.cpp" "b/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.cpp"
+new file mode 100644
+index 0000000..0248108
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.cpp"
+@@ -0,0 +1,307 @@
++/*
++ * Copyright (C) 2011~2017 by CSSlayer
++ * wengxt@gmail.com
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above Copyright
++ *    notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above Copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * 3. Neither the name of the authors nor the names of its contributors
++ *    may be used to endorse or promote products derived from this
++ *    software without specific prior written permission.
++ */
++
++#include "fcitxinputcontextproxy.h"
++#include "fcitxwatcher.h"
++#include <QCoreApplication>
++#include <QDBusConnectionInterface>
++#include <QDBusInterface>
++#include <QDBusMetaType>
++#include <QFileInfo>
++#include <QTimer>
++#include <unistd.h>
++
++FcitxInputContextProxy::FcitxInputContextProxy(FcitxWatcher *watcher,
++                                               QObject *parent)
++    : QObject(parent), m_fcitxWatcher(watcher), m_portal(false) {
++    FcitxFormattedPreedit::registerMetaType();
++    FcitxInputContextArgument::registerMetaType();
++    connect(m_fcitxWatcher, SIGNAL(availabilityChanged(bool)), this,
++            SLOT(availabilityChanged()));
++    m_watcher.setWatchMode(QDBusServiceWatcher::WatchForUnregistration);
++    connect(&m_watcher, SIGNAL(serviceUnregistered(QString)), this,
++            SLOT(serviceUnregistered()));
++    availabilityChanged();
++}
++
++FcitxInputContextProxy::~FcitxInputContextProxy() {
++    if (isValid()) {
++        if (m_portal) {
++            m_ic1proxy->DestroyIC();
++        } else {
++            m_icproxy->DestroyIC();
++        }
++    }
++}
++
++void FcitxInputContextProxy::setDisplay(const QString &display) {
++    m_display = display;
++}
++
++void FcitxInputContextProxy::serviceUnregistered() {
++    cleanUp();
++    availabilityChanged();
++}
++
++void FcitxInputContextProxy::availabilityChanged() {
++    QTimer::singleShot(100, this, SLOT(recheck()));
++}
++
++void FcitxInputContextProxy::recheck() {
++    if (!isValid() && m_fcitxWatcher->availability()) {
++        createInputContext();
++    }
++    if (!m_fcitxWatcher->availability()) {
++        cleanUp();
++    }
++}
++
++void FcitxInputContextProxy::cleanUp() {
++    auto services = m_watcher.watchedServices();
++    for (const auto &service : services) {
++        m_watcher.removeWatchedService(service);
++    }
++
++    delete m_improxy;
++    m_improxy = nullptr;
++    delete m_im1proxy;
++    m_im1proxy = nullptr;
++    delete m_icproxy;
++    m_icproxy = nullptr;
++    delete m_ic1proxy;
++    m_ic1proxy = nullptr;
++    delete m_createInputContextWatcher;
++    m_createInputContextWatcher = nullptr;
++}
++
++void FcitxInputContextProxy::createInputContext() {
++    if (!m_fcitxWatcher->availability()) {
++        return;
++    }
++
++    cleanUp();
++
++    auto service = m_fcitxWatcher->service();
++    auto connection = m_fcitxWatcher->connection();
++
++    auto owner = connection.interface()->serviceOwner(service);
++    if (!owner.isValid()) {
++        return;
++    }
++
++    m_watcher.setConnection(connection);
++    m_watcher.setWatchedServices(QStringList() << owner);
++    // Avoid race, query again.
++    if (!connection.interface()->isServiceRegistered(owner)) {
++        cleanUp();
++        return;
++    }
++
++    QFileInfo info(QCoreApplication::applicationFilePath());
++    if (service == "org.freedesktop.portal.Fcitx") {
++        m_portal = true;
++        m_im1proxy = new org::fcitx::Fcitx::InputMethod1(
++            owner, "/org/freedesktop/portal/inputmethod", connection, this);
++        FcitxInputContextArgumentList list;
++        FcitxInputContextArgument arg;
++        arg.setName("program");
++        arg.setValue(info.fileName());
++        list << arg;
++        if (!m_display.isEmpty()) {
++            FcitxInputContextArgument arg2;
++            arg2.setName("display");
++            arg2.setValue(m_display);
++            list << arg2;
++        }
++
++        auto result = m_im1proxy->CreateInputContext(list);
++        m_createInputContextWatcher = new QDBusPendingCallWatcher(result);
++        connect(m_createInputContextWatcher,
++                SIGNAL(finished(QDBusPendingCallWatcher *)), this,
++                SLOT(createInputContextFinished()));
++    } else {
++        m_portal = false;
++        m_improxy = new org::fcitx::Fcitx::InputMethod(owner, "/inputmethod",
++                                                       connection, this);
++        auto result = m_improxy->CreateICv3(info.fileName(), getpid());
++        m_createInputContextWatcher = new QDBusPendingCallWatcher(result);
++        connect(m_createInputContextWatcher,
++                SIGNAL(finished(QDBusPendingCallWatcher *)), this,
++                SLOT(createInputContextFinished()));
++    }
++}
++
++void FcitxInputContextProxy::createInputContextFinished() {
++    if (m_createInputContextWatcher->isError()) {
++        cleanUp();
++        return;
++    }
++
++    if (m_portal) {
++        QDBusPendingReply<QDBusObjectPath, QByteArray> reply(
++            *m_createInputContextWatcher);
++        m_ic1proxy = new org::fcitx::Fcitx::InputContext1(
++            m_im1proxy->service(), reply.value().path(),
++            m_im1proxy->connection(), this);
++        connect(m_ic1proxy, SIGNAL(CommitString(QString)), this,
++                SIGNAL(commitString(QString)));
++        connect(m_ic1proxy, SIGNAL(CurrentIM(QString, QString, QString)), this,
++                SIGNAL(currentIM(QString, QString, QString)));
++        connect(m_ic1proxy, SIGNAL(DeleteSurroundingText(int, uint)), this,
++                SIGNAL(deleteSurroundingText(int, uint)));
++        connect(m_ic1proxy, SIGNAL(ForwardKey(uint, uint, bool)), this,
++                SIGNAL(forwardKey(uint, uint, bool)));
++        connect(m_ic1proxy,
++                SIGNAL(UpdateFormattedPreedit(FcitxFormattedPreeditList, int)),
++                this,
++                SIGNAL(updateFormattedPreedit(FcitxFormattedPreeditList, int)));
++    } else {
++        QDBusPendingReply<int, bool, uint, uint, uint, uint> reply(
++            *m_createInputContextWatcher);
++        QString path = QString("/inputcontext_%1").arg(reply.value());
++        m_icproxy = new org::fcitx::Fcitx::InputContext(
++            m_improxy->service(), path, m_improxy->connection(), this);
++        connect(m_icproxy, SIGNAL(CommitString(QString)), this,
++                SIGNAL(commitString(QString)));
++        connect(m_icproxy, SIGNAL(CurrentIM(QString, QString, QString)), this,
++                SIGNAL(currentIM(QString, QString, QString)));
++        connect(m_icproxy, SIGNAL(DeleteSurroundingText(int, uint)), this,
++                SIGNAL(deleteSurroundingText(int, uint)));
++        connect(m_icproxy, SIGNAL(ForwardKey(uint, uint, int)), this,
++                SLOT(forwardKeyWrapper(uint, uint, int)));
++        connect(m_icproxy,
++                SIGNAL(UpdateFormattedPreedit(FcitxFormattedPreeditList, int)),
++                this,
++                SLOT(updateFormattedPreeditWrapper(FcitxFormattedPreeditList,
++                                                   int)));
++    }
++
++    delete m_createInputContextWatcher;
++    m_createInputContextWatcher = nullptr;
++    Q_EMIT inputContextCreated();
++}
++
++bool FcitxInputContextProxy::isValid() const {
++    return (m_icproxy && m_icproxy->isValid()) ||
++           (m_ic1proxy && m_ic1proxy->isValid());
++}
++
++void FcitxInputContextProxy::forwardKeyWrapper(uint keyval, uint state,
++                                               int type) {
++    Q_EMIT forwardKey(keyval, state, type == 1);
++}
++
++void FcitxInputContextProxy::updateFormattedPreeditWrapper(
++    const FcitxFormattedPreeditList &list, int cursorpos) {
++    auto newList = list;
++    for (auto item : newList) {
++        const qint32 underlineBit = (1 << 3);
++        // revert non underline and "underline"
++        item.setFormat(item.format() ^ underlineBit);
++    }
++
++    Q_EMIT updateFormattedPreedit(newList, cursorpos);
++}
++
++QDBusPendingReply<> FcitxInputContextProxy::focusIn() {
++    if (m_portal) {
++        return m_ic1proxy->FocusIn();
++    } else {
++        return m_icproxy->FocusIn();
++    }
++}
++
++QDBusPendingReply<> FcitxInputContextProxy::focusOut() {
++    if (m_portal) {
++        return m_ic1proxy->FocusOut();
++    } else {
++        return m_icproxy->FocusOut();
++    }
++}
++
++QDBusPendingCall FcitxInputContextProxy::processKeyEvent(uint keyval,
++                                                         uint keycode,
++                                                         uint state, bool type,
++                                                         uint time) {
++    if (m_portal) {
++        return m_ic1proxy->ProcessKeyEvent(keyval, keycode, state, type, time);
++    } else {
++        return m_icproxy->ProcessKeyEvent(keyval, keycode, state, type ? 1 : 0,
++                                          time);
++    }
++}
++
++QDBusPendingReply<> FcitxInputContextProxy::reset() {
++    if (m_portal) {
++        return m_ic1proxy->Reset();
++    } else {
++        return m_icproxy->Reset();
++    }
++}
++
++QDBusPendingReply<> FcitxInputContextProxy::setCapability(qulonglong caps) {
++    if (m_portal) {
++        return m_ic1proxy->SetCapability(caps);
++    } else {
++        return m_icproxy->SetCapacity(static_cast<uint>(caps));
++    }
++}
++
++QDBusPendingReply<> FcitxInputContextProxy::setCursorRect(int x, int y, int w,
++                                                          int h) {
++    if (m_portal) {
++        return m_ic1proxy->SetCursorRect(x, y, w, h);
++    } else {
++        return m_icproxy->SetCursorRect(x, y, w, h);
++    }
++}
++
++QDBusPendingReply<>
++FcitxInputContextProxy::setSurroundingText(const QString &text, uint cursor,
++                                           uint anchor) {
++    if (m_portal) {
++        return m_ic1proxy->SetSurroundingText(text, cursor, anchor);
++    } else {
++        return m_icproxy->SetSurroundingText(text, cursor, anchor);
++    }
++}
++
++QDBusPendingReply<>
++FcitxInputContextProxy::setSurroundingTextPosition(uint cursor, uint anchor) {
++    if (m_portal) {
++        return m_ic1proxy->SetSurroundingTextPosition(cursor, anchor);
++    } else {
++        return m_icproxy->SetSurroundingTextPosition(cursor, anchor);
++    }
++}
++
++bool FcitxInputContextProxy::processKeyEventResult(
++    const QDBusPendingCall &call) {
++    if (call.isError()) {
++        return false;
++    }
++    if (m_portal) {
++        QDBusPendingReply<bool> reply = call;
++        return reply.value();
++    } else {
++        QDBusPendingReply<int> reply = call;
++        return reply.value() > 0;
++    }
++}
+diff --git "a/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.h" "b/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.h"
+new file mode 100644
+index 0000000..983db35
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.h"
+@@ -0,0 +1,90 @@
++/*
++ * Copyright (C) 2011~2017 by CSSlayer
++ * wengxt@gmail.com
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above Copyright
++ *    notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above Copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * 3. Neither the name of the authors nor the names of its contributors
++ *    may be used to endorse or promote products derived from this
++ *    software without specific prior written permission.
++ */
++
++#ifndef FCITXINPUTCONTEXTPROXY_H_
++#define FCITXINPUTCONTEXTPROXY_H_
++
++#include "inputcontext1proxy.h"
++#include "inputcontextproxy.h"
++#include "inputmethod1proxy.h"
++#include "inputmethodproxy.h"
++#include <QDBusConnection>
++#include <QDBusServiceWatcher>
++#include <QObject>
++
++class QDBusPendingCallWatcher;
++class FcitxWatcher;
++
++class FcitxInputContextProxy : public QObject {
++    Q_OBJECT
++public:
++    FcitxInputContextProxy(FcitxWatcher *watcher, QObject *parent);
++    ~FcitxInputContextProxy();
++
++    bool isValid() const;
++
++    QDBusPendingReply<> focusIn();
++    QDBusPendingReply<> focusOut();
++    QDBusPendingCall processKeyEvent(uint keyval, uint keycode, uint state,
++                                     bool type, uint time);
++    bool processKeyEventResult(const QDBusPendingCall &call);
++    QDBusPendingReply<> reset();
++    QDBusPendingReply<> setCapability(qulonglong caps);
++    QDBusPendingReply<> setCursorRect(int x, int y, int w, int h);
++    QDBusPendingReply<> setSurroundingText(const QString &text, uint cursor,
++                                           uint anchor);
++    QDBusPendingReply<> setSurroundingTextPosition(uint cursor, uint anchor);
++    void setDisplay(const QString &display);
++
++Q_SIGNALS:
++    void commitString(const QString &str);
++    void currentIM(const QString &name, const QString &uniqueName,
++                   const QString &langCode);
++    void deleteSurroundingText(int offset, uint nchar);
++    void forwardKey(uint keyval, uint state, bool isRelease);
++    void updateFormattedPreedit(const FcitxFormattedPreeditList &str,
++                                int cursorpos);
++    void inputContextCreated();
++
++private Q_SLOTS:
++    void availabilityChanged();
++    void createInputContext();
++    void createInputContextFinished();
++    void serviceUnregistered();
++    void recheck();
++    void forwardKeyWrapper(uint keyval, uint state, int type);
++    void updateFormattedPreeditWrapper(const FcitxFormattedPreeditList &str,
++                                       int cursorpos);
++
++private:
++    void cleanUp();
++
++    QDBusServiceWatcher m_watcher;
++    FcitxWatcher *m_fcitxWatcher;
++    org::fcitx::Fcitx::InputMethod *m_improxy = nullptr;
++    org::fcitx::Fcitx::InputMethod1 *m_im1proxy = nullptr;
++    org::fcitx::Fcitx::InputContext *m_icproxy = nullptr;
++    org::fcitx::Fcitx::InputContext1 *m_ic1proxy = nullptr;
++    QDBusPendingCallWatcher *m_createInputContextWatcher = nullptr;
++    QString m_display;
++    bool m_portal;
++};
++
++#endif // FCITXINPUTCONTEXTPROXY_H_
+diff --git "a/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.cpp" "b/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.cpp"
+new file mode 100644
+index 0000000..2c8d950
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.cpp"
+@@ -0,0 +1,102 @@
++/*
++ * Copyright (C) 2017~2017 by CSSlayer
++ * wengxt@gmail.com
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above Copyright
++ *    notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above Copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * 3. Neither the name of the authors nor the names of its contributors
++ *    may be used to endorse or promote products derived from this
++ *    software without specific prior written permission.
++ */
++
++#include <QDBusMetaType>
++
++#include "fcitxqtdbustypes.h"
++
++void FcitxFormattedPreedit::registerMetaType() {
++    qRegisterMetaType<FcitxFormattedPreedit>("FcitxFormattedPreedit");
++    qDBusRegisterMetaType<FcitxFormattedPreedit>();
++    qRegisterMetaType<FcitxFormattedPreeditList>("FcitxFormattedPreeditList");
++    qDBusRegisterMetaType<FcitxFormattedPreeditList>();
++}
++
++qint32 FcitxFormattedPreedit::format() const { return m_format; }
++
++const QString &FcitxFormattedPreedit::string() const { return m_string; }
++
++void FcitxFormattedPreedit::setFormat(qint32 format) { m_format = format; }
++
++void FcitxFormattedPreedit::setString(const QString &str) { m_string = str; }
++
++bool FcitxFormattedPreedit::operator==(
++    const FcitxFormattedPreedit &preedit) const {
++    return (preedit.m_format == m_format) && (preedit.m_string == m_string);
++}
++
++QDBusArgument &operator<<(QDBusArgument &argument,
++                          const FcitxFormattedPreedit &preedit) {
++    argument.beginStructure();
++    argument << preedit.string();
++    argument << preedit.format();
++    argument.endStructure();
++    return argument;
++}
++
++const QDBusArgument &operator>>(const QDBusArgument &argument,
++                                FcitxFormattedPreedit &preedit) {
++    QString str;
++    qint32 format;
++    argument.beginStructure();
++    argument >> str >> format;
++    argument.endStructure();
++    preedit.setString(str);
++    preedit.setFormat(format);
++    return argument;
++}
++
++void FcitxInputContextArgument::registerMetaType() {
++    qRegisterMetaType<FcitxInputContextArgument>("FcitxInputContextArgument");
++    qDBusRegisterMetaType<FcitxInputContextArgument>();
++    qRegisterMetaType<FcitxInputContextArgumentList>(
++        "FcitxInputContextArgumentList");
++    qDBusRegisterMetaType<FcitxInputContextArgumentList>();
++}
++
++const QString &FcitxInputContextArgument::name() const { return m_name; }
++
++void FcitxInputContextArgument::setName(const QString &name) { m_name = name; }
++
++const QString &FcitxInputContextArgument::value() const { return m_value; }
++
++void FcitxInputContextArgument::setValue(const QString &value) {
++    m_value = value;
++}
++
++QDBusArgument &operator<<(QDBusArgument &argument,
++                          const FcitxInputContextArgument &arg) {
++    argument.beginStructure();
++    argument << arg.name();
++    argument << arg.value();
++    argument.endStructure();
++    return argument;
++}
++
++const QDBusArgument &operator>>(const QDBusArgument &argument,
++                                FcitxInputContextArgument &arg) {
++    QString name, value;
++    argument.beginStructure();
++    argument >> name >> value;
++    argument.endStructure();
++    arg.setName(name);
++    arg.setValue(value);
++    return argument;
++}
+diff --git "a/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.h" "b/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.h"
+new file mode 100644
+index 0000000..d760473
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.h"
+@@ -0,0 +1,82 @@
++/*
++ * Copyright (C) 2012~2017 by CSSlayer
++ * wengxt@gmail.com
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above Copyright
++ *    notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above Copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * 3. Neither the name of the authors nor the names of its contributors
++ *    may be used to endorse or promote products derived from this
++ *    software without specific prior written permission.
++ */
++
++#ifndef _DBUSADDONS_FCITXQTDBUSTYPES_H_
++#define _DBUSADDONS_FCITXQTDBUSTYPES_H_
++
++#include <QDBusArgument>
++#include <QList>
++#include <QMetaType>
++
++class FcitxFormattedPreedit {
++public:
++    const QString &string() const;
++    qint32 format() const;
++    void setString(const QString &str);
++    void setFormat(qint32 format);
++
++    static void registerMetaType();
++
++    bool operator==(const FcitxFormattedPreedit &preedit) const;
++
++private:
++    QString m_string;
++    qint32 m_format = 0;
++};
++
++typedef QList<FcitxFormattedPreedit> FcitxFormattedPreeditList;
++
++QDBusArgument &operator<<(QDBusArgument &argument,
++                          const FcitxFormattedPreedit &im);
++const QDBusArgument &operator>>(const QDBusArgument &argument,
++                                FcitxFormattedPreedit &im);
++
++class FcitxInputContextArgument {
++public:
++    FcitxInputContextArgument() {}
++    FcitxInputContextArgument(const QString &name, const QString &value)
++        : m_name(name), m_value(value) {}
++
++    static void registerMetaType();
++
++    const QString &name() const;
++    const QString &value() const;
++    void setName(const QString &);
++    void setValue(const QString &);
++
++private:
++    QString m_name;
++    QString m_value;
++};
++
++typedef QList<FcitxInputContextArgument> FcitxInputContextArgumentList;
++
++QDBusArgument &operator<<(QDBusArgument &argument,
++                          const FcitxInputContextArgument &im);
++const QDBusArgument &operator>>(const QDBusArgument &argument,
++                                FcitxInputContextArgument &im);
++
++Q_DECLARE_METATYPE(FcitxFormattedPreedit)
++Q_DECLARE_METATYPE(FcitxFormattedPreeditList)
++
++Q_DECLARE_METATYPE(FcitxInputContextArgument)
++Q_DECLARE_METATYPE(FcitxInputContextArgumentList)
++
++#endif // _DBUSADDONS_FCITXQTDBUSTYPES_H_
+diff --git "a/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.cpp" "b/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.cpp"
+new file mode 100644
+index 0000000..1fde40e
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.cpp"
+@@ -0,0 +1,289 @@
++/*
++ * Copyright (C) 2011~2017 by CSSlayer
++ * wengxt@gmail.com
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above Copyright
++ *    notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above Copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * 3. Neither the name of the authors nor the names of its contributors
++ *    may be used to endorse or promote products derived from this
++ *    software without specific prior written permission.
++ */
++
++#include "fcitxwatcher.h"
++#include <QDBusConnection>
++#include <QDBusConnectionInterface>
++#include <QDBusServiceWatcher>
++#include <QDir>
++#include <QFileSystemWatcher>
++#include <errno.h>
++#include <signal.h>
++#include <unistd.h>
++
++// utils function in fcitx-utils and fcitx-config
++bool _pid_exists(pid_t pid) {
++    if (pid <= 0)
++        return 0;
++    return !(kill(pid, 0) && (errno == ESRCH));
++}
++
++int displayNumber() {
++    QByteArray display(qgetenv("DISPLAY"));
++    QByteArray displayNumber("0");
++    int pos = display.indexOf(':');
++
++    if (pos >= 0) {
++        ++pos;
++        int pos2 = display.indexOf('.', pos);
++        if (pos2 > 0) {
++            displayNumber = display.mid(pos, pos2 - pos);
++        } else {
++            displayNumber = display.mid(pos);
++        }
++    }
++
++    bool ok;
++    int d = displayNumber.toInt(&ok);
++    if (ok) {
++        return d;
++    }
++    return 0;
++}
++
++QString socketFile() {
++    QString filename =
++        QString("%1-%2")
++            .arg(QString::fromLatin1(QDBusConnection::localMachineId()))
++            .arg(displayNumber());
++
++    QString home = QString::fromLocal8Bit(qgetenv("XDG_CONFIG_HOME"));
++    if (home.isEmpty()) {
++        home = QDir::homePath().append(QLatin1String("/.config"));
++    }
++    return QString("%1/fcitx/dbus/%2").arg(home).arg(filename);
++}
++
++FcitxWatcher::FcitxWatcher(QDBusConnection sessionBus, QObject *parent)
++    : QObject(parent), m_fsWatcher(new QFileSystemWatcher(this)),
++      m_serviceWatcher(new QDBusServiceWatcher(this)), m_connection(nullptr),
++      m_sessionBus(sessionBus), m_socketFile(socketFile()),
++      m_serviceName(QString("org.fcitx.Fcitx-%1").arg(displayNumber())),
++      m_availability(false) {}
++
++FcitxWatcher::~FcitxWatcher() {
++    cleanUpConnection();
++    delete m_fsWatcher;
++    m_fsWatcher = nullptr;
++}
++
++bool FcitxWatcher::availability() const { return m_availability; }
++
++QDBusConnection FcitxWatcher::connection() const {
++    if (m_connection) {
++        return *m_connection;
++    }
++    return m_sessionBus;
++}
++
++QString FcitxWatcher::service() const {
++    if (m_connection) {
++        return m_serviceName;
++    }
++    if (m_mainPresent) {
++        return m_serviceName;
++    }
++    if (m_portalPresent) {
++        return "org.freedesktop.portal.Fcitx";
++    }
++    return QString();
++}
++
++void FcitxWatcher::setAvailability(bool availability) {
++    if (m_availability != availability) {
++        m_availability = availability;
++        Q_EMIT availabilityChanged(m_availability);
++    }
++}
++
++void FcitxWatcher::watch() {
++    if (m_watched) {
++        return;
++    }
++
++    connect(m_serviceWatcher,
++            SIGNAL(serviceOwnerChanged(QString, QString, QString)), this,
++            SLOT(imChanged(QString, QString, QString)));
++    m_serviceWatcher->setConnection(m_sessionBus);
++    m_serviceWatcher->addWatchedService(m_serviceName);
++    m_serviceWatcher->addWatchedService("org.freedesktop.portal.Fcitx");
++
++    if (m_sessionBus.interface()->isServiceRegistered(m_serviceName)) {
++        m_mainPresent = true;
++    }
++    if (m_sessionBus.interface()->isServiceRegistered(
++            "org.freedesktop.portal.Fcitx")) {
++        m_portalPresent = true;
++    }
++
++    watchSocketFile();
++    createConnection();
++    m_watched = true;
++}
++
++void FcitxWatcher::unwatch() {
++    if (!m_watched) {
++        return;
++    }
++    disconnect(m_serviceWatcher,
++               SIGNAL(serviceOwnerChanged(QString, QString, QString)), this,
++               SLOT(imChanged(QString, QString, QString)));
++    unwatchSocketFile();
++    cleanUpConnection();
++    m_mainPresent = false;
++    m_portalPresent = false;
++    m_watched = false;
++    updateAvailability();
++}
++
++QString FcitxWatcher::address() {
++    QString addr;
++    QByteArray addrVar = qgetenv("FCITX_DBUS_ADDRESS");
++    if (!addrVar.isNull())
++        return QString::fromLocal8Bit(addrVar);
++
++    QFile file(m_socketFile);
++    if (!file.open(QIODevice::ReadOnly))
++        return QString();
++
++    const int BUFSIZE = 1024;
++
++    char buffer[BUFSIZE];
++    size_t sz = file.read(buffer, BUFSIZE);
++    file.close();
++    if (sz == 0)
++        return QString();
++    char *p = buffer;
++    while (*p)
++        p++;
++    size_t addrlen = p - buffer;
++    if (sz != addrlen + 2 * sizeof(pid_t) + 1)
++        return QString();
++
++    /* skip '\0' */
++    p++;
++    pid_t *ppid = (pid_t *)p;
++    pid_t daemonpid = ppid[0];
++    pid_t fcitxpid = ppid[1];
++
++    if (!_pid_exists(daemonpid) || !_pid_exists(fcitxpid))
++        return QString();
++
++    addr = QLatin1String(buffer);
++
++    return addr;
++}
++
++void FcitxWatcher::cleanUpConnection() {
++    QDBusConnection::disconnectFromBus("fcitx");
++    delete m_connection;
++    m_connection = nullptr;
++}
++
++void FcitxWatcher::socketFileChanged() {
++    cleanUpConnection();
++    createConnection();
++}
++
++void FcitxWatcher::createConnection() {
++    QString addr = address();
++    // qDebug() << addr;
++    if (!addr.isNull()) {
++        QDBusConnection connection(
++            QDBusConnection::connectToBus(addr, "fcitx"));
++        if (connection.isConnected()) {
++            // qDebug() << "create private";
++            m_connection = new QDBusConnection(connection);
++        } else {
++            QDBusConnection::disconnectFromBus("fcitx");
++        }
++    }
++
++    if (m_connection) {
++        m_connection->connect("org.freedesktop.DBus.Local",
++                              "/org/freedesktop/DBus/Local",
++                              "org.freedesktop.DBus.Local", "Disconnected",
++                              this, SLOT(dbusDisconnected()));
++        unwatchSocketFile();
++    }
++    updateAvailability();
++}
++
++void FcitxWatcher::dbusDisconnected() {
++    cleanUpConnection();
++    watchSocketFile();
++    // Try recreation immediately to avoid race.
++    createConnection();
++}
++
++void FcitxWatcher::watchSocketFile() {
++    if (m_socketFile.isEmpty()) {
++        return;
++    }
++    QFileInfo info(m_socketFile);
++    QDir dir(info.path());
++    if (!dir.exists()) {
++        QDir rt(QDir::root());
++        rt.mkpath(info.path());
++    }
++    m_fsWatcher->addPath(info.path());
++    if (info.exists()) {
++        m_fsWatcher->addPath(info.filePath());
++    }
++
++    connect(m_fsWatcher, SIGNAL(fileChanged(QString)), this,
++            SLOT(socketFileChanged()));
++    connect(m_fsWatcher, SIGNAL(directoryChanged(QString)), this,
++            SLOT(socketFileChanged()));
++}
++
++void FcitxWatcher::unwatchSocketFile() {
++    if (!m_fsWatcher->files().isEmpty()) {
++        m_fsWatcher->removePaths(m_fsWatcher->files());
++    }
++    if (!m_fsWatcher->directories().isEmpty()) {
++        m_fsWatcher->removePaths(m_fsWatcher->directories());
++    }
++    m_fsWatcher->disconnect(SIGNAL(fileChanged(QString)));
++    m_fsWatcher->disconnect(SIGNAL(directoryChanged(QString)));
++}
++
++void FcitxWatcher::imChanged(const QString &service, const QString &,
++                             const QString &newOwner) {
++    if (service == m_serviceName) {
++        if (!newOwner.isEmpty()) {
++            m_mainPresent = true;
++        } else {
++            m_mainPresent = false;
++        }
++    } else if (service == "org.freedesktop.portal.Fcitx") {
++        if (!newOwner.isEmpty()) {
++            m_portalPresent = true;
++        } else {
++            m_portalPresent = false;
++        }
++    }
++
++    updateAvailability();
++}
++
++void FcitxWatcher::updateAvailability() {
++    setAvailability(m_mainPresent || m_portalPresent || m_connection);
++}
+diff --git "a/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.h" "b/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.h"
+new file mode 100644
+index 0000000..3072b9d
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.h"
+@@ -0,0 +1,78 @@
++/*
++ * Copyright (C) 2017~2017 by CSSlayer
++ * wengxt@gmail.com
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above Copyright
++ *    notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above Copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * 3. Neither the name of the authors nor the names of its contributors
++ *    may be used to endorse or promote products derived from this
++ *    software without specific prior written permission.
++ */
++
++#ifndef FCITXWATCHER_H_
++#define FCITXWATCHER_H_
++
++#include <QDBusConnection>
++#include <QObject>
++
++class QDBusConnection;
++class QFileSystemWatcher;
++class QDBusServiceWatcher;
++
++// A FcitxQtConnection replacement, to implement compatibility with fcitx 5.
++// Since we have three thing to monitor, the situation becomes much more
++// complexer.
++class FcitxWatcher : public QObject {
++    Q_OBJECT
++public:
++    explicit FcitxWatcher(QDBusConnection sessionBus,
++                          QObject *parent = nullptr);
++    ~FcitxWatcher();
++    void watch();
++    void unwatch();
++
++    bool availability() const;
++
++    QDBusConnection connection() const;
++    QString service() const;
++
++Q_SIGNALS:
++    void availabilityChanged(bool);
++
++private Q_SLOTS:
++    void dbusDisconnected();
++    void socketFileChanged();
++    void imChanged(const QString &service, const QString &oldOwner,
++                   const QString &newOwner);
++
++private:
++    QString address();
++    void watchSocketFile();
++    void unwatchSocketFile();
++    void createConnection();
++    void cleanUpConnection();
++    void setAvailability(bool availability);
++    void updateAvailability();
++
++    QFileSystemWatcher *m_fsWatcher;
++    QDBusServiceWatcher *m_serviceWatcher;
++    QDBusConnection *m_connection;
++    QDBusConnection m_sessionBus;
++    QString m_socketFile;
++    QString m_serviceName;
++    bool m_availability = false;
++    bool m_mainPresent = false;
++    bool m_portalPresent = false;
++    bool m_watched = false;
++};
++
++#endif // FCITXWATCHER_H_
+diff --git "a/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext.xml" "b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext.xml"
+new file mode 100644
+index 0000000..b30d94c
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext.xml"
+@@ -0,0 +1,64 @@
++<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
++"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
++<node>
++  <interface name="org.fcitx.Fcitx.InputContext">
++    <method name="FocusIn">
++    </method>
++    <method name="FocusOut">
++    </method>
++    <method name="Reset">
++    </method>
++    <method name="SetCursorRect">
++      <arg name="x" direction="in" type="i"/>
++      <arg name="y" direction="in" type="i"/>
++      <arg name="w" direction="in" type="i"/>
++      <arg name="h" direction="in" type="i"/>
++    </method>
++    <method name="SetCapacity">
++       <arg name="caps" direction="in" type="u"/>
++    </method>
++    <method name="SetSurroundingText">
++      <arg name="text" direction="in" type="s"/>
++      <arg name="cursor" direction="in" type="u"/>
++      <arg name="anchor" direction="in" type="u"/>
++    </method>
++    <method name="SetSurroundingTextPosition">
++      <arg name="cursor" direction="in" type="u"/>
++      <arg name="anchor" direction="in" type="u"/>
++    </method>
++    <method name="DestroyIC">
++    </method>
++    <method name="ProcessKeyEvent">
++      <arg name="keyval" direction="in" type="u"/>
++      <arg name="keycode" direction="in" type="u"/>
++      <arg name="state" direction="in" type="u"/>
++      <arg name="type" direction="in" type="i"/>
++      <arg name="time" direction="in" type="u"/>
++      <arg name="ret" direction="out" type="i"/>
++    </method>
++    <signal name="CommitString">
++      <arg name="str" type="s"/>
++    </signal>
++    <signal name="CurrentIM">
++      <arg name="name" type="s"/>
++      <arg name="uniqueName" type="s"/>
++      <arg name="langCode" type="s"/>
++    </signal>
++    <signal name="UpdateFormattedPreedit">
++      <arg name="str" type="a(si)" />
++      <arg name="cursorpos" type="i"/>
++      <!-- qt4 / 5 seems use in/out differently -->
++      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="FcitxFormattedPreeditList" />
++      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="FcitxFormattedPreeditList" />
++    </signal>
++    <signal name="ForwardKey">
++      <arg name="keyval" type="u"/>
++      <arg name="state" type="u"/>
++      <arg name="type" type="i"/>
++    </signal>
++    <signal name="DeleteSurroundingText">
++      <arg name="offset" type="i"/>
++      <arg name="nchar" type="u"/>
++    </signal>
++  </interface>
++</node>
+diff --git "a/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext1.xml" "b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext1.xml"
+new file mode 100644
+index 0000000..6cb130d
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext1.xml"
+@@ -0,0 +1,64 @@
++<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
++"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
++<node>
++  <interface name="org.fcitx.Fcitx.InputContext1">
++    <method name="FocusIn">
++    </method>
++    <method name="FocusOut">
++    </method>
++    <method name="Reset">
++    </method>
++    <method name="SetCursorRect">
++      <arg name="x" direction="in" type="i"/>
++      <arg name="y" direction="in" type="i"/>
++      <arg name="w" direction="in" type="i"/>
++      <arg name="h" direction="in" type="i"/>
++    </method>
++    <method name="SetCapability">
++       <arg name="caps" direction="in" type="t"/>
++    </method>
++    <method name="SetSurroundingText">
++      <arg name="text" direction="in" type="s"/>
++      <arg name="cursor" direction="in" type="u"/>
++      <arg name="anchor" direction="in" type="u"/>
++    </method>
++    <method name="SetSurroundingTextPosition">
++      <arg name="cursor" direction="in" type="u"/>
++      <arg name="anchor" direction="in" type="u"/>
++    </method>
++    <method name="DestroyIC">
++    </method>
++    <method name="ProcessKeyEvent">
++      <arg name="keyval" direction="in" type="u"/>
++      <arg name="keycode" direction="in" type="u"/>
++      <arg name="state" direction="in" type="u"/>
++      <arg name="type" direction="in" type="b"/>
++      <arg name="time" direction="in" type="u"/>
++      <arg name="ret" direction="out" type="b"/>
++    </method>
++    <signal name="CommitString">
++      <arg name="str" type="s"/>
++    </signal>
++    <signal name="CurrentIM">
++      <arg name="name" type="s"/>
++      <arg name="uniqueName" type="s"/>
++      <arg name="langCode" type="s"/>
++    </signal>
++    <signal name="UpdateFormattedPreedit">
++      <arg name="str" type="a(si)" />
++      <arg name="cursorpos" type="i"/>
++      <!-- qt4 / 5 seems use in/out differently -->
++      <annotation name="com.trolltech.QtDBus.QtTypeName.In0" value="FcitxFormattedPreeditList" />
++      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="FcitxFormattedPreeditList" />
++    </signal>
++    <signal name="ForwardKey">
++      <arg name="keyval" type="u"/>
++      <arg name="state" type="u"/>
++      <arg name="type" type="b"/>
++    </signal>
++    <signal name="DeleteSurroundingText">
++      <arg name="offset" type="i"/>
++      <arg name="nchar" type="u"/>
++    </signal>
++  </interface>
++</node>
+diff --git "a/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod.xml" "b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod.xml"
+new file mode 100644
+index 0000000..b8d60f0
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod.xml"
+@@ -0,0 +1,16 @@
++<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
++"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
++<node>
++  <interface name="org.fcitx.Fcitx.InputMethod">
++    <method name="CreateICv3">
++      <arg name="appname" direction="in" type="s"/>
++      <arg name="pid" direction="in" type="i"/>
++      <arg name="icid" direction="out" type="i"/>
++      <arg name="enable" direction="out" type="b"/>
++      <arg name="keyval1" direction="out" type="u"/>
++      <arg name="state1" direction="out" type="u"/>
++      <arg name="keyval2" direction="out" type="u"/>
++      <arg name="state2" direction="out" type="u"/>
++    </method>
++  </interface>
++</node>
+diff --git "a/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod1.xml" "b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod1.xml"
+new file mode 100644
+index 0000000..0cc358a
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod1.xml"
+@@ -0,0 +1,12 @@
++<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
++"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
++<node>
++ <interface name="org.fcitx.Fcitx.InputMethod1">
++  <method name="CreateInputContext">
++   <arg type="a(ss)" direction="in"/>
++   <arg type="o" direction="out"/>
++   <arg type="ay" direction="out"/>
++   <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="FcitxInputContextArgumentList" />
++  </method>
++ </interface>
++</node>
+diff --git "a/src/plugins/platforminputcontexts/fcitx/main.cpp" "b/src/plugins/platforminputcontexts/fcitx/main.cpp"
+new file mode 100644
+index 0000000..aaf5300
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/main.cpp"
+@@ -0,0 +1,35 @@
++/*
++ * Copyright (C) 2012~2017 by CSSlayer
++ * wengxt@gmail.com
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above Copyright
++ *    notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above Copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * 3. Neither the name of the authors nor the names of its contributors
++ *    may be used to endorse or promote products derived from this
++ *    software without specific prior written permission.
++ */
++
++#include "main.h"
++
++QStringList QFcitxPlatformInputContextPlugin::keys() const {
++    return QStringList(QStringLiteral("fcitx"));
++}
++
++QFcitxPlatformInputContext *
++QFcitxPlatformInputContextPlugin::create(const QString &system,
++                                         const QStringList &paramList) {
++    Q_UNUSED(paramList);
++    if (system.compare(system, QStringLiteral("fcitx"), Qt::CaseInsensitive) ==
++        0)
++        return new QFcitxPlatformInputContext;
++    return 0;
++}
+diff --git "a/src/plugins/platforminputcontexts/fcitx/main.h" "b/src/plugins/platforminputcontexts/fcitx/main.h"
+new file mode 100644
+index 0000000..d21abae
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/main.h"
+@@ -0,0 +1,39 @@
++/*
++ * Copyright (C) 2012~2017 by CSSlayer
++ * wengxt@gmail.com
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above Copyright
++ *    notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above Copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * 3. Neither the name of the authors nor the names of its contributors
++ *    may be used to endorse or promote products derived from this
++ *    software without specific prior written permission.
++ */
++
++#ifndef MAIN_H
++#define MAIN_H
++
++#include <QtCore/QStringList>
++#include <qpa/qplatforminputcontextplugin_p.h>
++
++#include "qfcitxplatforminputcontext.h"
++
++class QFcitxPlatformInputContextPlugin : public QPlatformInputContextPlugin {
++    Q_OBJECT
++public:
++    Q_PLUGIN_METADATA(IID QPlatformInputContextFactoryInterface_iid FILE
++                      "fcitx.json")
++    QStringList keys() const;
++    QFcitxPlatformInputContext *create(const QString &system,
++                                       const QStringList &paramList);
++};
++
++#endif // MAIN_H
+diff --git "a/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.cpp" "b/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.cpp"
+new file mode 100644
+index 0000000..2d6a01d
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.cpp"
+@@ -0,0 +1,882 @@
++/*
++ * Copyright (C) 2011~2017 by CSSlayer
++ * wengxt@gmail.com
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above Copyright
++ *    notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above Copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * 3. Neither the name of the authors nor the names of its contributors
++ *    may be used to endorse or promote products derived from this
++ *    software without specific prior written permission.
++ */
++
++#include <QDBusConnection>
++#include <QDebug>
++#include <QGuiApplication>
++#include <QInputMethod>
++#include <QKeyEvent>
++#include <QPalette>
++#include <QTextCharFormat>
++#include <QWindow>
++#include <qpa/qplatformcursor.h>
++#include <qpa/qplatformscreen.h>
++#include <qpa/qwindowsysteminterface.h>
++
++#include "qtkey.h"
++
++#include "fcitxinputcontextproxy.h"
++#include "fcitxwatcher.h"
++#include "qfcitxplatforminputcontext.h"
++
++static bool get_boolean_env(const char *name, bool defval) {
++    const char *value = getenv(name);
++
++    if (value == nullptr)
++        return defval;
++
++    if (strcmp(value, "") == 0 || strcmp(value, "0") == 0 ||
++        strcmp(value, "false") == 0 || strcmp(value, "False") == 0 ||
++        strcmp(value, "FALSE") == 0)
++        return false;
++
++    return true;
++}
++
++static inline const char *get_locale() {
++    const char *locale = getenv("LC_ALL");
++    if (!locale)
++        locale = getenv("LC_CTYPE");
++    if (!locale)
++        locale = getenv("LANG");
++    if (!locale)
++        locale = "C";
++
++    return locale;
++}
++
++static bool objectAcceptsInputMethod() {
++    bool enabled = false;
++    QObject *object = qApp->focusObject();
++    if (object) {
++        QInputMethodQueryEvent query(Qt::ImEnabled);
++        QGuiApplication::sendEvent(object, &query);
++        enabled = query.value(Qt::ImEnabled).toBool();
++    }
++
++    return enabled;
++}
++
++struct xkb_context *_xkb_context_new_helper() {
++    struct xkb_context *context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
++    if (context) {
++        xkb_context_set_log_level(context, XKB_LOG_LEVEL_CRITICAL);
++    }
++
++    return context;
++}
++
++QFcitxPlatformInputContext::QFcitxPlatformInputContext()
++    : m_watcher(new FcitxWatcher(
++          QDBusConnection::connectToBus(QDBusConnection::SessionBus,
++                                        "fcitx-platform-input-context"),
++          this)),
++      m_cursorPos(0), m_useSurroundingText(false),
++      m_syncMode(get_boolean_env("FCITX_QT_USE_SYNC", false)), m_destroy(false),
++      m_xkbContext(_xkb_context_new_helper()),
++      m_xkbComposeTable(m_xkbContext ? xkb_compose_table_new_from_locale(
++                                           m_xkbContext.data(), get_locale(),
++                                           XKB_COMPOSE_COMPILE_NO_FLAGS)
++                                     : 0),
++      m_xkbComposeState(m_xkbComposeTable
++                            ? xkb_compose_state_new(m_xkbComposeTable.data(),
++                                                    XKB_COMPOSE_STATE_NO_FLAGS)
++                            : 0) {
++    m_watcher->watch();
++}
++
++QFcitxPlatformInputContext::~QFcitxPlatformInputContext() {
++    m_destroy = true;
++    m_watcher->unwatch();
++    cleanUp();
++    delete m_watcher;
++}
++
++void QFcitxPlatformInputContext::cleanUp() {
++    m_icMap.clear();
++
++    if (!m_destroy) {
++        commitPreedit();
++    }
++}
++
++bool QFcitxPlatformInputContext::isValid() const { return true; }
++
++void QFcitxPlatformInputContext::invokeAction(QInputMethod::Action action,
++                                              int cursorPosition) {
++    if (action == QInputMethod::Click &&
++        (cursorPosition <= 0 || cursorPosition >= m_preedit.length())) {
++        // qDebug() << action << cursorPosition;
++        commitPreedit();
++    }
++}
++
++void QFcitxPlatformInputContext::commitPreedit(QPointer<QObject> input) {
++    if (!input)
++        return;
++    if (m_commitPreedit.length() <= 0)
++        return;
++    QInputMethodEvent e;
++    e.setCommitString(m_commitPreedit);
++    QCoreApplication::sendEvent(input, &e);
++    m_commitPreedit.clear();
++    m_preeditList.clear();
++}
++
++bool checkUtf8(const QByteArray &byteArray) {
++    QString s = QString::fromUtf8(byteArray);
++    return !s.contains(QChar::ReplacementCharacter);
++}
++
++void QFcitxPlatformInputContext::reset() {
++    commitPreedit();
++    if (FcitxInputContextProxy *proxy = validIC()) {
++        proxy->reset();
++    }
++    if (m_xkbComposeState) {
++        xkb_compose_state_reset(m_xkbComposeState.data());
++    }
++    QPlatformInputContext::reset();
++}
++
++void QFcitxPlatformInputContext::update(Qt::InputMethodQueries queries) {
++    // ignore the boring query
++    if (!(queries & (Qt::ImCursorRectangle | Qt::ImHints |
++                     Qt::ImSurroundingText | Qt::ImCursorPosition))) {
++        return;
++    }
++
++    QWindow *window = qApp->focusWindow();
++    FcitxInputContextProxy *proxy = validICByWindow(window);
++    if (!proxy)
++        return;
++
++    FcitxQtICData &data = *static_cast<FcitxQtICData *>(
++        proxy->property("icData").value<void *>());
++
++    QObject *input = qApp->focusObject();
++    if (!input)
++        return;
++
++    QInputMethodQueryEvent query(queries);
++    QGuiApplication::sendEvent(input, &query);
++
++    if (queries & Qt::ImCursorRectangle) {
++        cursorRectChanged();
++    }
++
++    if (queries & Qt::ImHints) {
++        Qt::InputMethodHints hints =
++            Qt::InputMethodHints(query.value(Qt::ImHints).toUInt());
++
++#define CHECK_HINTS(_HINTS, _CAPACITY)                                         \
++    if (hints & _HINTS)                                                        \
++        addCapability(data, _CAPACITY);                                        \
++    else                                                                       \
++        removeCapability(data, _CAPACITY);
++
++        CHECK_HINTS(Qt::ImhHiddenText, CAPACITY_PASSWORD)
++        CHECK_HINTS(Qt::ImhNoAutoUppercase, CAPACITY_NOAUTOUPPERCASE)
++        CHECK_HINTS(Qt::ImhPreferNumbers, CAPACITY_NUMBER)
++        CHECK_HINTS(Qt::ImhPreferUppercase, CAPACITY_UPPERCASE)
++        CHECK_HINTS(Qt::ImhPreferLowercase, CAPACITY_LOWERCASE)
++        CHECK_HINTS(Qt::ImhNoPredictiveText, CAPACITY_NO_SPELLCHECK)
++        CHECK_HINTS(Qt::ImhDigitsOnly, CAPACITY_DIGIT)
++        CHECK_HINTS(Qt::ImhFormattedNumbersOnly, CAPACITY_NUMBER)
++        CHECK_HINTS(Qt::ImhUppercaseOnly, CAPACITY_UPPERCASE)
++        CHECK_HINTS(Qt::ImhLowercaseOnly, CAPACITY_LOWERCASE)
++        CHECK_HINTS(Qt::ImhDialableCharactersOnly, CAPACITY_DIALABLE)
++        CHECK_HINTS(Qt::ImhEmailCharactersOnly, CAPACITY_EMAIL)
++    }
++
++    bool setSurrounding = false;
++    do {
++        if (!m_useSurroundingText)
++            break;
++        if (!((queries & Qt::ImSurroundingText) &&
++              (queries & Qt::ImCursorPosition)))
++            break;
++        if (data.capability.testFlag(CAPACITY_PASSWORD))
++            break;
++        QVariant var = query.value(Qt::ImSurroundingText);
++        QVariant var1 = query.value(Qt::ImCursorPosition);
++        QVariant var2 = query.value(Qt::ImAnchorPosition);
++        if (!var.isValid() || !var1.isValid())
++            break;
++        QString text = var.toString();
++/* we don't want to waste too much memory here */
++#define SURROUNDING_THRESHOLD 4096
++        if (text.length() < SURROUNDING_THRESHOLD) {
++            if (checkUtf8(text.toUtf8())) {
++                addCapability(data, CAPACITY_SURROUNDING_TEXT);
++
++                int cursor = var1.toInt();
++                int anchor;
++                if (var2.isValid())
++                    anchor = var2.toInt();
++                else
++                    anchor = cursor;
++
++                // adjust it to real character size
++                QVector<uint> tempUCS4 = text.left(cursor).toUcs4();
++                cursor = tempUCS4.size();
++                tempUCS4 = text.left(anchor).toUcs4();
++                anchor = tempUCS4.size();
++                if (data.surroundingText != text) {
++                    data.surroundingText = text;
++                    proxy->setSurroundingText(text, cursor, anchor);
++                } else {
++                    if (data.surroundingAnchor != anchor ||
++                        data.surroundingCursor != cursor)
++                        proxy->setSurroundingTextPosition(cursor, anchor);
++                }
++                data.surroundingCursor = cursor;
++                data.surroundingAnchor = anchor;
++                setSurrounding = true;
++            }
++        }
++        if (!setSurrounding) {
++            data.surroundingAnchor = -1;
++            data.surroundingCursor = -1;
++            data.surroundingText = QString();
++            removeCapability(data, CAPACITY_SURROUNDING_TEXT);
++        }
++    } while (0);
++}
++
++void QFcitxPlatformInputContext::commit() { QPlatformInputContext::commit(); }
++
++void QFcitxPlatformInputContext::setFocusObject(QObject *object) {
++    Q_UNUSED(object);
++    FcitxInputContextProxy *proxy = validICByWindow(m_lastWindow);
++    commitPreedit(m_lastObject);
++    if (proxy) {
++        proxy->focusOut();
++    }
++
++    QWindow *window = qApp->focusWindow();
++    m_lastWindow = window;
++    m_lastObject = object;
++    // Always create IC Data for window.
++    if (window) {
++        proxy = validICByWindow(window);
++        if (!proxy) {
++            createICData(window);
++        }
++    }
++    if (!window || (!inputMethodAccepted() && !objectAcceptsInputMethod())) {
++        m_lastWindow = nullptr;
++        m_lastObject = nullptr;
++        return;
++    }
++    if (proxy) {
++        proxy->focusIn();
++        // We need to delegate this otherwise it may cause self-recursion in
++        // certain application like libreoffice.
++        auto window = m_lastWindow;
++        QMetaObject::invokeMethod(
++            this,
++            [this, window]() {
++                if (window != m_lastWindow) {
++                    return;
++                }
++                if (validICByWindow(window.data())) {
++                    cursorRectChanged();
++                }
++            },
++            Qt::QueuedConnection);
++    }
++}
++
++void QFcitxPlatformInputContext::windowDestroyed(QObject *object) {
++    /* access QWindow is not possible here, so we use our own map to do so */
++    m_icMap.erase(reinterpret_cast<QWindow *>(object));
++    // qDebug() << "Window Destroyed and we destroy IC correctly, horray!";
++}
++
++void QFcitxPlatformInputContext::cursorRectChanged() {
++    QWindow *inputWindow = qApp->focusWindow();
++    if (!inputWindow)
++        return;
++    FcitxInputContextProxy *proxy = validICByWindow(inputWindow);
++    if (!proxy)
++        return;
++
++    FcitxQtICData &data = *static_cast<FcitxQtICData *>(
++        proxy->property("icData").value<void *>());
++
++    QRect r = qApp->inputMethod()->cursorRectangle().toRect();
++    if (!r.isValid())
++        return;
++
++    // not sure if this is necessary but anyway, qt's screen used to be buggy.
++    if (!inputWindow->screen()) {
++        return;
++    }
++
++    if (data.capability & CAPACITY_RELATIVE_CURSOR_RECT) {
++        auto margins = inputWindow->frameMargins();
++        r.translate(margins.left(), margins.top());
++        if (data.rect != r) {
++            data.rect = r;
++            proxy->setCursorRect(r.x(), r.y(), r.width(), r.height());
++        }
++        return;
++    }
++    qreal scale = inputWindow->devicePixelRatio();
++    auto screenGeometry = inputWindow->screen()->geometry();
++    auto point = inputWindow->mapToGlobal(r.topLeft());
++    auto native =
++        (point - screenGeometry.topLeft()) * scale + screenGeometry.topLeft();
++    QRect newRect(native, r.size() * scale);
++
++    if (data.rect != newRect) {
++        data.rect = newRect;
++        proxy->setCursorRect(newRect.x(), newRect.y(), newRect.width(),
++                             newRect.height());
++    }
++}
++
++void QFcitxPlatformInputContext::createInputContextFinished() {
++    FcitxInputContextProxy *proxy =
++        qobject_cast<FcitxInputContextProxy *>(sender());
++    if (!proxy) {
++        return;
++    }
++    auto w = static_cast<QWindow *>(proxy->property("wid").value<void *>());
++    FcitxQtICData *data =
++        static_cast<FcitxQtICData *>(proxy->property("icData").value<void *>());
++    data->rect = QRect();
++
++    if (proxy->isValid()) {
++        QWindow *window = qApp->focusWindow();
++        if (window && window == w && inputMethodAccepted() &&
++            objectAcceptsInputMethod()) {
++            cursorRectChanged();
++            proxy->focusIn();
++        }
++    }
++
++    QFlags<FcitxCapabilityFlags> flag;
++    flag |= CAPACITY_PREEDIT;
++    flag |= CAPACITY_FORMATTED_PREEDIT;
++    flag |= CAPACITY_CLIENT_UNFOCUS_COMMIT;
++    flag |= CAPACITY_GET_IM_INFO_ON_FOCUS;
++    m_useSurroundingText =
++        get_boolean_env("FCITX_QT_ENABLE_SURROUNDING_TEXT", true);
++    if (m_useSurroundingText) {
++        flag |= CAPACITY_SURROUNDING_TEXT;
++    }
++
++    if (qApp && qApp->platformName() == "wayland") {
++        flag |= CAPACITY_RELATIVE_CURSOR_RECT;
++    }
++
++    addCapability(*data, flag, true);
++}
++
++void QFcitxPlatformInputContext::updateCapability(const FcitxQtICData &data) {
++    if (!data.proxy || !data.proxy->isValid())
++        return;
++
++    QDBusPendingReply<void> result =
++        data.proxy->setCapability((uint)data.capability);
++}
++
++void QFcitxPlatformInputContext::commitString(const QString &str) {
++    m_cursorPos = 0;
++    m_preeditList.clear();
++    m_commitPreedit.clear();
++    QObject *input = qApp->focusObject();
++    if (!input)
++        return;
++
++    QInputMethodEvent event;
++    event.setCommitString(str);
++    QCoreApplication::sendEvent(input, &event);
++}
++
++void QFcitxPlatformInputContext::updateFormattedPreedit(
++    const FcitxFormattedPreeditList &preeditList, int cursorPos) {
++    QObject *input = qApp->focusObject();
++    if (!input)
++        return;
++    if (cursorPos == m_cursorPos && preeditList == m_preeditList)
++        return;
++    m_preeditList = preeditList;
++    m_cursorPos = cursorPos;
++    QString str, commitStr;
++    int pos = 0;
++    QList<QInputMethodEvent::Attribute> attrList;
++
++    // Fcitx 5's flags support.
++    enum TextFormatFlag : int {
++        TextFormatFlag_Underline = (1 << 3), /**< underline is a flag */
++        TextFormatFlag_HighLight = (1 << 4), /**< highlight the preedit */
++        TextFormatFlag_DontCommit = (1 << 5),
++        TextFormatFlag_Bold = (1 << 6),
++        TextFormatFlag_Strike = (1 << 7),
++        TextFormatFlag_Italic = (1 << 8),
++    };
++
++    Q_FOREACH (const FcitxFormattedPreedit &preedit, preeditList) {
++        str += preedit.string();
++        if (!(preedit.format() & TextFormatFlag_DontCommit))
++            commitStr += preedit.string();
++        QTextCharFormat format;
++        if (preedit.format() & TextFormatFlag_Underline) {
++            format.setUnderlineStyle(QTextCharFormat::DashUnderline);
++        }
++        if (preedit.format() & TextFormatFlag_Strike) {
++            format.setFontStrikeOut(true);
++        }
++        if (preedit.format() & TextFormatFlag_Bold) {
++            format.setFontWeight(QFont::Bold);
++        }
++        if (preedit.format() & TextFormatFlag_Italic) {
++            format.setFontItalic(true);
++        }
++        if (preedit.format() & TextFormatFlag_HighLight) {
++            QBrush brush;
++            QPalette palette;
++            palette = QGuiApplication::palette();
++            format.setBackground(QBrush(
++                QColor(palette.color(QPalette::Active, QPalette::Highlight))));
++            format.setForeground(QBrush(QColor(
++                palette.color(QPalette::Active, QPalette::HighlightedText))));
++        }
++        attrList.append(
++            QInputMethodEvent::Attribute(QInputMethodEvent::TextFormat, pos,
++                                         preedit.string().length(), format));
++        pos += preedit.string().length();
++    }
++
++    QByteArray array = str.toUtf8();
++    array.truncate(cursorPos);
++    cursorPos = QString::fromUtf8(array).length();
++
++    attrList.append(QInputMethodEvent::Attribute(QInputMethodEvent::Cursor,
++                                                 cursorPos, 1, 0));
++    m_preedit = str;
++    m_commitPreedit = commitStr;
++    QInputMethodEvent event(str, attrList);
++    QCoreApplication::sendEvent(input, &event);
++    update(Qt::ImCursorRectangle);
++}
++
++void QFcitxPlatformInputContext::deleteSurroundingText(int offset,
++                                                       uint _nchar) {
++    QObject *input = qApp->focusObject();
++    if (!input)
++        return;
++
++    QInputMethodEvent event;
++
++    FcitxInputContextProxy *proxy =
++        qobject_cast<FcitxInputContextProxy *>(sender());
++    if (!proxy) {
++        return;
++    }
++
++    FcitxQtICData *data =
++        static_cast<FcitxQtICData *>(proxy->property("icData").value<void *>());
++    auto ucsText = data->surroundingText.toStdU32String();
++
++    int cursor = data->surroundingCursor;
++    // make nchar signed so we are safer
++    int nchar = _nchar;
++    // Qt's reconvert semantics is different from gtk's. It doesn't count the
++    // current
++    // selection. Discard selection from nchar.
++    if (data->surroundingAnchor < data->surroundingCursor) {
++        nchar -= data->surroundingCursor - data->surroundingAnchor;
++        offset += data->surroundingCursor - data->surroundingAnchor;
++        cursor = data->surroundingAnchor;
++    } else if (data->surroundingAnchor > data->surroundingCursor) {
++        nchar -= data->surroundingAnchor - data->surroundingCursor;
++        cursor = data->surroundingCursor;
++    }
++
++    // validates
++    if (nchar >= 0 && cursor + offset >= 0 &&
++        cursor + offset + nchar <= static_cast<int>(ucsText.size())) {
++        // order matters
++        auto replacedChars = ucsText.substr(cursor + offset, nchar);
++        nchar = QString::fromUcs4(replacedChars.data(), replacedChars.size())
++                    .size();
++
++        int start, len;
++        if (offset >= 0) {
++            start = cursor;
++            len = offset;
++        } else {
++            start = cursor + offset;
++            len = -offset;
++        }
++
++        auto prefixedChars = ucsText.substr(start, len);
++        offset = QString::fromUcs4(prefixedChars.data(), prefixedChars.size())
++                     .size() *
++                 (offset >= 0 ? 1 : -1);
++        event.setCommitString("", offset, nchar);
++        QCoreApplication::sendEvent(input, &event);
++    }
++}
++
++void QFcitxPlatformInputContext::forwardKey(uint keyval, uint state,
++                                            bool type) {
++    auto proxy = qobject_cast<FcitxInputContextProxy *>(sender());
++    if (!proxy) {
++        return;
++    }
++    FcitxQtICData &data = *static_cast<FcitxQtICData *>(
++        proxy->property("icData").value<void *>());
++    auto w = static_cast<QWindow *>(proxy->property("wid").value<void *>());
++    QObject *input = qApp->focusObject();
++    auto window = qApp->focusWindow();
++    if (input && window && w == window) {
++        std::unique_ptr<QKeyEvent> keyevent{
++            createKeyEvent(keyval, state, type, data.event.get())};
++
++        forwardEvent(window, *keyevent);
++    }
++}
++
++void QFcitxPlatformInputContext::updateCurrentIM(const QString &name,
++                                                 const QString &uniqueName,
++                                                 const QString &langCode) {
++    Q_UNUSED(name);
++    Q_UNUSED(uniqueName);
++    QLocale newLocale(langCode);
++    if (m_locale != newLocale) {
++        m_locale = newLocale;
++        emitLocaleChanged();
++    }
++}
++
++QLocale QFcitxPlatformInputContext::locale() const { return m_locale; }
++
++void QFcitxPlatformInputContext::createICData(QWindow *w) {
++    auto iter = m_icMap.find(w);
++    if (iter == m_icMap.end()) {
++        auto result =
++            m_icMap.emplace(std::piecewise_construct, std::forward_as_tuple(w),
++                            std::forward_as_tuple(m_watcher));
++        connect(w, &QObject::destroyed, this,
++                &QFcitxPlatformInputContext::windowDestroyed);
++        iter = result.first;
++        auto &data = iter->second;
++
++        if (QGuiApplication::platformName() == QLatin1String("xcb")) {
++            data.proxy->setDisplay("x11:");
++        } else if (QGuiApplication::platformName() ==
++                   QLatin1String("wayland")) {
++            data.proxy->setDisplay("wayland:");
++        }
++        data.proxy->setProperty("wid",
++                                QVariant::fromValue(static_cast<void *>(w)));
++        data.proxy->setProperty(
++            "icData", QVariant::fromValue(static_cast<void *>(&data)));
++        connect(data.proxy, &FcitxInputContextProxy::inputContextCreated, this,
++                &QFcitxPlatformInputContext::createInputContextFinished);
++        connect(data.proxy, &FcitxInputContextProxy::commitString, this,
++                &QFcitxPlatformInputContext::commitString);
++        connect(data.proxy, &FcitxInputContextProxy::forwardKey, this,
++                &QFcitxPlatformInputContext::forwardKey);
++        connect(data.proxy, &FcitxInputContextProxy::updateFormattedPreedit,
++                this, &QFcitxPlatformInputContext::updateFormattedPreedit);
++        connect(data.proxy, &FcitxInputContextProxy::deleteSurroundingText,
++                this, &QFcitxPlatformInputContext::deleteSurroundingText);
++        connect(data.proxy, &FcitxInputContextProxy::currentIM, this,
++                &QFcitxPlatformInputContext::updateCurrentIM);
++    }
++}
++
++QKeyEvent *QFcitxPlatformInputContext::createKeyEvent(uint keyval, uint state,
++                                                      bool isRelease,
++                                                      const QKeyEvent *event) {
++    QKeyEvent *newEvent = nullptr;
++    if (event && event->nativeVirtualKey() == keyval &&
++        event->nativeModifiers() == state &&
++        isRelease == (event->type() == QEvent::KeyRelease)) {
++#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
++        newEvent = new QKeyEvent(
++            event->type(), event->key(), event->modifiers(),
++            event->nativeScanCode(), event->nativeVirtualKey(),
++            event->nativeModifiers(), event->text(), event->isAutoRepeat(),
++            event->count(), event->device());
++#else
++        newEvent = new QKeyEvent(*event);
++#endif
++    } else {
++        Qt::KeyboardModifiers qstate = Qt::NoModifier;
++
++        int count = 1;
++        if (state & FcitxKeyState_Alt) {
++            qstate |= Qt::AltModifier;
++            count++;
++        }
++
++        if (state & FcitxKeyState_Shift) {
++            qstate |= Qt::ShiftModifier;
++            count++;
++        }
++
++        if (state & FcitxKeyState_Ctrl) {
++            qstate |= Qt::ControlModifier;
++            count++;
++        }
++
++        char32_t unicode = xkb_keysym_to_utf32(keyval);
++        QString text;
++        if (unicode) {
++            text = QString::fromUcs4(&unicode, 1);
++        }
++
++        int key = keysymToQtKey(keyval, text);
++
++        newEvent =
++            new QKeyEvent(isRelease ? (QEvent::KeyRelease) : (QEvent::KeyPress),
++                          key, qstate, 0, keyval, state, text, false, count);
++        if (event) {
++            newEvent->setTimestamp(event->timestamp());
++        }
++    }
++
++    return newEvent;
++}
++
++void QFcitxPlatformInputContext::forwardEvent(QWindow *window,
++                                              const QKeyEvent &keyEvent) {
++    // use same variable name as in QXcbKeyboard::handleKeyEvent
++    QEvent::Type type = keyEvent.type();
++    int qtcode = keyEvent.key();
++    Qt::KeyboardModifiers modifiers = keyEvent.modifiers();
++    quint32 code = keyEvent.nativeScanCode();
++    quint32 sym = keyEvent.nativeVirtualKey();
++    quint32 state = keyEvent.nativeModifiers();
++    QString string = keyEvent.text();
++    bool isAutoRepeat = keyEvent.isAutoRepeat();
++    ulong time = keyEvent.timestamp();
++    // copied from QXcbKeyboard::handleKeyEvent()
++    if (type == QEvent::KeyPress && qtcode == Qt::Key_Menu) {
++        QPoint globalPos, pos;
++        if (window->screen()) {
++            globalPos = window->screen()->handle()->cursor()->pos();
++            pos = window->mapFromGlobal(globalPos);
++        }
++        QWindowSystemInterface::handleContextMenuEvent(window, false, pos,
++                                                       globalPos, modifiers);
++    }
++    QWindowSystemInterface::handleExtendedKeyEvent(window, time, type, qtcode,
++                                                   modifiers, code, sym, state,
++                                                   string, isAutoRepeat);
++}
++
++bool QFcitxPlatformInputContext::filterEvent(const QEvent *event) {
++    do {
++        if (event->type() != QEvent::KeyPress &&
++            event->type() != QEvent::KeyRelease) {
++            break;
++        }
++
++        const QKeyEvent *keyEvent = static_cast<const QKeyEvent *>(event);
++        quint32 keyval = keyEvent->nativeVirtualKey();
++        quint32 keycode = keyEvent->nativeScanCode();
++        quint32 state = keyEvent->nativeModifiers();
++        bool isRelease = keyEvent->type() == QEvent::KeyRelease;
++
++        if (!inputMethodAccepted() && !objectAcceptsInputMethod())
++            break;
++
++        QObject *input = qApp->focusObject();
++
++        if (!input) {
++            break;
++        }
++
++        FcitxInputContextProxy *proxy = validICByWindow(qApp->focusWindow());
++
++        if (!proxy) {
++            if (filterEventFallback(keyval, keycode, state, isRelease)) {
++                return true;
++            } else {
++                break;
++            }
++        }
++
++        proxy->focusIn();
++
++        auto reply = proxy->processKeyEvent(keyval, keycode, state, isRelease,
++                                            keyEvent->timestamp());
++
++        if (Q_UNLIKELY(m_syncMode)) {
++            reply.waitForFinished();
++
++            auto filtered = proxy->processKeyEventResult(reply);
++            if (!filtered) {
++                if (filterEventFallback(keyval, keycode, state, isRelease)) {
++                    return true;
++                } else {
++                    break;
++                }
++            } else {
++                update(Qt::ImCursorRectangle);
++                return true;
++            }
++        } else {
++            ProcessKeyWatcher *watcher = new ProcessKeyWatcher(
++                *keyEvent, qApp->focusWindow(), reply, proxy);
++            connect(watcher, &QDBusPendingCallWatcher::finished, this,
++                    &QFcitxPlatformInputContext::processKeyEventFinished);
++            return true;
++        }
++    } while (0);
++    return QPlatformInputContext::filterEvent(event);
++}
++
++void QFcitxPlatformInputContext::processKeyEventFinished(
++    QDBusPendingCallWatcher *w) {
++    ProcessKeyWatcher *watcher = static_cast<ProcessKeyWatcher *>(w);
++    auto proxy = qobject_cast<FcitxInputContextProxy *>(watcher->parent());
++    bool filtered = false;
++
++    QWindow *window = watcher->window();
++    // if window is already destroyed, we can only throw this event away.
++    if (!window) {
++        delete watcher;
++        return;
++    }
++
++    const QKeyEvent &keyEvent = watcher->keyEvent();
++
++    // use same variable name as in QXcbKeyboard::handleKeyEvent
++    QEvent::Type type = keyEvent.type();
++    quint32 code = keyEvent.nativeScanCode();
++    quint32 sym = keyEvent.nativeVirtualKey();
++    quint32 state = keyEvent.nativeModifiers();
++    QString string = keyEvent.text();
++
++    if (!proxy->processKeyEventResult(*watcher)) {
++        filtered =
++            filterEventFallback(sym, code, state, type == QEvent::KeyRelease);
++    } else {
++        filtered = true;
++    }
++
++    if (!watcher->isError()) {
++        update(Qt::ImCursorRectangle);
++    }
++
++    if (!filtered) {
++        forwardEvent(window, keyEvent);
++    } else {
++        auto proxy = qobject_cast<FcitxInputContextProxy *>(watcher->parent());
++        if (proxy) {
++            FcitxQtICData &data = *static_cast<FcitxQtICData *>(
++                proxy->property("icData").value<void *>());
++#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
++            data.event = std::make_unique<QKeyEvent>(
++                keyEvent.type(), keyEvent.key(), keyEvent.modifiers(),
++                keyEvent.nativeScanCode(), keyEvent.nativeVirtualKey(),
++                keyEvent.nativeModifiers(), keyEvent.text(),
++                keyEvent.isAutoRepeat(), keyEvent.count(), keyEvent.device());
++#else
++            data.event = std::unique_ptr<QKeyEvent>(new QKeyEvent(keyEvent));
++#endif
++        }
++    }
++
++    delete watcher;
++}
++
++bool QFcitxPlatformInputContext::filterEventFallback(uint keyval, uint keycode,
++                                                     uint state,
++                                                     bool isRelease) {
++    Q_UNUSED(keycode);
++    if (processCompose(keyval, state, isRelease)) {
++        return true;
++    }
++    return false;
++}
++
++FcitxInputContextProxy *QFcitxPlatformInputContext::validIC() {
++    if (m_icMap.empty()) {
++        return nullptr;
++    }
++    QWindow *window = qApp->focusWindow();
++    return validICByWindow(window);
++}
++
++FcitxInputContextProxy *
++QFcitxPlatformInputContext::validICByWindow(QWindow *w) {
++    if (!w) {
++        return nullptr;
++    }
++
++    if (m_icMap.empty()) {
++        return nullptr;
++    }
++    auto iter = m_icMap.find(w);
++    if (iter == m_icMap.end())
++        return nullptr;
++    auto &data = iter->second;
++    if (!data.proxy || !data.proxy->isValid()) {
++        return nullptr;
++    }
++    return data.proxy;
++}
++
++bool QFcitxPlatformInputContext::processCompose(uint keyval, uint state,
++                                                bool isRelease) {
++    Q_UNUSED(state);
++
++    if (!m_xkbComposeTable || isRelease)
++        return false;
++
++    struct xkb_compose_state *xkbComposeState = m_xkbComposeState.data();
++
++    enum xkb_compose_feed_result result =
++        xkb_compose_state_feed(xkbComposeState, keyval);
++    if (result == XKB_COMPOSE_FEED_IGNORED) {
++        return false;
++    }
++
++    enum xkb_compose_status status =
++        xkb_compose_state_get_status(xkbComposeState);
++    if (status == XKB_COMPOSE_NOTHING) {
++        return 0;
++    } else if (status == XKB_COMPOSE_COMPOSED) {
++        char buffer[] = {'\0', '\0', '\0', '\0', '\0', '\0', '\0'};
++        int length =
++            xkb_compose_state_get_utf8(xkbComposeState, buffer, sizeof(buffer));
++        xkb_compose_state_reset(xkbComposeState);
++        if (length != 0) {
++            commitString(QString::fromUtf8(buffer));
++        }
++
++    } else if (status == XKB_COMPOSE_CANCELLED) {
++        xkb_compose_state_reset(xkbComposeState);
++    }
++
++    return true;
++}
++
++// kate: indent-mode cstyle; space-indent on; indent-width 0;
+diff --git "a/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.h" "b/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.h"
+new file mode 100644
+index 0000000..5b7bdd8
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.h"
+@@ -0,0 +1,247 @@
++/*
++ * Copyright (C) 2011~2017 by CSSlayer
++ * wengxt@gmail.com
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above Copyright
++ *    notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above Copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * 3. Neither the name of the authors nor the names of its contributors
++ *    may be used to endorse or promote products derived from this
++ *    software without specific prior written permission.
++ */
++
++#ifndef QFCITXPLATFORMINPUTCONTEXT_H
++#define QFCITXPLATFORMINPUTCONTEXT_H
++
++#include "fcitxinputcontextproxy.h"
++#include "fcitxqtdbustypes.h"
++#include "fcitxwatcher.h"
++#include <QDBusConnection>
++#include <QDBusServiceWatcher>
++#include <QGuiApplication>
++#include <QKeyEvent>
++#include <QPointer>
++#include <QRect>
++#include <QWindow>
++#include <memory>
++#include <qpa/qplatforminputcontext.h>
++#include <unordered_map>
++#include <xkbcommon/xkbcommon-compose.h>
++
++class QFileSystemWatcher;
++enum FcitxKeyEventType { FCITX_PRESS_KEY, FCITX_RELEASE_KEY };
++
++enum FcitxCapabilityFlags {
++    CAPACITY_NONE = 0,
++    CAPACITY_CLIENT_SIDE_UI = (1 << 0),
++    CAPACITY_PREEDIT = (1 << 1),
++    CAPACITY_CLIENT_SIDE_CONTROL_STATE = (1 << 2),
++    CAPACITY_PASSWORD = (1 << 3),
++    CAPACITY_FORMATTED_PREEDIT = (1 << 4),
++    CAPACITY_CLIENT_UNFOCUS_COMMIT = (1 << 5),
++    CAPACITY_SURROUNDING_TEXT = (1 << 6),
++    CAPACITY_EMAIL = (1 << 7),
++    CAPACITY_DIGIT = (1 << 8),
++    CAPACITY_UPPERCASE = (1 << 9),
++    CAPACITY_LOWERCASE = (1 << 10),
++    CAPACITY_NOAUTOUPPERCASE = (1 << 11),
++    CAPACITY_URL = (1 << 12),
++    CAPACITY_DIALABLE = (1 << 13),
++    CAPACITY_NUMBER = (1 << 14),
++    CAPACITY_NO_ON_SCREEN_KEYBOARD = (1 << 15),
++    CAPACITY_SPELLCHECK = (1 << 16),
++    CAPACITY_NO_SPELLCHECK = (1 << 17),
++    CAPACITY_WORD_COMPLETION = (1 << 18),
++    CAPACITY_UPPERCASE_WORDS = (1 << 19),
++    CAPACITY_UPPERCASE_SENTENCES = (1 << 20),
++    CAPACITY_ALPHA = (1 << 21),
++    CAPACITY_NAME = (1 << 22),
++    CAPACITY_GET_IM_INFO_ON_FOCUS = (1 << 23),
++    CAPACITY_RELATIVE_CURSOR_RECT = (1 << 24),
++};
++
++enum FcitxKeyState {
++    FcitxKeyState_None = 0,
++    FcitxKeyState_Shift = 1 << 0,
++    FcitxKeyState_CapsLock = 1 << 1,
++    FcitxKeyState_Ctrl = 1 << 2,
++    FcitxKeyState_Alt = 1 << 3,
++    FcitxKeyState_Alt_Shift = FcitxKeyState_Alt | FcitxKeyState_Shift,
++    FcitxKeyState_Ctrl_Shift = FcitxKeyState_Ctrl | FcitxKeyState_Shift,
++    FcitxKeyState_Ctrl_Alt = FcitxKeyState_Ctrl | FcitxKeyState_Alt,
++    FcitxKeyState_Ctrl_Alt_Shift =
++        FcitxKeyState_Ctrl | FcitxKeyState_Alt | FcitxKeyState_Shift,
++    FcitxKeyState_NumLock = 1 << 4,
++    FcitxKeyState_Super = 1 << 6,
++    FcitxKeyState_ScrollLock = 1 << 7,
++    FcitxKeyState_MousePressed = 1 << 8,
++    FcitxKeyState_HandledMask = 1 << 24,
++    FcitxKeyState_IgnoredMask = 1 << 25,
++    FcitxKeyState_Super2 = 1 << 26,
++    FcitxKeyState_Hyper = 1 << 27,
++    FcitxKeyState_Meta = 1 << 28,
++    FcitxKeyState_UsedMask = 0x5c001fff
++};
++
++struct FcitxQtICData {
++    FcitxQtICData(FcitxWatcher *watcher)
++        : proxy(new FcitxInputContextProxy(watcher, watcher)),
++          surroundingAnchor(-1), surroundingCursor(-1) {}
++    FcitxQtICData(const FcitxQtICData &that) = delete;
++    ~FcitxQtICData() {
++        if (proxy) {
++            delete proxy;
++        }
++    }
++    QFlags<FcitxCapabilityFlags> capability;
++    FcitxInputContextProxy *proxy;
++    QRect rect;
++    // Last key event forwarded.
++    std::unique_ptr<QKeyEvent> event;
++    QString surroundingText;
++    int surroundingAnchor;
++    int surroundingCursor;
++};
++
++class ProcessKeyWatcher : public QDBusPendingCallWatcher {
++    Q_OBJECT
++public:
++    ProcessKeyWatcher(const QKeyEvent &event, QWindow *window,
++                      const QDBusPendingCall &call, QObject *parent = 0)
++        : QDBusPendingCallWatcher(call, parent),
++          m_event(event.type(), event.key(), event.modifiers(),
++                  event.nativeScanCode(), event.nativeVirtualKey(),
++                  event.nativeModifiers(), event.text(), event.isAutoRepeat(),
++                  event.count()),
++          m_window(window) {}
++
++    virtual ~ProcessKeyWatcher() {}
++
++    const QKeyEvent &keyEvent() { return m_event; }
++
++    QWindow *window() { return m_window.data(); }
++
++private:
++    QKeyEvent m_event;
++    QPointer<QWindow> m_window;
++};
++
++struct XkbContextDeleter {
++    static inline void cleanup(struct xkb_context *pointer) {
++        if (pointer)
++            xkb_context_unref(pointer);
++    }
++};
++
++struct XkbComposeTableDeleter {
++    static inline void cleanup(struct xkb_compose_table *pointer) {
++        if (pointer)
++            xkb_compose_table_unref(pointer);
++    }
++};
++
++struct XkbComposeStateDeleter {
++    static inline void cleanup(struct xkb_compose_state *pointer) {
++        if (pointer)
++            xkb_compose_state_unref(pointer);
++    }
++};
++
++class FcitxQtInputMethodProxy;
++
++class QFcitxPlatformInputContext : public QPlatformInputContext {
++    Q_OBJECT
++public:
++    QFcitxPlatformInputContext();
++    virtual ~QFcitxPlatformInputContext();
++
++    virtual bool filterEvent(const QEvent *event) Q_DECL_OVERRIDE;
++    virtual bool isValid() const Q_DECL_OVERRIDE;
++    virtual void invokeAction(QInputMethod::Action,
++                              int cursorPosition) Q_DECL_OVERRIDE;
++    virtual void reset() Q_DECL_OVERRIDE;
++    virtual void commit() Q_DECL_OVERRIDE;
++    virtual void update(Qt::InputMethodQueries quries) Q_DECL_OVERRIDE;
++    virtual void setFocusObject(QObject *object) Q_DECL_OVERRIDE;
++    virtual QLocale locale() const Q_DECL_OVERRIDE;
++
++public Q_SLOTS:
++    void cursorRectChanged();
++    void commitString(const QString &str);
++    void updateFormattedPreedit(const FcitxFormattedPreeditList &preeditList,
++                                int cursorPos);
++    void deleteSurroundingText(int offset, uint nchar);
++    void forwardKey(uint keyval, uint state, bool type);
++    void createInputContextFinished();
++    void cleanUp();
++    void windowDestroyed(QObject *object);
++    void updateCurrentIM(const QString &name, const QString &uniqueName,
++                         const QString &langCode);
++
++private:
++    bool processCompose(uint keyval, uint state, bool isRelaese);
++    QKeyEvent *createKeyEvent(uint keyval, uint state, bool isRelaese,
++                              const QKeyEvent *event);
++    void forwardEvent(QWindow *window, const QKeyEvent &event);
++
++    void addCapability(FcitxQtICData &data,
++                       QFlags<FcitxCapabilityFlags> capability,
++                       bool forceUpdate = false) {
++        QFlags<FcitxCapabilityFlags> newcaps = data.capability | capability;
++        if (data.capability != newcaps || forceUpdate) {
++            data.capability = newcaps;
++            updateCapability(data);
++        }
++    }
++
++    void removeCapability(FcitxQtICData &data,
++                          QFlags<FcitxCapabilityFlags> capability,
++                          bool forceUpdate = false) {
++        QFlags<FcitxCapabilityFlags> newcaps = data.capability & (~capability);
++        if (data.capability != newcaps || forceUpdate) {
++            data.capability = newcaps;
++            updateCapability(data);
++        }
++    }
++
++    void updateCapability(const FcitxQtICData &data);
++    void commitPreedit(QPointer<QObject> input = qApp->focusObject());
++    void createICData(QWindow *w);
++    FcitxInputContextProxy *validIC();
++    FcitxInputContextProxy *validICByWindow(QWindow *window);
++    bool filterEventFallback(uint keyval, uint keycode, uint state,
++                             bool isRelaese);
++
++    FcitxWatcher *m_watcher;
++    QString m_preedit;
++    QString m_commitPreedit;
++    FcitxFormattedPreeditList m_preeditList;
++    int m_cursorPos;
++    bool m_useSurroundingText;
++    bool m_syncMode;
++    QString m_lastSurroundingText;
++    int m_lastSurroundingAnchor = 0;
++    int m_lastSurroundingCursor = 0;
++    std::unordered_map<QWindow *, FcitxQtICData> m_icMap;
++    QPointer<QWindow> m_lastWindow;
++    QPointer<QObject> m_lastObject;
++    bool m_destroy;
++    QScopedPointer<struct xkb_context, XkbContextDeleter> m_xkbContext;
++    QScopedPointer<struct xkb_compose_table, XkbComposeTableDeleter>
++        m_xkbComposeTable;
++    QScopedPointer<struct xkb_compose_state, XkbComposeStateDeleter>
++        m_xkbComposeState;
++    QLocale m_locale;
++private Q_SLOTS:
++    void processKeyEventFinished(QDBusPendingCallWatcher *);
++};
++
++#endif // QFCITXPLATFORMINPUTCONTEXT_H
+diff --git "a/src/plugins/platforminputcontexts/fcitx/qtkey.cpp" "b/src/plugins/platforminputcontexts/fcitx/qtkey.cpp"
+new file mode 100644
+index 0000000..aa79040
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/qtkey.cpp"
+@@ -0,0 +1,372 @@
++/*
++ * Copyright (C) 2017~2017 by CSSlayer
++ * wengxt@gmail.com
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above Copyright
++ *    notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above Copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * 3. Neither the name of the authors nor the names of its contributors
++ *    may be used to endorse or promote products derived from this
++ *    software without specific prior written permission.
++ */
++
++#include "qtkey.h"
++
++#include <QHash>
++#include <QString>
++#include <X11/XF86keysym.h>
++#include <X11/keysym.h>
++#include <ctype.h>
++#include <qnamespace.h>
++#include <unordered_map>
++
++const std::unordered_map<uint32_t, int> &KeyTbl() {
++    static std::unordered_map<uint32_t, int> keyTbl{
++        std::make_pair(XK_KP_Space, Qt::Key_Space),
++        std::make_pair(XK_KP_Tab, Qt::Key_Tab),
++        std::make_pair(XK_KP_Enter, Qt::Key_Enter),
++        std::make_pair(XK_KP_F1, Qt::Key_F1),
++        std::make_pair(XK_KP_F2, Qt::Key_F2),
++        std::make_pair(XK_KP_F3, Qt::Key_F3),
++        std::make_pair(XK_KP_F4, Qt::Key_F4),
++        std::make_pair(XK_KP_Home, Qt::Key_Home),
++        std::make_pair(XK_KP_Left, Qt::Key_Left),
++        std::make_pair(XK_KP_Up, Qt::Key_Up),
++        std::make_pair(XK_KP_Right, Qt::Key_Right),
++        std::make_pair(XK_KP_Down, Qt::Key_Down),
++        std::make_pair(XK_KP_Page_Up, Qt::Key_PageUp),
++        std::make_pair(XK_KP_Page_Down, Qt::Key_PageDown),
++        std::make_pair(XK_KP_End, Qt::Key_End),
++        std::make_pair(XK_KP_Begin, Qt::Key_Clear),
++        std::make_pair(XK_KP_Insert, Qt::Key_Insert),
++        std::make_pair(XK_KP_Delete, Qt::Key_Delete),
++        std::make_pair(XK_KP_Equal, Qt::Key_Equal),
++        std::make_pair(XK_KP_Multiply, Qt::Key_multiply),
++        std::make_pair(XK_KP_Add, Qt::Key_Plus),
++        std::make_pair(XK_KP_Separator, Qt::Key_Comma),
++        std::make_pair(XK_KP_Subtract, Qt::Key_Minus),
++        std::make_pair(XK_KP_Decimal, Qt::Key_Period),
++        std::make_pair(XK_KP_Divide, Qt::Key_Slash),
++
++        std::make_pair(XK_KP_0, Qt::Key_0),
++        std::make_pair(XK_KP_1, Qt::Key_1),
++        std::make_pair(XK_KP_2, Qt::Key_2),
++        std::make_pair(XK_KP_3, Qt::Key_3),
++        std::make_pair(XK_KP_4, Qt::Key_4),
++        std::make_pair(XK_KP_5, Qt::Key_5),
++        std::make_pair(XK_KP_6, Qt::Key_6),
++        std::make_pair(XK_KP_7, Qt::Key_7),
++        std::make_pair(XK_KP_8, Qt::Key_8),
++        std::make_pair(XK_KP_9, Qt::Key_9),
++
++        std::make_pair(XK_Escape, Qt::Key_Escape),
++        std::make_pair(XK_Tab, Qt::Key_Tab),
++        std::make_pair(XK_ISO_Left_Tab, Qt::Key_Backtab),
++        std::make_pair(XK_BackSpace, Qt::Key_Backspace),
++        std::make_pair(XK_Return, Qt::Key_Return),
++        std::make_pair(XK_KP_Enter, Qt::Key_Enter),
++        std::make_pair(XK_Insert, Qt::Key_Insert),
++        std::make_pair(XK_Delete, Qt::Key_Delete),
++        std::make_pair(XK_Clear, Qt::Key_Delete),
++        std::make_pair(XK_Pause, Qt::Key_Pause),
++        std::make_pair(XK_Print, Qt::Key_Print),
++        std::make_pair(XK_Sys_Req, Qt::Key_SysReq),
++        std::make_pair(0x1005FF60, Qt::Key_SysReq),
++        std::make_pair(0x1007ff00, Qt::Key_SysReq),
++
++        std::make_pair(XK_Home, Qt::Key_Home),
++        std::make_pair(XK_End, Qt::Key_End),
++        std::make_pair(XK_Left, Qt::Key_Left),
++        std::make_pair(XK_Up, Qt::Key_Up),
++        std::make_pair(XK_Right, Qt::Key_Right),
++        std::make_pair(XK_Down, Qt::Key_Down),
++        std::make_pair(XK_Page_Up, Qt::Key_PageUp),
++        std::make_pair(XK_Page_Down, Qt::Key_PageDown),
++        std::make_pair(XK_Shift_L, Qt::Key_Shift),
++        std::make_pair(XK_Shift_R, Qt::Key_Shift),
++        std::make_pair(XK_Shift_Lock, Qt::Key_Shift),
++        std::make_pair(XK_Control_L, Qt::Key_Control),
++        std::make_pair(XK_Control_R, Qt::Key_Control),
++        std::make_pair(XK_Meta_L, Qt::Key_Meta),
++        std::make_pair(XK_Meta_R, Qt::Key_Meta),
++        std::make_pair(XK_Alt_L, Qt::Key_Alt),
++        std::make_pair(XK_Alt_R, Qt::Key_Alt),
++        std::make_pair(XK_Caps_Lock, Qt::Key_CapsLock),
++        std::make_pair(XK_Num_Lock, Qt::Key_NumLock),
++        std::make_pair(XK_Scroll_Lock, Qt::Key_ScrollLock),
++        std::make_pair(XK_F1, Qt::Key_F1),
++        std::make_pair(XK_F2, Qt::Key_F2),
++        std::make_pair(XK_F3, Qt::Key_F3),
++        std::make_pair(XK_F4, Qt::Key_F4),
++        std::make_pair(XK_F5, Qt::Key_F5),
++        std::make_pair(XK_F6, Qt::Key_F6),
++        std::make_pair(XK_F7, Qt::Key_F7),
++        std::make_pair(XK_F8, Qt::Key_F8),
++        std::make_pair(XK_F9, Qt::Key_F9),
++        std::make_pair(XK_F10, Qt::Key_F10),
++        std::make_pair(XK_F11, Qt::Key_F11),
++        std::make_pair(XK_F12, Qt::Key_F12),
++        std::make_pair(XK_F13, Qt::Key_F13),
++        std::make_pair(XK_F14, Qt::Key_F14),
++        std::make_pair(XK_F15, Qt::Key_F15),
++        std::make_pair(XK_F16, Qt::Key_F16),
++        std::make_pair(XK_F17, Qt::Key_F17),
++        std::make_pair(XK_F18, Qt::Key_F18),
++        std::make_pair(XK_F19, Qt::Key_F19),
++        std::make_pair(XK_F20, Qt::Key_F20),
++        std::make_pair(XK_F21, Qt::Key_F21),
++        std::make_pair(XK_F22, Qt::Key_F22),
++        std::make_pair(XK_F23, Qt::Key_F23),
++        std::make_pair(XK_F24, Qt::Key_F24),
++        std::make_pair(XK_F25, Qt::Key_F25),
++        std::make_pair(XK_F26, Qt::Key_F26),
++        std::make_pair(XK_F27, Qt::Key_F27),
++        std::make_pair(XK_F28, Qt::Key_F28),
++        std::make_pair(XK_F29, Qt::Key_F29),
++        std::make_pair(XK_F30, Qt::Key_F30),
++        std::make_pair(XK_F31, Qt::Key_F31),
++        std::make_pair(XK_F32, Qt::Key_F32),
++        std::make_pair(XK_F33, Qt::Key_F33),
++        std::make_pair(XK_F34, Qt::Key_F34),
++        std::make_pair(XK_F35, Qt::Key_F35),
++        std::make_pair(XK_Super_L, Qt::Key_Super_L),
++        std::make_pair(XK_Super_R, Qt::Key_Super_R),
++        std::make_pair(XK_Menu, Qt::Key_Menu),
++        std::make_pair(XK_Hyper_L, Qt::Key_Hyper_L),
++        std::make_pair(XK_Hyper_R, Qt::Key_Hyper_R),
++        std::make_pair(XK_Help, Qt::Key_Help),
++        std::make_pair(XK_ISO_Level3_Shift, Qt::Key_AltGr),
++        std::make_pair(XK_Multi_key, Qt::Key_Multi_key),
++        std::make_pair(XK_Codeinput, Qt::Key_Codeinput),
++        std::make_pair(XK_SingleCandidate, Qt::Key_SingleCandidate),
++        std::make_pair(XK_MultipleCandidate, Qt::Key_MultipleCandidate),
++        std::make_pair(XK_PreviousCandidate, Qt::Key_PreviousCandidate),
++        std::make_pair(XK_Mode_switch, Qt::Key_Mode_switch),
++        std::make_pair(XK_script_switch, Qt::Key_Mode_switch),
++        std::make_pair(XK_Kanji, Qt::Key_Kanji),
++        std::make_pair(XK_Muhenkan, Qt::Key_Muhenkan),
++        std::make_pair(XK_Henkan, Qt::Key_Henkan),
++        std::make_pair(XK_Romaji, Qt::Key_Romaji),
++        std::make_pair(XK_Hiragana, Qt::Key_Hiragana),
++        std::make_pair(XK_Katakana, Qt::Key_Katakana),
++        std::make_pair(XK_Hiragana_Katakana, Qt::Key_Hiragana_Katakana),
++        std::make_pair(XK_Zenkaku, Qt::Key_Zenkaku),
++        std::make_pair(XK_Hankaku, Qt::Key_Hankaku),
++        std::make_pair(XK_Zenkaku_Hankaku, Qt::Key_Zenkaku_Hankaku),
++        std::make_pair(XK_Touroku, Qt::Key_Touroku),
++        std::make_pair(XK_Massyo, Qt::Key_Massyo),
++        std::make_pair(XK_Kana_Lock, Qt::Key_Kana_Lock),
++        std::make_pair(XK_Kana_Shift, Qt::Key_Kana_Shift),
++        std::make_pair(XK_Eisu_Shift, Qt::Key_Eisu_Shift),
++        std::make_pair(XK_Eisu_toggle, Qt::Key_Eisu_toggle),
++        std::make_pair(XK_Kanji_Bangou, Qt::Key_Codeinput),
++        std::make_pair(XK_Zen_Koho, Qt::Key_MultipleCandidate),
++        std::make_pair(XK_Mae_Koho, Qt::Key_PreviousCandidate),
++        std::make_pair(XK_Hangul, Qt::Key_Hangul),
++        std::make_pair(XK_Hangul_Start, Qt::Key_Hangul_Start),
++        std::make_pair(XK_Hangul_End, Qt::Key_Hangul_End),
++        std::make_pair(XK_Hangul_Hanja, Qt::Key_Hangul_Hanja),
++        std::make_pair(XK_Hangul_Jamo, Qt::Key_Hangul_Jamo),
++        std::make_pair(XK_Hangul_Romaja, Qt::Key_Hangul_Romaja),
++        std::make_pair(XK_Hangul_Codeinput, Qt::Key_Codeinput),
++        std::make_pair(XK_Hangul_Jeonja, Qt::Key_Hangul_Jeonja),
++        std::make_pair(XK_Hangul_Banja, Qt::Key_Hangul_Banja),
++        std::make_pair(XK_Hangul_PreHanja, Qt::Key_Hangul_PreHanja),
++        std::make_pair(XK_Hangul_PostHanja, Qt::Key_Hangul_PostHanja),
++        std::make_pair(XK_Hangul_SingleCandidate, Qt::Key_SingleCandidate),
++        std::make_pair(XK_Hangul_MultipleCandidate, Qt::Key_MultipleCandidate),
++        std::make_pair(XK_Hangul_PreviousCandidate, Qt::Key_PreviousCandidate),
++        std::make_pair(XK_Hangul_Special, Qt::Key_Hangul_Special),
++        std::make_pair(XK_Hangul_switch, Qt::Key_Mode_switch),
++        std::make_pair(XK_dead_grave, Qt::Key_Dead_Grave),
++        std::make_pair(XK_dead_acute, Qt::Key_Dead_Acute),
++        std::make_pair(XK_dead_circumflex, Qt::Key_Dead_Circumflex),
++        std::make_pair(XK_dead_tilde, Qt::Key_Dead_Tilde),
++        std::make_pair(XK_dead_macron, Qt::Key_Dead_Macron),
++        std::make_pair(XK_dead_breve, Qt::Key_Dead_Breve),
++        std::make_pair(XK_dead_abovedot, Qt::Key_Dead_Abovedot),
++        std::make_pair(XK_dead_diaeresis, Qt::Key_Dead_Diaeresis),
++        std::make_pair(XK_dead_abovering, Qt::Key_Dead_Abovering),
++        std::make_pair(XK_dead_doubleacute, Qt::Key_Dead_Doubleacute),
++        std::make_pair(XK_dead_caron, Qt::Key_Dead_Caron),
++        std::make_pair(XK_dead_cedilla, Qt::Key_Dead_Cedilla),
++        std::make_pair(XK_dead_ogonek, Qt::Key_Dead_Ogonek),
++        std::make_pair(XK_dead_iota, Qt::Key_Dead_Iota),
++        std::make_pair(XK_dead_voiced_sound, Qt::Key_Dead_Voiced_Sound),
++        std::make_pair(XK_dead_semivoiced_sound, Qt::Key_Dead_Semivoiced_Sound),
++        std::make_pair(XK_dead_belowdot, Qt::Key_Dead_Belowdot),
++        std::make_pair(XK_dead_hook, Qt::Key_Dead_Hook),
++        std::make_pair(XK_dead_horn, Qt::Key_Dead_Horn),
++        std::make_pair(XF86XK_Back, Qt::Key_Back),
++        std::make_pair(XF86XK_Forward, Qt::Key_Forward),
++        std::make_pair(XF86XK_Stop, Qt::Key_Stop),
++        std::make_pair(XF86XK_Refresh, Qt::Key_Refresh),
++        std::make_pair(XF86XK_AudioLowerVolume, Qt::Key_VolumeDown),
++        std::make_pair(XF86XK_AudioMute, Qt::Key_VolumeMute),
++        std::make_pair(XF86XK_AudioRaiseVolume, Qt::Key_VolumeUp),
++        std::make_pair(XF86XK_AudioPlay, Qt::Key_MediaPlay),
++        std::make_pair(XF86XK_AudioStop, Qt::Key_MediaStop),
++        std::make_pair(XF86XK_AudioPrev, Qt::Key_MediaPrevious),
++        std::make_pair(XF86XK_AudioNext, Qt::Key_MediaNext),
++        std::make_pair(XF86XK_AudioRecord, Qt::Key_MediaRecord),
++        std::make_pair(XF86XK_AudioPause, Qt::Key_MediaPause),
++        std::make_pair(XF86XK_HomePage, Qt::Key_HomePage),
++        std::make_pair(XF86XK_Favorites, Qt::Key_Favorites),
++        std::make_pair(XF86XK_Search, Qt::Key_Search),
++        std::make_pair(XF86XK_Standby, Qt::Key_Standby),
++        std::make_pair(XF86XK_OpenURL, Qt::Key_OpenUrl),
++        std::make_pair(XF86XK_Mail, Qt::Key_LaunchMail),
++        std::make_pair(XF86XK_AudioMedia, Qt::Key_LaunchMedia),
++        std::make_pair(XF86XK_MyComputer, Qt::Key_Launch0),
++        std::make_pair(XF86XK_Calculator, Qt::Key_Launch1),
++        std::make_pair(XF86XK_Launch0, Qt::Key_Launch2),
++        std::make_pair(XF86XK_Launch1, Qt::Key_Launch3),
++        std::make_pair(XF86XK_Launch2, Qt::Key_Launch4),
++        std::make_pair(XF86XK_Launch3, Qt::Key_Launch5),
++        std::make_pair(XF86XK_Launch4, Qt::Key_Launch6),
++        std::make_pair(XF86XK_Launch5, Qt::Key_Launch7),
++        std::make_pair(XF86XK_Launch6, Qt::Key_Launch8),
++        std::make_pair(XF86XK_Launch7, Qt::Key_Launch9),
++        std::make_pair(XF86XK_Launch8, Qt::Key_LaunchA),
++        std::make_pair(XF86XK_Launch9, Qt::Key_LaunchB),
++        std::make_pair(XF86XK_LaunchA, Qt::Key_LaunchC),
++        std::make_pair(XF86XK_LaunchB, Qt::Key_LaunchD),
++        std::make_pair(XF86XK_LaunchC, Qt::Key_LaunchE),
++        std::make_pair(XF86XK_LaunchD, Qt::Key_LaunchF),
++        std::make_pair(XF86XK_MonBrightnessUp, Qt::Key_MonBrightnessUp),
++        std::make_pair(XF86XK_MonBrightnessDown, Qt::Key_MonBrightnessDown),
++        std::make_pair(XF86XK_KbdLightOnOff, Qt::Key_KeyboardLightOnOff),
++        std::make_pair(XF86XK_KbdBrightnessUp, Qt::Key_KeyboardBrightnessUp),
++        std::make_pair(XF86XK_KbdBrightnessDown,
++                       Qt::Key_KeyboardBrightnessDown),
++        std::make_pair(XF86XK_PowerOff, Qt::Key_PowerOff),
++        std::make_pair(XF86XK_WakeUp, Qt::Key_WakeUp),
++        std::make_pair(XF86XK_Eject, Qt::Key_Eject),
++        std::make_pair(XF86XK_ScreenSaver, Qt::Key_ScreenSaver),
++        std::make_pair(XF86XK_WWW, Qt::Key_WWW),
++        std::make_pair(XF86XK_Memo, Qt::Key_Memo),
++        std::make_pair(XF86XK_LightBulb, Qt::Key_LightBulb),
++        std::make_pair(XF86XK_Shop, Qt::Key_Shop),
++        std::make_pair(XF86XK_History, Qt::Key_History),
++        std::make_pair(XF86XK_AddFavorite, Qt::Key_AddFavorite),
++        std::make_pair(XF86XK_HotLinks, Qt::Key_HotLinks),
++        std::make_pair(XF86XK_BrightnessAdjust, Qt::Key_BrightnessAdjust),
++        std::make_pair(XF86XK_Finance, Qt::Key_Finance),
++        std::make_pair(XF86XK_Community, Qt::Key_Community),
++        std::make_pair(XF86XK_AudioRewind, Qt::Key_AudioRewind),
++        std::make_pair(XF86XK_BackForward, Qt::Key_BackForward),
++        std::make_pair(XF86XK_ApplicationLeft, Qt::Key_ApplicationLeft),
++        std::make_pair(XF86XK_ApplicationRight, Qt::Key_ApplicationRight),
++        std::make_pair(XF86XK_Book, Qt::Key_Book),
++        std::make_pair(XF86XK_CD, Qt::Key_CD),
++        std::make_pair(XF86XK_Calculater, Qt::Key_Calculator),
++        std::make_pair(XF86XK_ToDoList, Qt::Key_ToDoList),
++        std::make_pair(XF86XK_ClearGrab, Qt::Key_ClearGrab),
++        std::make_pair(XF86XK_Close, Qt::Key_Close),
++        std::make_pair(XF86XK_Copy, Qt::Key_Copy),
++        std::make_pair(XF86XK_Cut, Qt::Key_Cut),
++        std::make_pair(XF86XK_Display, Qt::Key_Display),
++        std::make_pair(XF86XK_DOS, Qt::Key_DOS),
++        std::make_pair(XF86XK_Documents, Qt::Key_Documents),
++        std::make_pair(XF86XK_Excel, Qt::Key_Excel),
++        std::make_pair(XF86XK_Explorer, Qt::Key_Explorer),
++        std::make_pair(XF86XK_Game, Qt::Key_Game),
++        std::make_pair(XF86XK_Go, Qt::Key_Go),
++        std::make_pair(XF86XK_iTouch, Qt::Key_iTouch),
++        std::make_pair(XF86XK_LogOff, Qt::Key_LogOff),
++        std::make_pair(XF86XK_Market, Qt::Key_Market),
++        std::make_pair(XF86XK_Meeting, Qt::Key_Meeting),
++        std::make_pair(XF86XK_MenuKB, Qt::Key_MenuKB),
++        std::make_pair(XF86XK_MenuPB, Qt::Key_MenuPB),
++        std::make_pair(XF86XK_MySites, Qt::Key_MySites),
++        std::make_pair(XF86XK_News, Qt::Key_News),
++        std::make_pair(XF86XK_OfficeHome, Qt::Key_OfficeHome),
++        std::make_pair(XF86XK_Option, Qt::Key_Option),
++        std::make_pair(XF86XK_Paste, Qt::Key_Paste),
++        std::make_pair(XF86XK_Phone, Qt::Key_Phone),
++        std::make_pair(XF86XK_Calendar, Qt::Key_Calendar),
++        std::make_pair(XF86XK_Reply, Qt::Key_Reply),
++        std::make_pair(XF86XK_Reload, Qt::Key_Reload),
++        std::make_pair(XF86XK_RotateWindows, Qt::Key_RotateWindows),
++        std::make_pair(XF86XK_RotationPB, Qt::Key_RotationPB),
++        std::make_pair(XF86XK_RotationKB, Qt::Key_RotationKB),
++        std::make_pair(XF86XK_Save, Qt::Key_Save),
++        std::make_pair(XF86XK_Send, Qt::Key_Send),
++        std::make_pair(XF86XK_Spell, Qt::Key_Spell),
++        std::make_pair(XF86XK_SplitScreen, Qt::Key_SplitScreen),
++        std::make_pair(XF86XK_Support, Qt::Key_Support),
++        std::make_pair(XF86XK_TaskPane, Qt::Key_TaskPane),
++        std::make_pair(XF86XK_Terminal, Qt::Key_Terminal),
++        std::make_pair(XF86XK_Tools, Qt::Key_Tools),
++        std::make_pair(XF86XK_Travel, Qt::Key_Travel),
++        std::make_pair(XF86XK_Video, Qt::Key_Video),
++        std::make_pair(XF86XK_Word, Qt::Key_Word),
++        std::make_pair(XF86XK_Xfer, Qt::Key_Xfer),
++        std::make_pair(XF86XK_ZoomIn, Qt::Key_ZoomIn),
++        std::make_pair(XF86XK_ZoomOut, Qt::Key_ZoomOut),
++        std::make_pair(XF86XK_Away, Qt::Key_Away),
++        std::make_pair(XF86XK_Messenger, Qt::Key_Messenger),
++        std::make_pair(XF86XK_WebCam, Qt::Key_WebCam),
++        std::make_pair(XF86XK_MailForward, Qt::Key_MailForward),
++        std::make_pair(XF86XK_Pictures, Qt::Key_Pictures),
++        std::make_pair(XF86XK_Music, Qt::Key_Music),
++        std::make_pair(XF86XK_Battery, Qt::Key_Battery),
++        std::make_pair(XF86XK_Bluetooth, Qt::Key_Bluetooth),
++        std::make_pair(XF86XK_WLAN, Qt::Key_WLAN),
++        std::make_pair(XF86XK_UWB, Qt::Key_UWB),
++        std::make_pair(XF86XK_AudioForward, Qt::Key_AudioForward),
++        std::make_pair(XF86XK_AudioRepeat, Qt::Key_AudioRepeat),
++        std::make_pair(XF86XK_AudioRandomPlay, Qt::Key_AudioRandomPlay),
++        std::make_pair(XF86XK_Subtitle, Qt::Key_Subtitle),
++        std::make_pair(XF86XK_AudioCycleTrack, Qt::Key_AudioCycleTrack),
++        std::make_pair(XF86XK_Time, Qt::Key_Time),
++        std::make_pair(XF86XK_Hibernate, Qt::Key_Hibernate),
++        std::make_pair(XF86XK_View, Qt::Key_View),
++        std::make_pair(XF86XK_TopMenu, Qt::Key_TopMenu),
++        std::make_pair(XF86XK_PowerDown, Qt::Key_PowerDown),
++        std::make_pair(XF86XK_Suspend, Qt::Key_Suspend),
++        std::make_pair(XF86XK_ContrastAdjust, Qt::Key_ContrastAdjust),
++
++        std::make_pair(XF86XK_LaunchE, Qt::Key_LaunchG),
++        std::make_pair(XF86XK_LaunchF, Qt::Key_LaunchH),
++
++        std::make_pair(XF86XK_Select, Qt::Key_Select),
++        std::make_pair(XK_Cancel, Qt::Key_Cancel),
++        std::make_pair(XK_Execute, Qt::Key_Execute),
++        std::make_pair(XF86XK_Sleep, Qt::Key_Sleep),
++    };
++    return keyTbl;
++}
++
++int keysymToQtKey(uint32_t key) {
++    auto iter = KeyTbl().find(key);
++    if (iter != KeyTbl().end()) {
++        return iter->second;
++    }
++    return 0;
++}
++
++int keysymToQtKey(uint32_t keysym, const QString &text) {
++    int code = 0;
++    if (keysym < 128) {
++        // upper-case key, if known
++        code = isprint((int)keysym) ? toupper((int)keysym) : 0;
++    } else if (text.length() == 1 && text.unicode()->unicode() > 0x1f &&
++               text.unicode()->unicode() != 0x7f &&
++               !(keysym >= XK_dead_grave && keysym <= XK_dead_currency)) {
++        code = text.unicode()->toUpper().unicode();
++    } else {
++        // any other keys
++        code = keysymToQtKey(keysym);
++    }
++
++    return code;
++}
+diff --git "a/src/plugins/platforminputcontexts/fcitx/qtkey.h" "b/src/plugins/platforminputcontexts/fcitx/qtkey.h"
+new file mode 100644
+index 0000000..fc378fc
+--- /dev/null
++++ "b/src/plugins/platforminputcontexts/fcitx/qtkey.h"
+@@ -0,0 +1,28 @@
++/*
++ * Copyright (C) 2017~2017 by CSSlayer
++ * wengxt@gmail.com
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above Copyright
++ *    notice, this list of conditions and the following disclaimer.
++ *
++ * 2. Redistributions in binary form must reproduce the above Copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * 3. Neither the name of the authors nor the names of its contributors
++ *    may be used to endorse or promote products derived from this
++ *    software without specific prior written permission.
++ */
++
++#ifndef _PLATFORMINPUTCONTEXT_QTKEY_H_
++#define _PLATFORMINPUTCONTEXT_QTKEY_H_
++
++#include <QString>
++
++int keysymToQtKey(uint32_t keysym, const QString &text);
++
++#endif // _PLATFORMINPUTCONTEXT_QTKEY_H_
+diff --git "a/src/plugins/platforminputcontexts/platforminputcontexts.pro" "b/src/plugins/platforminputcontexts/platforminputcontexts.pro"
+index 56a39a4..4287358 100644
+--- "a/src/plugins/platforminputcontexts/platforminputcontexts.pro"
++++ "b/src/plugins/platforminputcontexts/platforminputcontexts.pro"
+@@ -6,6 +6,7 @@ qtConfig(xkbcommon) {
+ 
+     qtHaveModule(dbus) {
+         !macos:!win32:SUBDIRS += ibus
++        !macos:!win32:SUBDIRS += fcitx
+     }
+ }
+ 
