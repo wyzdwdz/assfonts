@@ -1,19 +1,19 @@
-diff --git "a/src/plugins/platforminputcontexts/fcitx/fcitx.json" "b/src/plugins/platforminputcontexts/fcitx/fcitx.json"
+diff --git a/src/plugins/platforminputcontexts/fcitx/fcitx.json b/src/plugins/platforminputcontexts/fcitx/fcitx.json
 new file mode 100644
 index 0000000..6d2b389
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/fcitx.json"
++++ b/src/plugins/platforminputcontexts/fcitx/fcitx.json
 @@ -0,0 +1,3 @@
 +{
 +    "Keys": [ "fcitx" ]
 +}
 \ No newline at end of file
-diff --git "a/src/plugins/platforminputcontexts/fcitx/fcitx.pro" "b/src/plugins/platforminputcontexts/fcitx/fcitx.pro"
+diff --git a/src/plugins/platforminputcontexts/fcitx/fcitx.pro b/src/plugins/platforminputcontexts/fcitx/fcitx.pro
 new file mode 100644
-index 0000000..53e0263
+index 0000000..2cd5f28
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/fcitx.pro"
-@@ -0,0 +1,23 @@
++++ b/src/plugins/platforminputcontexts/fcitx/fcitx.pro
+@@ -0,0 +1,31 @@
 +TARGET = fcitxplatforminputcontextplugin
 +
 +QT += dbus gui-private xkbcommon_support-private
@@ -22,6 +22,10 @@ index 0000000..53e0263
 +           $$PWD/fcitxwatcher.cpp \
 +           $$PWD/qfcitxplatforminputcontext.cpp \
 +           $$PWD/qtkey.cpp \
++           $$PWD/inputcontextproxy.cpp \
++           $$PWD/inputcontext1proxy.cpp \
++           $$PWD/inputmethodproxy.cpp \
++           $$PWD/inputmethod1proxy.cpp \
 +           $$PWD/main.cpp
 +
 +HEADERS += $$PWD/fcitxinputcontextproxy.h \
@@ -29,6 +33,10 @@ index 0000000..53e0263
 +           $$PWD/fcitxwatcher.h \
 +           $$PWD/qfcitxplatforminputcontext.h \
 +           $$PWD/qtkey.h \
++           $$PWD/inputcontextproxy.h \
++           $$PWD/inputcontext1proxy.h \
++           $$PWD/inputmethodproxy.h \
++           $$PWD/inputmethod1proxy.h \
 +           $$PWD/main.h
 +
 +OTHER_FILES += $$PWD/fcitx.json
@@ -37,11 +45,11 @@ index 0000000..53e0263
 +PLUGIN_EXTENDS = -
 +PLUGIN_CLASS_NAME = QFcitxPlatformInputContextPlugin
 +load(qt_plugin)
-diff --git "a/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.cpp" "b/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.cpp"
+diff --git a/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.cpp b/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.cpp
 new file mode 100644
 index 0000000..0248108
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.cpp"
++++ b/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.cpp
 @@ -0,0 +1,307 @@
 +/*
 + * Copyright (C) 2011~2017 by CSSlayer
@@ -350,11 +358,11 @@ index 0000000..0248108
 +        return reply.value() > 0;
 +    }
 +}
-diff --git "a/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.h" "b/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.h"
+diff --git a/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.h b/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.h
 new file mode 100644
 index 0000000..983db35
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.h"
++++ b/src/plugins/platforminputcontexts/fcitx/fcitxinputcontextproxy.h
 @@ -0,0 +1,90 @@
 +/*
 + * Copyright (C) 2011~2017 by CSSlayer
@@ -446,11 +454,11 @@ index 0000000..983db35
 +};
 +
 +#endif // FCITXINPUTCONTEXTPROXY_H_
-diff --git "a/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.cpp" "b/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.cpp"
+diff --git a/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.cpp b/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.cpp
 new file mode 100644
 index 0000000..2c8d950
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.cpp"
++++ b/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.cpp
 @@ -0,0 +1,102 @@
 +/*
 + * Copyright (C) 2017~2017 by CSSlayer
@@ -554,11 +562,11 @@ index 0000000..2c8d950
 +    arg.setValue(value);
 +    return argument;
 +}
-diff --git "a/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.h" "b/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.h"
+diff --git a/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.h b/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.h
 new file mode 100644
 index 0000000..d760473
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.h"
++++ b/src/plugins/platforminputcontexts/fcitx/fcitxqtdbustypes.h
 @@ -0,0 +1,82 @@
 +/*
 + * Copyright (C) 2012~2017 by CSSlayer
@@ -642,11 +650,11 @@ index 0000000..d760473
 +Q_DECLARE_METATYPE(FcitxInputContextArgumentList)
 +
 +#endif // _DBUSADDONS_FCITXQTDBUSTYPES_H_
-diff --git "a/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.cpp" "b/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.cpp"
+diff --git a/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.cpp b/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.cpp
 new file mode 100644
 index 0000000..1fde40e
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.cpp"
++++ b/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.cpp
 @@ -0,0 +1,289 @@
 +/*
 + * Copyright (C) 2011~2017 by CSSlayer
@@ -937,11 +945,11 @@ index 0000000..1fde40e
 +void FcitxWatcher::updateAvailability() {
 +    setAvailability(m_mainPresent || m_portalPresent || m_connection);
 +}
-diff --git "a/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.h" "b/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.h"
+diff --git a/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.h b/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.h
 new file mode 100644
 index 0000000..3072b9d
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.h"
++++ b/src/plugins/platforminputcontexts/fcitx/fcitxwatcher.h
 @@ -0,0 +1,78 @@
 +/*
 + * Copyright (C) 2017~2017 by CSSlayer
@@ -1021,11 +1029,525 @@ index 0000000..3072b9d
 +};
 +
 +#endif // FCITXWATCHER_H_
-diff --git "a/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext.xml" "b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext.xml"
+diff --git a/src/plugins/platforminputcontexts/fcitx/inputcontext1proxy.cpp b/src/plugins/platforminputcontexts/fcitx/inputcontext1proxy.cpp
+new file mode 100644
+index 0000000..6116586
+--- /dev/null
++++ b/src/plugins/platforminputcontexts/fcitx/inputcontext1proxy.cpp
+@@ -0,0 +1,26 @@
++/*
++ * This file was generated by qdbusxml2cpp version 0.8
++ * Command line was: qdbusxml2cpp -p inputcontext1proxy interfaces/org.fcitx.Fcitx.InputContext1.xml
++ *
++ * qdbusxml2cpp is Copyright (C) 2020 The Qt Company Ltd.
++ *
++ * This is an auto-generated file.
++ * This file may have been hand-edited. Look for HAND-EDIT comments
++ * before re-generating it.
++ */
++
++#include "inputcontext1proxy.h"
++
++/*
++ * Implementation of interface class OrgFcitxFcitxInputContext1Interface
++ */
++
++OrgFcitxFcitxInputContext1Interface::OrgFcitxFcitxInputContext1Interface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
++    : QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
++{
++}
++
++OrgFcitxFcitxInputContext1Interface::~OrgFcitxFcitxInputContext1Interface()
++{
++}
++
+diff --git a/src/plugins/platforminputcontexts/fcitx/inputcontext1proxy.h b/src/plugins/platforminputcontexts/fcitx/inputcontext1proxy.h
+new file mode 100644
+index 0000000..2d47751
+--- /dev/null
++++ b/src/plugins/platforminputcontexts/fcitx/inputcontext1proxy.h
+@@ -0,0 +1,113 @@
++/*
++ * This file was generated by qdbusxml2cpp version 0.8
++ * Command line was: qdbusxml2cpp -p inputcontext1proxy interfaces/org.fcitx.Fcitx.InputContext1.xml
++ *
++ * qdbusxml2cpp is Copyright (C) 2020 The Qt Company Ltd.
++ *
++ * This is an auto-generated file.
++ * Do not edit! All changes made to it will be lost.
++ */
++
++#ifndef INPUTCONTEXT1PROXY_H
++#define INPUTCONTEXT1PROXY_H
++
++#include <QtCore/QObject>
++#include <QtCore/QByteArray>
++#include <QtCore/QList>
++#include <QtCore/QMap>
++#include <QtCore/QString>
++#include <QtCore/QStringList>
++#include <QtCore/QVariant>
++#include <QtDBus/QtDBus>
++
++/*
++ * Proxy class for interface org.fcitx.Fcitx.InputContext1
++ */
++class OrgFcitxFcitxInputContext1Interface: public QDBusAbstractInterface
++{
++    Q_OBJECT
++public:
++    static inline const char *staticInterfaceName()
++    { return "org.fcitx.Fcitx.InputContext1"; }
++
++public:
++    OrgFcitxFcitxInputContext1Interface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = nullptr);
++
++    ~OrgFcitxFcitxInputContext1Interface();
++
++public Q_SLOTS: // METHODS
++    inline QDBusPendingReply<> DestroyIC()
++    {
++        QList<QVariant> argumentList;
++        return asyncCallWithArgumentList(QStringLiteral("DestroyIC"), argumentList);
++    }
++
++    inline QDBusPendingReply<> FocusIn()
++    {
++        QList<QVariant> argumentList;
++        return asyncCallWithArgumentList(QStringLiteral("FocusIn"), argumentList);
++    }
++
++    inline QDBusPendingReply<> FocusOut()
++    {
++        QList<QVariant> argumentList;
++        return asyncCallWithArgumentList(QStringLiteral("FocusOut"), argumentList);
++    }
++
++    inline QDBusPendingReply<bool> ProcessKeyEvent(uint keyval, uint keycode, uint state, bool type, uint time)
++    {
++        QList<QVariant> argumentList;
++        argumentList << QVariant::fromValue(keyval) << QVariant::fromValue(keycode) << QVariant::fromValue(state) << QVariant::fromValue(type) << QVariant::fromValue(time);
++        return asyncCallWithArgumentList(QStringLiteral("ProcessKeyEvent"), argumentList);
++    }
++
++    inline QDBusPendingReply<> Reset()
++    {
++        QList<QVariant> argumentList;
++        return asyncCallWithArgumentList(QStringLiteral("Reset"), argumentList);
++    }
++
++    inline QDBusPendingReply<> SetCapability(qulonglong caps)
++    {
++        QList<QVariant> argumentList;
++        argumentList << QVariant::fromValue(caps);
++        return asyncCallWithArgumentList(QStringLiteral("SetCapability"), argumentList);
++    }
++
++    inline QDBusPendingReply<> SetCursorRect(int x, int y, int w, int h)
++    {
++        QList<QVariant> argumentList;
++        argumentList << QVariant::fromValue(x) << QVariant::fromValue(y) << QVariant::fromValue(w) << QVariant::fromValue(h);
++        return asyncCallWithArgumentList(QStringLiteral("SetCursorRect"), argumentList);
++    }
++
++    inline QDBusPendingReply<> SetSurroundingText(const QString &text, uint cursor, uint anchor)
++    {
++        QList<QVariant> argumentList;
++        argumentList << QVariant::fromValue(text) << QVariant::fromValue(cursor) << QVariant::fromValue(anchor);
++        return asyncCallWithArgumentList(QStringLiteral("SetSurroundingText"), argumentList);
++    }
++
++    inline QDBusPendingReply<> SetSurroundingTextPosition(uint cursor, uint anchor)
++    {
++        QList<QVariant> argumentList;
++        argumentList << QVariant::fromValue(cursor) << QVariant::fromValue(anchor);
++        return asyncCallWithArgumentList(QStringLiteral("SetSurroundingTextPosition"), argumentList);
++    }
++
++Q_SIGNALS: // SIGNALS
++    void CommitString(const QString &str);
++    void CurrentIM(const QString &name, const QString &uniqueName, const QString &langCode);
++    void DeleteSurroundingText(int offset, uint nchar);
++    void ForwardKey(uint keyval, uint state, bool type);
++    void UpdateFormattedPreedit(FcitxFormattedPreeditList str, int cursorpos);
++};
++
++namespace org {
++  namespace fcitx {
++    namespace Fcitx {
++      typedef ::OrgFcitxFcitxInputContext1Interface InputContext1;
++    }
++  }
++}
++#endif
+diff --git a/src/plugins/platforminputcontexts/fcitx/inputcontextproxy.cpp b/src/plugins/platforminputcontexts/fcitx/inputcontextproxy.cpp
+new file mode 100644
+index 0000000..2b22e54
+--- /dev/null
++++ b/src/plugins/platforminputcontexts/fcitx/inputcontextproxy.cpp
+@@ -0,0 +1,26 @@
++/*
++ * This file was generated by qdbusxml2cpp version 0.8
++ * Command line was: qdbusxml2cpp -p inputcontextproxy interfaces/org.fcitx.Fcitx.InputContext.xml
++ *
++ * qdbusxml2cpp is Copyright (C) 2020 The Qt Company Ltd.
++ *
++ * This is an auto-generated file.
++ * This file may have been hand-edited. Look for HAND-EDIT comments
++ * before re-generating it.
++ */
++
++#include "inputcontextproxy.h"
++
++/*
++ * Implementation of interface class OrgFcitxFcitxInputContextInterface
++ */
++
++OrgFcitxFcitxInputContextInterface::OrgFcitxFcitxInputContextInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
++    : QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
++{
++}
++
++OrgFcitxFcitxInputContextInterface::~OrgFcitxFcitxInputContextInterface()
++{
++}
++
+diff --git a/src/plugins/platforminputcontexts/fcitx/inputcontextproxy.h b/src/plugins/platforminputcontexts/fcitx/inputcontextproxy.h
+new file mode 100644
+index 0000000..5116140
+--- /dev/null
++++ b/src/plugins/platforminputcontexts/fcitx/inputcontextproxy.h
+@@ -0,0 +1,113 @@
++/*
++ * This file was generated by qdbusxml2cpp version 0.8
++ * Command line was: qdbusxml2cpp -p inputcontextproxy interfaces/org.fcitx.Fcitx.InputContext.xml
++ *
++ * qdbusxml2cpp is Copyright (C) 2020 The Qt Company Ltd.
++ *
++ * This is an auto-generated file.
++ * Do not edit! All changes made to it will be lost.
++ */
++
++#ifndef INPUTCONTEXTPROXY_H
++#define INPUTCONTEXTPROXY_H
++
++#include <QtCore/QObject>
++#include <QtCore/QByteArray>
++#include <QtCore/QList>
++#include <QtCore/QMap>
++#include <QtCore/QString>
++#include <QtCore/QStringList>
++#include <QtCore/QVariant>
++#include <QtDBus/QtDBus>
++
++/*
++ * Proxy class for interface org.fcitx.Fcitx.InputContext
++ */
++class OrgFcitxFcitxInputContextInterface: public QDBusAbstractInterface
++{
++    Q_OBJECT
++public:
++    static inline const char *staticInterfaceName()
++    { return "org.fcitx.Fcitx.InputContext"; }
++
++public:
++    OrgFcitxFcitxInputContextInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = nullptr);
++
++    ~OrgFcitxFcitxInputContextInterface();
++
++public Q_SLOTS: // METHODS
++    inline QDBusPendingReply<> DestroyIC()
++    {
++        QList<QVariant> argumentList;
++        return asyncCallWithArgumentList(QStringLiteral("DestroyIC"), argumentList);
++    }
++
++    inline QDBusPendingReply<> FocusIn()
++    {
++        QList<QVariant> argumentList;
++        return asyncCallWithArgumentList(QStringLiteral("FocusIn"), argumentList);
++    }
++
++    inline QDBusPendingReply<> FocusOut()
++    {
++        QList<QVariant> argumentList;
++        return asyncCallWithArgumentList(QStringLiteral("FocusOut"), argumentList);
++    }
++
++    inline QDBusPendingReply<int> ProcessKeyEvent(uint keyval, uint keycode, uint state, int type, uint time)
++    {
++        QList<QVariant> argumentList;
++        argumentList << QVariant::fromValue(keyval) << QVariant::fromValue(keycode) << QVariant::fromValue(state) << QVariant::fromValue(type) << QVariant::fromValue(time);
++        return asyncCallWithArgumentList(QStringLiteral("ProcessKeyEvent"), argumentList);
++    }
++
++    inline QDBusPendingReply<> Reset()
++    {
++        QList<QVariant> argumentList;
++        return asyncCallWithArgumentList(QStringLiteral("Reset"), argumentList);
++    }
++
++    inline QDBusPendingReply<> SetCapacity(uint caps)
++    {
++        QList<QVariant> argumentList;
++        argumentList << QVariant::fromValue(caps);
++        return asyncCallWithArgumentList(QStringLiteral("SetCapacity"), argumentList);
++    }
++
++    inline QDBusPendingReply<> SetCursorRect(int x, int y, int w, int h)
++    {
++        QList<QVariant> argumentList;
++        argumentList << QVariant::fromValue(x) << QVariant::fromValue(y) << QVariant::fromValue(w) << QVariant::fromValue(h);
++        return asyncCallWithArgumentList(QStringLiteral("SetCursorRect"), argumentList);
++    }
++
++    inline QDBusPendingReply<> SetSurroundingText(const QString &text, uint cursor, uint anchor)
++    {
++        QList<QVariant> argumentList;
++        argumentList << QVariant::fromValue(text) << QVariant::fromValue(cursor) << QVariant::fromValue(anchor);
++        return asyncCallWithArgumentList(QStringLiteral("SetSurroundingText"), argumentList);
++    }
++
++    inline QDBusPendingReply<> SetSurroundingTextPosition(uint cursor, uint anchor)
++    {
++        QList<QVariant> argumentList;
++        argumentList << QVariant::fromValue(cursor) << QVariant::fromValue(anchor);
++        return asyncCallWithArgumentList(QStringLiteral("SetSurroundingTextPosition"), argumentList);
++    }
++
++Q_SIGNALS: // SIGNALS
++    void CommitString(const QString &str);
++    void CurrentIM(const QString &name, const QString &uniqueName, const QString &langCode);
++    void DeleteSurroundingText(int offset, uint nchar);
++    void ForwardKey(uint keyval, uint state, int type);
++    void UpdateFormattedPreedit(FcitxFormattedPreeditList str, int cursorpos);
++};
++
++namespace org {
++  namespace fcitx {
++    namespace Fcitx {
++      typedef ::OrgFcitxFcitxInputContextInterface InputContext;
++    }
++  }
++}
++#endif
+diff --git a/src/plugins/platforminputcontexts/fcitx/inputmethod1proxy.cpp b/src/plugins/platforminputcontexts/fcitx/inputmethod1proxy.cpp
+new file mode 100644
+index 0000000..d489771
+--- /dev/null
++++ b/src/plugins/platforminputcontexts/fcitx/inputmethod1proxy.cpp
+@@ -0,0 +1,26 @@
++/*
++ * This file was generated by qdbusxml2cpp version 0.8
++ * Command line was: qdbusxml2cpp -p inputmethod1proxy interfaces/org.fcitx.Fcitx.InputMethod1.xml
++ *
++ * qdbusxml2cpp is Copyright (C) 2020 The Qt Company Ltd.
++ *
++ * This is an auto-generated file.
++ * This file may have been hand-edited. Look for HAND-EDIT comments
++ * before re-generating it.
++ */
++
++#include "inputmethod1proxy.h"
++
++/*
++ * Implementation of interface class OrgFcitxFcitxInputMethod1Interface
++ */
++
++OrgFcitxFcitxInputMethod1Interface::OrgFcitxFcitxInputMethod1Interface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
++    : QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
++{
++}
++
++OrgFcitxFcitxInputMethod1Interface::~OrgFcitxFcitxInputMethod1Interface()
++{
++}
++
+diff --git a/src/plugins/platforminputcontexts/fcitx/inputmethod1proxy.h b/src/plugins/platforminputcontexts/fcitx/inputmethod1proxy.h
+new file mode 100644
+index 0000000..2ed7cb8
+--- /dev/null
++++ b/src/plugins/platforminputcontexts/fcitx/inputmethod1proxy.h
+@@ -0,0 +1,66 @@
++/*
++ * This file was generated by qdbusxml2cpp version 0.8
++ * Command line was: qdbusxml2cpp -p inputmethod1proxy interfaces/org.fcitx.Fcitx.InputMethod1.xml
++ *
++ * qdbusxml2cpp is Copyright (C) 2020 The Qt Company Ltd.
++ *
++ * This is an auto-generated file.
++ * Do not edit! All changes made to it will be lost.
++ */
++
++#ifndef INPUTMETHOD1PROXY_H
++#define INPUTMETHOD1PROXY_H
++
++#include <QtCore/QObject>
++#include <QtCore/QByteArray>
++#include <QtCore/QList>
++#include <QtCore/QMap>
++#include <QtCore/QString>
++#include <QtCore/QStringList>
++#include <QtCore/QVariant>
++#include <QtDBus/QtDBus>
++
++/*
++ * Proxy class for interface org.fcitx.Fcitx.InputMethod1
++ */
++class OrgFcitxFcitxInputMethod1Interface: public QDBusAbstractInterface
++{
++    Q_OBJECT
++public:
++    static inline const char *staticInterfaceName()
++    { return "org.fcitx.Fcitx.InputMethod1"; }
++
++public:
++    OrgFcitxFcitxInputMethod1Interface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = nullptr);
++
++    ~OrgFcitxFcitxInputMethod1Interface();
++
++public Q_SLOTS: // METHODS
++    inline QDBusPendingReply<QDBusObjectPath, QByteArray> CreateInputContext(FcitxInputContextArgumentList in0)
++    {
++        QList<QVariant> argumentList;
++        argumentList << QVariant::fromValue(in0);
++        return asyncCallWithArgumentList(QStringLiteral("CreateInputContext"), argumentList);
++    }
++    inline QDBusReply<QDBusObjectPath> CreateInputContext(FcitxInputContextArgumentList in0, QByteArray &out1)
++    {
++        QList<QVariant> argumentList;
++        argumentList << QVariant::fromValue(in0);
++        QDBusMessage reply = callWithArgumentList(QDBus::Block, QStringLiteral("CreateInputContext"), argumentList);
++        if (reply.type() == QDBusMessage::ReplyMessage && reply.arguments().count() == 2) {
++            out1 = qdbus_cast<QByteArray>(reply.arguments().at(1));
++        }
++        return reply;
++    }
++
++Q_SIGNALS: // SIGNALS
++};
++
++namespace org {
++  namespace fcitx {
++    namespace Fcitx {
++      typedef ::OrgFcitxFcitxInputMethod1Interface InputMethod1;
++    }
++  }
++}
++#endif
+diff --git a/src/plugins/platforminputcontexts/fcitx/inputmethodproxy.cpp b/src/plugins/platforminputcontexts/fcitx/inputmethodproxy.cpp
+new file mode 100644
+index 0000000..15c56b6
+--- /dev/null
++++ b/src/plugins/platforminputcontexts/fcitx/inputmethodproxy.cpp
+@@ -0,0 +1,26 @@
++/*
++ * This file was generated by qdbusxml2cpp version 0.8
++ * Command line was: qdbusxml2cpp -p inputmethodproxy interfaces/org.fcitx.Fcitx.InputMethod.xml
++ *
++ * qdbusxml2cpp is Copyright (C) 2020 The Qt Company Ltd.
++ *
++ * This is an auto-generated file.
++ * This file may have been hand-edited. Look for HAND-EDIT comments
++ * before re-generating it.
++ */
++
++#include "inputmethodproxy.h"
++
++/*
++ * Implementation of interface class OrgFcitxFcitxInputMethodInterface
++ */
++
++OrgFcitxFcitxInputMethodInterface::OrgFcitxFcitxInputMethodInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent)
++    : QDBusAbstractInterface(service, path, staticInterfaceName(), connection, parent)
++{
++}
++
++OrgFcitxFcitxInputMethodInterface::~OrgFcitxFcitxInputMethodInterface()
++{
++}
++
+diff --git a/src/plugins/platforminputcontexts/fcitx/inputmethodproxy.h b/src/plugins/platforminputcontexts/fcitx/inputmethodproxy.h
+new file mode 100644
+index 0000000..a0e1329
+--- /dev/null
++++ b/src/plugins/platforminputcontexts/fcitx/inputmethodproxy.h
+@@ -0,0 +1,70 @@
++/*
++ * This file was generated by qdbusxml2cpp version 0.8
++ * Command line was: qdbusxml2cpp -p inputmethodproxy interfaces/org.fcitx.Fcitx.InputMethod.xml
++ *
++ * qdbusxml2cpp is Copyright (C) 2020 The Qt Company Ltd.
++ *
++ * This is an auto-generated file.
++ * Do not edit! All changes made to it will be lost.
++ */
++
++#ifndef INPUTMETHODPROXY_H
++#define INPUTMETHODPROXY_H
++
++#include <QtCore/QObject>
++#include <QtCore/QByteArray>
++#include <QtCore/QList>
++#include <QtCore/QMap>
++#include <QtCore/QString>
++#include <QtCore/QStringList>
++#include <QtCore/QVariant>
++#include <QtDBus/QtDBus>
++
++/*
++ * Proxy class for interface org.fcitx.Fcitx.InputMethod
++ */
++class OrgFcitxFcitxInputMethodInterface: public QDBusAbstractInterface
++{
++    Q_OBJECT
++public:
++    static inline const char *staticInterfaceName()
++    { return "org.fcitx.Fcitx.InputMethod"; }
++
++public:
++    OrgFcitxFcitxInputMethodInterface(const QString &service, const QString &path, const QDBusConnection &connection, QObject *parent = nullptr);
++
++    ~OrgFcitxFcitxInputMethodInterface();
++
++public Q_SLOTS: // METHODS
++    inline QDBusPendingReply<int, bool, uint, uint, uint, uint> CreateICv3(const QString &appname, int pid)
++    {
++        QList<QVariant> argumentList;
++        argumentList << QVariant::fromValue(appname) << QVariant::fromValue(pid);
++        return asyncCallWithArgumentList(QStringLiteral("CreateICv3"), argumentList);
++    }
++    inline QDBusReply<int> CreateICv3(const QString &appname, int pid, bool &enable, uint &keyval1, uint &state1, uint &keyval2, uint &state2)
++    {
++        QList<QVariant> argumentList;
++        argumentList << QVariant::fromValue(appname) << QVariant::fromValue(pid);
++        QDBusMessage reply = callWithArgumentList(QDBus::Block, QStringLiteral("CreateICv3"), argumentList);
++        if (reply.type() == QDBusMessage::ReplyMessage && reply.arguments().count() == 6) {
++            enable = qdbus_cast<bool>(reply.arguments().at(1));
++            keyval1 = qdbus_cast<uint>(reply.arguments().at(2));
++            state1 = qdbus_cast<uint>(reply.arguments().at(3));
++            keyval2 = qdbus_cast<uint>(reply.arguments().at(4));
++            state2 = qdbus_cast<uint>(reply.arguments().at(5));
++        }
++        return reply;
++    }
++
++Q_SIGNALS: // SIGNALS
++};
++
++namespace org {
++  namespace fcitx {
++    namespace Fcitx {
++      typedef ::OrgFcitxFcitxInputMethodInterface InputMethod;
++    }
++  }
++}
++#endif
+diff --git a/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext.xml b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext.xml
 new file mode 100644
 index 0000000..b30d94c
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext.xml"
++++ b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext.xml
 @@ -0,0 +1,64 @@
 +<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
 +"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
@@ -1091,11 +1613,11 @@ index 0000000..b30d94c
 +    </signal>
 +  </interface>
 +</node>
-diff --git "a/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext1.xml" "b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext1.xml"
+diff --git a/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext1.xml b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext1.xml
 new file mode 100644
 index 0000000..6cb130d
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext1.xml"
++++ b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputContext1.xml
 @@ -0,0 +1,64 @@
 +<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
 +"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
@@ -1161,11 +1683,11 @@ index 0000000..6cb130d
 +    </signal>
 +  </interface>
 +</node>
-diff --git "a/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod.xml" "b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod.xml"
+diff --git a/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod.xml b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod.xml
 new file mode 100644
 index 0000000..b8d60f0
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod.xml"
++++ b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod.xml
 @@ -0,0 +1,16 @@
 +<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
 +"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
@@ -1183,11 +1705,11 @@ index 0000000..b8d60f0
 +    </method>
 +  </interface>
 +</node>
-diff --git "a/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod1.xml" "b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod1.xml"
+diff --git a/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod1.xml b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod1.xml
 new file mode 100644
 index 0000000..0cc358a
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod1.xml"
++++ b/src/plugins/platforminputcontexts/fcitx/interfaces/org.fcitx.Fcitx.InputMethod1.xml
 @@ -0,0 +1,12 @@
 +<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
 +"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
@@ -1201,11 +1723,11 @@ index 0000000..0cc358a
 +  </method>
 + </interface>
 +</node>
-diff --git "a/src/plugins/platforminputcontexts/fcitx/main.cpp" "b/src/plugins/platforminputcontexts/fcitx/main.cpp"
+diff --git a/src/plugins/platforminputcontexts/fcitx/main.cpp b/src/plugins/platforminputcontexts/fcitx/main.cpp
 new file mode 100644
 index 0000000..aaf5300
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/main.cpp"
++++ b/src/plugins/platforminputcontexts/fcitx/main.cpp
 @@ -0,0 +1,35 @@
 +/*
 + * Copyright (C) 2012~2017 by CSSlayer
@@ -1242,11 +1764,11 @@ index 0000000..aaf5300
 +        return new QFcitxPlatformInputContext;
 +    return 0;
 +}
-diff --git "a/src/plugins/platforminputcontexts/fcitx/main.h" "b/src/plugins/platforminputcontexts/fcitx/main.h"
+diff --git a/src/plugins/platforminputcontexts/fcitx/main.h b/src/plugins/platforminputcontexts/fcitx/main.h
 new file mode 100644
 index 0000000..d21abae
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/main.h"
++++ b/src/plugins/platforminputcontexts/fcitx/main.h
 @@ -0,0 +1,39 @@
 +/*
 + * Copyright (C) 2012~2017 by CSSlayer
@@ -1287,11 +1809,11 @@ index 0000000..d21abae
 +};
 +
 +#endif // MAIN_H
-diff --git "a/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.cpp" "b/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.cpp"
+diff --git a/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.cpp b/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.cpp
 new file mode 100644
 index 0000000..2d6a01d
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.cpp"
++++ b/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.cpp
 @@ -0,0 +1,882 @@
 +/*
 + * Copyright (C) 2011~2017 by CSSlayer
@@ -2175,11 +2697,11 @@ index 0000000..2d6a01d
 +}
 +
 +// kate: indent-mode cstyle; space-indent on; indent-width 0;
-diff --git "a/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.h" "b/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.h"
+diff --git a/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.h b/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.h
 new file mode 100644
 index 0000000..5b7bdd8
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.h"
++++ b/src/plugins/platforminputcontexts/fcitx/qfcitxplatforminputcontext.h
 @@ -0,0 +1,247 @@
 +/*
 + * Copyright (C) 2011~2017 by CSSlayer
@@ -2428,11 +2950,11 @@ index 0000000..5b7bdd8
 +};
 +
 +#endif // QFCITXPLATFORMINPUTCONTEXT_H
-diff --git "a/src/plugins/platforminputcontexts/fcitx/qtkey.cpp" "b/src/plugins/platforminputcontexts/fcitx/qtkey.cpp"
+diff --git a/src/plugins/platforminputcontexts/fcitx/qtkey.cpp b/src/plugins/platforminputcontexts/fcitx/qtkey.cpp
 new file mode 100644
 index 0000000..aa79040
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/qtkey.cpp"
++++ b/src/plugins/platforminputcontexts/fcitx/qtkey.cpp
 @@ -0,0 +1,372 @@
 +/*
 + * Copyright (C) 2017~2017 by CSSlayer
@@ -2806,11 +3328,11 @@ index 0000000..aa79040
 +
 +    return code;
 +}
-diff --git "a/src/plugins/platforminputcontexts/fcitx/qtkey.h" "b/src/plugins/platforminputcontexts/fcitx/qtkey.h"
+diff --git a/src/plugins/platforminputcontexts/fcitx/qtkey.h b/src/plugins/platforminputcontexts/fcitx/qtkey.h
 new file mode 100644
 index 0000000..fc378fc
 --- /dev/null
-+++ "b/src/plugins/platforminputcontexts/fcitx/qtkey.h"
++++ b/src/plugins/platforminputcontexts/fcitx/qtkey.h
 @@ -0,0 +1,28 @@
 +/*
 + * Copyright (C) 2017~2017 by CSSlayer
@@ -2840,10 +3362,10 @@ index 0000000..fc378fc
 +int keysymToQtKey(uint32_t keysym, const QString &text);
 +
 +#endif // _PLATFORMINPUTCONTEXT_QTKEY_H_
-diff --git "a/src/plugins/platforminputcontexts/platforminputcontexts.pro" "b/src/plugins/platforminputcontexts/platforminputcontexts.pro"
+diff --git a/src/plugins/platforminputcontexts/platforminputcontexts.pro b/src/plugins/platforminputcontexts/platforminputcontexts.pro
 index 56a39a4..4287358 100644
---- "a/src/plugins/platforminputcontexts/platforminputcontexts.pro"
-+++ "b/src/plugins/platforminputcontexts/platforminputcontexts.pro"
+--- a/src/plugins/platforminputcontexts/platforminputcontexts.pro
++++ b/src/plugins/platforminputcontexts/platforminputcontexts.pro
 @@ -6,6 +6,7 @@ qtConfig(xkbcommon) {
  
      qtHaveModule(dbus) {
