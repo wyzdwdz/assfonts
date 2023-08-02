@@ -4,22 +4,24 @@ APPDIR=$(dirname "$(readlink -f "$0")")
 
 export PATH="$APPDIR/usr/bin:$PATH"
 export LD_LIBRARY_PATH="$APPDIR/usr/lib:$LD_LIBRARY_PATH"
+
 export QT_AUTO_SCREEN_SCALE_FACTOR=1
+export QT_QPA_PLATFORM=xcb
 
-if [ "$XDG_SESSION_TYPE" = "x11" ]; then
-    QT_QPA_PLATFORM=xcb
-elif [ -n "$WAYLAND_DISPLAY" ]; then
-    QT_QPA_PLATFORM=wayland
+if [ -z "$QT_IM_MODULE" ]; then
+    if grep -q "XKBOPTIONS.*compose:" /etc/default/keyboard; then
+        export QT_IM_MODULE=compose
+    elif type -P ibus version > /dev/null; then
+        export QT_IM_MODULE=ibus
+    elif type -P fcitx-diagnose > /dev/null; then
+        export QT_IM_MODULE=fcitx
+    elif type -P fcitx5-diagnose > /dev/null; then
+        export QT_IM_MODULE=fcitx
+    fi
 fi
 
-if grep -q "XKBOPTIONS.*compose:" /etc/default/keyboard; then
-    export QT_IM_MODULE=compose
-elif [ "$(ibus version)" ]; then
-    export QT_IM_MODULE=ibus
-elif [ "$(fcitx-diagnose)" ]; then
-    export QT_IM_MODULE=fcitx
+if [ -z "$FONTCONFIG_PATH" ]; then
+    export FONTCONFIG_PATH=/etc/fonts
 fi
-
-export FONTCONFIG_PATH=/etc/fonts
 
 exec "$APPDIR/usr/bin/assfonts-gui" "$@"

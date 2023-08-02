@@ -26,7 +26,6 @@
 
 #ifdef __linux__
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
-Q_IMPORT_PLUGIN(QWaylandIntegrationPlugin)
 Q_IMPORT_PLUGIN(QIbusPlatformInputContextPlugin)
 Q_IMPORT_PLUGIN(QComposePlatformInputContextPlugin)
 Q_IMPORT_PLUGIN(QFcitxPlatformInputContextPlugin)

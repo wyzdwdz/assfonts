@@ -1550,13 +1550,10 @@ Examples = bin/datadir/examples""")
 
         if self.settings.os == "Linux" and self.options.gui:
             if self.options.with_dbus:
-                _create_plugin("QIbusPlatformInputContextPlugin", "ibusplatforminputcontextplugin", "platforminputcontexts", ["DBus"])
-                _create_plugin("QFcitxPlatformInputContextPlugin", "fcitxplatforminputcontextplugin", "platforminputcontexts", ["DBus"])
+                _create_plugin("QIbusPlatformInputContextPlugin", "ibusplatforminputcontextplugin", "platforminputcontexts", ["DBus", "Gui", "XkbCommonSupport"])
+                _create_plugin("QFcitxPlatformInputContextPlugin", "fcitxplatforminputcontextplugin", "platforminputcontexts", ["DBus", "Gui", "XkbCommonSupport"])
 
-            _create_plugin("QComposePlatformInputContextPlugin", "composeplatforminputcontextplugin", "platforminputcontexts", [])
-
-            if self.options.qtwayland:
-                _create_plugin("QWaylandIntegrationPlugin", "qwayland", "platforms", [])
+            _create_plugin("QComposePlatformInputContextPlugin", "composeplatforminputcontextplugin", "platforminputcontexts", ["Core", "Gui"])
 
         if not self.options.shared:
             if self.settings.os == "Windows":

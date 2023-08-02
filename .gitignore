@@ -474,7 +474,7 @@ build/
 imgui.ini
 
 #Appimage
-AppDir/
+*AppDir/
 *.AppImage
 runtime-*
 *.squashfs
