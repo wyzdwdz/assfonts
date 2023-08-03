@@ -510,7 +510,9 @@ class QtConan(ConanFile):
             self.requires("dbus/1.15.6")
         if self.options.qtwayland:
             self.requires("wayland/1.22.0")
-            self.requires("xkbcommon/1.5.0")
+            self.requires("egl/system")
+            if not self.options.get_safe("with_x11", False):
+                self.requires("xkbcommon/1.5.0")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_atspi"):
@@ -1366,8 +1368,9 @@ Examples = bin/datadir/examples""")
             _create_module("Svg", ["Gui"])
 
         if self.options.qtwayland and self.options.gui:
-            _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
-            _create_module("WaylandCompositor", ["Gui", "wayland::wayland-server"])
+            _create_module("EglSupport", ["Core", "Gui", "egl::egl"])
+            _create_module("WaylandClient", ["Gui", "wayland::wayland", "EglSupport"])
+            _create_module("WaylandCompositor", ["Gui", "wayland::wayland", "EglSupport"])
 
         if self.options.qtlocation:
             _create_module("Positioning")
@@ -1550,10 +1553,15 @@ Examples = bin/datadir/examples""")
 
         if self.settings.os == "Linux" and self.options.gui:
             if self.options.with_dbus:
-                _create_plugin("QIbusPlatformInputContextPlugin", "ibusplatforminputcontextplugin", "platforminputcontexts", ["DBus", "Gui", "XkbCommonSupport"])
-                _create_plugin("QFcitxPlatformInputContextPlugin", "fcitxplatforminputcontextplugin", "platforminputcontexts", ["DBus", "Gui", "XkbCommonSupport"])
+                _create_plugin("QIbusPlatformInputContextPlugin", "ibusplatforminputcontextplugin", "platforminputcontexts", ["DBus"])
+                _create_plugin("QFcitxPlatformInputContextPlugin", "fcitxplatforminputcontextplugin", "platforminputcontexts", ["DBus"])
 
-            _create_plugin("QComposePlatformInputContextPlugin", "composeplatforminputcontextplugin", "platforminputcontexts", ["Core", "Gui"])
+            _create_plugin("QComposePlatformInputContextPlugin", "composeplatforminputcontextplugin", "platforminputcontexts", [])
+
+            if self.options.qtwayland:
+                _create_plugin("QWaylandIntegrationPlugin", "qwayland-generic", "platforms", [])
+                _create_plugin("QWaylandEglClientBufferPlugin", "qt-plugin-wayland-egl", "wayland-graphics-integration-client", [])
+                _create_plugin("QWaylandXdgShellIntegrationPlugin", "xdg-shell", "wayland-shell-integration", [])
 
         if not self.options.shared:
             if self.settings.os == "Windows":

@@ -6,7 +6,16 @@ export PATH="$APPDIR/usr/bin:$PATH"
 export LD_LIBRARY_PATH="$APPDIR/usr/lib:$LD_LIBRARY_PATH"
 
 export QT_AUTO_SCREEN_SCALE_FACTOR=1
-export QT_QPA_PLATFORM=xcb
+
+if [ -z "$QT_QPA_PLATFORM" ]; then
+    if [ "$XDG_SESSION_TYPE" = "x11" ]; then
+        export QT_QPA_PLATFORM=xcb
+    elif [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+        export QT_QPA_PLATFORM=wayland
+    else
+        export QT_QPA_PLATFORM=xcb
+    fi
+fi
 
 if [ -z "$QT_IM_MODULE" ]; then
     if grep -q "XKBOPTIONS.*compose:" /etc/default/keyboard; then

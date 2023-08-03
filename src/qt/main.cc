@@ -26,6 +26,9 @@
 
 #ifdef __linux__
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
+Q_IMPORT_PLUGIN(QWaylandIntegrationPlugin)
+Q_IMPORT_PLUGIN(QWaylandEglClientBufferPlugin)
+Q_IMPORT_PLUGIN(QWaylandXdgShellIntegrationPlugin)
 Q_IMPORT_PLUGIN(QIbusPlatformInputContextPlugin)
 Q_IMPORT_PLUGIN(QComposePlatformInputContextPlugin)
 Q_IMPORT_PLUGIN(QFcitxPlatformInputContextPlugin)
@@ -34,6 +37,8 @@ Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 #elif __APPLE__
 Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin)
 #endif
+
+#include <QtGui/qopenglcontext.h>
 
 int main(int argc, char** argv) {
   QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
