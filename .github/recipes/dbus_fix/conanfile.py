@@ -49,5 +49,5 @@ class SysConfigEGLConan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
-        pkg_config = PkgConfig(self, "dbus")
+        pkg_config = PkgConfig(self, "dbus-1")
         pkg_config.fill_cpp_info(self.cpp_info, is_system=True)
