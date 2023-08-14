@@ -507,7 +507,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_pulseaudio", False):
             self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
-            self.requires("dbus/1.15.6")
+            self.requires("dbus/system")
         if self.options.qtwayland:
             self.requires("wayland/1.22.0")
             self.requires("xkbcommon/1.5.0")
