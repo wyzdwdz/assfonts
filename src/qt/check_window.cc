@@ -39,6 +39,7 @@ class Curl {
     curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &data);
     curl_easy_setopt(curl_, CURLOPT_USERAGENT, "libcurl-agent/1.0");
     CURLcode res = curl_easy_perform(curl_);
+    qDebug() << res;
     if (res == CURLE_OK) {
       return true;
     } else {

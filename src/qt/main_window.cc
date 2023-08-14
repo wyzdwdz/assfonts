@@ -69,6 +69,8 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     thread_.quit();
     thread_.wait();
 
+    SaveSettings();
+
     event->accept();
   }
 }
@@ -702,5 +704,112 @@ void MainWindow::ResizeHelper(QWidget* widget, const int width,
     widget->setFixedSize(hint_size);
   } else {
     widget->resize(hint_size);
+  }
+}
+
+void MainWindow::LoadSettings() {
+  settings_ = new QSettings(
+      (fs::path(save_files_path) / "settings.ini").u8string().c_str(),
+      QSettings::IniFormat, this);
+
+  settings_->beginGroup("MainWindow");
+  if (settings_->contains("WSize") && settings_->contains("HSize") &&
+      settings_->contains("WPos") && settings_->contains("HPos")) {
+    int w_size = settings_->value("WSize").toInt();
+    int h_size = settings_->value("HSize").toInt();
+    int w_pos = settings_->value("WPos").toInt();
+    int h_pos = settings_->value("HPos").toInt();
+    resize(w_size, h_size);
+    move(w_pos, h_pos);
+  }
+  settings_->endGroup();
+
+  settings_->beginGroup("InputsText");
+  if (settings_->contains("Input")) {
+    input_line_->setText(settings_->value("Input").toString());
+  }
+  if (settings_->contains("Output")) {
+    output_line_->setText(settings_->value("Output").toString());
+  }
+  if (settings_->contains("Font")) {
+    font_line_->setText(settings_->value("Font").toString());
+  }
+  if (settings_->contains("Database")) {
+    database_line_->setText(settings_->value("Database").toString());
+  }
+  settings_->endGroup();
+
+  settings_->beginGroup("Options");
+  if (settings_->contains("Hdr")) {
+    hdr_combo_->setCurrentIndex(settings_->value("Hdr").toInt());
+  }
+  if (settings_->contains("Subset")) {
+    subset_checkbox_->setChecked(settings_->value("Subset").toBool());
+  }
+  if (settings_->contains("Embed")) {
+    embed_checkbox_->setChecked(settings_->value("Embed").toBool());
+  }
+  if (settings_->contains("Rename")) {
+    rename_checkbox_->setChecked(settings_->value("Rename").toBool());
+  }
+  settings_->endGroup();
+
+  settings_->beginGroup("Menu");
+
+  if (settings_->contains("LogSpace")) {
+    space_action_->setChecked(settings_->value("LogSpace").toBool());
+    RefreshLogText();
+  }
+
+  if (settings_->contains("LogLevel")) {
+    switch (settings_->value("LogLevel").toInt()) {
+      case 0:
+        min_info_action_->trigger();
+        break;
+      case 1:
+        min_warn_action_->trigger();
+        break;
+      case 2:
+        min_error_action_->trigger();
+        break;
+      default:
+        break;
+    }
+  }
+
+  settings_->endGroup();
+}
+
+void MainWindow::SaveSettings() {
+  settings_->beginGroup("MainWindow");
+  settings_->setValue("WSize", width());
+  settings_->setValue("HSize", height());
+  settings_->setValue("WPos", pos().x());
+  settings_->setValue("HPos", pos().y());
+  settings_->endGroup();
+
+  settings_->beginGroup("InputsText");
+  settings_->setValue("Input", input_line_->text());
+  settings_->setValue("Output", output_line_->text());
+  settings_->setValue("Font", font_line_->text());
+  settings_->setValue("Database", database_line_->text());
+  settings_->endGroup();
+
+  settings_->beginGroup("Options");
+  settings_->setValue("Hdr", hdr_combo_->currentIndex());
+  settings_->setValue("Subset", subset_checkbox_->isChecked());
+  settings_->setValue("Embed", embed_checkbox_->isChecked());
+  settings_->setValue("Rename", rename_checkbox_->isChecked());
+  settings_->endGroup();
+
+  settings_->beginGroup("Menu");
+  settings_->setValue("LogSpace", space_action_->isChecked());
+  
+  if (min_info_action_->isChecked()) {
+    settings_->setValue("LogLevel", 0);
+  } else if (min_warn_action_->isChecked()) {
+    settings_->setValue("LogLevel", 1);
+  } else if (min_error_action_->isChecked()) {
+    settings_->setValue("LogLevel", 2);
   }
 }

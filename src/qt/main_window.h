@@ -53,6 +53,8 @@ class MainWindow : public QMainWindow {
     InitAllConnects();
 
     ResizeHelper(this, 700, 700);
+
+    LoadSettings();
   }
 
  protected:
@@ -114,6 +116,8 @@ class MainWindow : public QMainWindow {
 
   CheckWindow* check_window_ = nullptr;
 
+  QSettings* settings_;
+
   void InitMenu();
   void InitMainWindowLayout();
 
@@ -156,4 +160,7 @@ class MainWindow : public QMainWindow {
 
   void ResizeHelper(QWidget* widget, const int width, const int height,
                     const bool is_fixed = false);
+
+  void LoadSettings();
+  void SaveSettings();
 };
