@@ -50,6 +50,8 @@ class Assfonts(ConanFile):
             self.options["libcurl"].with_ssl = "schannel"
         elif self.settings.os == "Macos":
             self.options["libcurl"].with_ssl = "darwinssl"
+        elif self.settings.os == "Linux":
+            self.options["libcurl"].with_ssl = "wolfssl"
 
     def layout(self):
         cmake_layout(self)
