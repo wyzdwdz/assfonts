@@ -6,14 +6,14 @@ from conan.tools.system import package_manager
 required_conan_version = ">=1.50.0"
 
 
-class SysConfigEGLConan(ConanFile):
-    name = "dbus"
+class SysConfigOpenSSLConan(ConanFile):
+    name = "openssl"
     version = "system"
-    description = "D-Bus is a simple system for interprocess communication and coordination."
-    topics = "bus", "interprocess", "message"
+    description = "A toolkit for the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols"
+    topics = ("openssl", "ssl", "tls", "encryption", "security")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://www.freedesktop.org/wiki/Software/dbus"
-    license = ("AFL-2.1", "GPL-2.0-or-later")
+    homepage = "https://github.com/openssl/openssl"
+    license = "OpenSSL"
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
 
@@ -29,25 +29,25 @@ class SysConfigEGLConan(ConanFile):
 
     def system_requirements(self):
         dnf = package_manager.Dnf(self)
-        dnf.install(["dbus-devel"], update=True, check=True)
+        dnf.install(["openssl-devel"], update=True, check=True)
 
         yum = package_manager.Yum(self)
-        yum.install(["dbus-devel"], update=True, check=True)
+        yum.install(["openssl-devel"], update=True, check=True)
 
         apt = package_manager.Apt(self)
-        apt.install_substitutes(["libdbus-1-dev"], update=True, check=True)
+        apt.install_substitutes(["libssl-dev"], update=True, check=True)
 
         pacman = package_manager.PacMan(self)
-        pacman.install(["dbus"], update=True, check=True)
+        pacman.install(["openssl"], update=True, check=True)
 
         zypper = package_manager.Zypper(self)
-        zypper.install(["dbus-1-devel"], update=True, check=True)
+        zypper.install(["libopenssl-devel"], update=True, check=True)
 
         pkg = package_manager.Pkg(self)
-        pkg.install(["dbus"], update=True, check=True)
+        pkg.install(["openssl"], update=True, check=True)
 
     def package_info(self):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
-        pkg_config = PkgConfig(self, "dbus-1")
+        pkg_config = PkgConfig(self, "openssl")
         pkg_config.fill_cpp_info(self.cpp_info, is_system=True)
