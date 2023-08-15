@@ -95,8 +95,10 @@ jobs:
           run: |
             cd /var/www
             conan export --version 8.0.1 -nr 3rdparty/harfbuzz_expt
-            conan export --version system -nr .github/recipes/dbus_fix
+            conan export --version system -nr .github/recipes/dbus_system
+            conan export --version system -nr .github/recipes/openssl_system
             conan export --version 5.15.10 -nr .github/recipes/qt5_fix
+            conan export --version 8.2.0 -nr .github/recipes/libcurl_fix
             conan config install .github/conan2-linux
             conan install . -pr:h ${{ matrix.profile }} -pr:b ${{ matrix.profile }}
             apt update && apt -y install squashfs-tools
