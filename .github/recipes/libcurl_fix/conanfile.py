@@ -438,7 +438,7 @@ class LibcurlConan(ConanFile):
 
         openssl_option = "ssl" if Version(self.version) < "7.77.0" else "openssl"
         if self.options.with_ssl == "openssl":
-            if self.dependencies["openssl"].version == "system":
+            if self.dependencies["openssl"].ref.version == "system":
                 tc.configure_args.append(f"--with-{openssl_option}")
             else:
                 path = unix_path(self, self.dependencies["openssl"].package_folder)
