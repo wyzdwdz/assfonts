@@ -77,7 +77,8 @@ bool FontSubsetter::Run(const bool is_no_subset, const bool is_rename) {
                       subfont_info.font_path.path,
                       subfont_info.font_path.index);
         CheckGlyph(subfont_info.font_path.path, subfont_info.font_path.index,
-                   font_set.second, fontname);
+                   font_set.second, fontname, font_set.first.bold,
+                   font_set.first.italic);
       }
       subfont_info.fonts_desc.emplace_back(font_set.first);
       subfont_info.subfont_path = subfont_info.font_path.path;
@@ -247,7 +248,7 @@ bool FontSubsetter::set_subfonts_info() {
                     font_set.first.bold, font_set.first.italic, font_path.path,
                     font_path.index);
       if (!CheckGlyph(font_path.path, font_path.index, font_set.second,
-                      fontname)) {
+                      fontname, font_set.first.bold, font_set.first.italic)) {
         return false;
       }
     }
@@ -369,7 +370,7 @@ bool FontSubsetter::CreateSubfont(FontSubsetInfo& subset_font,
 
 bool FontSubsetter::CheckGlyph(const AString& font_path, const long& font_index,
                                const std::set<char32_t>& codepoint_set,
-                               const AString& fontname) {
+                               const AString& fontname, int bold, int italic) {
   std::vector<uint32_t> missing_codepoints;
   FT_Face ft_face;
   std::ifstream is(font_path, std::ios::binary);
@@ -391,7 +392,8 @@ bool FontSubsetter::CheckGlyph(const AString& font_path, const long& font_index,
     }
   }
   if (!missing_codepoints.empty()) {
-    logger_->Warn(_ST("Missing codepoints for  \"{}\": {:#06x}"), fontname,
+    logger_->Warn(_ST("Missing codepoints for \"{}\" ({},{}): {:#06x}"),
+                  fontname, bold, italic,
                   fmt::join(missing_codepoints, _ST("  ")));
   }
   FT_Done_Face(ft_face);

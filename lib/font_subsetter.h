@@ -98,7 +98,7 @@ class FontSubsetter {
   bool CreateSubfont(FontSubsetInfo& subset_font, const bool is_rename);
   bool CheckGlyph(const AString& font_path, const long& font_index,
                   const std::set<char32_t>& codepoint_set,
-                  const AString& fontname);
+                  const AString& fontname, int bold, int italic);
   bool LowerCmp(const std::string& a, const std::string& b);
   void SetNewname();
   std::string RandomName(const int len);
