@@ -45,6 +45,7 @@ jobs:
             conan export --version system -nr .github/recipes/dbus_system
             conan export --version system -nr .github/recipes/openssl_system
             conan export --version 5.15.10 -nr .github/recipes/qt5_fix
+            conan export --version 8.2.0 -nr .github/recipes/libcurl_fix
             conan config install .github/conan2-linux
             conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
             source ./build/Release/generators/conanbuild.sh
@@ -76,6 +77,7 @@ jobs:
             conan export --version system -nr .github/recipes/dbus_system
             conan export --version system -nr .github/recipes/openssl_system
             conan export --version 5.15.10 -nr .github/recipes/qt5_fix
+            conan export --version 8.2.0 -nr .github/recipes/libcurl_fix
             conan config install .github/conan2-linux
             conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
             source ./build/Release/generators/conanbuild.sh
