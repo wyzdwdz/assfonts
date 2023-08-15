@@ -19,45 +19,14 @@
 
 #include "check_window.h"
 
-#include <curl/curl.h>
+#include <httplib.h>
 
 #include <assfonts.h>
 
-constexpr char VERSION_URL[] =
-    "https://raw.githubusercontent.com/wyzdwdz/assfonts/HEAD/VERSION";
 constexpr char DOWNLOAD_URL[] =
     "https://github.com/wyzdwdz/assfonts/releases/latest";
-
-class Curl {
- public:
-  Curl() { curl_ = curl_easy_init(); }
-  ~Curl() { curl_easy_cleanup(curl_); }
-
-  bool Download(const std::string& url, std::string& data) {
-    curl_easy_setopt(curl_, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl_, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
-    curl_easy_setopt(curl_, CURLOPT_WRITEDATA, &data);
-    curl_easy_setopt(curl_, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-    CURLcode res = curl_easy_perform(curl_);
-    qDebug() << res;
-    if (res == CURLE_OK) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
- private:
-  CURL* curl_;
-
-  static size_t WriteMemoryCallback(void* contents, size_t size, size_t nmemb,
-                                    void* userp) {
-    size_t realsize = size * nmemb;
-    auto& mem = *static_cast<std::string*>(userp);
-    mem.append(static_cast<char*>(contents), realsize);
-    return realsize;
-  }
-};
+constexpr char DOWNLOAD_URL_BACKUP[] =
+    "https://gitee.com/wyzdwdz/assfonts/releases/latest";
 
 void CheckWindow::InitLayout() {
   QGridLayout* main_layout = new QGridLayout;
@@ -87,32 +56,73 @@ void CheckWindow::AddLabels(QGridLayout* layout) {
   layout->addWidget(latest_version_label, 1, 0);
   layout->addWidget(latest_version_label_num_, 1, 1);
 
-  QLabel* link = new QLabel(QString("<a href=\"") + DOWNLOAD_URL + "\">" +
-                            DOWNLOAD_URL + "</a>");
-  link->setTextFormat(Qt::RichText);
-  link->setTextInteractionFlags(Qt::TextBrowserInteraction);
-  link->setOpenExternalLinks(true);
+  link_ = new QLabel(QString("<a href=\"") + DOWNLOAD_URL + "\">" +
+                     DOWNLOAD_URL + "</a>");
+  link_->setTextFormat(Qt::RichText);
+  link_->setTextInteractionFlags(Qt::TextBrowserInteraction);
+  link_->setOpenExternalLinks(true);
 
-  layout->addWidget(link, 2, 0, 1, 2);
+  layout->addWidget(link_, 2, 0, 1, 2);
 }
 
-void CheckWindow::InitFetching() {
-  watcher_ = new QFutureWatcher<QString>(this);
-  connect(watcher_, &QFutureWatcher<QString>::finished, this,
-          [this]() { latest_version_label_num_->setText(watcher_->result()); });
+void CheckWindow::InitConcurrents() {
+  watcher_version_ = new QFutureWatcher<QString>(this);
+  connect(watcher_version_, &QFutureWatcher<QString>::finished, this, [this]() {
+    latest_version_label_num_->setText(watcher_version_->result());
+  });
 
-  QFuture<QString> future =
+  QFuture<QString> future_version =
       QtConcurrent::run(this, &CheckWindow::GetLatestVersion);
-  watcher_->setFuture(future);
+  watcher_version_->setFuture(future_version);
+
+  watcher_link_ = new QFutureWatcher<QString>(this);
+  connect(watcher_link_, &QFutureWatcher<QString>::finished, this,
+          [this]() { link_->setText(watcher_link_->result()); });
+
+  QFuture<QString> future_link =
+      QtConcurrent::run(this, &CheckWindow::GetDownloadLink);
+  watcher_link_->setFuture(future_link);
 }
 
 QString CheckWindow::GetLatestVersion() {
-  Curl curl;
+  httplib::Client client("https://raw.githubusercontent.com");
 
-  std::string data;
-  if (!curl.Download(VERSION_URL, data)) {
-    return tr("Not found");
+  auto res = client.Get("/wyzdwdz/assfonts/HEAD/VERSION");
+
+  if (res && res->status == 200) {
+    return QString::fromStdString(res->body).trimmed();
   }
 
-  return QString::fromStdString(data).trimmed();
+  httplib::Client client_backup("https://gitee.com");
+
+  auto res_backup = client_backup.Get("/wyzdwdz/assfonts/raw/HEAD/VERSION");
+
+  if (res_backup && res_backup->status == 200) {
+    return QString::fromStdString(res_backup->body).trimmed();
+  }
+
+  return tr("Not found");
+}
+
+QString CheckWindow::GetDownloadLink() {
+  httplib::Client client("https://github.com");
+  client.set_follow_location(true);
+
+  auto res = client.Head("/wyzdwdz/assfonts/releases/latest/");
+
+  if (res && res->status == 200) {
+    return QString("<a href=\"") + DOWNLOAD_URL + "\">" + DOWNLOAD_URL + "</a>";
+  }
+
+  httplib::Client client_backup("https://gitee.com");
+  client_backup.set_follow_location(true);
+
+  auto res_backup = client_backup.Head("/wyzdwdz/assfonts/releases/latest/");
+
+  if (res_backup && res_backup->status == 200) {
+    return QString("<a href=\"") + DOWNLOAD_URL_BACKUP + "\">" +
+           DOWNLOAD_URL_BACKUP + "</a>";
+  }
+
+  return QString("<a href=\"") + DOWNLOAD_URL + "\">" + DOWNLOAD_URL + "</a>";
 }

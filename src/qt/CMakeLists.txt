@@ -2,7 +2,7 @@
 
 set(THIRD_PARTY_LIBS qt::qt
                      ghcFilesystem::ghc_filesystem
-                     CURL::libcurl)
+                     httplib::httplib)
 
 set(TARGET_SOURCES main.cc
                    main_window.cc

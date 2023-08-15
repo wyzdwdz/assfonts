@@ -40,18 +40,22 @@ class CheckWindow : public QDialog {
 
     setFixedSize(sizeHint());
 
-    InitFetching();
+    InitConcurrents();
   }
 
  private:
   QLabel* latest_version_label_num_;
-  QFutureWatcher<QString>* watcher_;
+  QLabel* link_;
+
+  QFutureWatcher<QString>* watcher_version_;
+  QFutureWatcher<QString>* watcher_link_;
 
   void InitLayout();
 
   void AddLabels(QGridLayout* layout);
 
-  void InitFetching();
+  void InitConcurrents();
 
   QString GetLatestVersion();
+  QString GetDownloadLink();
 };

@@ -25,9 +25,10 @@ class Assfonts(ConanFile):
         self.requires("threadpool/20140926")
         self.requires("ghc-filesystem/1.5.14")
         self.requires("qt/5.15.10")
-        self.requires("libcurl/8.2.0")
+        self.requires("cpp-httplib/0.13.3")
 
         self.requires("libpng/1.6.40", override=True)
+        self.requires("openssl/1.1.1u", override=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/3.26.3")
@@ -42,19 +43,11 @@ class Assfonts(ConanFile):
         self.options["qt"].with_mysql = False
         self.options["qt"].with_odbc = False
         self.options["qt"].with_sqlite3 = False
-        self.options["qt"].openssl = False
         if self.settings.os == "Linux":
             self.options["qt"].with_dbus = True
             self.requires("dbus/system", override=True)
 
-        if self.settings.os == "Windows":
-            self.options["libcurl"].with_ssl = "schannel"
-        elif self.settings.os == "Macos":
-            self.options["libcurl"].with_ssl = "darwinssl"
-        elif self.settings.os == "Linux":
-            self.options["libcurl"].with_ssl = "openssl"
-            self.options["libcurl"].with_ntlm = False
-            self.requires("openssl/system", override=True)
+        self.options["cpp-httplib"].with_openssl = True
 
     def layout(self):
         cmake_layout(self)
