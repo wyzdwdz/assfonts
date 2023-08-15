@@ -1,3 +1,14 @@
+Overview of changes leading to v0.5.2
+Tuesday, August 15, 2023
+====================================
+- use cpp-httplib to fetch latest version instead of libcurl
+- fix hidpi-scale bug in Linux
+- turn off dark mode in MacOS
+- add fcitx and ibus support
+- new feature: save GUI state when exit
+- fix bug: only show one missing codepoint
+
+
 Overview of changes leading to v0.5.1
 Sunday, July 30, 2023
 ====================================
