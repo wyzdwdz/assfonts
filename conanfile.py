@@ -53,6 +53,7 @@ class Assfonts(ConanFile):
             self.options["libcurl"].with_ssl = "darwinssl"
         elif self.settings.os == "Linux":
             self.options["libcurl"].with_ssl = "openssl"
+            self.options["libcurl"].with_ntlm = False
             self.requires("openssl/system", override=True)
 
     def layout(self):
