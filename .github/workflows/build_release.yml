@@ -39,7 +39,7 @@ jobs:
           run: |
             cd /var/www
             export CONAN_HOME=/var/www/.conan2
-            apt update && apt -y install lld-10
+            apt update && apt -y install lld-10 bsdmainutils
             update-alternatives --install /usr/bin/ld ld /usr/lib/llvm-10/bin/lld 10
             conan export --version 8.0.1 -nr 3rdparty/harfbuzz_expt
             conan export --version system -nr .github/recipes/dbus_fix
@@ -64,7 +64,7 @@ jobs:
           run: |
             cd /var/www
             export CONAN_HOME=/var/www/.conan2
-            apt update && apt -y install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu lld-10
+            apt update && apt -y install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu lld-10 bsdmainutils
             update-alternatives --install /usr/bin/ld ld /usr/lib/llvm-10/bin/lld 10
             cp -f .github/apt-lists/amd64-sources.list /etc/apt/sources.list
             cp -f .github/apt-lists/arm64-sources.list /etc/apt/sources.list.d/
