@@ -1,6 +1,6 @@
 ![Supported Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue.svg)
 ![License](https://img.shields.io/github/license/wyzdwdz/assfonts)
-![Building status](https://img.shields.io/github/actions/workflow/status/wyzdwdz/assfonts/build_release.yml?event=release&logo=github&link=https%3A%2F%2Fgithub.com%2Fwyzdwdz%2Fassfonts%2Factions%2Fworkflows%2Fbuild_release.yml)
+[![Building status](https://img.shields.io/github/actions/workflow/status/wyzdwdz/assfonts/build_release.yml?event=release)](https://github.com/wyzdwdz/assfonts/actions/workflows/build_release.yml)
 ![Latest Release Tag](https://img.shields.io/github/tag/wyzdwdz/assfonts.svg)
 
 # assfonts
