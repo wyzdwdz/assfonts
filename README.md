@@ -1,4 +1,4 @@
-![Supported Platforms](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows%20%7C%20-blue.svg)
+![Supported Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue.svg)
 ![License: MIT](https://img.shields.io/badge/License-GPLv3-blue.svg)
 
 # assfonts
