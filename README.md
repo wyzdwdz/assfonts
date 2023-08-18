@@ -10,29 +10,9 @@ Subset fonts and embed them into an ASS subtitle.
 
 ### Build Requirements
 
-Package Manager ---- Conan version 2.0.4
-
-- [FreeType](http://freetype.org/) ---- under GPLv2
-
-- [HarfBuzz](https://github.com/harfbuzz/harfbuzz)
-
-- [nlohmann_json](https://github.com/nlohmann/json)
-
-- [libiconv](https://www.gnu.org/software/libiconv/)
-
-- [fmt](https://github.com/fmtlib/fmt)
-
-- [CLI11](https://github.com/CLIUtils/CLI11)
-
-- [pcre2](https://www.pcre.org/)
-
-- [ThreadPool](https://github.com/progschj/ThreadPool)
-
-- [ghc::filesystem](https://github.com/gulrak/filesystem)
-
-- [Qt5](https://www.qt.io/)
-  
-- [libcurl](https://curl.se/libcurl/)
+- Conan == 2.0.4
+- 
+- CMake >= 3.16
 
 ### How to build
 

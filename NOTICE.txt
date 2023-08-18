@@ -1,0 +1,80 @@
+﻿assfonts
+
+Copyright (C) 2023 wyzdwdz <wyzdwdz@gmail.com>
+
+This software is licensed under the GNU General Public License version 3 (GPLv3). You can obtain a copy of the license at the following URL:
+https://github.com/wyzdwdz/assfonts/blob/main/LICENSE.txt
+
+The source code for this software can be found at the following location:
+https://github.com/wyzdwdz/assfonts
+
+Copyright and license information for third-party open source components and libraries used in this software can be found at:
+
+- Freetype 
+Copyright (C) 1989, 1991 Free Software Foundation, Inc.
+https://gitlab.freedesktop.org/freetype/freetype/-/blob/master/docs/GPLv2.TXT
+
+- HarfBuzz
+Copyright © 2010-2022  Google, Inc.
+Copyright © 2015-2020  Ebrahim Byagowi
+Copyright © 2019,2020  Facebook, Inc.
+Copyright © 2012,2015  Mozilla Foundation
+Copyright © 2011  Codethink Limited
+Copyright © 2008,2010  Nokia Corporation and/or its subsidiary(-ies)
+Copyright © 2009  Keith Stribley
+Copyright © 2011  Martin Hosken and SIL International
+Copyright © 2007  Chris Wilson
+Copyright © 2005,2006,2020,2021,2022,2023  Behdad Esfahbod
+Copyright © 2004,2007,2008,2009,2010,2013,2021,2022,2023  Red Hat, Inc.
+Copyright © 1998-2005  David Turner and Werner Lemberg
+Copyright © 2016  Igalia S.L.
+Copyright © 2022  Matthias Clasen
+Copyright © 2018,2021  Khaled Hosny
+Copyright © 2018,2019,2020  Adobe, Inc
+Copyright © 2013-2015  Alexei Podtelezhnikov
+https://github.com/harfbuzz/harfbuzz/blob/main/COPYING
+
+- JSON for Modern C++
+Copyright (c) 2013-2022 Niels Lohmann
+https://github.com/nlohmann/json/blob/develop/LICENSE.MIT
+
+- libiconv
+Copyright (C) 1998, 2022 Free Software Foundation, Inc.
+https://www.gnu.org/software/libiconv/
+
+- fmt
+Copyright (c) 2012 - present, Victor Zverovich and {fmt} contributors
+https://github.com/fmtlib/fmt/blob/master/LICENSE.rst
+
+- CLI11
+CLI11 2.2 Copyright (c) 2017-2023 University of Cincinnati, developed by Henry Schreiner under NSF AWARD 1414736. All rights reserved.
+https://github.com/CLIUtils/CLI11/blob/main/LICENSE
+
+- PCRE2
+Copyright (c) 1997-2021 University of Cambridge. All rights reserved.
+https://www.pcre.org/licence.txt
+
+- ThreadPool
+Copyright (c) 2012 Jakob Progsch, Václav Zeman
+https://github.com/progschj/ThreadPool/blob/master/COPYING
+
+- ghc::filesystem
+Copyright (c) 2018, Steffen Schümann <s.schuemann@pobox.com>
+https://github.com/gulrak/filesystem/blob/master/LICENSE
+
+- Qt 5.15 LTS
+Copyright (C) 2018 The Qt Company Ltd. and other contributors.
+https://doc.qt.io/qt-5/lgpl.html
+
+- cpp-httplib
+Copyright (c) 2017 yhirose
+https://github.com/yhirose/cpp-httplib/blob/master/LICENSE
+
+- compact_enc_det
+Copyright 2016 Google Inc.
+https://github.com/google/compact_enc_det/blob/master/LICENSE
+
+- rang
+https://github.com/agauniyal/rang/blob/master/LICENSE
+
+This software is provided "as is" without warranty of any kind, either expressed or implied. See the GNU General Public License for the specific language governing permissions and limitations under the license.
