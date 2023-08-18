@@ -11,7 +11,7 @@ Subset fonts and embed them into an ASS subtitle.
 ### Build Requirements
 
 - Conan == 2.0.4
-- 
+
 - CMake >= 3.16
 
 ### How to build
