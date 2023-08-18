@@ -12,7 +12,7 @@ Subset fonts and embed them into an ASS subtitle.
 
 Package Manager ---- Conan version 2.0.4
 
-- [FreeType](http://freetype.org/)
+- [FreeType](http://freetype.org/) under GPLv2
 
 - [HarfBuzz](https://github.com/harfbuzz/harfbuzz)
 
