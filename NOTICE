@@ -77,11 +77,11 @@ https://github.com/google/compact_enc_det/blob/master/LICENSE
 - rang
 https://github.com/agauniyal/rang/blob/master/LICENSE
 
-- function "ass_face_get_weight‎" in ass_font.c (from libass) 
+- function "ass_face_get_weight" in ass_font.c (from libass) 
 Copyright (C) 2006 Evgeniy Stepanov <eugeni.stepanov@gmail.com>
 https://github.com/libass/libass/blob/master/COPYING
 
-- function "UUEncode‎" in uuencode.cpp (from Aegisub)
+- function "UUEncode" in uuencode.cpp (from Aegisub)
 Copyright (c) 2013, Thomas Goyne <plorkyeran@aegisub.org>
 https://github.com/Aegisub/Aegisub/blob/master/LICENCE
 

@@ -20,11 +20,11 @@ do
 done
 
 conan profile detect -vquiet
-conan export --version 8.0.1 -nr 3rdparty/harfbuzz_expt
-conan export --version 5.15.10 -nr .github/recipes/qt5_fix
+conan export --version 8.0.1 -nr recipes/harfbuzz_expt
+conan export --version 5.15.10 -nr recipes/qt5_fix
 
 if [ "$(uname)" = "Linux" ]; then
-    conan export --version system -nr .github/recipes/dbus_system
+    conan export --version system -nr recipes/dbus_system
 fi
 
 if (( $EUID != 0 ))
