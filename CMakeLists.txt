@@ -32,6 +32,10 @@ endif()
 
 set(CXX_STD_VER cxx_std_11)
 
+install(FILES LICENSE NEWS NOTICE
+        DESTINATION ${CMAKE_INSTALL_DOCDIR}
+        CONFIGURATIONS Release)
+
 add_subdirectory(lib)
 add_subdirectory(src)
 # add_subdirectory(test)
