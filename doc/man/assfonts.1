@@ -1,0 +1,67 @@
+.\" Copyright (C) 2023 wyzdwdz <wyzdwdz@gmail.com>
+.\"
+.\" SPDX-License-Identifier: GPL-3.0-or-later
+.\"
+.TH assfonts 1 2023-08-20 "Linux man-pages 6.04"
+.SH "NAME"
+assfonts \- Subset fonts and embed them into an ASS subtitle
+.SH "SYNOPSIS"
+.B assfonts
+.RI [ options ]
+.RI [ inputfiles ]...
+.SH "EXAMPLES"
+assfonts \-i <\fIfiles\fR>                  Embed subset fonts into ASS script
+.TP
+assfonts \-i <\fIfiles\fR>                  Same as above
+.TP
+assfonts \-o <\fIdir\fR> \-s \-i <\fIfiles\fR>      Only subset fonts but not embed
+.TP
+assfonts \-f <\fIdir\fR> \-e \-i <\fIfiles\fR>      Only embed fonts without subset
+.TP
+assfonts \-f <\fIdir\fR> \-b                 Build or update fonts database only
+.TP
+assfonts \-l <\fInum\fR> \-i <\fIfiles\fR>         Recolorize the subtitle for HDR contents
+.SH "DESCRIPTION"
+The
+.B assfonts
+can search for the required fonts of an ASS subtitle file and subset them.
+It can also embed the UUEncode\-encoded font files directly into a subtitle script (which is
+based on one feature of ASS subtitle format).
+In this way, only one subtitle file can contain all the information to be rendered and achieve
+the similar effect as those graphical subtitles such as PGS.
+.SH "OPTIONS"
+\fB\-i\fR, \fB\-\-input\fR       <\fIfiles\fR>   Input .ass files
+.TP
+\fB\-o\fR, \fB\-\-output\fR      <\fIdir\fR>     Output directory  (Default: same directory as input)
+.TP
+\fB\-f\fR, \fB\-\-fontpath\fR    <\fIdir\fR>     Set fonts directory
+.TP
+\fB\-b\fR, \fB\-\-build\fR                 Build or update fonts database  (Require: \fB--fontpath\fR)
+.TP
+\fB\-d\fR, \fB\-\-dbpath\fR      <\fIdir\fR>     Set fonts database path  (Default: current path)
+.TP
+\fB\-s\fR, \fB\-\-subset-only\fR <\fIbool\fR>    Subset fonts but not embed them into subtitle  (Default: False)
+.TP
+\fB\-e\fR, \fB\-\-embed-only\fR  <\fIbool\fR>    Embed fonts into subtitle but not subset them (Default: False)
+.TP
+\fB\-r\fR, \fB\-\-rename\fR      <\fIbool\fR>    \fB!!!Experimental!!!\fR Rename subsetted fonts (Default: False)
+.TP
+\fB\-l\fR, \fB\-\-luminance\fR   <\fInum\fR>     Set subtitle brightness for HDR contents  (Default: 203)
+.TP
+\fB\-v\fR, \fB\-\-verbose\fR     <\fInum\fR>     Set logging level (0 to 3), 0 is off  (Default: 3)
+.TP
+\fB\-h\fR, \fB\-\-help\fR                  Get help info
+.SH "CAUTION"
+According \fBASS Specs\fR, only Truetype fonts can be embedded into ASS Script.
+This program will ignore this rule and embed non-ttf fonts in by force.
+Some video players may not load these fonts correctly.
+One recommended solution is to subset fonts without embedding firstly by giving option \fB\-s\fR or \fB\-\-subset\-only\fR.
+Then convert those subsetted fonts to .ttf fonts using some 3rdparty tools like \fBotf2ttf\fR.
+Finally, rerun this program by giving option \fB\-e\fR or \fB\-\-embed\-only\fR and setting fonts directory to subsetted fonts.
+For example:
+.TP
+assfonts \-s \-i <\fIass_file\fR>
+.TP
+otf2ttf <\fIass_file\fR>_subsetted/*.otf
+.TP
+assfonts \-n \-f <\fIass_file\fR>_subsetted/ \-i <\fIass_file\fR>

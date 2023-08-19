@@ -306,14 +306,17 @@ jobs:
           sudo apt-get install -y zip
           mkdir ./share/doc/assfonts
           cp LICENSE NEWS NOTICE ./share/doc/assfonts/
+          mkdir ./share/man/man1
+          gzip -k ./doc/man/assfonts.1
+          cp ./doc/man/assfonts.1.gz ./share/man/man1/
           mkdir bin
           cp -f assfonts-${{ github.ref_name }}-x86_64-Linux ./bin/assfonts
           cp -f assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage assfonts-gui.AppImage
-          tar -czvf assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz bin/assfonts assfonts-gui.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE
+          tar -czvf assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz bin/assfonts assfonts-gui.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE ./share/man/man1/assfonts.1.gz
           rm -rf assfonts-${{ github.ref_name }}-x86_64-Linux assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage
           cp -f assfonts-${{ github.ref_name }}-aarch64-Linux ./bin/assfonts
           cp -f assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage assfonts-gui.AppImage
-          tar -czvf assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz bin/assfonts assfonts-gui.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE
+          tar -czvf assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz bin/assfonts assfonts-gui.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE ./share/man/man1/assfonts.1.gz
           rm -rf assfonts-${{ github.ref_name }}-aarch64-Linux assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
           cp -f assfonts-${{ github.ref_name }}-x86_64-Windows.exe assfonts.exe
           cp -f assfonts-gui-${{ github.ref_name }}-x86_64-Windows.exe assfonts-gui.exe

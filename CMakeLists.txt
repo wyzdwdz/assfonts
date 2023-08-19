@@ -32,9 +32,24 @@ endif()
 
 set(CXX_STD_VER cxx_std_11)
 
+include(GNUInstallDirs)
+
 install(FILES LICENSE NEWS NOTICE
         DESTINATION ${CMAKE_INSTALL_DOCDIR}
         CONFIGURATIONS Release)
+
+if(UNIX)
+
+install(CODE "
+    execute_process(COMMAND gzip -k doc/man/assfonts.1
+                    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+")
+
+install(FILES doc/man/assfonts.1.gz
+        DESTINATION ${CMAKE_INSTALL_MANDIR}/man1
+        CONFIGURATIONS Release)
+
+endif()
 
 add_subdirectory(lib)
 add_subdirectory(src)

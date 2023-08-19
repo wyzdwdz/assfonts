@@ -481,3 +481,6 @@ runtime-*
 
 #vscode dev container
 .devcontainer
+
+#gzip
+*.gz

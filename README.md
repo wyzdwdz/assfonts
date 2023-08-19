@@ -8,6 +8,14 @@
 
 Subset fonts and embed them into an ASS subtitle.
 
+### Description
+
+The **assfonts** can search for the required fonts of an ASS subtitle file and subset them. 
+It can also embed the UUEncode-encoded font files directly into a subtitle script (which is
+based on one feature of ASS subtitle format). In this way, only one subtitle file can contain
+all the information to be rendered and achieve the similar effect as those graphical subtitles
+such as PGS.
+
 ### Build Requirements
 
 - Conan == 2.0.4
@@ -40,15 +48,15 @@ Examples:  assfonts <files>                  Embed subset fonts into ASS script
            assfonts -f <dir> -b              Build or update fonts database only
            assfonts -l <num> -i <files>      Recolorize the subtitle for HDR contents
 Options:
-  -i, --input,      <files>   Input .ass files
+  -i, --input       <files>   Input .ass files
   -o, --output      <dir>     Output directory  (Default: same directory as input)
   -f, --fontpath    <dir>     Set fonts directory
-  -b, --build                 Build or update fonts database  (Require --fontpath)
+  -b, --build                 Build or update fonts database  (Require: --fontpath)
   -d, --dbpath      <dir>     Set fonts database path  (Default: current path)
-  -s, --subset-only <bool>    Subset fonts but not embed them into subtitle  (default: False)
-  -e, --embed-only  <bool>    Embed fonts into subtitle but not subset them (default: False)
-  -r, --rename      <bool>    !!!Experimental!!! Rename subsetted fonts (default: False)
-  -l, --luminance   <num>     Set subtitle brightness for HDR contents  (default: 203)
+  -s, --subset-only <bool>    Subset fonts but not embed them into subtitle  (Default: False)
+  -e, --embed-only  <bool>    Embed fonts into subtitle but not subset them (Default: False)
+  -r, --rename      <bool>    !!!Experimental!!! Rename subsetted fonts (Default: False)
+  -l, --luminance   <num>     Set subtitle brightness for HDR contents  (Default: 203)
   -v, --verbose     <num>     Set logging level (0 to 3), 0 is off  (Default: 3)
   -h, --help                  Get help info
  ```

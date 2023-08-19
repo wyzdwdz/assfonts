@@ -213,12 +213,12 @@ int main(int argc, char** argv) {
     << "  -i, --input,      <files>   Input .ass files\n"
     << "  -o, --output      <dir>     Output directory  (Default: same directory as input)\n"
     << "  -f, --fontpath    <dir>     Set fonts directory\n"
-    << "  -b, --build                 Build or update fonts database  (Require --fontpath)\n"
+    << "  -b, --build                 Build or update fonts database  (Require: --fontpath)\n"
     << "  -d, --dbpath      <dir>     Set fonts database path  (Default: current path)\n"
-    << "  -s, --subset-only <bool>    Subset fonts but not embed them into subtitle  (default: False)\n"
-    << "  -e, --embed-only  <bool>    Embed fonts into subtitle but not subset them (default: False)\n"
-    << "  -r, --rename      <bool>    !!!Experimental!!! Rename subsetted fonts (default: False)\n"
-    << "  -l, --luminance   <num>     Set subtitle brightness for HDR contents  (default: 203)\n"
+    << "  -s, --subset-only <bool>    Subset fonts but not embed them into subtitle  (Default: False)\n"
+    << "  -e, --embed-only  <bool>    Embed fonts into subtitle but not subset them (Default: False)\n"
+    << "  -r, --rename      <bool>    !!!Experimental!!! Rename subsetted fonts (Default: False)\n"
+    << "  -l, --luminance   <num>     Set subtitle brightness for HDR contents  (Default: 203)\n"
     << "  -v, --verbose     <num>     Set logging level (0 to 3), 0 is off  (Default: 3)\n"
     << "  -h, --help                  Get help info\n" << std::endl;
     // clang-format on
