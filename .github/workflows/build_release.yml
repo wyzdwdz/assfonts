@@ -268,6 +268,9 @@ jobs:
         shell: bash
     needs: [ build-linux, build-windows, build-macos ]
     steps:
+      - name: checkout
+        uses: actions/checkout@v3
+          
       - name: download Linux x86_64
         uses: actions/download-artifact@v3
         with:
@@ -304,19 +307,19 @@ jobs:
           mkdir bin
           cp -f assfonts-${{ github.ref_name }}-x86_64-Linux ./bin/assfonts
           cp -f assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage assfonts-gui.AppImage
-          tar -czvf assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz bin/assfonts assfonts-gui.AppImage
+          tar -czvf assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz bin/assfonts assfonts-gui.AppImage LICENSE NEWS NOTICE
           rm -rf assfonts-${{ github.ref_name }}-x86_64-Linux assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage
           cp -f assfonts-${{ github.ref_name }}-aarch64-Linux ./bin/assfonts
           cp -f assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage assfonts-gui.AppImage
-          tar -czvf assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz bin/assfonts assfonts-gui.AppImage
+          tar -czvf assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz bin/assfonts assfonts-gui.AppImage LICENSE NEWS NOTICE
           rm -rf assfonts-${{ github.ref_name }}-aarch64-Linux assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
           cp -f assfonts-${{ github.ref_name }}-x86_64-Windows.exe assfonts.exe
           cp -f assfonts-gui-${{ github.ref_name }}-x86_64-Windows.exe assfonts-gui.exe
-          zip assfonts-${{ github.ref_name }}-x86_64-Windows.zip assfonts.exe assfonts-gui.exe
+          zip assfonts-${{ github.ref_name }}-x86_64-Windows.zip assfonts.exe assfonts-gui.exe LICENSE NEWS NOTICE
           rm -rf assfonts-${{ github.ref_name }}-x86_64-Windows.exe assfonts-gui-${{ github.ref_name }}-x86_64-Windows.exe
           cp -f assfonts-${{ github.ref_name }}-aarch64-Windows.exe assfonts.exe
           cp -f assfonts-gui-${{ github.ref_name }}-aarch64-Windows.exe assfonts-gui.exe
-          zip assfonts-${{ github.ref_name }}-aarch64-Windows.zip assfonts.exe assfonts-gui.exe
+          zip assfonts-${{ github.ref_name }}-aarch64-Windows.zip assfonts.exe assfonts-gui.exe LICENSE NEWS NOTICE
           rm -rf assfonts-${{ github.ref_name }}-aarch64-Windows.exe assfonts-gui-${{ github.ref_name }}-aarch64-Windows.exe
 
       - name: calculate hash
