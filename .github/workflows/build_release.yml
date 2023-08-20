@@ -52,7 +52,7 @@ jobs:
             cmake --install build/Release --prefix install --strip
             cp -f ./install/bin/assfonts assfonts-${{ github.ref_name }}-x86_64-Linux
             linuxdeploy --appdir=./assfonts-gui_AppDir -e ./install/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
-            mkdir ./assfonts-gui_AppDir/usr/share/doc/assfonts
+            mkdir -p ./assfonts-gui_AppDir/usr/share/doc/assfonts
             cp LICENSE NEWS NOTICE ./assfonts-gui_AppDir/usr/share/doc/assfonts
             appimagetool ./assfonts-gui_AppDir assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage
 
@@ -100,7 +100,7 @@ jobs:
             apt update && apt -y install squashfs-tools
             cp -f ./install/bin/assfonts assfonts-${{ github.ref_name }}-aarch64-Linux
             linuxdeploy --appdir=./assfonts-gui_AppDir -e ./install/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
-            mkdir ./assfonts-gui_AppDir/usr/share/doc/assfonts
+            mkdir -p ./assfonts-gui_AppDir/usr/share/doc/assfonts
             cp LICENSE NEWS NOTICE ./assfonts-gui_AppDir/usr/share/doc/assfonts
             ln -sf assfonts-gui.png ./assfonts-gui_AppDir/.DirIcon
             mksquashfs ./assfonts-gui_AppDir assfonts-gui_AppDir.squashfs -root-owned -noappend
@@ -308,9 +308,9 @@ jobs:
       - name: create zips
         run: |
           sudo apt-get install -y zip
-          mkdir ./share/doc/assfonts
+          mkdir -p ./share/doc/assfonts
           cp LICENSE NEWS NOTICE ./share/doc/assfonts/
-          mkdir ./share/man/man1
+          mkdir -p ./share/man/man1
           gzip -k ./doc/man/assfonts.1
           cp ./doc/man/assfonts.1.gz ./share/man/man1/
           mkdir bin
