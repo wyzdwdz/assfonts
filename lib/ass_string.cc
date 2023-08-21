@@ -30,13 +30,7 @@
 #include <Windows.h>
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#include <iconv.h>
-#endif
-#ifdef __cplusplus
-}
-#endif
+#include "iconv_wrapper.hh"
 
 namespace ass {
 
@@ -112,26 +106,20 @@ std::istream& SafeGetLine(std::istream& is, std::string& t) {
 
 bool IconvConvert(const std::string& in, std::string& out,
                   const std::string& from_code, const std::string& to_code) {
-  IconvT cd(to_code.c_str(), from_code.c_str());
+  iconv_wrapper::iconv cvt;
 
-  if (cd.get() == reinterpret_cast<iconv_t>(-1)) {
+  try {
+    cvt.open(from_code, to_code);
+  } catch (std::system_error&) {
     return false;
   }
 
-  char* inbuf = const_cast<char*>(in.c_str());
-  size_t insize = in.size();
-
-  auto outbuf = std::unique_ptr<char[]>(new char[insize * 4]);
-  char* outbuf_tmp = outbuf.get();
-  size_t outsize = insize * 4;
-
-  size_t err = iconv(cd.get(), &inbuf, &insize, &outbuf_tmp, &outsize);
-
-  if (err == static_cast<size_t>(-1)) {
+  try {
+    out = cvt.convert(in);
+  } catch (std::system_error&) {
     return false;
   }
 
-  out = std::string(outbuf.get(), outbuf_tmp - outbuf.get());
   return true;
 }
 

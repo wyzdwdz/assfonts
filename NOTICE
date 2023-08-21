@@ -10,7 +10,7 @@ https://github.com/wyzdwdz/assfonts
 
 Copyright and license information for third-party open source components and libraries used in this software can be found at:
 
-- Freetype 
+- FreeType 
 Copyright (C) 1989, 1991 Free Software Foundation, Inc.
 https://gitlab.freedesktop.org/freetype/freetype/-/blob/master/docs/GPLv2.TXT
 
@@ -84,5 +84,13 @@ https://github.com/libass/libass/blob/master/COPYING
 - function "UUEncode" in uuencode.cpp (from Aegisub)
 Copyright (c) 2013, Thomas Goyne <plorkyeran@aegisub.org>
 https://github.com/Aegisub/Aegisub/blob/master/LICENCE
+
+- jpcre2
+Copyright (c) Md Jahidul Hamid. <jahidulhamid@yahoo.com>
+https://github.com/jpcre2/jpcre2/blob/master/LICENCE
+
+- iconv_wrapper
+Copyright (C) 2016, 2019, 2022, 2023 Masamichi Hosoda. All rights reserved.
+https://github.com/trueroad/iconv_wrapper/blob/master/LICENSE
 
 This software is provided "as is" without warranty of any kind, either expressed or implied. See the GNU General Public License for the specific language governing permissions and limitations under the license.
