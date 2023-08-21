@@ -19,8 +19,13 @@
 
 #include "assfonts.h"
 
+#include <functional>
+#include <future>
 #include <memory>
+#include <string>
+#include <vector>
 
+#include <ThreadPool/ThreadPool.h>
 #include <ghc/filesystem.hpp>
 
 #include "ass_font_embedder.h"
@@ -31,6 +36,11 @@
 #include "font_subsetter.h"
 
 namespace fs = ghc::filesystem;
+
+using LogType = struct {
+  ASSFONTS_LOG_LEVEL level;
+  std::string msg;
+};
 
 void AssfontsBuildDB(const char* fonts_path, const char* db_path,
                      const AssfontsLogCallback cb,
@@ -83,10 +93,7 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
     return;
   }
 
-  ass::AssParser ap(logger);
   ass::FontParser fp(logger);
-  ass::FontSubsetter fs(ap, fp, logger);
-  ass::AssFontEmbedder afe(fs, logger);
 
   fs::path fonts(fonts_path);
   fs::path db(db_path);
@@ -98,52 +105,94 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
 
   fp.LoadDB(db.native() + fs::path::preferred_separator + _ST("fonts.json"));
 
+  ThreadPool pool(std::thread::hardware_concurrency() + 1);
+  std::vector<std::future<std::vector<LogType>>> results;
+
   for (unsigned int idx = 0; idx < num_paths; ++idx) {
+    results.emplace_back(pool.enqueue([=, &fp]() {
+      std::vector<LogType> logs;
+
+      auto log_callback = [&](const char* msg,
+                              const ASSFONTS_LOG_LEVEL log_level) {
+        LogType log = {log_level, std::string(msg)};
+        logs.emplace_back(log);
+      };
+
+      auto t_logger =
+          std::make_shared<ass::Logger>(ass::Logger(log_callback, log_level));
+
+      ass::AssParser ap(t_logger);
+      ass::FontSubsetter fs(ap, fp, t_logger);
+      ass::AssFontEmbedder afe(fs, t_logger);
+
+      fs::path input(input_paths[idx]);
+
+      ap.set_output_dir_path(output.native());
+
+      if (brightness != 0) {
+        if (!ap.Recolorize(input.native(), brightness)) {
+          return logs;
+        }
+
+        AString hdr_filename =
+            input.stem().native() + _ST(".hdr") + input.extension().native();
+        input = output / hdr_filename;
+      }
+
+      if (!ap.ReadFile(input.native())) {
+        return logs;
+      }
+
+      if (is_embed_only && is_subset_only) {
+        return logs;
+      }
+
+      if (!is_embed_only) {
+        fs.SetSubfontDir(output.native() + fs::path::preferred_separator +
+                         input.stem().native() + _ST("_subsetted"));
+      }
+
+      if (!fs.Run(is_embed_only, is_rename)) {
+        return logs;
+      }
+
+      afe.set_output_dir_path(output.native());
+      if (!afe.Run(is_subset_only, is_embed_only, is_rename)) {
+        return logs;
+      }
+
+      return logs;
+    }));
+  }
+
+  int idx = 0;
+  for (auto&& result : results) {
     if (idx != 0) {
       logger->Text("");
     }
 
-    fs::path input(input_paths[idx]);
+    auto logs = result.get();
 
-    ap.set_output_dir_path(output.native());
-
-    if (brightness != 0) {
-      if (!ap.Recolorize(input.native(), brightness)) {
-        continue;
+    for (auto& log : logs) {
+      switch (log.level) {
+        case ASSFONTS_INFO:
+          logger->Info(log.msg);
+          break;
+        case ASSFONTS_WARN:
+          logger->Warn(log.msg);
+          break;
+        case ASSFONTS_ERROR:
+          logger->Error(log.msg);
+          break;
+        case ASSFONTS_TEXT:
+          logger->Text(log.msg);
+        case ASSFONTS_NONE:
+          break;
+        default:
+          break;
       }
-
-      AString hdr_filename =
-          input.stem().native() + _ST(".hdr") + input.extension().native();
-      input = output / hdr_filename;
     }
 
-    if (!ap.ReadFile(input.native())) {
-      continue;
-    }
-
-    if (is_embed_only && is_subset_only) {
-      ap.Clear();
-      fs.Clear();
-      afe.Clear();
-      continue;
-    }
-
-    if (!is_embed_only) {
-      fs.SetSubfontDir(output.native() + fs::path::preferred_separator +
-                       input.stem().native() + _ST("_subsetted"));
-    }
-
-    if (!fs.Run(is_embed_only, is_rename)) {
-      continue;
-    }
-
-    afe.set_output_dir_path(output.native());
-    if (!afe.Run(is_subset_only, is_embed_only, is_rename)) {
-      continue;
-    }
-
-    ap.Clear();
-    fs.Clear();
-    afe.Clear();
+    ++idx;
   }
 }

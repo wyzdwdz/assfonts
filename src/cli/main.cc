@@ -63,16 +63,16 @@ static std::string save_files_path = []() {
 static void log_callback(const char* msg, const ASSFONTS_LOG_LEVEL log_level) {
   switch (log_level) {
     case ASSFONTS_INFO:
-      nowide::cout << msg << std::endl;
+      nowide::cout << "[INFO] " << msg << std::endl;
       break;
 
     case ASSFONTS_WARN:
-      nowide::cout << rang::style::bold << rang::fg::cyan << msg
+      nowide::cout << rang::style::bold << rang::fg::cyan << "[WARN] " << msg
                    << rang::fg::reset << rang::style::reset << std::endl;
       break;
 
     case ASSFONTS_ERROR:
-      nowide::cout << rang::style::bold << rang::fg::red << msg
+      nowide::cout << rang::style::bold << rang::fg::red << "[ERROR] " << msg
                    << rang::fg::reset << rang::style::reset << std::endl;
       break;
 
@@ -117,6 +117,15 @@ struct DirectoryValidator : public CLI::Validator {
 const static DirectoryValidator directory_validator;
 
 int main(int argc, char** argv) {
+  auto loc = std::setlocale(LC_ALL, ".UTF8");
+  if (loc == nullptr) {
+    loc = std::setlocale(LC_ALL, "");
+  }
+  if (loc == nullptr) {
+    std::cout << "Error! Locale not set." << std::endl;
+    return -1;
+  }
+
   nowide::args _(argc, argv);
 
   std::vector<std::string> inputs;
@@ -187,7 +196,7 @@ int main(int argc, char** argv) {
   app.failure_message(
       [=](const CLI::App* app, const CLI::Error& e) -> std::string {
         if (verbose > 0) {
-          std::string str = "[ERROR] ";
+          std::string str;
           str.append(CLI::FailureMessage::simple(app, e));
           str.pop_back();
           str += ". See --help for more info.";

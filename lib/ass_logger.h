@@ -21,6 +21,7 @@
 #define ASSFONTS_ASSLOGGER_H_
 
 #include <algorithm>
+#include <functional>
 #include <string>
 #include <utility>
 
@@ -32,9 +33,11 @@
 
 namespace ass {
 
+using CallbackType = std::function<void(const char*, const ASSFONTS_LOG_LEVEL)>;
+
 class Logger {
  public:
-  Logger(AssfontsLogCallback cb, ASSFONTS_LOG_LEVEL log_level)
+  Logger(CallbackType cb, ASSFONTS_LOG_LEVEL log_level)
       : cb_(cb), log_level_(log_level){};
   ~Logger() = default;
 
@@ -91,30 +94,13 @@ class Logger {
   }
 
  private:
-  AssfontsLogCallback cb_;
+  CallbackType cb_;
   ASSFONTS_LOG_LEVEL log_level_;
 
   template <typename... T>
   void Log(ASSFONTS_LOG_LEVEL log_level, fmt::format_string<T...> fmt,
            T&&... args) {
     std::string msg;
-
-    switch (log_level) {
-      case ASSFONTS_INFO:
-        msg = "[INFO] ";
-        break;
-
-      case ASSFONTS_WARN:
-        msg = "[WARN] ";
-        break;
-
-      case ASSFONTS_ERROR:
-        msg = "[ERROR] ";
-        break;
-
-      default:
-        break;
-    }
 
     msg.append(fmt::format(fmt, std::forward<T>(args)...));
 
@@ -127,23 +113,6 @@ class Logger {
   void Log(ASSFONTS_LOG_LEVEL log_level, fmt::wformat_string<T...> fmt,
            T&&... args) {
     std::string msg;
-
-    switch (log_level) {
-      case ASSFONTS_INFO:
-        msg = "[INFO] ";
-        break;
-
-      case ASSFONTS_WARN:
-        msg = "[WARN] ";
-        break;
-
-      case ASSFONTS_ERROR:
-        msg = "[ERROR] ";
-        break;
-
-      default:
-        break;
-    }
 
     msg.append(WideToU8(fmt::format(fmt, std::forward<T>(args)...)));
 

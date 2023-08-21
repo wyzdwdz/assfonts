@@ -607,8 +607,55 @@ void MainWindow::OnStartButtonPressed() {
 }
 
 void MainWindow::OnReceiveLog(QString msg, ASSFONTS_LOG_LEVEL log_level) {
-  log_buffer_.push_back({log_level, msg});
-  RefreshLogText();
+  QString log;
+
+  switch (log_level) {
+    case ASSFONTS_INFO:
+      log = "[INFO] ";
+      break;
+
+    case ASSFONTS_WARN:
+      log = "[WARN] ";
+      break;
+
+    case ASSFONTS_ERROR:
+      log = "[ERROR] ";
+      break;
+
+    default:
+      break;
+  }
+
+  log.append(msg);
+
+  log_buffer_.push_back({log_level, log});
+
+  ASSFONTS_LOG_LEVEL show_min_level = ASSFONTS_INFO;
+
+  if (min_info_action_->isChecked()) {
+    show_min_level = ASSFONTS_INFO;
+  } else if (min_warn_action_->isChecked()) {
+    show_min_level = ASSFONTS_WARN;
+  } else if (min_error_action_->isChecked()) {
+    show_min_level = ASSFONTS_ERROR;
+  }
+
+  if (!space_action_->isChecked() && log.isEmpty()) {
+    return;
+  }
+
+  if (log_level < show_min_level) {
+    return;
+  }
+
+  QTextCursor cursor(log_text_->document());
+  cursor.movePosition(QTextCursor::End);
+  cursor.beginEditBlock();
+  cursor.insertText(log);
+  cursor.insertBlock();
+  cursor.endEditBlock();
+  cursor.movePosition(QTextCursor::End);
+  log_text_->setTextCursor(cursor);
 }
 
 void MainWindow::OnClearActionTrigger() {
@@ -659,6 +706,7 @@ void MainWindow::OnCheckActionTrigger() {
 }
 
 void MainWindow::RefreshLogText() {
+  log_text_->setUpdatesEnabled(false);
   log_text_->clear();
 
   QTextBlockFormat bf = log_text_->textCursor().blockFormat();
@@ -675,17 +723,27 @@ void MainWindow::RefreshLogText() {
     show_min_level = ASSFONTS_ERROR;
   }
 
-  for (const auto& item : log_buffer_) {
-    if (!space_action_->isChecked() && item.text.isEmpty()) {
+  QTextCursor cursor(log_text_->document());
+  cursor.beginEditBlock();
+
+  for (auto iter = log_buffer_.begin(); iter != log_buffer_.end(); ++iter) {
+    if (!space_action_->isChecked() && (*iter).text.isEmpty()) {
       continue;
     }
 
-    if (item.level < show_min_level) {
+    if ((*iter).level < show_min_level) {
       continue;
     }
 
-    log_text_->append(item.text);
+    cursor.insertText((*iter).text);
+    cursor.insertBlock();
   }
+
+  cursor.endEditBlock();
+  log_text_->setUpdatesEnabled(true);
+
+  cursor.movePosition(QTextCursor::End);
+  log_text_->setTextCursor(cursor);
 }
 
 void MainWindow::ResizeHelper(QWidget* widget, const int width,
@@ -804,7 +862,7 @@ void MainWindow::SaveSettings() {
 
   settings_->beginGroup("Menu");
   settings_->setValue("LogSpace", space_action_->isChecked());
-  
+
   if (min_info_action_->isChecked()) {
     settings_->setValue("LogLevel", 0);
   } else if (min_warn_action_->isChecked()) {

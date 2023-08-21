@@ -339,20 +339,29 @@ void FontParser::ParseFontName(const FT_Face& ft_face,
   switch (name.name_id) {
     case TT_NAME_ID_FONT_FAMILY:
       if (std::find(families.begin(), families.end(), buf) == families.end()) {
-        families.emplace_back(ToLower(buf));
+        std::string family = ToLower(buf);
+        if (!family.empty() && family != "undefined") {
+          families.emplace_back(family);
+        }
       }
       break;
 
     case TT_NAME_ID_FULL_NAME:
       if (std::find(fullnames.begin(), fullnames.end(), buf) ==
           fullnames.end()) {
-        fullnames.emplace_back(ToLower(buf));
+        std::string fullname = ToLower(buf);
+        if (!fullname.empty() && fullname != "undefined") {
+          fullnames.emplace_back(fullname);
+        }
       }
       break;
 
     case TT_NAME_ID_PS_NAME:
       if (std::find(psnames.begin(), psnames.end(), buf) == psnames.end()) {
-        psnames.emplace_back(ToLower(buf));
+        std::string psname = ToLower(buf);
+        if (!psname.empty() && psname != "undefined") {
+          psnames.emplace_back(psname);
+        }
       }
       break;
 

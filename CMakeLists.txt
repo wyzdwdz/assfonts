@@ -41,7 +41,7 @@ install(FILES LICENSE NEWS NOTICE
 if(UNIX)
 
 install(CODE "
-    execute_process(COMMAND gzip -k doc/man/assfonts.1
+    execute_process(COMMAND gzip -kf doc/man/assfonts.1
                     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 ")
 

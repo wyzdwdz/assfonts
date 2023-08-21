@@ -21,6 +21,8 @@
 
 #include <memory>
 
+#include <QThread>
+
 static void log_callback(const char* msg, const ASSFONTS_LOG_LEVEL log_level) {
   QString msg_string(msg);
   emit TaskRunner::GetInstance().OnSendLog(msg_string, log_level);

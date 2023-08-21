@@ -46,6 +46,8 @@ bool AssParser::ReadFile(const AString& ass_file_path) {
     return false;
   }
 
+  logger_->Info(_ST("Reading input file: \"{}\""), ass_path.native());
+
   if (!GetUTF8(ass_file, buf_u8)) {
     return false;
   }
