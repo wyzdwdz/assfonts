@@ -64,7 +64,8 @@ class MainWindow : public QMainWindow {
   void OnSendBuild(QString fonts_path, QString db_path);
   void OnSendStart(QString inputs_path, QString output_path, QString fonts_path,
                    QString db_path, unsigned int brightness,
-                   bool is_subset_only, bool is_embed_only, bool is_rename);
+                   bool is_subset_only, bool is_embed_only, bool is_rename,
+                   unsigned int num_thread);
 
  private:
   struct LogItem {
@@ -83,6 +84,8 @@ class MainWindow : public QMainWindow {
   QAction* min_info_action_;
   QAction* min_warn_action_;
   QAction* min_error_action_;
+
+  QAction* mt_action_;
 
   QLabel* input_label_;
   QLabel* output_label_;

@@ -74,7 +74,7 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
                  const char* db_path, const unsigned int brightness,
                  const unsigned int is_subset_only,
                  const unsigned int is_embed_only, const unsigned int is_rename,
-                 const AssfontsLogCallback cb,
+                 const unsigned int num_thread, const AssfontsLogCallback cb,
                  const enum ASSFONTS_LOG_LEVEL log_level) {
   auto logger = std::make_shared<ass::Logger>(ass::Logger(cb, log_level));
 
@@ -105,7 +105,7 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
 
   fp.LoadDB(db.native() + fs::path::preferred_separator + _ST("fonts.json"));
 
-  ThreadPool pool(std::thread::hardware_concurrency() + 1);
+  ThreadPool pool(num_thread);
   std::vector<std::future<std::vector<LogType>>> results;
 
   for (unsigned int idx = 0; idx < num_paths; ++idx) {

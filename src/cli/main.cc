@@ -18,6 +18,7 @@
  */
 
 #include <memory>
+#include <thread>
 
 #include <CLI/App.hpp>
 #include <CLI/Config.hpp>
@@ -139,7 +140,8 @@ int main(int argc, char** argv) {
   bool is_rename = false;
   bool is_help = false;
 
-  unsigned int brightness = 203;
+  unsigned int brightness = 0;
+  unsigned int num_thread = 1;
   int verbose = 3;
 
   CLI::App app{"Subset fonts and embed them into an ASS subtitle."};
@@ -156,6 +158,9 @@ int main(int argc, char** argv) {
 
   auto* p_opt_l = app.add_option("-l,--luminance", brightness,
                                  "Set brightness for HDR contents");
+
+  auto* p_opt_m = app.add_option("-m,--multi-thread", num_thread,
+                                 "Enable multi thread mode");
 
   auto* p_opt_b =
       app.add_flag("-b,--build", is_build, "Build or update fonts database");
@@ -186,7 +191,12 @@ int main(int argc, char** argv) {
 
   p_opt_l->type_name("<num>");
   p_opt_l->expected(0, 1);
+  p_opt_l->default_val(203);
   p_opt_l->check(CLI::Range(0, 1000));
+
+  p_opt_m->type_name("<num>");
+  p_opt_m->expected(0, 1);
+  p_opt_m->default_val(std::thread::hardware_concurrency() + 1);
 
   p_opt_b->needs(p_opt_f);
 
@@ -219,17 +229,19 @@ int main(int argc, char** argv) {
     << "           assfonts -f <dir> -b              Build or update fonts database only\n"
     << "           assfonts -l <num> -i <files>      Recolorize the subtitle for HDR contents\n"
     << "Options:\n"
-    << "  -i, --input,      <files>   Input .ass files\n"
-    << "  -o, --output      <dir>     Output directory  (Default: same directory as input)\n"
-    << "  -f, --fontpath    <dir>     Set fonts directory\n"
-    << "  -b, --build                 Build or update fonts database  (Require: --fontpath)\n"
-    << "  -d, --dbpath      <dir>     Set fonts database path  (Default: current path)\n"
-    << "  -s, --subset-only <bool>    Subset fonts but not embed them into subtitle  (Default: False)\n"
-    << "  -e, --embed-only  <bool>    Embed fonts into subtitle but not subset them (Default: False)\n"
-    << "  -r, --rename      <bool>    !!!Experimental!!! Rename subsetted fonts (Default: False)\n"
-    << "  -l, --luminance   <num>     Set subtitle brightness for HDR contents  (Default: 203)\n"
-    << "  -v, --verbose     <num>     Set logging level (0 to 3), 0 is off  (Default: 3)\n"
-    << "  -h, --help                  Get help info\n" << std::endl;
+    << "  -i, --input,       <files>   Input .ass files\n"
+    << "  -o, --output       <dir>     Output directory  (Default: same directory as input)\n"
+    << "  -f, --fontpath     <dir>     Set fonts directory\n"
+    << "  -b, --build                  Build or update fonts database  (Require: --fontpath)\n"
+    << "  -d, --dbpath       <dir>     Set fonts database path  (Default: current path)\n"
+    << "  -s, --subset-only  <bool>    Subset fonts but not embed them into subtitle  (Default: False)\n"
+    << "  -e, --embed-only   <bool>    Embed fonts into subtitle but not subset them (Default: False)\n"
+    << "  -r, --rename       <bool>    !!!Experimental!!! Rename subsetted fonts (Default: False)\n"
+    << "  -l, --luminance    <num>     Set subtitle brightness for HDR contents  (Default: 203)\n"
+    << "  -m, --multi-thread <num>     Enable multi thread mode, <num> is the number of threads for processing\n"  
+    << "                               (Default: <cpu_count> + 1)\n"
+    << "  -v, --verbose      <num>     Set logging level (0 to 3), 0 is off  (Default: 3)\n"
+    << "  -h, --help                   Get help info\n" << std::endl;
     // clang-format on
   }
 
@@ -276,10 +288,14 @@ int main(int argc, char** argv) {
     brightness = 0;
   }
 
+  if (p_opt_m->empty()) {
+    num_thread = 1;
+  }
+
   AssfontsRun(const_cast<const char**>(inputs_char_list.get()), inputs.size(),
               output.c_str(), fonts.c_str(), database.c_str(), brightness,
-              is_subset_only, is_embed_only, is_rename, log_callback,
-              max_log_level);
+              is_subset_only, is_embed_only, is_rename, num_thread,
+              log_callback, max_log_level);
 
   return 0;
 }

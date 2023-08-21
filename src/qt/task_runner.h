@@ -44,7 +44,8 @@ class TaskRunner : public QObject {
   void OnStartRun(const QString inputs_path, const QString output_path,
                   const QString fonts_path, const QString db_path,
                   const unsigned int brightness, const bool is_subset_only,
-                  const bool is_embed_only, const bool is_rename);
+                  const bool is_embed_only, const bool is_rename,
+                  const unsigned int num_thread);
 
  signals:
   void OnSendLog(QString msg, ASSFONTS_LOG_LEVEL log_level);

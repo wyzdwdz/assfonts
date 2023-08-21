@@ -19,6 +19,8 @@
 
 #include "main_window.h"
 
+#include <thread>
+
 #include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -86,6 +88,10 @@ void MainWindow::InitMenu() {
   space_action_->setCheckable(true);
   space_action_->setChecked(true);
 
+  mt_action_ = new QAction(tr("&Multi thread"));
+  mt_action_->setCheckable(true);
+  mt_action_->setChecked(false);
+
   check_action_ = new QAction(tr("&Check update"));
 
   log_menu_->addAction(clear_action_);
@@ -109,6 +115,7 @@ void MainWindow::InitMenu() {
   min_level_menu_->addAction(min_warn_action_);
   min_level_menu_->addAction(min_error_action_);
 
+  info_menu_->addAction(mt_action_);
   info_menu_->addAction(check_action_);
 
   setMenuBar(menu_bar);
@@ -599,11 +606,16 @@ void MainWindow::OnStartButtonPressed() {
       break;
   }
 
+  unsigned int num_thread = 1;
+  if (mt_action_->isChecked()) {
+    num_thread = std::thread::hardware_concurrency() + 1;
+  }
+
   emit OnSendStart(input_line_->text().trimmed(),
                    output_line_->text().trimmed(), font_line_->text().trimmed(),
                    database_line_->text().trimmed(), brightness,
                    subset_checkbox_->isChecked(), embed_checkbox_->isChecked(),
-                   rename_checkbox_->isChecked());
+                   rename_checkbox_->isChecked(), num_thread);
 }
 
 void MainWindow::OnReceiveLog(QString msg, ASSFONTS_LOG_LEVEL log_level) {
@@ -835,6 +847,10 @@ void MainWindow::LoadSettings() {
     }
   }
 
+  if (settings_->contains("MultiThread")) {
+    mt_action_->setChecked(settings_->value("MultiThread").toBool());
+  }
+
   settings_->endGroup();
 }
 
@@ -870,4 +886,7 @@ void MainWindow::SaveSettings() {
   } else if (min_error_action_->isChecked()) {
     settings_->setValue("LogLevel", 2);
   }
+
+  settings_->setValue("MultiThread", mt_action_->isChecked());
+  settings_->endGroup();
 }

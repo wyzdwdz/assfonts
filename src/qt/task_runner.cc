@@ -48,7 +48,8 @@ void TaskRunner::OnStartRun(const QString inputs_path,
                             const QString db_path,
                             const unsigned int brightness,
                             const bool is_subset_only, const bool is_embed_only,
-                            const bool is_rename) {
+                            const bool is_rename,
+                            const unsigned int num_thread) {
   is_running_ = true;
 
   QStringList inputs_list = inputs_path.split(";");
@@ -68,7 +69,7 @@ void TaskRunner::OnStartRun(const QString inputs_path,
   AssfontsRun(const_cast<const char**>(inputs_char_list.get()),
               inputs_list.size(), output_path.toUtf8().constData(),
               fonts_path.toUtf8().constData(), db_path.toUtf8().constData(),
-              brightness, is_subset_only, is_embed_only, is_rename,
+              brightness, is_subset_only, is_embed_only, is_rename, num_thread,
               log_callback, ASSFONTS_INFO);
 
   log_callback("", ASSFONTS_TEXT);
