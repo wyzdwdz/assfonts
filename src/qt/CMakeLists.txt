@@ -45,7 +45,11 @@ endif()
 
 add_executable(${TARGET_NAME} )
 
-target_link_libraries(${TARGET_NAME} $<$<BOOL:UNIX>:mimalloc-obj> ${OBJECT_NAME})
+if(UNIX)
+target_link_libraries(${TARGET_NAME} mimalloc-obj ${OBJECT_NAME})
+else()
+target_link_libraries(${TARGET_NAME} ${OBJECT_NAME})
+endif()
 
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
 

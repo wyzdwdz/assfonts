@@ -43,28 +43,44 @@ class U8Iterator {
   using iterator_type = U8Iterator;
   using iterator_category = std::bidirectional_iterator_tag;
   using value_type = char32_t;
-  using difference_type = ssize_t;
-  using reference = char32_t const&;
-  using pointer = char32_t const*;
+  using difference_type = int;
+  using reference = value_type const&;
+  using pointer = value_type const*;
 
-  static const value_type EOS = static_cast<char32_t>(EOF);
+  static const value_type EOS = static_cast<value_type>(EOF);
   static const difference_type NPOS =
       static_cast<difference_type>(StringType::npos);
 
   U8Iterator(const StringType& str, bool end = false)
-      : str_(str), pos_(end ? str.size() : 0){};
+      : str_(&str), pos_(end ? str.size() : 0){};
 
   value_type operator*() {
-    if (pos_ >= str_.size()) {
+    if (pos_ >= str_->size()) {
       return EOS;
     }
 
-    char32_t wc = U'\0';
-    std::mbstate_t state{};
+    unsigned char c = static_cast<const unsigned char>(*(str_->data() + pos_));
+    unsigned int len;
 
-    if (std::mbrtoc32(&wc, str_.data() + pos_, str_.size() - pos_, &state) <=
-        0) {
+    if ((len = GetCharSize(c)) == 0) {
       is_valid_ = false;
+      return U'\0';
+    }
+
+    if (len == 1) {
+      return static_cast<value_type>(c);
+    }
+
+    static const unsigned char table_unicode[] = {0, 0, 0x1F, 0xF, 0x7};
+
+    value_type wc = U'\0';
+
+    wc = table_unicode[len] & c;
+
+    for (unsigned int i = 1; i < len; i++) {
+      wc = wc << 6;
+      wc = wc | (static_cast<const unsigned char>(*(str_->data() + pos_ + i)) &
+                 0x3F);
     }
 
     return wc;
@@ -138,7 +154,7 @@ class U8Iterator {
       bool>::type
   operator==(const T rhs) const {
     return pos_ ==
-           static_cast<typename StringType::size_type>(rhs - str_.begin());
+           static_cast<typename StringType::size_type>(rhs - str_->begin());
   }
 
   template <typename T>
@@ -155,58 +171,51 @@ class U8Iterator {
       bool>::type
   operator!=(const T rhs) const {
     return pos_ !=
-           static_cast<typename StringType::size_type>(rhs - str_.begin());
+           static_cast<typename StringType::size_type>(rhs - str_->begin());
   }
 
   inline bool IsValid() const { return is_valid_; }
 
   inline typename StringType::const_iterator ToStdIter() const {
-    return str_.begin() + pos_;
+    return str_->begin() + pos_;
   }
 
  private:
-  const StringType& str_;
+  const StringType* str_;
   typename StringType::size_type pos_;
   bool is_valid_ = true;
 
-  void ToNext() {
-    auto skip = [&]() {
-      for (unsigned char b = '\0';
-           pos_ < str_.size() &&
-           (b = static_cast<const unsigned char>(*(str_.data() + pos_)),
-           (b >= 0x80 && b <= 0xBF) || b >= 0xF5);
-           ++pos_)
-        ;
-      is_valid_ = false;
-    };
-
-    if (pos_ >= str_.size()) {
-      return;
+  unsigned int GetCharSize(const char c) {
+    if (c == '\0') {
+      return 0;
     }
 
-    unsigned char c = static_cast<const unsigned char>(*(str_.data() + pos_));
-
-    if (c < 0x80) {
-      ++pos_;
-    } else if (c <= 0xBF || c >= 0xF5) {
-      skip();
-    } else if (c >= 0xF0) {
-      pos_ += 4;
-      if (c == 0xF4 && pos_ - 3 < str_.size()) {
-        c = static_cast<const unsigned char>(*(str_.data() + pos_ - 3));
-        if (c >= 0x90) {
-          pos_ -= 3;
-          skip();
-        }
-      }
-    } else if (c >= 0xE0) {
-      pos_ += 3;
+    if ((c & 0x80) == 0) {
+      return 1;
+    } else if ((c & 0xE0) == 0xC0) {
+      return 2;
+    } else if ((c & 0xF0) == 0xE0) {
+      return 3;
+    } else if ((c & 0xF8) == 0xF0) {
+      return 4;
     } else {
-      pos_ += 2;
+      return 0;
+    }
+  }
+
+  void ToNext() {
+    unsigned char c = static_cast<const unsigned char>(*(str_->data() + pos_));
+    unsigned int len = 0;
+
+    if ((len = GetCharSize(c)) == 0) {
+      pos_ = str_->size();
+      is_valid_ = false;
+    } else {
+      pos_ += len;
     }
 
-    if (pos_ > str_.size()) {
-      pos_ = str_.size();
+    if (pos_ > str_->size()) {
+      pos_ = str_->size();
       is_valid_ = false;
     }
   }
@@ -219,7 +228,7 @@ class U8Iterator {
     while (pos_ > 0) {
       --pos_;
       unsigned char c =
-          static_cast<const unsigned char>(*(str_.c_str() + pos_));
+          static_cast<const unsigned char>(*(str_->data() + pos_));
       if (c < 0x80 || c >= 0xC0) {
         break;
       }

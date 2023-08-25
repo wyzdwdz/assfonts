@@ -225,9 +225,9 @@ bool AssParser::ParseLine(const std::string& line, const unsigned int num_field,
     nonstd::string_view substr(&(*ch), line.end() - ch);
     size_t pos = 0;
     while ((pos = substr.find(delimiter)) != nonstd::string_view::npos) {
-      pos += 1;
+      res.emplace_back(Trim(nonstd::string_view(&(*ch), pos)));
 
-      res.emplace_back(Trim(nonstd::string_view(&(*ch), pos - 1)));
+      pos += 1;
 
       if (delimiter == ':') {
         ch += pos;
@@ -249,7 +249,11 @@ bool AssParser::ParseLine(const std::string& line, const unsigned int num_field,
   GetWords(':');
   GetWords(',');
 
-  word = nonstd::string_view(&(*ch), line.end() - ch);
+  if (ch != line.end()) {
+    word = nonstd::string_view(&(*ch), line.end() - ch);
+  } else {
+    word = nonstd::string_view("");
+  }
 
   res.emplace_back(word);
 
