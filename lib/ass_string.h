@@ -23,6 +23,8 @@
 #include <iostream>
 #include <string>
 
+#include <nonstd/string_view.hpp>
+
 #ifdef _WIN32
 
 using AChar = wchar_t;
@@ -52,7 +54,7 @@ enum class endian {
 };
 
 std::string Trim(const std::string& str);
-std::u32string Trim(const std::u32string& str);
+nonstd::string_view Trim(const nonstd::string_view sv);
 
 std::string ToLower(const std::string& str);
 std::wstring ToLower(const std::wstring& str);
@@ -71,7 +73,6 @@ std::wstring U8ToWide(const std::string& str);
 std::string WideToU8(const std::wstring& str);
 
 int StringToInt(const std::string& str);
-int StringToInt(const std::u32string& str_u32);
 
 }  // namespace ass
 

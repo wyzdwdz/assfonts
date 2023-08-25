@@ -9,17 +9,23 @@ set(TARGET_SOURCES main.cc)
 
 set(TARGET_NAME assfonts)
 
+set(OBJECT_NAME assfonts-obj)
+
 if(APPLE)
     list(APPEND TARGET_SOURCES get_app_support_dir.mm)
 endif()
 
-add_executable(${TARGET_NAME} ${TARGET_SOURCES})
+add_library(${OBJECT_NAME} OBJECT ${TARGET_SOURCES})
 
-target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} libassfonts)
+target_link_libraries(${OBJECT_NAME} PRIVATE ${THIRD_PARTY_LIBS} libassfonts)
 
 if(APPLE)
-    target_link_options(${TARGET_NAME} PRIVATE -framework Foundation)
+    target_link_options(${OBJECT_NAME} PRIVATE -framework Foundation)
 endif()
+
+add_executable(${TARGET_NAME} )
+
+target_link_libraries(${TARGET_NAME} $<$<BOOL:UNIX>:mimalloc-obj> ${OBJECT_NAME})
 
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
 

@@ -77,6 +77,10 @@ https://github.com/google/compact_enc_det/blob/master/LICENSE
 - rang
 https://github.com/agauniyal/rang/blob/master/LICENSE
 
+- mimalloc
+Copyright (c) 2018-2021 Microsoft Corporation, Daan Leijen
+https://github.com/microsoft/mimalloc/blob/master/LICENSE
+
 - function "ass_face_get_weight" in ass_font.c (from libass) 
 Copyright (C) 2006 Evgeniy Stepanov <eugeni.stepanov@gmail.com>
 https://github.com/libass/libass/blob/master/COPYING

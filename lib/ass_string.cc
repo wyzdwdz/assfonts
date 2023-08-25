@@ -32,6 +32,8 @@
 
 #include "iconv_wrapper.hh"
 
+#include "ass_utf8.h"
+
 namespace ass {
 
 std::string Trim(const std::string& str) {
@@ -49,15 +51,25 @@ std::string Trim(const std::string& str) {
   return res;
 }
 
-std::u32string Trim(const std::u32string& str) {
-  std::string res_u8 = U32ToU8(str);
-  std::string tmp(Trim(res_u8));
-  std::u32string res = U8ToU32(Trim(res_u8));
-  return res;
+nonstd::string_view Trim(const nonstd::string_view sv) {
+  auto first = std::find_if(sv.begin(), sv.end(),
+                            [](unsigned char ch) { return !std::isspace(ch); });
+
+  auto last = std::find_if(sv.rbegin(), sv.rend(), [](unsigned char ch) {
+                return !std::isspace(ch);
+              }).base();
+
+  if (first == last) {
+    return "";
+  }
+
+  return nonstd::string_view(first, last - first);
 }
 
 std::string ToLower(const std::string& str) {
-  return WideToU8(ToLower(U8ToWide(str)));
+  std::string res = str;
+  StrToLwrExt(reinterpret_cast<unsigned char*>(&res[0]));
+  return res;
 }
 
 std::wstring ToLower(const std::wstring& str) {
@@ -224,7 +236,7 @@ std::string WideToU8(const std::wstring& w_str) {
 #else
   std::string str;
 
-  for (const auto& wc : w_str) {
+  for (const auto wc : w_str) {
     char c[MB_CUR_MAX];
     int len = std::wctomb(c, wc);
 
@@ -247,10 +259,6 @@ int StringToInt(const std::string& str) {
   }
 
   return res;
-}
-
-int StringToInt(const std::u32string& str_u32) {
-  return StringToInt(U32ToU8(str_u32));
 }
 
 }  // namespace ass

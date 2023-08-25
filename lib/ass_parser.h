@@ -27,8 +27,11 @@
 #include <string>
 #include <vector>
 
+#include <nonstd/string_view.hpp>
+
 #include "ass_logger.h"
 #include "ass_string.h"
+#include "ass_utf8.h"
 
 namespace ass {
 
@@ -53,11 +56,13 @@ class AssParser {
 
   AString get_ass_path() const;
 
-  bool Recolorize(const AString& ass_file_path, const unsigned int& brightness);
+  bool Recolorize(const AString& ass_file_path, const unsigned int brightness);
 
   void Clear();
 
  private:
+  using Iterator = U8Iterator<nonstd::string_view>;
+
   struct FontDesc {
     std::string fontname;
     int bold = 400;
@@ -80,17 +85,22 @@ class AssParser {
   };
 
   struct TextInfo {
-    TextInfo(unsigned int line_num, std::string text)
+    TextInfo(const unsigned int line_num, const std::string& text)
         : line_num(line_num), text(text){};
     unsigned int line_num = 0;
     std::string text;
   };
 
   struct DialogueInfo {
-    DialogueInfo(unsigned int line_num, std::vector<std::string> dialogue)
-        : line_num(line_num), dialogue(dialogue){};
+    DialogueInfo(const unsigned int line_num,
+                 const std::vector<nonstd::string_view>& dialogue)
+        : line_num(line_num) {
+      for (const auto block : dialogue) {
+        this->dialogue.emplace_back(block);
+      }
+    };
     unsigned int line_num = 0;
-    std::vector<std::string> dialogue;
+    std::vector<nonstd::string_view> dialogue;
   };
 
   std::shared_ptr<Logger> logger_;
@@ -99,7 +109,7 @@ class AssParser {
   AString output_dir_path_;
 
   std::vector<TextInfo> text_;
-  std::vector<std::vector<std::string>> styles_;
+  std::vector<std::vector<nonstd::string_view>> styles_;
   std::vector<DialogueInfo> dialogues_;
 
   bool has_default_style_ = false;
@@ -108,20 +118,20 @@ class AssParser {
   std::map<FontDesc, std::set<char32_t>> font_sets_;
   std::map<std::string, FontDesc> stylename_fontdesc_;
 
-  void SkipFontsLines(std::istringstream& is, unsigned int& line_num);
+  void SkipFontsLines(std::istringstream& is, unsigned int line_num);
 
   bool GetUTF8(const std::ifstream& is, std::string& res);
 
   bool FindTitle(const std::string& line, const std::string& title);
 
   bool ParseLine(const std::string& line, const unsigned int num_field,
-                 std::vector<std::string>& res);
+                 std::vector<nonstd::string_view>& res);
 
   bool ParseAss();
   bool GetStyles(std::vector<TextInfo>::iterator& line,
-                 const std::vector<TextInfo>::iterator& end, bool& has_style);
+                 const std::vector<TextInfo>::iterator end, bool& has_style);
   bool GetEvents(std::vector<TextInfo>::iterator& line,
-                 const std::vector<TextInfo>::iterator& end, bool& has_event);
+                 const std::vector<TextInfo>::iterator end, bool& has_event);
 
   void set_stylename_fontdesc();
   int CalculateBold(int value);
@@ -129,21 +139,20 @@ class AssParser {
 
   void set_font_sets();
   FontDesc GetFontDescStyle(const DialogueInfo& dialogue);
-  void GetCharacter(std::u32string::iterator& wch,
-                    const std::u32string::iterator& end,
+  void GetCharacter(Iterator& wch, const Iterator end,
                     const FontDesc& font_desc_style, FontDesc& font_desc,
                     const unsigned int line_num);
 
-  void StyleOverride(const std::u32string& code, FontDesc& font_desc,
+  void StyleOverride(const nonstd::string_view code, FontDesc& font_desc,
                      const FontDesc& font_desc_style,
                      const unsigned int line_num);
-  void ChangeFontname(const std::u32string& code, FontDesc& font_desc,
+  void ChangeFontname(const nonstd::string_view code, FontDesc& font_desc,
                       const FontDesc& font_desc_style);
-  void ChangeBold(const std::u32string& code, FontDesc& font_desc,
+  void ChangeBold(const nonstd::string_view code, FontDesc& font_desc,
                   const FontDesc& font_desc_style);
-  void ChangeItalic(const std::u32string& code, FontDesc& font_desc,
+  void ChangeItalic(const nonstd::string_view code, FontDesc& font_desc,
                     const FontDesc& font_desc_style);
-  void ChangeStyle(const std::u32string& code, FontDesc& font_desc,
+  void ChangeStyle(const nonstd::string_view code, FontDesc& font_desc,
                    const FontDesc& font_desc_style,
                    const unsigned int line_num);
 
