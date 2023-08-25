@@ -21,7 +21,6 @@
 #define ASSFONTS_ASSUTF8_H_
 
 #include <cstdlib>
-#include <cuchar>
 #include <iterator>
 #include <string>
 #include <type_traits>
