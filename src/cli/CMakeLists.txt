@@ -21,7 +21,7 @@ if(APPLE)
     target_link_options(${TARGET_NAME} PRIVATE -framework Foundation)
 endif()
 
-target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
+target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTS})
 
 target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})
 
