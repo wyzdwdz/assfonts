@@ -62,6 +62,10 @@ https://github.com/progschj/ThreadPool/blob/master/COPYING
 Copyright (c) 2018, Steffen Schümann <s.schuemann@pobox.com>
 https://github.com/gulrak/filesystem/blob/master/LICENSE
 
+- string_view lite
+Copyright 2017-2020 by Martin Moene
+https://github.com/martinmoene/string-view-lite/blob/master/LICENSE.txt
+
 - Qt 5.15 LTS
 Copyright (C) 2018 The Qt Company Ltd. and other contributors.
 https://doc.qt.io/qt-5/lgpl.html
@@ -76,10 +80,6 @@ https://github.com/google/compact_enc_det/blob/master/LICENSE
 
 - rang
 https://github.com/agauniyal/rang/blob/master/LICENSE
-
-- mimalloc
-Copyright (c) 2018-2021 Microsoft Corporation, Daan Leijen
-https://github.com/microsoft/mimalloc/blob/master/LICENSE
 
 - function "ass_face_get_weight" in ass_font.c (from libass) 
 Copyright (C) 2006 Evgeniy Stepanov <eugeni.stepanov@gmail.com>

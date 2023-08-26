@@ -1,3 +1,12 @@
+Overview of changes leading to v0.5.3
+Saturday, August 26, 2023
+====================================
+- Add new feature: multi thread
+- Add manpage document
+- Add copyright files in release package
+- Improve ASS parsing performance, especially for multi-threads
+
+
 Overview of changes leading to v0.5.2
 Tuesday, August 15, 2023
 ====================================
