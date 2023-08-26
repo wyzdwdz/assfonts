@@ -237,7 +237,7 @@ class U8Iterator {
 
 template <typename StringType>
 typename U8Iterator<StringType>::difference_type U8Find(
-    const StringType& str, const std::string& value,
+    const StringType& str, const std::u32string& value,
     const typename U8Iterator<StringType>::difference_type pos) {
 
   auto res = U8Iterator<StringType>::NPOS;
@@ -248,12 +248,10 @@ typename U8Iterator<StringType>::difference_type U8Find(
     return res;
   }
 
-  std::u32string value_u32 = U8ToU32(value);
-
   typename U8Iterator<StringType>::difference_type diff = pos;
 
   for (; it != str.end(); ++it, ++diff) {
-    if (*it != value_u32.at(0)) {
+    if (*it != value.at(0)) {
       continue;
     }
 
@@ -261,9 +259,9 @@ typename U8Iterator<StringType>::difference_type U8Find(
 
     for (typename U8Iterator<StringType>::difference_type i = 0;
          i < static_cast<typename U8Iterator<StringType>::difference_type>(
-                 value_u32.size());
+                 value.size());
          ++i) {
-      if (*(it + i) != value_u32.at(i)) {
+      if (*(it + i) != value.at(i)) {
         is_found = false;
         break;
       }

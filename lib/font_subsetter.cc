@@ -124,7 +124,8 @@ void FontSubsetter::Clear() {
 }
 
 bool FontSubsetter::FindFont(
-    const std::pair<AssParser::FontDesc, std::set<char32_t>>& font_set,
+    const std::pair<AssParser::FontDesc, std::unordered_set<char32_t>>&
+        font_set,
     const std::unordered_multimap<AString, FontParser::FontInfo>& font_list,
     AString& found_path, long& found_index) {
   auto fontname = ToLower(font_set.first.fontname);
@@ -231,7 +232,7 @@ bool FontSubsetter::set_subfonts_info() {
   bool have_missing = false;
   for (const auto& font_set : ap_.font_sets_) {
     FontPath font_path;
-    std::set<uint32_t> codepoint_set;
+    std::unordered_set<uint32_t> codepoint_set;
 #ifdef _WIN32
     AString fontname = U8ToWide(font_set.first.fontname);
 #else
@@ -368,9 +369,10 @@ bool FontSubsetter::CreateSubfont(FontSubsetInfo& subset_font,
   return true;
 }
 
-bool FontSubsetter::CheckGlyph(const AString& font_path, const long& font_index,
-                               const std::set<char32_t>& codepoint_set,
-                               const AString& fontname, int bold, int italic) {
+bool FontSubsetter::CheckGlyph(
+    const AString& font_path, const long& font_index,
+    const std::unordered_set<char32_t>& codepoint_set, const AString& fontname,
+    int bold, int italic) {
   std::vector<uint32_t> missing_codepoints;
   FT_Face ft_face;
   std::ifstream is(font_path, std::ios::binary);

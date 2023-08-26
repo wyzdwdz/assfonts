@@ -404,7 +404,7 @@ int AssParser::CalculateItalic(int value) {
 }
 
 void AssParser::set_font_sets() {
-  const std::set<char32_t> empty_set;
+  const std::unordered_set<char32_t> empty_set;
 
   for (const auto& dialogue : dialogues_) {
     FontDesc font_desc_style = GetFontDescStyle(dialogue);
@@ -470,7 +470,7 @@ void AssParser::GetCharacter(Iterator& wch, const Iterator end,
   if (*wch == U'{') {
     nonstd::string_view override(wch.ToStdIter(),
                                  end.ToStdIter() - wch.ToStdIter());
-    auto pos = U8Find(override, "}", 0);
+    auto pos = U8Find(override, U"}", 0);
 
     if (pos == Iterator::NPOS) {
       if (!font_desc_style.fontname.empty()) {
@@ -511,7 +511,7 @@ void AssParser::ChangeFontname(const nonstd::string_view code,
   Iterator::difference_type pos = 0;
 
   while (true) {
-    pos = U8Find(code, "\\fn", pos);
+    pos = U8Find(code, U"\\fn", pos);
 
     if (pos == Iterator::NPOS) {
       break;
@@ -547,7 +547,7 @@ void AssParser::ChangeBold(const nonstd::string_view code, FontDesc& font_desc,
   Iterator::difference_type pos = 0;
 
   while (true) {
-    pos = U8Find(code, "\\b", pos);
+    pos = U8Find(code, U"\\b", pos);
 
     if (pos == Iterator::NPOS) {
       break;
@@ -585,7 +585,7 @@ void AssParser::ChangeItalic(const nonstd::string_view code,
   Iterator::difference_type pos = 0;
 
   while (true) {
-    pos = U8Find(code, "\\i", pos);
+    pos = U8Find(code, U"\\i", pos);
 
     if (pos == Iterator::NPOS) {
       break;
@@ -623,7 +623,7 @@ void AssParser::ChangeStyle(const nonstd::string_view code, FontDesc& font_desc,
   Iterator::difference_type pos = 0;
 
   while (true) {
-    pos = U8Find(code, "\\r", pos);
+    pos = U8Find(code, U"\\r", pos);
 
     if (pos == Iterator::NPOS) {
       break;

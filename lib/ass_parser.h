@@ -23,8 +23,8 @@
 #include <fstream>
 #include <map>
 #include <memory>
-#include <set>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include <nonstd/string_view.hpp>
@@ -115,7 +115,7 @@ class AssParser {
   bool has_default_style_ = false;
   bool has_fonts_ = false;
 
-  std::map<FontDesc, std::set<char32_t>> font_sets_;
+  std::map<FontDesc, std::unordered_set<char32_t>> font_sets_;
   std::map<std::string, FontDesc> stylename_fontdesc_;
 
   void SkipFontsLines(std::istringstream& is, unsigned int line_num);

@@ -22,9 +22,9 @@
 
 #include <map>
 #include <memory>
-#include <set>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #ifdef __cplusplus
@@ -77,7 +77,7 @@ class FontSubsetter {
 
   struct FontSubsetInfo {
     std::vector<AssParser::FontDesc> fonts_desc;
-    std::set<uint32_t> codepoints;
+    std::unordered_set<uint32_t> codepoints;
     FontPath font_path;
     std::string newname;
     AString subfont_path;
@@ -91,13 +91,14 @@ class FontSubsetter {
   std::vector<FontSubsetInfo> subfonts_info_;
 
   bool FindFont(
-      const std::pair<AssParser::FontDesc, std::set<char32_t>>& font_set,
+      const std::pair<AssParser::FontDesc, std::unordered_set<char32_t>>&
+          font_set,
       const std::unordered_multimap<AString, FontParser::FontInfo>& font_list,
       AString& found_path, long& found_index);
   bool set_subfonts_info();
   bool CreateSubfont(FontSubsetInfo& subset_font, const bool is_rename);
   bool CheckGlyph(const AString& font_path, const long& font_index,
-                  const std::set<char32_t>& codepoint_set,
+                  const std::unordered_set<char32_t>& codepoint_set,
                   const AString& fontname, int bold, int italic);
   bool LowerCmp(const std::string& a, const std::string& b);
   void SetNewname();
