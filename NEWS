@@ -5,6 +5,7 @@ Saturday, August 26, 2023
 - Add manpage document
 - Add copyright files in release package
 - Improve ASS parsing performance, especially for multi-threads
+- Fix bug: avoid identical name of subfonts
 
 
 Overview of changes leading to v0.5.2
