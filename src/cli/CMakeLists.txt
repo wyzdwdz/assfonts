@@ -13,7 +13,7 @@ if(APPLE)
     list(APPEND TARGET_SOURCES get_app_support_dir.mm)
 endif()
 
-add_library(${TARGET_NAME} OBJECT ${TARGET_SOURCES})
+add_executable(${TARGET_NAME} ${TARGET_SOURCES})
 
 target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} libassfonts)
 
