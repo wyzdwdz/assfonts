@@ -298,25 +298,26 @@ bool FontSubsetter::CreateSubfont(FontSubsetInfo& subset_font,
   fs::path output_filepath;
 
   for (unsigned int i = 0; i < INT_MAX; ++i) {
-    AString index = i == 0 ? "" : _ST("_") + ToAString(i);
+    AString index = i == 0 ? _ST("") : _ST("_") + ToAString(i);
     fs::path filepath(
-      subfont_dir_ + fs::path::preferred_separator +
-      input_filepath.stem().native() + _ST("[") +
-      ToAString(subset_font.font_path.index) + _ST("]_") + subfont_name_suffix + index +
-      ((ToLower(input_filepath.extension().native()) == _ST(".otf") ||
-        ToLower(input_filepath.extension().native()) == _ST(".otc"))
-           ? _ST(".otf")
-           : _ST(".ttf")));
+        subfont_dir_ + fs::path::preferred_separator +
+        input_filepath.stem().native() + _ST("[") +
+        ToAString(subset_font.font_path.index) + _ST("]_") +
+        subfont_name_suffix + index +
+        ((ToLower(input_filepath.extension().native()) == _ST(".otf") ||
+          ToLower(input_filepath.extension().native()) == _ST(".otc"))
+             ? _ST(".otf")
+             : _ST(".ttf")));
     std::error_code ec;
-    if(!fs::is_regular_file(filepath, ec)) {
+    if (!fs::is_regular_file(filepath, ec)) {
       output_filepath = filepath;
       break;
     }
   }
-  if(output_filepath.empty()) {
+  if (output_filepath.empty()) {
     return false;
   }
-  
+
   std::ifstream is(subset_font.font_path.path, std::ios::binary);
   const auto font_size = fs::file_size(subset_font.font_path.path);
   std::string font_data(font_size, '\0');
