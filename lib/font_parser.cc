@@ -332,6 +332,11 @@ void FontParser::ParseFontName(const FT_Face& ft_face,
     return;
   }
 
+  size_t last_none_zero = buf.find_last_not_of('\0');
+  if (last_none_zero != std::string::npos) {
+    buf.erase(last_none_zero + 1);
+  }
+
   if (buf.empty()) {
     return;
   }
