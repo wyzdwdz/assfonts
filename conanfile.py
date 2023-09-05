@@ -6,7 +6,7 @@ class Assfonts(ConanFile):
     name = "assfonts"
     version = "0.5.3"
 
-    license = "GNU General Public License v2.0"
+    license = "GNU General Public License v3.0"
     author = "wyzdwdz"
     url = "https://github.com/wyzdwdz/assfonts"
     description = "Subset fonts and embed them into an ASS subtitle"
