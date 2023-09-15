@@ -480,7 +480,10 @@ void AssParser::GetCharacter(Iterator& wch, const Iterator end,
       return;
 
     } else {
-      override = nonstd::string_view((wch + 1).ToStdIter(), pos - 1);
+      override = nonstd::string_view(
+          (wch + 1).ToStdIter(),
+          (Iterator(override) += pos).ToStdIter() - (wch + 1).ToStdIter());
+
       StyleOverride(override, font_desc, font_desc_style, line_num);
       wch += (pos + 1);
       return;
