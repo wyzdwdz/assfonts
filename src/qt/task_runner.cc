@@ -31,8 +31,22 @@ static void log_callback(const char* msg, const ASSFONTS_LOG_LEVEL log_level) {
 void TaskRunner::OnBuildRun(const QString fonts_path, const QString db_path) {
   is_running_ = true;
 
-  AssfontsBuildDB(fonts_path.toUtf8().constData(), db_path.toUtf8().constData(),
-                  log_callback, ASSFONTS_INFO);
+  QStringList fonts_list = fonts_path.split(";");
+
+  QVector<QByteArray> fonts_byte;
+  for (const auto& str : fonts_list) {
+    fonts_byte.push_back(str.trimmed().toUtf8());
+  }
+
+  auto fonts_char_list = std::unique_ptr<char*[]>(new char*[fonts_list.size()]);
+
+  for (int idx = 0; idx < fonts_list.size(); ++idx) {
+    fonts_char_list[idx] = const_cast<char*>(fonts_byte.at(idx).constData());
+  }
+
+  AssfontsBuildDB(const_cast<const char**>(fonts_char_list.get()),
+                  fonts_list.size(), db_path.toUtf8().constData(), log_callback,
+                  ASSFONTS_INFO);
 
   log_callback("", ASSFONTS_TEXT);
 
@@ -66,10 +80,24 @@ void TaskRunner::OnStartRun(const QString inputs_path,
     inputs_char_list[idx] = const_cast<char*>(inputs_byte.at(idx).constData());
   }
 
+  QStringList fonts_list = fonts_path.split(";");
+
+  QVector<QByteArray> fonts_byte;
+  for (const auto& str : fonts_list) {
+    fonts_byte.push_back(str.trimmed().toUtf8());
+  }
+
+  auto fonts_char_list = std::unique_ptr<char*[]>(new char*[fonts_list.size()]);
+
+  for (int idx = 0; idx < fonts_list.size(); ++idx) {
+    fonts_char_list[idx] = const_cast<char*>(fonts_byte.at(idx).constData());
+  }
+
   AssfontsRun(const_cast<const char**>(inputs_char_list.get()),
               inputs_list.size(), output_path.toUtf8().constData(),
-              fonts_path.toUtf8().constData(), db_path.toUtf8().constData(),
-              brightness, is_subset_only, is_embed_only, is_rename, num_thread,
+              const_cast<const char**>(fonts_char_list.get()),
+              fonts_list.size(), db_path.toUtf8().constData(), brightness,
+              is_subset_only, is_embed_only, is_rename, num_thread,
               log_callback, ASSFONTS_INFO);
 
   log_callback("", ASSFONTS_TEXT);

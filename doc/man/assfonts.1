@@ -16,9 +16,9 @@ assfonts \-i <\fIfiles\fR>                  Same as above
 .TP
 assfonts \-o <\fIdir\fR> \-s \-i <\fIfiles\fR>      Only subset fonts but not embed
 .TP
-assfonts \-f <\fIdir\fR> \-e \-i <\fIfiles\fR>      Only embed fonts without subset
+assfonts \-f <\fIdirs\fR> \-e \-i <\fIfiles\fR>     Only embed fonts without subset
 .TP
-assfonts \-f <\fIdir\fR> \-b                 Build or update fonts database only
+assfonts \-f <\fIdirs\fR> \-b                Build or update fonts database only
 .TP
 assfonts \-l <\fInum\fR> \-i <\fIfiles\fR>         Recolorize the subtitle for HDR contents
 .SH "DESCRIPTION"
@@ -34,7 +34,7 @@ the similar effect as those graphical subtitles such as PGS.
 .TP
 \fB\-o\fR, \fB\-\-output\fR       <\fIdir\fR>     Output directory  (Default: same directory as input)
 .TP
-\fB\-f\fR, \fB\-\-fontpath\fR     <\fIdir\fR>     Set fonts directory
+\fB\-f\fR, \fB\-\-fontpath\fR     <\fIdirs\fR>    Set fonts directories
 .TP
 \fB\-b\fR, \fB\-\-build\fR                  Build or update fonts database  (Require: \fB\-\-fontpath\fR)
 .TP

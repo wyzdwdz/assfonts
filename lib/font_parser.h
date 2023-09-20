@@ -43,14 +43,15 @@ class FontParser {
  public:
   FontParser(std::shared_ptr<Logger> logger) : logger_(logger){};
 
-  FontParser(const AString& fonts_dir, std::shared_ptr<Logger> logger)
+  FontParser(const std::vector<AString>& fonts_dirs,
+             std::shared_ptr<Logger> logger)
       : FontParser(logger) {
-    LoadFonts(fonts_dir);
+    LoadFonts(fonts_dirs);
   };
 
   ~FontParser() = default;
 
-  void LoadFonts(const AString& fonts_dir);
+  void LoadFonts(std::vector<AString> fonts_dirs, bool with_default = true);
 
   void SaveDB(const AString& db_path);
 

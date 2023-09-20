@@ -554,7 +554,17 @@ void MainWindow::OnFontLineDrop(QList<QString> paths) {
   }
 
   if (!paths.isEmpty()) {
-    font_line_->setText(QDir::toNativeSeparators(paths.at(0)));
+    font_line_->clear();
+  } else {
+    return;
+  }
+
+  for (auto it = paths.begin(); it != paths.end(); ++it) {
+    if (it != paths.begin()) {
+      font_line_->insert("; ");
+    }
+
+    font_line_->insert(QDir::toNativeSeparators(*it));
   }
 }
 
@@ -580,8 +590,11 @@ void MainWindow::OnBuildButtonPressed() {
     return;
   }
 
-  emit OnSendBuild(font_line_->text().trimmed(),
-                   database_line_->text().trimmed());
+  auto font_line = font_line_->text().trimmed();
+
+
+
+  emit OnSendBuild(font_line, database_line_->text().trimmed());
 }
 
 void MainWindow::OnStartButtonPressed() {

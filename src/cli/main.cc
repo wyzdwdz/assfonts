@@ -131,7 +131,7 @@ int main(int argc, char** argv) {
 
   std::vector<std::string> inputs;
   std::string output;
-  std::string fonts;
+  std::vector<std::string> fonts;
   std::string database = save_files_path;
 
   bool is_build = false;
@@ -151,7 +151,8 @@ int main(int argc, char** argv) {
 
   auto* p_opt_o = app.add_option("-o,--output", output, "Output directory");
 
-  auto* p_opt_f = app.add_option("-f,--fontpath", fonts, "Set fonts directory");
+  auto* p_opt_f =
+      app.add_option("-f,--fontpath", fonts, "Set fonts directories");
 
   auto* p_opt_d =
       app.add_option("-d,--dbpath", database, "Set fonts database path");
@@ -225,13 +226,13 @@ int main(int argc, char** argv) {
     << "Examples:  assfonts <files>                  Embed subset fonts into ASS script\n"
     << "           assfonts -i <files>               Same as above\n"
     << "           assfonts -o <dir> -s -i <files>   Only subset fonts but not embed\n"
-    << "           assfonts -f <dir> -e -i <files>   Only embed fonts without subset\n"
-    << "           assfonts -f <dir> -b              Build or update fonts database only\n"
+    << "           assfonts -f <dirs> -e -i <files>  Only embed fonts without subset\n"
+    << "           assfonts -f <dirs> -b             Build or update fonts database only\n"
     << "           assfonts -l <num> -i <files>      Recolorize the subtitle for HDR contents\n"
     << "Options:\n"
     << "  -i, --input,       <files>   Input .ass files\n"
     << "  -o, --output       <dir>     Output directory  (Default: same directory as input)\n"
-    << "  -f, --fontpath     <dir>     Set fonts directory\n"
+    << "  -f, --fontpath     <dirs>    Set fonts directories\n"
     << "  -b, --build                  Build or update fonts database  (Require: --fontpath)\n"
     << "  -d, --dbpath       <dir>     Set fonts database path  (Default: current path)\n"
     << "  -s, --subset-only  <bool>    Subset fonts but not embed them into subtitle  (Default: False)\n"
@@ -261,8 +262,15 @@ int main(int argc, char** argv) {
       break;
   }
 
+  auto fonts_char_list = std::unique_ptr<char*[]>(new char*[fonts.size()]);
+
+  for (size_t idx = 0; idx < fonts.size(); ++idx) {
+    fonts_char_list[idx] = const_cast<char*>(fonts.at(idx).c_str());
+  }
+
   if (is_build) {
-    AssfontsBuildDB(fonts.c_str(), database.c_str(), log_callback,
+    AssfontsBuildDB(const_cast<const char**>(fonts_char_list.get()),
+                    fonts.size(), database.c_str(), log_callback,
                     max_log_level);
     if (verbose > 0) {
       nowide::cout << std::endl;
@@ -293,9 +301,10 @@ int main(int argc, char** argv) {
   }
 
   AssfontsRun(const_cast<const char**>(inputs_char_list.get()), inputs.size(),
-              output.c_str(), fonts.c_str(), database.c_str(), brightness,
-              is_subset_only, is_embed_only, is_rename, num_thread,
-              log_callback, max_log_level);
+              output.c_str(), const_cast<const char**>(fonts_char_list.get()),
+              fonts.size(), database.c_str(), brightness, is_subset_only,
+              is_embed_only, is_rename, num_thread, log_callback,
+              max_log_level);
 
   return 0;
 }

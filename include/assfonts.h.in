@@ -20,9 +20,11 @@
 #ifndef ASSFONTS_ASSFONTS_H_
 #define ASSFONTS_ASSFONTS_H_
 
+// clang-format off
 #define ASSFONTS_VERSION_MAJOR @VERSION_MAJOR@
 #define ASSFONTS_VERSION_MINOR @VERSION_MINOR@
 #define ASSFONTS_VERSION_PATCH @VERSION_PATCH@
+// clang-format on
 
 enum ASSFONTS_LOG_LEVEL {
   ASSFONTS_INFO = 0,
@@ -37,18 +39,18 @@ extern "C" {
 typedef void (*AssfontsLogCallback)(const char* msg,
                                     const enum ASSFONTS_LOG_LEVEL log_level);
 
-void AssfontsBuildDB(const char* fonts_path, const char* db_path,
-                     const AssfontsLogCallback cb,
+void AssfontsBuildDB(const char** fonts_paths, const unsigned int num_fonts,
+                     const char* db_path, const AssfontsLogCallback cb,
                      const enum ASSFONTS_LOG_LEVEL log_level);
 
 void AssfontsRun(const char** input_paths, const unsigned int num_paths,
-                 const char* output_path, const char* fonts_path,
-                 const char* db_path, const unsigned int brightness,
+                 const char* output_path, const char** fonts_paths,
+                 const unsigned int num_fonts, const char* db_path,
+                 const unsigned int brightness,
                  const unsigned int is_subset_only,
                  const unsigned int is_embed_only, const unsigned int is_rename,
                  const unsigned int num_thread, const AssfontsLogCallback cb,
                  const enum ASSFONTS_LOG_LEVEL log_level);
-
 }
 
 #endif

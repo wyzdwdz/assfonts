@@ -28,3 +28,8 @@ std::string GetAppSupportDir() {
   
   return std::string([applicationSupportDirectory UTF8String]);
 }
+
+std::string GetHomeDir() {
+  NSString *homeDir = NSHomeDirectory();
+  return std::string([homeDir UTF8String]);
+}

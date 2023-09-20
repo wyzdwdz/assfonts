@@ -44,13 +44,13 @@ Usage:     assfonts [options...] [<files>]
 Examples:  assfonts <files>                  Embed subset fonts into ASS script
            assfonts -i <files>               Same as above
            assfonts -o <dir> -s -i <files>   Only subset fonts but not embed
-           assfonts -f <dir> -e -i <files>   Only embed fonts without subset
-           assfonts -f <dir> -b              Build or update fonts database only
+           assfonts -f <dirs> -e -i <files>  Only embed fonts without subset
+           assfonts -f <dirs> -b             Build or update fonts database only
            assfonts -l <num> -i <files>      Recolorize the subtitle for HDR contents
 Options:
   -i, --input        <files>   Input .ass files
   -o, --output       <dir>     Output directory  (Default: same directory as input)
-  -f, --fontpath     <dir>     Set fonts directory
+  -f, --fontpath     <dirs>    Set fonts directories
   -b, --build                  Build or update fonts database  (Require: --fontpath)
   -d, --dbpath       <dir>     Set fonts database path  (Default: current path)
   -s, --subset-only  <bool>    Subset fonts but not embed them into subtitle  (Default: False)

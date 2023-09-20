@@ -17,10 +17,11 @@
  *  written by wyzdwdz (https://github.com/wyzdwdz)
  */
 
-#pragma once
+#include "get_home_dir_macos.h"
 
-#include <string>
+#import <Foundation/Foundation.h>
 
-std::string GetAppSupportDir();
-
-std::string GetHomeDir();
+std::string GetHomeDir() {
+  NSString *homeDir = NSHomeDirectory();
+  return std::string([homeDir UTF8String]);
+}

@@ -21,6 +21,4 @@
 
 #include <string>
 
-std::string GetAppSupportDir();
-
 std::string GetHomeDir();

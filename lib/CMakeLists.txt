@@ -23,6 +23,10 @@ set(TARGET_SOURCES font_parser.cc
 
 set(TARGET_NAME libassfonts)
 
+if(APPLE)
+    list(APPEND TARGET_SOURCES get_home_dir_macos.mm)
+endif()
+
 configure_file(${PROJECT_SOURCE_DIR}/include/assfonts.h.in ${PROJECT_BINARY_DIR}/include/assfonts.h)
 						  
 add_library(${TARGET_NAME} STATIC EXCLUDE_FROM_ALL)
@@ -30,6 +34,10 @@ add_library(${TARGET_NAME} STATIC EXCLUDE_FROM_ALL)
 target_sources(${TARGET_NAME} PRIVATE ${TARGET_SOURCES})
 
 target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS})
+
+if(APPLE)
+    target_link_options(${TARGET_NAME} PRIVATE -framework Foundation)
+endif()
 
 target_include_directories(${TARGET_NAME} PUBLIC ${PROJECT_BINARY_DIR}/include)
 

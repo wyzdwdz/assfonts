@@ -48,6 +48,13 @@ extern "C" {
 #include <ghc/filesystem.hpp>
 #include <nlohmann/json.hpp>
 
+#ifdef __APPLE__
+#include "get_home_dir_macos.h"
+#elif _WIN32
+#include <Shlobj.h>
+#else
+#endif
+
 #include "ass_freetype.h"
 
 #ifdef _WIN32
@@ -56,12 +63,71 @@ constexpr int MAX_TCHAR = 128;
 
 namespace fs = ghc::filesystem;
 
+static std::vector<AString> default_font_paths = []() {
+  std::vector<AString> paths;
+
+#ifdef __APPLE__
+  auto path_1 = fs::path("/Library/Fonts");
+  if (fs::is_directory(path_1)) {
+    paths.emplace_back(path_1.native());
+  }
+
+  auto path_2 = fs::path("/Network/Library/Fonts");
+  if (fs::is_directory(path_2)) {
+    paths.emplace_back(path_2.native());
+  }
+
+  auto path_3 = fs::path("/System/Library/Fonts");
+  if (fs::is_directory(path_3)) {
+    paths.emplace_back(path_3.native());
+  }
+
+  auto path_4 = fs::path(GetHomeDir()) / "Library" / "Fonts";
+  if (fs::is_directory(path_4)) {
+    paths.emplace_back(path_4.native());
+  }
+
+#elif __linux__
+  auto path_1 = fs::path("/usr/share/fonts");
+  if (fs::is_directory(path_1)) {
+    paths.emplace_back(path_1.native());
+  }
+
+  if (getenv("HOME")) {
+    auto path_2 = fs::path(getenv("HOME")) / ".local" / "share" / "fonts";
+    if (fs::is_directory(path_2)) {
+      paths.emplace_back(path_2.native());
+    }
+  }
+
+#elif _WIN32
+  TCHAR sz_path[MAX_PATH];
+  SHGetFolderPath(NULL, CSIDL_FONTS, NULL, 0, sz_path);
+
+  auto path = fs::path(sz_path);
+  if (fs::is_directory(path)) {
+    paths.emplace_back(path.native());
+  }
+
+#endif
+
+  return paths;
+}();
+
 namespace ass {
 
-void FontParser::LoadFonts(const AString& fonts_dir) {
-  fonts_path_ = FindFileInDir(fonts_dir, _ST(".+\\.(ttf|otf|ttc|otc)$"));
-  logger_->Info(_ST("Found {} font files in \"{}\". Parsing font files."),
-                fonts_path_.size(), fonts_dir);
+void FontParser::LoadFonts(std::vector<AString> fonts_dirs, bool with_default) {
+  if (with_default) {
+    fonts_dirs.insert(fonts_dirs.end(), default_font_paths.begin(),
+                      default_font_paths.end());
+  }
+  for (const auto& dir : fonts_dirs) {
+    auto fonts_path = FindFileInDir(dir, _ST(".+\\.(ttf|otf|ttc|otc)$"));
+    fonts_path_.insert(fonts_path_.end(), fonts_path.begin(), fonts_path.end());
+    logger_->Info(_ST("Found {} font files in \"{}\". Parsing font files."),
+                  fonts_path.size(), dir);
+  }
+
   font_list_.reserve(fonts_path_.size());
 
   ThreadPool pool(std::thread::hardware_concurrency() + 1);

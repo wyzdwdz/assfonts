@@ -42,12 +42,12 @@ using LogType = struct {
   std::string msg;
 };
 
-void AssfontsBuildDB(const char* fonts_path, const char* db_path,
-                     const AssfontsLogCallback cb,
+void AssfontsBuildDB(const char** fonts_paths, const unsigned int num_fonts,
+                     const char* db_path, const AssfontsLogCallback cb,
                      const enum ASSFONTS_LOG_LEVEL log_level) {
   auto logger = std::make_shared<ass::Logger>(ass::Logger(cb, log_level));
 
-  if (*fonts_path == '\0') {
+  if (**fonts_paths == '\0') {
     logger->Error("No font directory.");
     return;
   }
@@ -60,18 +60,25 @@ void AssfontsBuildDB(const char* fonts_path, const char* db_path,
   ass::FontParser fp(logger);
 
   fs::path db(db_path);
-  fs::path fonts(fonts_path);
+
+  std::vector<AString> paths;
+
+  for (unsigned int idx = 0; idx < num_fonts; ++idx) {
+    fs::path path(fonts_paths[idx]);
+    paths.emplace_back(path.native());
+  }
 
   fp.LoadDB(db.native() + fs::path::preferred_separator + _ST("fonts.json"));
 
-  fp.LoadFonts(fonts.native());
+  fp.LoadFonts(paths);
 
   fp.SaveDB(db.native() + fs::path::preferred_separator + _ST("fonts.json"));
 }
 
 void AssfontsRun(const char** input_paths, const unsigned int num_paths,
-                 const char* output_path, const char* fonts_path,
-                 const char* db_path, const unsigned int brightness,
+                 const char* output_path, const char** fonts_paths,
+                 const unsigned int num_fonts, const char* db_path,
+                 const unsigned int brightness,
                  const unsigned int is_subset_only,
                  const unsigned int is_embed_only, const unsigned int is_rename,
                  const unsigned int num_thread, const AssfontsLogCallback cb,
@@ -95,12 +102,18 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
 
   ass::FontParser fp(logger);
 
-  fs::path fonts(fonts_path);
   fs::path db(db_path);
   fs::path output(output_path);
 
-  if (!fonts.empty()) {
-    fp.LoadFonts(fonts.native());
+  std::vector<AString> paths;
+
+  for (unsigned int idx = 0; idx < num_fonts; ++idx) {
+    fs::path path(fonts_paths[idx]);
+    paths.emplace_back(path.native());
+  }
+
+  if (!paths.empty()) {
+    fp.LoadFonts(paths, false);
   }
 
   fp.LoadDB(db.native() + fs::path::preferred_separator + _ST("fonts.json"));
