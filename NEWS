@@ -4,6 +4,7 @@ Thursday, September 21, 2023
 - Fix ASS subtitle parsing bug
 - Support multiple font directories
 - Add default system font directory when building font database
+- fix font parsing bug: fontname contains "\u0000"
 
 
 Overview of changes leading to v0.5.3
