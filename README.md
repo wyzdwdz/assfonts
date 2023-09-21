@@ -1,5 +1,5 @@
 ![Supported Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue.svg)
-[![License](https://img.shields.io/github/license/wyzdwdz/assfonts)](https://github.com/wyzdwdz/assfonts/blob/main/LICENSE.txt)
+[![License](https://img.shields.io/github/license/wyzdwdz/assfonts)](https://github.com/wyzdwdz/assfonts/blob/main/LICENSE)
 ![Latest Release Tag](https://img.shields.io/github/tag/wyzdwdz/assfonts.svg)
 
 # assfonts
