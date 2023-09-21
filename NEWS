@@ -1,3 +1,11 @@
+Overview of changes leading to v0.5.4
+Thursday, September 21, 2023
+====================================
+- Fix ASS subtitle parsing bug
+- Support multiple font directories
+- Add default system font directory when building font database
+
+
 Overview of changes leading to v0.5.3
 Sunday, September 3, 2023
 ====================================
