@@ -19,9 +19,11 @@
 
 #include "assfonts.h"
 
+#include <condition_variable>
 #include <functional>
-#include <future>
 #include <memory>
+#include <mutex>
+#include <queue>
 #include <string>
 #include <vector>
 
@@ -41,6 +43,58 @@ using LogType = struct {
   ASSFONTS_LOG_LEVEL level;
   std::string msg;
 };
+
+using LogQueue = struct {
+  bool is_finished = false;
+  std::queue<LogType> queue;
+};
+
+void ShowLog(std::shared_ptr<ass::Logger> logger, const LogType& log) {
+  switch (log.level) {
+    case ASSFONTS_INFO:
+      logger->Info(log.msg);
+      break;
+    case ASSFONTS_WARN:
+      logger->Warn(log.msg);
+      break;
+    case ASSFONTS_ERROR:
+      logger->Error(log.msg);
+      break;
+    case ASSFONTS_TEXT:
+      logger->Text(log.msg);
+    case ASSFONTS_NONE:
+      break;
+    default:
+      break;
+  }
+}
+
+void ConsumeQueue(std::shared_ptr<ass::Logger> logger, LogQueue& queue,
+                  std::mutex& mtx, std::condition_variable& cv) {
+  if (queue.is_finished) {
+    while (!queue.queue.empty()) {
+      ShowLog(logger, queue.queue.front());
+      queue.queue.pop();
+    }
+
+  } else {
+    while (true) {
+      std::unique_lock<std::mutex> lock(mtx);
+      cv.wait(lock, [&] { return !queue.queue.empty() || queue.is_finished; });
+
+      if (queue.is_finished) {
+        break;
+      }
+
+      if (queue.queue.empty()) {
+        continue;
+      }
+
+      ShowLog(logger, queue.queue.front());
+      queue.queue.pop();
+    }
+  }
+}
 
 void AssfontsBuildDB(const char** fonts_paths, const unsigned int num_fonts,
                      const char* db_path, const AssfontsLogCallback cb,
@@ -119,16 +173,25 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
   fp.LoadDB(db.native() + fs::path::preferred_separator + _ST("fonts.json"));
 
   ThreadPool pool(num_thread);
-  std::vector<std::future<std::vector<LogType>>> results;
+
+  std::vector<LogQueue> queues(num_paths);
+  std::vector<std::mutex> mtxs(num_paths);
+  std::vector<std::condition_variable> cvs(num_paths);
 
   for (unsigned int idx = 0; idx < num_paths; ++idx) {
-    results.emplace_back(pool.enqueue([=, &fp]() {
-      std::vector<LogType> logs;
+    pool.enqueue([=, &fp, &queues, &mtxs, &cvs]() {
+      auto finish = [&]() {
+        queues[idx].is_finished = true;
+        cvs[idx].notify_all();
+      };
 
       auto log_callback = [&](const char* msg,
                               const ASSFONTS_LOG_LEVEL log_level) {
         LogType log = {log_level, std::string(msg)};
-        logs.emplace_back(log);
+        std::unique_lock<std::mutex> lock(mtxs[idx]);
+        queues[idx].queue.push(log);
+        lock.unlock();
+        cvs[idx].notify_all();
       };
 
       auto t_logger =
@@ -144,7 +207,7 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
 
       if (brightness != 0) {
         if (!ap.Recolorize(input.native(), brightness)) {
-          return logs;
+          return finish();
         }
 
         AString hdr_filename =
@@ -153,11 +216,11 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
       }
 
       if (!ap.ReadFile(input.native())) {
-        return logs;
+        return finish();
       }
 
       if (is_embed_only && is_subset_only) {
-        return logs;
+        return finish();
       }
 
       if (!is_embed_only) {
@@ -166,46 +229,23 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
       }
 
       if (!fs.Run(is_embed_only, is_rename)) {
-        return logs;
+        return finish();
       }
 
       afe.set_output_dir_path(output.native());
       if (!afe.Run(is_subset_only, is_embed_only, is_rename)) {
-        return logs;
+        return finish();
       }
 
-      return logs;
-    }));
+      finish();
+    });
   }
 
-  int idx = 0;
-  for (auto&& result : results) {
+  for (unsigned int idx = 0; idx < num_paths; ++idx) {
     if (idx != 0) {
       logger->Text("");
     }
 
-    auto logs = result.get();
-
-    for (auto& log : logs) {
-      switch (log.level) {
-        case ASSFONTS_INFO:
-          logger->Info(log.msg);
-          break;
-        case ASSFONTS_WARN:
-          logger->Warn(log.msg);
-          break;
-        case ASSFONTS_ERROR:
-          logger->Error(log.msg);
-          break;
-        case ASSFONTS_TEXT:
-          logger->Text(log.msg);
-        case ASSFONTS_NONE:
-          break;
-        default:
-          break;
-      }
-    }
-
-    ++idx;
+    ConsumeQueue(logger, queues[idx], mtxs[idx], cvs[idx]);
   }
 }
