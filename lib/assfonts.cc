@@ -101,7 +101,7 @@ void AssfontsBuildDB(const char** fonts_paths, const unsigned int num_fonts,
                      const enum ASSFONTS_LOG_LEVEL log_level) {
   auto logger = std::make_shared<ass::Logger>(ass::Logger(cb, log_level));
 
-  if (**fonts_paths == '\0') {
+  if (num_fonts == 0 || **fonts_paths == '\0') {
     logger->Error("No font directory.");
     return;
   }
@@ -139,7 +139,7 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
                  const enum ASSFONTS_LOG_LEVEL log_level) {
   auto logger = std::make_shared<ass::Logger>(ass::Logger(cb, log_level));
 
-  if (num_paths == 0) {
+  if (num_paths == 0 || **input_paths == '\0') {
     logger->Error("No input ASS file.");
     return;
   }
@@ -162,8 +162,10 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
   std::vector<AString> paths;
 
   for (unsigned int idx = 0; idx < num_fonts; ++idx) {
-    fs::path path(fonts_paths[idx]);
-    paths.emplace_back(path.native());
+    if (*fonts_paths[idx] != '\0') {
+      fs::path path(fonts_paths[idx]);
+      paths.emplace_back(path.native());
+    }
   }
 
   if (!paths.empty()) {
