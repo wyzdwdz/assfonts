@@ -23,6 +23,7 @@
 #include <iterator>
 #include <regex>
 #include <sstream>
+#include <unordered_set>
 
 #include <ghc/filesystem.hpp>
 
@@ -202,25 +203,31 @@ std::string AssFontEmbedder::UUEncode(const char* begin, const char* end,
 
 void AssFontEmbedder::RegexInit() {
   for (const auto& subfont_info : fs_.subfonts_info_) {
+    std::unordered_set<std::string> fontname_set;
     for (const auto& font_desc : subfont_info.fonts_desc) {
-      jp::Regex re(font_desc.fontname, "S");
-      re_list_.emplace_back(std::make_pair(re, subfont_info.newname));
+      fontname_set.insert(font_desc.fontname);
+    }
+
+    for (const auto& fontname : fontname_set) {
+      jp::Regex re(fontname, "S");
+      ReInfo re_info = {re, subfont_info.newname};
+      re_list_.emplace_back(re_info);
     }
   }
 }
 
 void AssFontEmbedder::WriteRenameInfo(std::vector<std::string>& text) {
   text.emplace_back(std::string("[Assfonts Rename Info]"));
-  for (const auto& re : re_list_) {
+  for (const auto& re_info : re_list_) {
     text.emplace_back(
-        std::string(re.first.getPattern() + " ---- " + re.second));
+        std::string(re_info.re.getPattern() + " ---- " + re_info.newname));
   }
   text.emplace_back(std::string(""));
 }
 
 void AssFontEmbedder::FontRename(std::string& line) {
-  for (auto& re : re_list_) {
-    line = re.first.replace(line, re.second, "g");
+  for (auto& re_info : re_list_) {
+    line = re_info.re.replace(line, re_info.newname, "g");
   }
 }
 

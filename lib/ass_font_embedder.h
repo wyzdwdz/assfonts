@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "ass_logger.h"
+#include "ass_parser.h"
 #include "ass_string.h"
 #include "font_subsetter.h"
 #include "jpcre2.hpp"
@@ -47,10 +48,15 @@ class AssFontEmbedder {
   void Clear();
 
  private:
+  using ReInfo = struct {
+    jp::Regex re;
+    std::string newname;
+  };
+
   const FontSubsetter& fs_;
   std::shared_ptr<Logger> logger_;
   AString output_dir_path_;
-  std::vector<std::pair<jp::Regex, std::string>> re_list_;
+  std::vector<ReInfo> re_list_;
   std::string UUEncode(const char* begin, const char* end,
                        bool insert_linebreaks);
   void RegexInit();
