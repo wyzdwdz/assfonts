@@ -107,6 +107,7 @@ QString CheckWindow::GetLatestVersion() {
 QString CheckWindow::GetDownloadLink() {
   httplib::Client client("https://github.com");
   client.set_follow_location(true);
+  client.set_connection_timeout(1);
 
   auto res = client.Head("/wyzdwdz/assfonts/releases/latest/");
 
