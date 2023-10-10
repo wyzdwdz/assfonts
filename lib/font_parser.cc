@@ -325,7 +325,9 @@ void FontParser::GetFontInfoFromFace(
   std::vector<std::string> fullnames;
   std::vector<std::string> psnames;
 
-  FT_Open_Face(ft_library, &open_args, face_idx, &ft_face);
+  if (FT_Open_Face(ft_library, &open_args, face_idx, &ft_face)) {
+    return;
+  }
 
   if (FT_Has_PS_Glyph_Names(ft_face)) {
     PS_FontInfo afont_info = nullptr;
