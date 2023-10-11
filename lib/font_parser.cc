@@ -121,6 +121,7 @@ void FontParser::LoadFonts(std::vector<AString> fonts_dirs, bool with_default) {
     fonts_dirs.insert(fonts_dirs.end(), default_font_paths.begin(),
                       default_font_paths.end());
   }
+
   for (const auto& dir : fonts_dirs) {
     auto fonts_path = FindFileInDir(dir, _ST(".+\\.(ttf|otf|ttc|otc)$"));
     fonts_path_.insert(fonts_path_.end(), fonts_path.begin(), fonts_path.end());
