@@ -59,7 +59,7 @@ nonstd::string_view Trim(const nonstd::string_view sv) {
                 return !std::isspace(ch);
               }).base();
 
-  if (first == last) {
+  if (first == sv.end()) {
     return "";
   }
 
