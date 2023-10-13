@@ -117,6 +117,7 @@ QString CheckWindow::GetDownloadLink() {
 
   httplib::Client client_backup("https://gitee.com");
   client_backup.set_follow_location(true);
+  client_backup.set_connection_timeout(1);
 
   auto res_backup = client_backup.Head("/wyzdwdz/assfonts/releases/latest/");
 
