@@ -30,11 +30,8 @@
 #include "ass_parser.h"
 #include "ass_string.h"
 #include "font_subsetter.h"
-#include "jpcre2.hpp"
 
 namespace ass {
-
-using jp = jpcre2::select<char>;
 
 class AssFontEmbedder {
  public:
@@ -48,15 +45,15 @@ class AssFontEmbedder {
   void Clear();
 
  private:
-  using ReInfo = struct {
-    jp::Regex re;
+  using NameInfo = struct {
+    std::string oldname;
     std::string newname;
   };
 
   const FontSubsetter& fs_;
   std::shared_ptr<Logger> logger_;
   AString output_dir_path_;
-  std::vector<ReInfo> re_list_;
+  std::vector<NameInfo> fontname_list_;
   std::string UUEncode(const char* begin, const char* end,
                        bool insert_linebreaks);
   void RegexInit();

@@ -209,25 +209,34 @@ void AssFontEmbedder::RegexInit() {
     }
 
     for (const auto& fontname : fontname_set) {
-      jp::Regex re(fontname, "S");
-      ReInfo re_info = {re, subfont_info.newname};
-      re_list_.emplace_back(re_info);
+      NameInfo name_info = {fontname, subfont_info.newname};
+      fontname_list_.emplace_back(name_info);
     }
   }
 }
 
 void AssFontEmbedder::WriteRenameInfo(std::vector<std::string>& text) {
   text.emplace_back(std::string("[Assfonts Rename Info]"));
-  for (const auto& re_info : re_list_) {
+  for (const auto& name_info : fontname_list_) {
     text.emplace_back(
-        std::string(re_info.re.getPattern() + " ---- " + re_info.newname));
+        std::string(name_info.oldname + " ---- " + name_info.newname));
   }
   text.emplace_back(std::string(""));
 }
 
 void AssFontEmbedder::FontRename(std::string& line) {
-  for (auto& re_info : re_list_) {
-    line = re_info.re.replace(line, re_info.newname, "g");
+  for (auto& name_info : fontname_list_) {
+    size_t loc = 0;
+
+    while (true) {
+      loc = line.find(name_info.oldname, loc);
+
+      if (loc == std::string::npos) {
+        break;
+      }
+
+      line.replace(loc, name_info.oldname.size(), name_info.newname);
+    }
   }
 }
 

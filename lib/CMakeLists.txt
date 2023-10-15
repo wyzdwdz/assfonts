@@ -9,7 +9,6 @@ set(THIRD_PARTY_LIBS harfbuzz::harfbuzz
                      ced
                      libasshdr
                      ghcFilesystem::ghc_filesystem
-                     pcre2::pcre2
                      nonstd::string-view-lite)
 
 set(TARGET_SOURCES font_parser.cc
