@@ -18,7 +18,7 @@ such as PGS.
 
 ### Build Requirements
 
-- Conan == 2.0.4
+- Conan 2.0
 
 - CMake >= 3.16
 
