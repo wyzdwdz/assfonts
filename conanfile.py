@@ -52,6 +52,8 @@ class Assfonts(ConanFile):
 
         self.options["cpp-httplib"].with_openssl = True
 
+        self.options["openssl"].no_zlib = True
+
     def layout(self):
         cmake_layout(self)
 
