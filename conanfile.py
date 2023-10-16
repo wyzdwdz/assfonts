@@ -30,7 +30,6 @@ class Assfonts(ConanFile):
         self.requires("libpng/1.6.40", override=True)
         self.requires("openssl/1.1.1u", override=True)
         self.requires("zlib/1.2.13", override=True)
-        self.requires("wayland/1.22.0", override=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/3.26.3")
@@ -45,6 +44,7 @@ class Assfonts(ConanFile):
         self.options["qt"].with_mysql = False
         self.options["qt"].with_odbc = False
         self.options["qt"].with_sqlite3 = False
+        self.options["qt"].qtwayland = False
         if self.settings.os == "Linux":
             self.options["qt"].with_dbus = True
             self.requires("dbus/system", override=True)
