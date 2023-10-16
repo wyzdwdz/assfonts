@@ -44,7 +44,6 @@ class Assfonts(ConanFile):
         self.options["qt"].with_mysql = False
         self.options["qt"].with_odbc = False
         self.options["qt"].with_sqlite3 = False
-        self.options["qt"].qtwayland = False
         if self.settings.os == "Linux":
             self.options["qt"].with_dbus = True
             self.requires("dbus/system", override=True)
