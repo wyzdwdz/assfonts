@@ -4,7 +4,7 @@ from conan.tools.cmake import CMakeDeps, CMakeToolchain, cmake_layout
 
 class Assfonts(ConanFile):
     name = "assfonts"
-    version = "0.5.4"
+    version = "0.5.5"
 
     license = "GNU General Public License v3.0"
     author = "wyzdwdz"
