@@ -27,10 +27,11 @@ class Assfonts(ConanFile):
         self.requires("string-view-lite/1.7.0")
         self.requires("qt/5.15.10")
         self.requires("cpp-httplib/0.13.3")
-        self.requires("libpng/1.6.40", override=True)
-        self.requires("openssl/1.1.1u", override=True)
-        self.requires("zlib/1.2.13", override=True)
-        self.requires("libgettext/0.21", override=True)
+
+        #self.requires("libpng/1.6.40", override=True)
+        #self.requires("openssl/1.1.1u", override=True)
+        #self.requires("zlib/1.2.13", override=True)
+        #self.requires("libgettext/0.21", override=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/3.26.3")
