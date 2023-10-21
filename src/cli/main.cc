@@ -39,7 +39,7 @@
 
 namespace fs = ghc::filesystem;
 
-static std::string save_files_path = []() {
+static std::string SAVE_FILES_PATH = []() {
   fs::path path = fs::current_path();
 
 #ifdef __APPLE__
@@ -132,7 +132,7 @@ int main(int argc, char** argv) {
   std::vector<std::string> inputs;
   std::string output;
   std::vector<std::string> fonts;
-  std::string database = save_files_path;
+  std::string database = SAVE_FILES_PATH;
 
   bool is_build = false;
   bool is_embed_only = false;

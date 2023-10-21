@@ -63,7 +63,7 @@ constexpr int MAX_TCHAR = 128;
 
 namespace fs = ghc::filesystem;
 
-static std::vector<AString> default_font_paths = []() {
+static std::vector<AString> DEFAULT_FONT_PATHS = []() {
   std::vector<AString> paths;
 
 #ifdef __APPLE__
@@ -118,8 +118,8 @@ namespace ass {
 
 void FontParser::LoadFonts(std::vector<AString> fonts_dirs, bool with_default) {
   if (with_default) {
-    fonts_dirs.insert(fonts_dirs.end(), default_font_paths.begin(),
-                      default_font_paths.end());
+    fonts_dirs.insert(fonts_dirs.end(), DEFAULT_FONT_PATHS.begin(),
+                      DEFAULT_FONT_PATHS.end());
   }
 
   for (const auto& dir : fonts_dirs) {
@@ -526,7 +526,6 @@ std::string FontParser::GetLastWriteTime(const AString& font_path) {
                   OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
   if (file_handle == INVALID_HANDLE_VALUE) {
-    CloseHandle(file_handle);
     return std::string();
   }
 
@@ -537,7 +536,10 @@ std::string FontParser::GetLastWriteTime(const AString& font_path) {
     return std::string();
   }
 
-  FileTimeToSystemTime(&file_time, &system_time);
+  if (!FileTimeToSystemTime(&file_time, &system_time)) {
+    CloseHandle(file_handle);
+    return std::string();
+  }
 
   if (!GetDateFormat(LOCALE_SYSTEM_DEFAULT, NULL, &system_time,
                      "yyyy'-'MM'-'dd", date, MAX_TCHAR)) {
@@ -561,9 +563,18 @@ std::string FontParser::GetLastWriteTime(const AString& font_path) {
   }
 
   std::stringstream ss;
+
   auto gmt_time = std::gmtime(&buffer->st_mtime);
-  auto last_write_time = std::put_time(gmt_time, "UTC %Y-%m-%d %H:%M:%S");
-  ss << last_write_time;
+  if (gmt_time == nullptr) {
+    return std::string();
+  }
+
+  try {
+    ss << std::put_time(gmt_time, "UTC %Y-%m-%d %H:%M:%S");
+  } catch (const std::exception&) {
+    return std::string();
+  }
+
   return ss.str();
 #endif
 }

@@ -39,7 +39,7 @@
 
 namespace fs = ghc::filesystem;
 
-static std::string save_files_path = []() {
+static std::string SAVE_FILES_PATH = []() {
   fs::path path = fs::current_path();
 
 #ifdef __APPLE__
@@ -244,7 +244,7 @@ void MainWindow::AddDatabaseLayout(QVBoxLayout* layout) {
   database_line_ = new DropLineEdit;
   database_line_->setMinimumHeight(25);
 
-  QDir appdata_dir(QString::fromStdString(save_files_path));
+  QDir appdata_dir(QString::fromStdString(SAVE_FILES_PATH));
 
   database_line_->setText(QDir::toNativeSeparators(appdata_dir.absolutePath()));
 
@@ -792,7 +792,7 @@ void MainWindow::ResizeHelper(QWidget* widget, const int width,
 
 void MainWindow::LoadSettings() {
   settings_ = new QSettings(
-      (fs::path(save_files_path) / "settings.ini").u8string().c_str(),
+      (fs::path(SAVE_FILES_PATH) / "settings.ini").u8string().c_str(),
       QSettings::IniFormat, this);
 
   settings_->beginGroup("MainWindow");
