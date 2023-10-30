@@ -46,15 +46,30 @@ class AssParser {
 
   ~AssParser() = default;
 
+  struct TextInfo {
+    unsigned int line_num = 0;
+    std::string text;
+  };
+
+  struct RenameInfo {
+    unsigned int line_num;
+    size_t beg;
+    size_t end;
+    std::string fontname;
+    std::string newname;
+  };
+
   void set_output_dir_path(const AString& output_dir_path);
 
   bool ReadFile(const AString& ass_file_path);
 
   bool get_has_fonts() const;
 
-  std::vector<std::string> get_text() const;
+  std::vector<TextInfo> get_text() const;
 
   AString get_ass_path() const;
+
+  std::vector<RenameInfo> get_rename_infos() const;
 
   bool Recolorize(const AString& ass_file_path, const unsigned int brightness);
 
@@ -84,22 +99,15 @@ class AssParser {
     }
   };
 
-  struct TextInfo {
-    TextInfo(const unsigned int line_num, const std::string& text)
-        : line_num(line_num), text(text){};
+  struct StyleInfo {
     unsigned int line_num = 0;
-    std::string text;
+    const char* line_beg = nullptr;
+    std::vector<nonstd::string_view> style;
   };
 
   struct DialogueInfo {
-    DialogueInfo(const unsigned int line_num,
-                 const std::vector<nonstd::string_view>& dialogue)
-        : line_num(line_num) {
-      for (const auto block : dialogue) {
-        this->dialogue.emplace_back(block);
-      }
-    };
     unsigned int line_num = 0;
+    const char* line_beg = nullptr;
     std::vector<nonstd::string_view> dialogue;
   };
 
@@ -109,7 +117,7 @@ class AssParser {
   AString output_dir_path_;
 
   std::vector<TextInfo> text_;
-  std::vector<std::vector<nonstd::string_view>> styles_;
+  std::vector<StyleInfo> styles_;
   std::vector<DialogueInfo> dialogues_;
 
   bool has_default_style_ = false;
@@ -117,6 +125,8 @@ class AssParser {
 
   std::map<FontDesc, std::unordered_set<char32_t>> font_sets_;
   std::map<std::string, FontDesc> stylename_fontdesc_;
+
+  std::vector<RenameInfo> rename_infos_;
 
   void SkipFontsLines(std::istringstream& is, unsigned int line_num);
 
@@ -141,13 +151,14 @@ class AssParser {
   FontDesc GetFontDescStyle(const DialogueInfo& dialogue);
   void GetCharacter(Iterator& wch, const Iterator end,
                     const FontDesc& font_desc_style, FontDesc& font_desc,
-                    const unsigned int line_num);
+                    const unsigned int line_num, const char* line_beg);
 
   void StyleOverride(const nonstd::string_view code, FontDesc& font_desc,
                      const FontDesc& font_desc_style,
-                     const unsigned int line_num);
+                     const unsigned int line_num, const char* line_beg);
   void ChangeFontname(const nonstd::string_view code, FontDesc& font_desc,
-                      const FontDesc& font_desc_style);
+                      const FontDesc& font_desc_style,
+                      const unsigned int line_num, const char* line_beg);
   void ChangeBold(const nonstd::string_view code, FontDesc& font_desc,
                   const FontDesc& font_desc_style);
   void ChangeItalic(const nonstd::string_view code, FontDesc& font_desc,

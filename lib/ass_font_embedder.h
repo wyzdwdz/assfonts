@@ -21,6 +21,7 @@
 #define ASSFONTS_ASSFONTEMBEDDER_H_
 
 #include <fstream>
+#include <map>
 #include <memory>
 #include <string>
 #include <utility>
@@ -45,20 +46,14 @@ class AssFontEmbedder {
   void Clear();
 
  private:
-  using NameInfo = struct {
-    std::string oldname;
-    std::string newname;
-  };
-
   const FontSubsetter& fs_;
   std::shared_ptr<Logger> logger_;
   AString output_dir_path_;
-  std::vector<NameInfo> fontname_list_;
+  std::map<std::string, std::string> fontname_map_;
   std::string UUEncode(const char* begin, const char* end,
                        bool insert_linebreaks);
-  void RegexInit();
   void WriteRenameInfo(std::vector<std::string>& text);
-  void FontRename(std::string& line);
+  void FontRename(std::vector<AssParser::TextInfo>& text);
   bool WriteRenamed(AString& path, std::vector<std::string>& text);
 };
 

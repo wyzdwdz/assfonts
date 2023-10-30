@@ -64,7 +64,7 @@ bool AssParser::ReadFile(const AString& ass_file_path) {
       has_fonts_ = true;
       SkipFontsLines(isstream, line_num);
     } else {
-      TextInfo text_info(line_num, line);
+      TextInfo text_info = {line_num, line};
       text_.emplace_back(text_info);
     }
   }
@@ -99,7 +99,7 @@ void AssParser::SkipFontsLines(std::istringstream& is, unsigned int line_num) {
 
     if (tmp == "[events]" || tmp == "[script info]" || tmp == "[v4 styles]" ||
         tmp == "[v4+ styles]" || tmp == "[graphics]") {
-      TextInfo text_info(line_num, line);
+      TextInfo text_info = {line_num, line};
       text_.emplace_back(text_info);
       break;
     }
@@ -110,18 +110,16 @@ bool AssParser::get_has_fonts() const {
   return has_fonts_;
 }
 
-std::vector<std::string> AssParser::get_text() const {
-  std::vector<std::string> text;
-
-  for (const TextInfo& t : text_) {
-    text.emplace_back(t.text);
-  }
-
-  return text;
+std::vector<AssParser::TextInfo> AssParser::get_text() const {
+  return text_;
 }
 
 AString AssParser::get_ass_path() const {
   return ass_path_;
+}
+
+std::vector<AssParser::RenameInfo> AssParser::get_rename_infos() const {
+  return rename_infos_;
 }
 
 bool AssParser::Recolorize(const AString& ass_file_path,
@@ -319,10 +317,11 @@ bool AssParser::GetStyles(std::vector<TextInfo>::iterator& line,
       continue;
     }
 
-    std::vector<nonstd::string_view> res;
-    if (!ParseLine((*line).text, 10, res)) {
+    std::vector<nonstd::string_view> styles;
+    if (!ParseLine((*line).text, 10, styles)) {
       return false;
     }
+    StyleInfo res = {(*line).line_num, (*line).text.c_str(), styles};
     styles_.emplace_back(res);
   }
   has_style = true;
@@ -353,7 +352,7 @@ bool AssParser::GetEvents(std::vector<TextInfo>::iterator& line,
       return false;
     }
 
-    DialogueInfo dialogue_info((*line).line_num, res);
+    DialogueInfo dialogue_info = {(*line).line_num, (*line).text.c_str(), res};
     dialogues_.emplace_back(dialogue_info);
   }
 
@@ -366,22 +365,28 @@ void AssParser::set_stylename_fontdesc() {
   FontDesc empty_font_desc;
 
   for (const auto& style : styles_) {
-    if (style[1] == "Default") {
+    if (style.style[1] == "Default") {
       has_default_style_ = true;
     }
 
-    stylename_fontdesc_[style[1].to_string()] = empty_font_desc;
-    std::string fontname = style[2].to_string();
+    stylename_fontdesc_[style.style[1].to_string()] = empty_font_desc;
+    nonstd::string_view fontname = style.style[2];
 
     if (fontname[0] == '@') {
-      fontname.erase(0, 1);
+      fontname = fontname.substr(1);
     }
 
-    stylename_fontdesc_[style[1].to_string()].fontname = fontname;
-    stylename_fontdesc_[style[1].to_string()].bold =
-        CalculateBold(StringToInt(style[8].to_string()));
-    stylename_fontdesc_[style[1].to_string()].italic =
-        CalculateItalic(StringToInt(style[9].to_string()));
+    stylename_fontdesc_[style.style[1].to_string()].fontname =
+        fontname.to_string();
+    stylename_fontdesc_[style.style[1].to_string()].bold =
+        CalculateBold(StringToInt(style.style[8].to_string()));
+    stylename_fontdesc_[style.style[1].to_string()].italic =
+        CalculateItalic(StringToInt(style.style[9].to_string()));
+
+    RenameInfo rename_info = {style.line_num, fontname.begin() - style.line_beg,
+                              fontname.end() - style.line_beg,
+                              fontname.to_string(), ""};
+    rename_infos_.emplace_back(rename_info);
   }
 }
 
@@ -420,7 +425,8 @@ void AssParser::set_font_sets() {
     const auto end = Iterator(dialogue.dialogue[10], true);
 
     while (wch != end) {
-      GetCharacter(wch, end, font_desc_style, font_desc, dialogue.line_num);
+      GetCharacter(wch, end, font_desc_style, font_desc, dialogue.line_num,
+                   dialogue.line_beg);
     }
   }
 
@@ -460,7 +466,8 @@ AssParser::FontDesc AssParser::GetFontDescStyle(const DialogueInfo& dialogue) {
 
 void AssParser::GetCharacter(Iterator& wch, const Iterator end,
                              const FontDesc& font_desc_style,
-                             FontDesc& font_desc, const unsigned int line_num) {
+                             FontDesc& font_desc, const unsigned int line_num,
+                             const char* line_beg) {
   if (*wch == U'\\' && (wch + 1) != end &&
       (*(wch + 1) == U'h' || *(wch + 1) == U'n' || *(wch + 1) == U'N')) {
     wch += 2;
@@ -484,7 +491,7 @@ void AssParser::GetCharacter(Iterator& wch, const Iterator end,
           (wch + 1).ToStdIter(),
           (Iterator(override) += pos).ToStdIter() - (wch + 1).ToStdIter());
 
-      StyleOverride(override, font_desc, font_desc_style, line_num);
+      StyleOverride(override, font_desc, font_desc_style, line_num, line_beg);
       wch += (pos + 1);
       return;
     }
@@ -501,8 +508,9 @@ void AssParser::GetCharacter(Iterator& wch, const Iterator end,
 void AssParser::StyleOverride(const nonstd::string_view code,
                               FontDesc& font_desc,
                               const FontDesc& font_desc_style,
-                              const unsigned int line_num) {
-  ChangeFontname(code, font_desc, font_desc_style);
+                              const unsigned int line_num,
+                              const char* line_beg) {
+  ChangeFontname(code, font_desc, font_desc_style, line_num, line_beg);
   ChangeBold(code, font_desc, font_desc_style);
   ChangeItalic(code, font_desc, font_desc_style);
   ChangeStyle(code, font_desc, font_desc_style, line_num);
@@ -510,7 +518,9 @@ void AssParser::StyleOverride(const nonstd::string_view code,
 
 void AssParser::ChangeFontname(const nonstd::string_view code,
                                FontDesc& font_desc,
-                               const FontDesc& font_desc_style) {
+                               const FontDesc& font_desc_style,
+                               const unsigned int line_num,
+                               const char* line_beg) {
   Iterator::difference_type pos = 0;
 
   while (true) {
@@ -522,26 +532,30 @@ void AssParser::ChangeFontname(const nonstd::string_view code,
 
     pos += 3;
     auto iter = Iterator(code) + pos;
-    std::u32string font;
+    auto view_beg = iter.ToStdIter();
 
     while (iter != code.end() && *iter != U'\\') {
-      font.push_back(*iter);
       ++iter;
       ++pos;
     }
 
-    std::string font_u8 = U32ToU8(font);
+    nonstd::string_view font_view(view_beg, iter.ToStdIter() - view_beg);
+    font_view = Trim(font_view);
 
-    if (Trim(font_u8).empty()) {
+    if (font_view.empty()) {
       font_desc.fontname = font_desc_style.fontname;
       continue;
     }
 
-    auto fontname = Trim(font_u8);
-    if (fontname[0] == '@') {
-      fontname.erase(0, 1);
+    if (font_view[0] == '@') {
+      font_view = font_view.substr(1);
     }
-    font_desc.fontname = fontname;
+    font_desc.fontname = font_view.to_string();
+
+    RenameInfo rename_info = {line_num, font_view.begin() - line_beg,
+                              font_view.end() - line_beg, font_view.to_string(),
+                              ""};
+    rename_infos_.emplace_back(rename_info);
   }
 }
 

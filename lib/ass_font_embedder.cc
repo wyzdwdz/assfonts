@@ -48,7 +48,10 @@ bool AssFontEmbedder::Run(const bool is_subset_only, const bool is_embed_only,
     input_path = fs::path(path);
   } else {
     input_path = fs::path(fs_.ap_.get_ass_path());
-    text = fs_.ap_.get_text();
+    auto text_vec = fs_.ap_.get_text();
+    for (const auto& line : text_vec) {
+      text.emplace_back(line.text);
+    }
   }
 
   if (is_subset_only) {
@@ -127,11 +130,11 @@ bool AssFontEmbedder::WriteRenamed(AString& path,
   }
 
   std::vector<std::string> font_info;
-  RegexInit();
   WriteRenameInfo(font_info);
-  text = fs_.ap_.get_text();
-  for (auto& line : text) {
-    FontRename(line);
+  auto text_vec = fs_.ap_.get_text();
+  FontRename(text_vec);
+  for (const auto& line : text_vec) {
+    text.emplace_back(line.text);
   }
 
   for (auto iter = text.begin(); iter != text.end(); ++iter) {
@@ -201,7 +204,7 @@ std::string AssFontEmbedder::UUEncode(const char* begin, const char* end,
   return ret;
 }
 
-void AssFontEmbedder::RegexInit() {
+void AssFontEmbedder::WriteRenameInfo(std::vector<std::string>& text) {
   for (const auto& subfont_info : fs_.subfonts_info_) {
     std::unordered_set<std::string> fontname_set;
     for (const auto& font_desc : subfont_info.fonts_desc) {
@@ -209,34 +212,53 @@ void AssFontEmbedder::RegexInit() {
     }
 
     for (const auto& fontname : fontname_set) {
-      NameInfo name_info = {fontname, subfont_info.newname};
-      fontname_list_.emplace_back(name_info);
+      fontname_map_[fontname] = subfont_info.newname;
     }
   }
-}
 
-void AssFontEmbedder::WriteRenameInfo(std::vector<std::string>& text) {
   text.emplace_back(std::string("[Assfonts Rename Info]"));
-  for (const auto& name_info : fontname_list_) {
+  for (const auto& name_info : fontname_map_) {
     text.emplace_back(
-        std::string(name_info.oldname + " ---- " + name_info.newname));
+        std::string(name_info.first + " ---- " + name_info.second));
   }
   text.emplace_back(std::string(""));
 }
 
-void AssFontEmbedder::FontRename(std::string& line) {
-  for (auto& name_info : fontname_list_) {
-    size_t loc = 0;
-
-    while (true) {
-      loc = line.find(name_info.oldname, loc);
-
-      if (loc == std::string::npos) {
-        break;
-      }
-
-      line.replace(loc, name_info.oldname.size(), name_info.newname);
+void AssFontEmbedder::FontRename(std::vector<AssParser::TextInfo>& text) {
+  auto rename_infos = fs_.ap_.get_rename_infos();
+  for (auto& rename_info : rename_infos) {
+    try {
+      rename_info.newname = fontname_map_.at(rename_info.fontname);
+    } catch (const std::out_of_range&) {
+      continue;
     }
+  }
+
+  unsigned int line_num = 0;
+  int offset = 0;
+  for (const auto& rename_info : rename_infos) {
+    if (rename_info.newname.empty()) {
+      continue;
+    }
+
+    if (line_num != rename_info.line_num) {
+      offset = 0;
+    }
+
+    auto check_same_line = [=](const AssParser::TextInfo& text_info) {
+      return text_info.line_num == rename_info.line_num;
+    };
+
+    auto iter = std::find_if(text.begin(), text.end(), check_same_line);
+    if (iter == text.end()) {
+      continue;
+    }
+    (*iter).text.replace(rename_info.beg + offset,
+                         (rename_info.end - rename_info.beg),
+                         rename_info.newname);
+
+    line_num = rename_info.line_num;
+    offset = offset + rename_info.newname.size() - rename_info.fontname.size();
   }
 }
 
