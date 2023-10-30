@@ -383,9 +383,10 @@ void AssParser::set_stylename_fontdesc() {
     stylename_fontdesc_[style.style[1].to_string()].italic =
         CalculateItalic(StringToInt(style.style[9].to_string()));
 
-    RenameInfo rename_info = {style.line_num, fontname.begin() - style.line_beg,
-                              fontname.end() - style.line_beg,
-                              fontname.to_string(), ""};
+    RenameInfo rename_info = {
+        style.line_num, static_cast<size_t>(fontname.begin() - style.line_beg),
+        static_cast<size_t>(fontname.end() - style.line_beg),
+        fontname.to_string(), ""};
     rename_infos_.emplace_back(rename_info);
   }
 }
@@ -552,9 +553,10 @@ void AssParser::ChangeFontname(const nonstd::string_view code,
     }
     font_desc.fontname = font_view.to_string();
 
-    RenameInfo rename_info = {line_num, font_view.begin() - line_beg,
-                              font_view.end() - line_beg, font_view.to_string(),
-                              ""};
+    RenameInfo rename_info = {line_num,
+                              static_cast<size_t>(font_view.begin() - line_beg),
+                              static_cast<size_t>(font_view.end() - line_beg),
+                              font_view.to_string(), ""};
     rename_infos_.emplace_back(rename_info);
   }
 }
