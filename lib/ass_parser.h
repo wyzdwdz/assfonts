@@ -47,7 +47,7 @@ class AssParser {
   ~AssParser() = default;
 
   struct TextInfo {
-    unsigned int line_num = 0;
+    unsigned int line_num;
     std::string text;
   };
 
@@ -100,13 +100,13 @@ class AssParser {
   };
 
   struct StyleInfo {
-    unsigned int line_num = 0;
+    unsigned int line_num;
     const char* line_beg = nullptr;
     std::vector<nonstd::string_view> style;
   };
 
   struct DialogueInfo {
-    unsigned int line_num = 0;
+    unsigned int line_num;
     const char* line_beg = nullptr;
     std::vector<nonstd::string_view> dialogue;
   };
