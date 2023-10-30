@@ -101,13 +101,13 @@ class AssParser {
 
   struct StyleInfo {
     unsigned int line_num;
-    const char* line_beg = nullptr;
+    const char* line_beg;
     std::vector<nonstd::string_view> style;
   };
 
   struct DialogueInfo {
     unsigned int line_num;
-    const char* line_beg = nullptr;
+    const char* line_beg;
     std::vector<nonstd::string_view> dialogue;
   };
 
