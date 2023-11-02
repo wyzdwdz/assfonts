@@ -21,7 +21,6 @@ done
 
 conan profile detect -vquiet
 conan export --version 8.0.1 -nr recipes/harfbuzz_expt
-conan export --version 8.2.1 -nr recipes/harfbuzz_expt
 conan export --version 5.15.10 -nr recipes/qt5_fix
 
 if [ "$(uname)" = "Linux" ]; then

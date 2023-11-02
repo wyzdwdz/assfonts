@@ -234,14 +234,13 @@ jobs:
       - name: set CONAN_HOME
         run: echo "CONAN_HOME=${{ github.workspace }}/.conan2" >> "$GITHUB_ENV"
 
-      - name: aarch64 fix conan recipes
-        if: ${{ matrix.arch == 'aarch64' }}
+      - name: fix qt recipe
         run: |
           conan export recipes/qt5_fix -nr --version 5.15.10
 
       - name: build executable binary
         run: |
-          conan export --version 8.2.1 -nr recipes/harfbuzz_expt
+          conan export --version 8.0.1 -nr recipes/harfbuzz_expt
           conan config install .github/conan2-macos
           conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
           source ./build/Release/generators/conanbuild.sh
