@@ -15,7 +15,7 @@ class Assfonts(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 
     def requirements(self):
-        self.requires("harfbuzz/8.2.2", override=True)
+        self.requires("harfbuzz/8.0.1")
         self.requires("freetype/2.13.0")
         self.requires("nlohmann_json/3.11.2")
         self.requires("libiconv/1.17")
@@ -31,7 +31,6 @@ class Assfonts(ConanFile):
         self.requires("openssl/1.1.1u", override=True)
         self.requires("zlib/1.2.13", override=True)
         self.requires("libgettext/0.21", override=True)
-        self.requires("libpng/1.6.40", override=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/3.26.3")
