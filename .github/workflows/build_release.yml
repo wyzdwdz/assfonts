@@ -156,8 +156,6 @@ jobs:
       - name: install Conan
         id: conan
         uses: turtlebrowser/get-conan@main
-        with:
-          version: 2.0.4
 
       - name: set CONAN_HOME
         run: Add-Content -Path $env:GITHUB_ENV -Value "CONAN_HOME=${{ github.workspace }}\.conan2"
@@ -232,8 +230,6 @@ jobs:
       - name: install Conan
         id: conan
         uses: turtlebrowser/get-conan@main
-        with:
-          version: 2.0.4
 
       - name: set CONAN_HOME
         run: echo "CONAN_HOME=${{ github.workspace }}/.conan2" >> "$GITHUB_ENV"
