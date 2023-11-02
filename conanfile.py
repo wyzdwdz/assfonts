@@ -15,7 +15,11 @@ class Assfonts(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 
     def requirements(self):
-        self.requires("harfbuzz/8.0.1")
+        if self.settings.os == "Macos":
+            self.requires("harfbuzz/8.2.1")
+        else:
+            self.requires("harfbuzz/8.0.1")
+
         self.requires("freetype/2.13.0")
         self.requires("nlohmann_json/3.11.2")
         self.requires("libiconv/1.17")

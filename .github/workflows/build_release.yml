@@ -241,7 +241,7 @@ jobs:
 
       - name: build executable binary
         run: |
-          conan export --version 8.0.1 -nr recipes/harfbuzz_expt
+          conan export --version 8.2.1 -nr recipes/harfbuzz_expt
           conan config install .github/conan2-macos
           conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
           source ./build/Release/generators/conanbuild.sh
