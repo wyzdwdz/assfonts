@@ -339,8 +339,7 @@ void MainWindow::InitToolTips() {
       tr("Embed fonts into subtitle but not subset them"));
 
   rename_checkbox_->setToolTip(
-      tr("!!!Experimental!!!\n"
-         "Rename subsetted fonts to ensure the one-to-one\n"
+      tr("Rename subsetted fonts to ensure the one-to-one\n"
          "correspondence between one subtitle and one series of fonts"));
 
   build_button_->setToolTip(tr("Build fonts database"));
@@ -591,8 +590,6 @@ void MainWindow::OnBuildButtonPressed() {
   }
 
   auto font_line = font_line_->text().trimmed();
-
-
 
   emit OnSendBuild(font_line, database_line_->text().trimmed());
 }

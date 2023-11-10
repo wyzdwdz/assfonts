@@ -55,7 +55,7 @@ Options:
   -d, --dbpath       <dir>     Set fonts database path  (Default: current path)
   -s, --subset-only  <bool>    Subset fonts but not embed them into subtitle  (Default: False)
   -e, --embed-only   <bool>    Embed fonts into subtitle but not subset them (Default: False)
-  -r, --rename       <bool>    !!!Experimental!!! Rename subsetted fonts (Default: False)
+  -r, --rename       <bool>    Rename subsetted fonts (Default: False)
   -l, --luminance    <num>     Set subtitle brightness for HDR contents  (Default: 203)
   -m, --multi-thread <num>     Enable multi thread mode, <num> is the number of threads for processing
                                (Default: <cpu_count> + 1)

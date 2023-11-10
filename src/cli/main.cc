@@ -237,7 +237,7 @@ int main(int argc, char** argv) {
     << "  -d, --dbpath       <dir>     Set fonts database path  (Default: current path)\n"
     << "  -s, --subset-only  <bool>    Subset fonts but not embed them into subtitle  (Default: False)\n"
     << "  -e, --embed-only   <bool>    Embed fonts into subtitle but not subset them (Default: False)\n"
-    << "  -r, --rename       <bool>    !!!Experimental!!! Rename subsetted fonts (Default: False)\n"
+    << "  -r, --rename       <bool>    Rename subsetted fonts (Default: False)\n"
     << "  -l, --luminance    <num>     Set subtitle brightness for HDR contents  (Default: 203)\n"
     << "  -m, --multi-thread <num>     Enable multi thread mode, <num> is the number of threads for processing\n"  
     << "                               (Default: <cpu_count> + 1)\n"
