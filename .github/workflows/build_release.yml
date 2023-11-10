@@ -308,6 +308,9 @@ jobs:
         run: |
           sudo apt-get install -y zip
           mkdir -p ./share/doc/assfonts
+          cp LICENSE LICENSE.txt
+          cp NEWS NEWS.txt
+          cp NOTICE NOTICE.txt
           cp LICENSE NEWS NOTICE ./share/doc/assfonts/
           mkdir -p ./share/man/man1
           gzip -k ./doc/man/assfonts.1
@@ -323,11 +326,11 @@ jobs:
           rm -rf assfonts-${{ github.ref_name }}-aarch64-Linux assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
           cp -f assfonts-${{ github.ref_name }}-x86_64-Windows.exe assfonts.exe
           cp -f assfonts-gui-${{ github.ref_name }}-x86_64-Windows.exe assfonts-gui.exe
-          zip assfonts-${{ github.ref_name }}-x86_64-Windows.zip assfonts.exe assfonts-gui.exe LICENSE NEWS NOTICE README.md
+          zip assfonts-${{ github.ref_name }}-x86_64-Windows.zip assfonts.exe assfonts-gui.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
           rm -rf assfonts-${{ github.ref_name }}-x86_64-Windows.exe assfonts-gui-${{ github.ref_name }}-x86_64-Windows.exe
           cp -f assfonts-${{ github.ref_name }}-aarch64-Windows.exe assfonts.exe
           cp -f assfonts-gui-${{ github.ref_name }}-aarch64-Windows.exe assfonts-gui.exe
-          zip assfonts-${{ github.ref_name }}-aarch64-Windows.zip assfonts.exe assfonts-gui.exe LICENSE NEWS NOTICE README.md
+          zip assfonts-${{ github.ref_name }}-aarch64-Windows.zip assfonts.exe assfonts-gui.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
           rm -rf assfonts-${{ github.ref_name }}-aarch64-Windows.exe assfonts-gui-${{ github.ref_name }}-aarch64-Windows.exe
 
       - name: calculate hash
