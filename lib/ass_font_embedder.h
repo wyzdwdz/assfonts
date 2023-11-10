@@ -50,8 +50,14 @@ class AssFontEmbedder {
   std::shared_ptr<Logger> logger_;
   AString output_dir_path_;
   std::map<std::string, std::string> fontname_map_;
+
+  void WriteOutput(const std::vector<std::string>& text, size_t& num_line,
+                   std::ofstream& output_ass);
+  void WriteFonts(bool& has_none_ttf, std::ofstream& output_ass);
+
   std::string UUEncode(const char* begin, const char* end,
                        bool insert_linebreaks);
+
   void WriteRenameInfo(std::vector<std::string>& text);
   void FontRename(std::vector<AssParser::TextInfo>& text);
   bool WriteRenamed(AString& path, std::vector<std::string>& text);

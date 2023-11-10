@@ -46,6 +46,7 @@ bool AssFontEmbedder::Run(const bool is_subset_only, const bool is_embed_only,
       return false;
     }
     input_path = fs::path(path);
+
   } else {
     input_path = fs::path(fs_.ap_.get_ass_path());
     auto text_vec = fs_.ap_.get_text();
@@ -63,40 +64,32 @@ bool AssFontEmbedder::Run(const bool is_subset_only, const bool is_embed_only,
                        input_path.extension().native());
   std::string buf_u8;
   std::ofstream output_ass(output_path.native());
+
   if (!output_ass.is_open()) {
     logger_->Error(_ST("\"{}\" cannot be created."), output_path.native());
     return false;
   }
+
   size_t num_line = 0;
+
+  WriteOutput(text, num_line, output_ass);
+
+  logger_->Info(_ST("Create font-embeded subtitle: \"{}\""),
+                output_path.native());
+  return true;
+}
+
+void AssFontEmbedder::WriteOutput(const std::vector<std::string>& text,
+                                  size_t& num_line, std::ofstream& output_ass) {
   for (auto& line : text) {
     ++num_line;
+
     if (Trim(ToLower(line)) == "[events]") {
       output_ass << "[Fonts]";
       bool has_none_ttf = false;
-      for (const auto& font : fs_.subfonts_info_) {
-        fs::path font_path(font.subfont_path);
-        if (ToLower(font_path.extension().native()) != _ST(".ttf")) {
-          logger_->Warn(_ST("\"{}\" is not a .ttf font."), font_path.native());
-          has_none_ttf = true;
-        }
-        AString a_fontname = font_path.stem().native() + _ST("_0") +
-                             font_path.extension().native();
-#ifdef _WIN32
-        std::string fontname = WideToU8(a_fontname);
-#else
-        std::string fontname(a_fontname);
-#endif
-        std::ifstream is(font.subfont_path, std::ios::binary);
-        std::ostringstream ostrm;
-        ostrm << is.rdbuf();
-        std::string font_data(ostrm.str());
-        std::string uu_str = UUEncode(
-            font_data.c_str(), font_data.c_str() + font_data.size(), true);
-        output_ass << "\nfontname: " << fontname << '\n';
-        output_ass << uu_str;
-        ostrm.clear();
-      }
+      WriteFonts(has_none_ttf, output_ass);
       output_ass << "\n\n" << line;
+
       if (has_none_ttf) {
         logger_->Warn(
             _ST("Found non-TTF fonts. Check the warnings above. Based on ASS "
@@ -107,13 +100,42 @@ bool AssFontEmbedder::Run(const bool is_subset_only, const bool is_embed_only,
     } else {
       output_ass << line;
     }
+
     if (num_line != text.size()) {
       output_ass << '\n';
     }
   }
-  logger_->Info(_ST("Create font-embeded subtitle: \"{}\""),
-                output_path.native());
-  return true;
+}
+
+void AssFontEmbedder::WriteFonts(bool& has_none_ttf,
+                                 std::ofstream& output_ass) {
+  for (const auto& font : fs_.subfonts_info_) {
+    fs::path font_path(font.subfont_path);
+
+    if (ToLower(font_path.extension().native()) != _ST(".ttf")) {
+      logger_->Warn(_ST("\"{}\" is not a .ttf font."), font_path.native());
+      has_none_ttf = true;
+    }
+
+    AString a_fontname =
+        font_path.stem().native() + _ST("_0") + font_path.extension().native();
+
+#ifdef _WIN32
+    std::string fontname = WideToU8(a_fontname);
+#else
+    std::string fontname(a_fontname);
+#endif
+
+    std::ifstream is(font.subfont_path, std::ios::binary);
+    std::ostringstream ostrm;
+    ostrm << is.rdbuf();
+    std::string font_data(ostrm.str());
+    std::string uu_str =
+        UUEncode(font_data.c_str(), font_data.c_str() + font_data.size(), true);
+    output_ass << "\nfontname: " << fontname << '\n';
+    output_ass << uu_str;
+    ostrm.clear();
+  }
 }
 
 bool AssFontEmbedder::WriteRenamed(AString& path,
