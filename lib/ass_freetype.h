@@ -36,7 +36,11 @@ namespace ass {
 class FTLibrary {
  public:
   FTLibrary() = default;
-  ~FTLibrary() { FT_Done_FreeType(ft_library_); }
+  ~FTLibrary() {
+    if (ft_library_) {
+      FT_Done_FreeType(ft_library_);
+    }
+  };
 
   FTLibrary(const FTLibrary&) = delete;
   FTLibrary& operator=(const FTLibrary&) = delete;
@@ -44,13 +48,17 @@ class FTLibrary {
   inline FT_Library& get() { return ft_library_; }
 
  private:
-  FT_Library ft_library_;
+  FT_Library ft_library_ = nullptr;
 };
 
 class FTFace {
  public:
   FTFace() = default;
-  ~FTFace() { FT_Done_Face(ft_face_); }
+  ~FTFace() {
+    if (ft_face_) {
+      FT_Done_Face(ft_face_);
+    }
+  };
 
   FTFace(const FTFace&) = delete;
   FTFace& operator=(const FTFace&) = delete;
@@ -58,7 +66,7 @@ class FTFace {
   inline FT_Face& get() { return ft_face_; }
 
  private:
-  FT_Face ft_face_;
+  FT_Face ft_face_ = nullptr;
 };
 
 FT_Error NewOpenArgs(const AString& filepathname, FT_StreamRec& stream,
