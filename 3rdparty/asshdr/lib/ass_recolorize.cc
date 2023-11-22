@@ -35,7 +35,7 @@ using jp = jpcre2::select<char>;
 static jp::Regex r_style_color(
     R"((?<prefix>&H[0-9a-fA-F]{2})(?<color>[0-9a-fA-F]{6}))", "uS");
 static jp::Regex r_event_color(
-    R"((?<prefix>\\[1-4]?c&?H?)(?<color>[0-9a-fA-F]{2,})(?<suffix>&?))", "uS");
+    R"((?<prefix>\\[1-4]?c&?H?)(?<color>[0-9a-fA-F]{2,6})(?<suffix>&?))", "uS");
 static jp::Regex r_style_title(R"(^\s*\[v4\+? Styles\]\s*$)", "iuS");
 static jp::Regex r_event_title(R"(^\s*\[Events\]\s*$)", "iuS");
 static jp::Regex r_title(R"(^\s*\[.*\]\s*$)", "uS");
@@ -213,9 +213,9 @@ jp::String event_callback(void*, const jp::MapNas& substr_map, void*) {
   for (int i = 6 - color_str.size(); i > 0; --i) {
     color_str.push_back('0');
   }
-  const std::string blue_hex = substr_map.at("color").substr(0, 2);
-  const std::string green_hex = substr_map.at("color").substr(2, 2);
-  const std::string red_hex = substr_map.at("color").substr(4, 2);
+  const std::string blue_hex = color_str.substr(0, 2);
+  const std::string green_hex = color_str.substr(2, 2);
+  const std::string red_hex = color_str.substr(4, 2);
   std::array<unsigned int, 3> rgb_recolored =
       RecolorHex(red_hex, green_hex, blue_hex);
   std::array<std::string, 3> rgbhex_recolored = IntToHex(rgb_recolored);
