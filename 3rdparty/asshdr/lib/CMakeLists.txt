@@ -14,7 +14,7 @@ target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS})
 
 target_include_directories(${TARGET_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
 
-target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTS})
+target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTIONS})
 
 target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})
 

@@ -55,6 +55,7 @@ int main(int argc, char** argv) {
   p_opt_i->type_name("<files>");
   p_opt_o->type_name("<dir>");
   p_opt_b->type_name("<num>");
+  p_opt_b->check(CLI::Range(0, 1000));
   app.failure_message(
       [=](const CLI::App* app, const CLI::Error& e) -> std::string {
         std::string str = CLI::FailureMessage::simple(app, e);
@@ -121,7 +122,7 @@ int main(int argc, char** argv) {
     }
 
     unsigned int out_size = ass_text.size() * 2;
-    std::unique_ptr<char> out_text(new char[out_size]);
+    std::unique_ptr<char[]> out_text(new char[out_size]);
     asshdr::AssRecolor(ass_text.c_str(), ass_text.size(), out_text.get(),
                        out_size, brightness);
 

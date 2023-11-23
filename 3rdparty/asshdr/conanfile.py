@@ -27,7 +27,7 @@ class _CMake(CMake):
 
 class AsshdrConan(ConanFile):
     name = "asshdr"
-    version = "0.1.0"
+    version = "0.1.2"
 
     license = "GNU General Public License v2.0"
     author = "wyzdwdz"
@@ -40,17 +40,14 @@ class AsshdrConan(ConanFile):
     requires = ["cli11/2.3.1",
                 "pcre2/10.42"]
 
-    default_options = {"fmt:shared": False,
+    default_options = {"fmt/*:shared": False,
 
-                       "pcre2:build_pcre2_16": False,
-                       "pcre2:build_pcre2_32": False,
-                       "pcre2:build_pcre2_8": True,
-                       "pcre2:build_pcre2grep": False,
-                       "pcre2:grep_support_callout_fork": False,
-                       "pcre2:shared": False,
-                       "pcre2:support_jit": True,
-                       "pcre2:with_bzip2": False,
-                       "pcre2:with_zlib": False}
+                       "pcre2/*:build_pcre2_16": False,
+                       "pcre2/*:build_pcre2_32": False,
+                       "pcre2/*:build_pcre2_8": True,
+                       "pcre2/*:build_pcre2grep": False,
+                       "pcre2/*:shared": False,
+                       "pcre2/*:support_jit": True}
 
     def config_options(self):
         if self.settings.os == 'Windows':

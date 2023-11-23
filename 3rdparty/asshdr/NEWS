@@ -1,3 +1,16 @@
+Overview of changes leading to v0.1.2
+Thursday, November 23, 2023
+====================================
+- Fix bug: crash when recolorize
+
+
+Overview of changes leading to v0.1.1
+Wednesday, Janurary 4, 2023
+====================================
+- Fix bugs of "Bt2100Oetf"
+- Add boundry check for -b option
+
+
 Overview of changes leading to v0.1.0
 Tuesday, Janurary 3, 2023
 ====================================
