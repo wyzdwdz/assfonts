@@ -78,7 +78,7 @@ jobs:
             conan export --version 8.0.1 -nr recipes/harfbuzz_expt
             conan export --version system -nr recipes/dbus_system
             conan export --version 5.15.10 -nr recipes/qt5_fix
-            # conan export --version 2.11.4 -nr .github/recipes/libxml2_fix
+            conan export --version 2.11.5 -nr .github/recipes/libxml2_fix
             conan config install .github/conan2-linux
             conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
             source ./build/Release/generators/conanbuild.sh
