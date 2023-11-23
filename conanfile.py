@@ -16,7 +16,7 @@ class Assfonts(ConanFile):
 
     def requirements(self):
         self.requires("harfbuzz/8.0.1")
-        self.requires("freetype/2.13.0", override=True)
+        self.requires("freetype/2.13.0")
         self.requires("nlohmann_json/3.11.2")
         self.requires("libiconv/1.17")
         self.requires("fmt/10.0.0")
