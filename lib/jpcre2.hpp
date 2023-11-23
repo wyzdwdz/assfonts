@@ -2266,6 +2266,8 @@ struct select{
             return *this;
         }
 
+        using RegexMatch::operator=;
+
         public:
 
         ///Default constructor.
