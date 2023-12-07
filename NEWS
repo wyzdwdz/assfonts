@@ -1,5 +1,5 @@
 Overview of changes leading to v0.6.1
-Thursday, November 23, 2023
+Thursday, December 7, 2023
 ====================================
 - fix bug: crash when recolorizing
 - fix bug: crash when recognize invalid font
