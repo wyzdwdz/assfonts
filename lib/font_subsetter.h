@@ -51,14 +51,22 @@ class FontSubsetter {
       : ap_(ap), fp_(fp), logger_(logger) {
     FT_Init_FreeType(&ft_library_);
   };
+
   FontSubsetter(const AssParser& ap, const FontParser& fp,
                 const AString& subfont_dir, std::shared_ptr<Logger> logger)
       : FontSubsetter(ap, fp, logger) {
     SetSubfontDir(subfont_dir);
   };
+
   ~FontSubsetter() { FT_Done_FreeType(ft_library_); }
+
+  FontSubsetter(const FontSubsetter&) = delete;
+  FontSubsetter& operator=(const FontSubsetter&) = delete;
+
   void SetSubfontDir(const AString& subfont_dir);
+
   bool Run(const bool is_no_subset, const bool is_rename = false);
+
   void Clear();
 
  private:
@@ -95,13 +103,18 @@ class FontSubsetter {
           font_set,
       const std::unordered_multimap<AString, FontParser::FontInfo>& font_list,
       AString& found_path, long& found_index);
+
   bool set_subfonts_info();
+
   bool CreateSubfont(FontSubsetInfo& subset_font, const bool is_rename);
+
   bool CheckGlyph(const AString& font_path, const long& font_index,
                   const std::unordered_set<char32_t>& codepoint_set,
                   const AString& fontname, int bold, int italic);
   bool LowerCmp(const std::string& a, const std::string& b);
+
   void SetNewname();
+
   std::string RandomName(const int len);
 
   friend class AssFontEmbedder;

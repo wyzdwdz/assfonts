@@ -40,6 +40,9 @@ class AssFontEmbedder {
       : fs_(fs), logger_(logger){};
   ~AssFontEmbedder() = default;
 
+  AssFontEmbedder(const AssFontEmbedder&) = delete;
+  AssFontEmbedder& operator=(const AssFontEmbedder&) = delete;
+
   void set_output_dir_path(const AString& output_ass_path);
   bool Run(const bool is_subset_only, const bool is_embed_only,
            const bool is_rename = false);

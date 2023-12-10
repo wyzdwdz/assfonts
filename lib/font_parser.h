@@ -51,6 +51,9 @@ class FontParser {
 
   ~FontParser() = default;
 
+  FontParser(const FontParser&) = delete;
+  FontParser& operator=(const FontParser&) = delete;
+
   void LoadFonts(std::vector<AString> fonts_dirs, bool with_default = true);
 
   void SaveDB(const AString& db_path);

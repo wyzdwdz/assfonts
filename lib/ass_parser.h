@@ -46,6 +46,9 @@ class AssParser {
 
   ~AssParser() = default;
 
+  AssParser(const AssParser&) = delete;
+  AssParser& operator=(const AssParser&) = delete;
+
   struct TextInfo {
     unsigned int line_num;
     std::string text;
