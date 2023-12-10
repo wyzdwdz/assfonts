@@ -36,37 +36,54 @@ namespace ass {
 class FTLibrary {
  public:
   FTLibrary() = default;
-  ~FTLibrary() {
-    if (ft_library_) {
-      FT_Done_FreeType(ft_library_);
-    }
-  };
+  ~FTLibrary() { Destroy(); }
 
   FTLibrary(const FTLibrary&) = delete;
   FTLibrary& operator=(const FTLibrary&) = delete;
+
+  FTLibrary(FTLibrary&& prev) : ft_library_(prev.ft_library_) {
+    prev.ft_library_ = nullptr;
+  }
+  FTLibrary& operator=(FTLibrary&& prev) {
+    Destroy();
+    ft_library_ = prev.ft_library_;
+    prev.ft_library_ = nullptr;
+  }
 
   inline FT_Library& get() { return ft_library_; }
 
  private:
   FT_Library ft_library_ = nullptr;
+
+  void Destroy() {
+    if (ft_library_) {
+      FT_Done_FreeType(ft_library_);
+    }
+  }
 };
 
 class FTFace {
  public:
   FTFace() = default;
-  ~FTFace() {
-    if (ft_face_) {
-      FT_Done_Face(ft_face_);
-    }
-  };
+  ~FTFace() { Destroy(); }
 
-  FTFace(const FTFace&) = delete;
-  FTFace& operator=(const FTFace&) = delete;
+  FTFace(FTFace&& prev) : ft_face_(prev.ft_face_) { prev.ft_face_ = nullptr; }
+  FTFace& operator=(FTFace&& prev) {
+    Destroy();
+    ft_face_ = prev.ft_face_;
+    prev.ft_face_ = nullptr;
+  }
 
   inline FT_Face& get() { return ft_face_; }
 
  private:
   FT_Face ft_face_ = nullptr;
+
+  void Destroy() {
+    if (ft_face_) {
+      FT_Done_Face(ft_face_);
+    }
+  }
 };
 
 FT_Error NewOpenArgs(const AString& filepathname, FT_StreamRec& stream,
