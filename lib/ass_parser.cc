@@ -122,6 +122,11 @@ std::vector<AssParser::RenameInfo> AssParser::get_rename_infos() const {
   return rename_infos_;
 }
 
+std::map<AssParser::FontDesc, std::unordered_set<char32_t>>
+AssParser::get_font_sets() const {
+  return font_sets_;
+}
+
 bool AssParser::Recolorize(const AString& ass_file_path,
                            const unsigned int brightness) {
   fs::path ass_path(ass_file_path);

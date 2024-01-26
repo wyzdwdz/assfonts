@@ -36,8 +36,11 @@ namespace ass {
 
 class AssFontEmbedder {
  public:
-  AssFontEmbedder(const FontSubsetter& fs, std::shared_ptr<Logger> logger)
-      : fs_(fs), logger_(logger){};
+  AssFontEmbedder(
+      const AssParser& ap,
+      const std::vector<FontSubsetter::FontSubsetInfo>& subfonts_info,
+      std::shared_ptr<Logger> logger)
+      : ap_(ap), subfonts_info_(subfonts_info), logger_(logger){};
   ~AssFontEmbedder() = default;
 
   AssFontEmbedder(const AssFontEmbedder&) = delete;
@@ -49,10 +52,11 @@ class AssFontEmbedder {
   void Clear();
 
  private:
-  const FontSubsetter& fs_;
+  const AssParser& ap_;
   std::shared_ptr<Logger> logger_;
   AString output_dir_path_;
   std::map<std::string, std::string> fontname_map_;
+  std::vector<FontSubsetter::FontSubsetInfo> subfonts_info_;
 
   void WriteOutput(const std::vector<std::string>& text, size_t& num_line,
                    std::ofstream& output_ass);

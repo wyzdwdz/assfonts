@@ -82,6 +82,9 @@ void MainWindow::InitMenu() {
   log_menu_ = menu_bar->addMenu(tr("&Log"));
   info_menu_ = menu_bar->addMenu(tr("&Other"));
 
+  log_menu_->setToolTipsVisible(true);
+  info_menu_->setToolTipsVisible(true);
+
   clear_action_ = new QAction(tr("&Clear all"));
 
   space_action_ = new QAction(tr("&Print space"));
@@ -91,6 +94,12 @@ void MainWindow::InitMenu() {
   mt_action_ = new QAction(tr("&Multi thread"));
   mt_action_->setCheckable(true);
   mt_action_->setChecked(false);
+
+  combined_action_ = new QAction(tr("&Font combined"));
+  combined_action_->setCheckable(true);
+  combined_action_->setChecked(false);
+
+  reset_action_ = new QAction(tr("&Reset all"));
 
   check_action_ = new QAction(tr("&Check update"));
 
@@ -116,6 +125,8 @@ void MainWindow::InitMenu() {
   min_level_menu_->addAction(min_error_action_);
 
   info_menu_->addAction(mt_action_);
+  info_menu_->addAction(combined_action_);
+  info_menu_->addAction(reset_action_);
   info_menu_->addAction(check_action_);
 
   setMenuBar(menu_bar);
@@ -345,6 +356,13 @@ void MainWindow::InitToolTips() {
   build_button_->setToolTip(tr("Build fonts database"));
 
   start_button_->setToolTip(tr("Start program"));
+
+  mt_action_->setToolTip(
+      tr("Enable multi thread mode. May cause huge RAM usage"));
+
+  combined_action_->setToolTip(
+      tr("!!Experimental!! When there are multiple input files,\n"
+         "combine the subsetted fonts with the same fontname together"));
 }
 
 void MainWindow::InitAllConnects() {
@@ -398,6 +416,9 @@ void MainWindow::InitAllConnects() {
           &MainWindow::OnWarnActionTrigger);
   connect(min_error_action_, &QAction::triggered, this,
           &MainWindow::OnErrorActionTrigger);
+
+  connect(reset_action_, &QAction::triggered, this,
+          &MainWindow::OnResetActionTrigger);
 
   connect(check_action_, &QAction::triggered, this,
           &MainWindow::OnCheckActionTrigger);
@@ -621,11 +642,11 @@ void MainWindow::OnStartButtonPressed() {
     num_thread = std::thread::hardware_concurrency() + 1;
   }
 
-  emit OnSendStart(input_line_->text().trimmed(),
-                   output_line_->text().trimmed(), font_line_->text().trimmed(),
-                   database_line_->text().trimmed(), brightness,
-                   subset_checkbox_->isChecked(), embed_checkbox_->isChecked(),
-                   rename_checkbox_->isChecked(), num_thread);
+  emit OnSendStart(
+      input_line_->text().trimmed(), output_line_->text().trimmed(),
+      font_line_->text().trimmed(), database_line_->text().trimmed(),
+      brightness, subset_checkbox_->isChecked(), embed_checkbox_->isChecked(),
+      rename_checkbox_->isChecked(), combined_action_->isChecked(), num_thread);
 }
 
 void MainWindow::OnReceiveLog(QString msg, ASSFONTS_LOG_LEVEL log_level) {
@@ -861,6 +882,10 @@ void MainWindow::LoadSettings() {
     mt_action_->setChecked(settings_->value("MultiThread").toBool());
   }
 
+  if (settings_->contains("CombinedFonts")) {
+    combined_action_->setChecked(settings_->value("CombinedFonts").toBool());
+  }
+
   settings_->endGroup();
 }
 
@@ -898,5 +923,38 @@ void MainWindow::SaveSettings() {
   }
 
   settings_->setValue("MultiThread", mt_action_->isChecked());
+
+  settings_->setValue("CombinedFonts", combined_action_->isChecked());
   settings_->endGroup();
+}
+
+void MainWindow::OnResetActionTrigger() {
+  input_line_->clear();
+  output_line_->clear();
+  font_line_->clear();
+  database_line_->clear();
+
+  hdr_combo_->setCurrentIndex(0);
+  subset_checkbox_->setChecked(false);
+  embed_checkbox_->setChecked(false);
+  rename_checkbox_->setChecked(false);
+
+  space_action_->setChecked(true);
+
+  min_info_action_->setChecked(true);
+  min_warn_action_->setChecked(false);
+  min_error_action_->setChecked(false);
+
+  mt_action_->setChecked(false);
+  combined_action_->setChecked(false);
+
+  log_buffer_.clear();
+  QString version_info = "assfonts -- version " +
+                         QString::number(ASSFONTS_VERSION_MAJOR) + "." +
+                         QString::number(ASSFONTS_VERSION_MINOR) + "." +
+                         QString::number(ASSFONTS_VERSION_PATCH);
+  log_buffer_.push_back({ASSFONTS_TEXT, version_info});
+  log_buffer_.push_back({ASSFONTS_TEXT, ""});
+  RefreshLogText();
+  RefreshLogText();
 }

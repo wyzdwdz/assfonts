@@ -46,7 +46,7 @@ class AssParser {
 
   ~AssParser() = default;
 
-  AssParser(const AssParser&) = delete;
+  //AssParser(const AssParser&) = delete;
   AssParser& operator=(const AssParser&) = delete;
 
   struct TextInfo {
@@ -61,25 +61,6 @@ class AssParser {
     std::string fontname;
     std::string newname;
   };
-
-  void set_output_dir_path(const AString& output_dir_path);
-
-  bool ReadFile(const AString& ass_file_path);
-
-  bool get_has_fonts() const;
-
-  std::vector<TextInfo> get_text() const;
-
-  AString get_ass_path() const;
-
-  std::vector<RenameInfo> get_rename_infos() const;
-
-  bool Recolorize(const AString& ass_file_path, const unsigned int brightness);
-
-  void Clear();
-
- private:
-  using Iterator = U8Iterator<nonstd::string_view>;
 
   struct FontDesc {
     std::string fontname;
@@ -101,6 +82,27 @@ class AssParser {
       return false;
     }
   };
+
+  void set_output_dir_path(const AString& output_dir_path);
+
+  bool ReadFile(const AString& ass_file_path);
+
+  bool get_has_fonts() const;
+
+  std::vector<TextInfo> get_text() const;
+
+  AString get_ass_path() const;
+
+  std::vector<RenameInfo> get_rename_infos() const;
+
+  std::map<FontDesc, std::unordered_set<char32_t>> get_font_sets() const;
+
+  bool Recolorize(const AString& ass_file_path, const unsigned int brightness);
+
+  void Clear();
+
+ private:
+  using Iterator = U8Iterator<nonstd::string_view>;
 
   struct StyleInfo {
     unsigned int line_num;
@@ -172,7 +174,7 @@ class AssParser {
 
   bool CleanFonts();
 
-  friend class FontSubsetter;
+  friend class AssFontEmbedder;
 };
 
 }  // namespace ass

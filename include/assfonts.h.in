@@ -49,6 +49,7 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
                  const unsigned int brightness,
                  const unsigned int is_subset_only,
                  const unsigned int is_embed_only, const unsigned int is_rename,
+                 const unsigned int is_font_combined,
                  const unsigned int num_thread, const AssfontsLogCallback cb,
                  const enum ASSFONTS_LOG_LEVEL log_level);
 }

@@ -65,7 +65,7 @@ class MainWindow : public QMainWindow {
   void OnSendStart(QString inputs_path, QString output_path, QString fonts_path,
                    QString db_path, unsigned int brightness,
                    bool is_subset_only, bool is_embed_only, bool is_rename,
-                   unsigned int num_thread);
+                   bool is_font_combined, unsigned int num_thread);
 
  private:
   struct LogItem {
@@ -78,6 +78,7 @@ class MainWindow : public QMainWindow {
 
   QAction* clear_action_;
   QAction* space_action_;
+  QAction* reset_action_;
   QAction* check_action_;
 
   QMenu* min_level_menu_;
@@ -86,6 +87,8 @@ class MainWindow : public QMainWindow {
   QAction* min_error_action_;
 
   QAction* mt_action_;
+
+  QAction* combined_action_;
 
   QLabel* input_label_;
   QLabel* output_label_;
@@ -156,6 +159,8 @@ class MainWindow : public QMainWindow {
   void OnInfoActionTrigger(bool checked);
   void OnWarnActionTrigger(bool checked);
   void OnErrorActionTrigger(bool checked);
+
+  void OnResetActionTrigger();
 
   void OnCheckActionTrigger();
 

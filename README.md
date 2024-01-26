@@ -48,19 +48,21 @@ Examples:  assfonts <files>                  Embed subset fonts into ASS script
            assfonts -f <dirs> -b             Build or update fonts database only
            assfonts -l <num> -i <files>      Recolorize the subtitle for HDR contents
 Options:
-  -i, --input        <files>   Input .ass files
-  -o, --output       <dir>     Output directory  (Default: same directory as input)
-  -f, --fontpath     <dirs>    Set fonts directories
-  -b, --build                  Build or update fonts database  (Require: --fontpath)
-  -d, --dbpath       <dir>     Set fonts database path  (Default: current path)
-  -s, --subset-only  <bool>    Subset fonts but not embed them into subtitle  (Default: False)
-  -e, --embed-only   <bool>    Embed fonts into subtitle but not subset them (Default: False)
-  -r, --rename       <bool>    Rename subsetted fonts (Default: False)
-  -l, --luminance    <num>     Set subtitle brightness for HDR contents  (Default: 203)
-  -m, --multi-thread <num>     Enable multi thread mode, <num> is the number of threads for processing
-                               (Default: <cpu_count> + 1)
-  -v, --verbose      <num>     Set logging level (0 to 3), 0 is off  (Default: 3)
-  -h, --help                   Get help info
+  -i, --input         <files>   Input .ass files
+  -o, --output        <dir>     Output directory  (Default: same directory as input)
+  -f, --fontpath      <dirs>    Set fonts directories
+  -b, --build                   Build or update fonts database  (Require: --fontpath)
+  -d, --dbpath        <dir>     Set fonts database path  (Default: current path)
+  -s, --subset-only   <bool>    Subset fonts but not embed them into subtitle  (Default: False)
+  -e, --embed-only    <bool>    Embed fonts into subtitle but not subset them (Default: False)
+  -r, --rename        <bool>    Rename subsetted fonts (Default: False)
+  -l, --luminance     <num>     Set subtitle brightness for HDR contents  (Default: 203)
+  -m, --multi-thread  <num>     Enable multi thread mode, <num> is the number of threads for processing
+                                (Default: <cpu_count> + 1)
+  -c, --font-combined <bool>    !!Experimental!! When there are multiple input files, combine the
+                                (subsetted) fonts with the same fontname together (Default: False)
+  -v, --verbose       <num>     Set logging level (0 to 3), 0 is off  (Default: 3)
+  -h, --help                    Get help info
  ```
  
  When you first run this program, it's recommended to initialize font database first `assfonts -f <your_fonts_dir> -b` 

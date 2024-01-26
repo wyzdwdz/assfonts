@@ -58,7 +58,7 @@ bool FontSubsetter::Run(const bool is_no_subset, const bool is_rename) {
   if (is_no_subset) {
     bool have_missing = false;
     FontSubsetInfo subfont_info;
-    for (const auto& font_set : ap_.font_sets_) {
+    for (const auto& font_set : font_sets_) {
 #ifdef _WIN32
       AString fontname = U8ToWide(font_set.first.fontname);
 #else
@@ -116,6 +116,11 @@ bool FontSubsetter::Run(const bool is_no_subset, const bool is_rename) {
     }
   }
   return true;
+}
+
+std::vector<FontSubsetter::FontSubsetInfo> FontSubsetter::get_subfonts_info()
+    const {
+  return subfonts_info_;
 }
 
 void FontSubsetter::Clear() {
@@ -230,7 +235,7 @@ bool FontSubsetter::FindFont(
 
 bool FontSubsetter::set_subfonts_info() {
   bool have_missing = false;
-  for (const auto& font_set : ap_.font_sets_) {
+  for (const auto& font_set : font_sets_) {
     FontPath font_path;
     std::unordered_set<uint32_t> codepoint_set;
 #ifdef _WIN32

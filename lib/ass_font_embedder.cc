@@ -48,8 +48,8 @@ bool AssFontEmbedder::Run(const bool is_subset_only, const bool is_embed_only,
     input_path = fs::path(path);
 
   } else {
-    input_path = fs::path(fs_.ap_.get_ass_path());
-    auto text_vec = fs_.ap_.get_text();
+    input_path = fs::path(ap_.get_ass_path());
+    auto text_vec = ap_.get_text();
     for (const auto& line : text_vec) {
       text.emplace_back(line.text);
     }
@@ -109,7 +109,7 @@ void AssFontEmbedder::WriteOutput(const std::vector<std::string>& text,
 
 void AssFontEmbedder::WriteFonts(bool& has_none_ttf,
                                  std::ofstream& output_ass) {
-  for (const auto& font : fs_.subfonts_info_) {
+  for (const auto& font : subfonts_info_) {
     fs::path font_path(font.subfont_path);
 
     if (ToLower(font_path.extension().native()) != _ST(".ttf")) {
@@ -140,7 +140,7 @@ void AssFontEmbedder::WriteFonts(bool& has_none_ttf,
 
 bool AssFontEmbedder::WriteRenamed(AString& path,
                                    std::vector<std::string>& text) {
-  fs::path input_path(fs_.ap_.get_ass_path());
+  fs::path input_path(ap_.get_ass_path());
   fs::path output_path(output_dir_path_ + fs::path::preferred_separator +
                        input_path.stem().native() + _ST(".rename") +
                        input_path.extension().native());
@@ -153,7 +153,7 @@ bool AssFontEmbedder::WriteRenamed(AString& path,
 
   std::vector<std::string> font_info;
   WriteRenameInfo(font_info);
-  auto text_vec = fs_.ap_.get_text();
+  auto text_vec = ap_.get_text();
   FontRename(text_vec);
   for (const auto& line : text_vec) {
     text.emplace_back(line.text);
@@ -227,7 +227,7 @@ std::string AssFontEmbedder::UUEncode(const char* begin, const char* end,
 }
 
 void AssFontEmbedder::WriteRenameInfo(std::vector<std::string>& text) {
-  for (const auto& subfont_info : fs_.subfonts_info_) {
+  for (const auto& subfont_info : subfonts_info_) {
     std::unordered_set<std::string> fontname_set;
     for (const auto& font_desc : subfont_info.fonts_desc) {
       fontname_set.insert(font_desc.fontname);
@@ -247,7 +247,7 @@ void AssFontEmbedder::WriteRenameInfo(std::vector<std::string>& text) {
 }
 
 void AssFontEmbedder::FontRename(std::vector<AssParser::TextInfo>& text) {
-  auto rename_infos = fs_.ap_.get_rename_infos();
+  auto rename_infos = ap_.get_rename_infos();
   for (auto& rename_info : rename_infos) {
     try {
       rename_info.newname = fontname_map_.at(rename_info.fontname);

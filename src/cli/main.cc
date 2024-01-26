@@ -139,6 +139,7 @@ int main(int argc, char** argv) {
   bool is_subset_only = false;
   bool is_rename = false;
   bool is_help = false;
+  bool is_font_combined = false;
 
   unsigned int brightness = 0;
   unsigned int num_thread = 1;
@@ -172,6 +173,9 @@ int main(int argc, char** argv) {
                "Subset fonts but not embed them into subtitle");
 
   app.add_flag("-r,--rename", is_rename, "Rename subsetted fonts");
+
+  app.add_flag("-c,--font-combined", is_font_combined,
+               "Combine fonts with the same fontname together");
 
   auto* p_opt_v = app.add_option("-v,--verbose", verbose, "Set logging level.");
 
@@ -230,19 +234,21 @@ int main(int argc, char** argv) {
     << "           assfonts -f <dirs> -b             Build or update fonts database only\n"
     << "           assfonts -l <num> -i <files>      Recolorize the subtitle for HDR contents\n"
     << "Options:\n"
-    << "  -i, --input,       <files>   Input .ass files\n"
-    << "  -o, --output       <dir>     Output directory  (Default: same directory as input)\n"
-    << "  -f, --fontpath     <dirs>    Set fonts directories\n"
-    << "  -b, --build                  Build or update fonts database  (Require: --fontpath)\n"
-    << "  -d, --dbpath       <dir>     Set fonts database path  (Default: current path)\n"
-    << "  -s, --subset-only  <bool>    Subset fonts but not embed them into subtitle  (Default: False)\n"
-    << "  -e, --embed-only   <bool>    Embed fonts into subtitle but not subset them (Default: False)\n"
-    << "  -r, --rename       <bool>    Rename subsetted fonts (Default: False)\n"
-    << "  -l, --luminance    <num>     Set subtitle brightness for HDR contents  (Default: 203)\n"
-    << "  -m, --multi-thread <num>     Enable multi thread mode, <num> is the number of threads for processing\n"  
-    << "                               (Default: <cpu_count> + 1)\n"
-    << "  -v, --verbose      <num>     Set logging level (0 to 3), 0 is off  (Default: 3)\n"
-    << "  -h, --help                   Get help info\n" << std::endl;
+    << "  -i, --input,        <files>   Input .ass files\n"
+    << "  -o, --output        <dir>     Output directory  (Default: same directory as input)\n"
+    << "  -f, --fontpath      <dirs>    Set fonts directories\n"
+    << "  -b, --build                   Build or update fonts database  (Require: --fontpath)\n"
+    << "  -d, --dbpath        <dir>     Set fonts database path  (Default: current path)\n"
+    << "  -s, --subset-only   <bool>    Subset fonts but not embed them into subtitle  (Default: False)\n"
+    << "  -e, --embed-only    <bool>    Embed fonts into subtitle but not subset them (Default: False)\n"
+    << "  -r, --rename        <bool>    Rename subsetted fonts (Default: False)\n"
+    << "  -l, --luminance     <num>     Set subtitle brightness for HDR contents  (Default: 203)\n"
+    << "  -m, --multi-thread  <num>     Enable multi thread mode, <num> is the number of threads for processing\n"  
+    << "                                (Default: <cpu_count> + 1)\n"
+    << "  -c, --font-combined <bool>    !!Experimental!! When there are multiple input files, combine the\n"
+    << "                                subsetted fonts with the same fontname together (Default: False)\n"
+    << "  -v, --verbose       <num>     Set logging level (0 to 3), 0 is off  (Default: 3)\n"
+    << "  -h, --help                    Get help info\n" << std::endl;
     // clang-format on
   }
 
@@ -303,8 +309,8 @@ int main(int argc, char** argv) {
   AssfontsRun(const_cast<const char**>(inputs_char_list.get()), inputs.size(),
               output.c_str(), const_cast<const char**>(fonts_char_list.get()),
               fonts.size(), database.c_str(), brightness, is_subset_only,
-              is_embed_only, is_rename, num_thread, log_callback,
-              max_log_level);
+              is_embed_only, is_rename, is_font_combined, num_thread,
+              log_callback, max_log_level);
 
   return 0;
 }

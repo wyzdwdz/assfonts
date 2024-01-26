@@ -135,6 +135,7 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
                  const unsigned int brightness,
                  const unsigned int is_subset_only,
                  const unsigned int is_embed_only, const unsigned int is_rename,
+                 const unsigned int is_font_combined,
                  const unsigned int num_thread, const AssfontsLogCallback cb,
                  const enum ASSFONTS_LOG_LEVEL log_level) {
   auto logger = std::make_shared<ass::Logger>(ass::Logger(cb, log_level));
@@ -180,8 +181,13 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
   std::vector<std::mutex> mtxs(num_paths);
   std::vector<std::condition_variable> cvs(num_paths);
 
+  std::vector<ass::AssParser> aps;
+  std::map<ass::AssParser::FontDesc, std::unordered_set<char32_t>> font_sets;
+  std::mutex font_sets_mtx;
+
   for (unsigned int idx = 0; idx < num_paths; ++idx) {
-    pool.enqueue([=, &fp, &queues, &mtxs, &cvs]() {
+    pool.enqueue([=, &fp, &queues, &mtxs, &cvs, &font_sets, &font_sets_mtx,
+                  &aps]() {
       auto finish = [&]() {
         queues[idx].is_finished = true;
         cvs[idx].notify_all();
@@ -200,8 +206,6 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
           std::make_shared<ass::Logger>(ass::Logger(log_callback, log_level));
 
       ass::AssParser ap(t_logger);
-      ass::FontSubsetter fs(ap, fp, t_logger);
-      ass::AssFontEmbedder afe(fs, t_logger);
 
       fs::path input(input_paths[idx]);
 
@@ -221,18 +225,40 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
         return finish();
       }
 
+      if (is_font_combined) {
+        std::lock_guard<std::mutex> lock(font_sets_mtx);
+
+        auto font_sets_this = ap.get_font_sets();
+        for (const auto& font_set : font_sets_this) {
+          if (font_sets.find(font_set.first) == font_sets.end()) {
+            font_sets[font_set.first] = font_set.second;
+          } else {
+            font_sets[font_set.first].insert(font_set.second.begin(),
+                                             font_set.second.end());
+          }
+        }
+
+        aps.emplace_back(std::move(ap));
+
+        return finish();
+      }
+
       if (is_embed_only && is_subset_only) {
         return finish();
       }
 
+      ass::FontSubsetter fsub(fp, ap.get_font_sets(), t_logger);
+
       if (!is_embed_only) {
-        fs.SetSubfontDir(output.native() + fs::path::preferred_separator +
-                         input.stem().native() + _ST("_subsetted"));
+        fsub.SetSubfontDir(output.native() + fs::path::preferred_separator +
+                           input.stem().native() + _ST("_subsetted"));
       }
 
-      if (!fs.Run(is_embed_only, is_rename)) {
+      if (!fsub.Run(is_embed_only, is_rename)) {
         return finish();
       }
+
+      ass::AssFontEmbedder afe(ap, fsub.get_subfonts_info(), t_logger);
 
       afe.set_output_dir_path(output.native());
       if (!afe.Run(is_subset_only, is_embed_only, is_rename)) {
@@ -249,5 +275,29 @@ void AssfontsRun(const char** input_paths, const unsigned int num_paths,
     }
 
     ConsumeQueue(logger, queues[idx], mtxs[idx], cvs[idx]);
+  }
+
+  if (is_font_combined) {
+    logger->Text("");
+
+    ass::FontSubsetter fsub(fp, font_sets, logger);
+    fsub.SetSubfontDir(output.native() + fs::path::preferred_separator +
+                       _ST("subsetted_fonts"));
+
+    if (!fsub.Run(false, is_rename)) {
+      return;
+    }
+
+    for (const auto& ap : aps) {
+      logger->Text("");
+
+      ass::AssFontEmbedder afe(ap, fsub.get_subfonts_info(), logger);
+
+      afe.set_output_dir_path(output.native());
+
+      if (!afe.Run(true, false, is_rename)) {
+        return;
+      }
+    }
   }
 }

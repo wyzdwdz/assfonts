@@ -46,30 +46,24 @@ namespace ass {
 
 class FontSubsetter {
  public:
-  FontSubsetter(const AssParser& ap, const FontParser& fp,
+  FontSubsetter(const FontParser& fp,
+                const std::map<AssParser::FontDesc,
+                               std::unordered_set<char32_t>>& font_sets,
                 std::shared_ptr<Logger> logger)
-      : ap_(ap), fp_(fp), logger_(logger) {
+      : fp_(fp), font_sets_(font_sets), logger_(logger) {
     FT_Init_FreeType(&ft_library_);
   };
 
-  FontSubsetter(const AssParser& ap, const FontParser& fp,
+  FontSubsetter(const FontParser& fp,
+                const std::map<AssParser::FontDesc,
+                               std::unordered_set<char32_t>>& font_sets,
                 const AString& subfont_dir, std::shared_ptr<Logger> logger)
-      : FontSubsetter(ap, fp, logger) {
+      : FontSubsetter(fp, font_sets, logger) {
     SetSubfontDir(subfont_dir);
   };
 
   ~FontSubsetter() { FT_Done_FreeType(ft_library_); }
 
-  FontSubsetter(const FontSubsetter&) = delete;
-  FontSubsetter& operator=(const FontSubsetter&) = delete;
-
-  void SetSubfontDir(const AString& subfont_dir);
-
-  bool Run(const bool is_no_subset, const bool is_rename = false);
-
-  void Clear();
-
- private:
   struct FontPath {
     AString path;
     long index = 0;
@@ -91,12 +85,24 @@ class FontSubsetter {
     AString subfont_path;
   };
 
+  FontSubsetter(const FontSubsetter&) = delete;
+  FontSubsetter& operator=(const FontSubsetter&) = delete;
+
+  void SetSubfontDir(const AString& subfont_dir);
+
+  bool Run(const bool is_no_subset, const bool is_rename = false);
+
+  std::vector<FontSubsetInfo> get_subfonts_info() const;
+
+  void Clear();
+
+ private:
   FT_Library ft_library_;
-  const AssParser& ap_;
   const FontParser& fp_;
   std::shared_ptr<Logger> logger_;
   AString subfont_dir_;
   std::vector<FontSubsetInfo> subfonts_info_;
+  std::map<AssParser::FontDesc, std::unordered_set<char32_t>> font_sets_;
 
   bool FindFont(
       const std::pair<AssParser::FontDesc, std::unordered_set<char32_t>>&
@@ -116,8 +122,6 @@ class FontSubsetter {
   void SetNewname();
 
   std::string RandomName(const int len);
-
-  friend class AssFontEmbedder;
 };
 
 }  // namespace ass
