@@ -30,29 +30,31 @@ based on one feature of ASS subtitle format).
 In this way, only one subtitle file can contain all the information to be rendered and achieve
 the similar effect as those graphical subtitles such as PGS.
 .SH "OPTIONS"
-\fB\-i\fR, \fB\-\-input\fR        <\fIfiles\fR>   Input .ass files
+\fB\-i\fR, \fB\-\-input\fR         <\fIfiles\fR>   Input .ass files
 .TP
-\fB\-o\fR, \fB\-\-output\fR       <\fIdir\fR>     Output directory  (Default: same directory as input)
+\fB\-o\fR, \fB\-\-output\fR        <\fIdir\fR>     Output directory  (Default: same directory as input)
 .TP
-\fB\-f\fR, \fB\-\-fontpath\fR     <\fIdirs\fR>    Set fonts directories
+\fB\-f\fR, \fB\-\-fontpath\fR      <\fIdirs\fR>    Set fonts directories
 .TP
-\fB\-b\fR, \fB\-\-build\fR                  Build or update fonts database  (Require: \fB\-\-fontpath\fR)
+\fB\-b\fR, \fB\-\-build\fR                   Build or update fonts database  (Require: \fB\-\-fontpath\fR)
 .TP
-\fB\-d\fR, \fB\-\-dbpath\fR       <\fIdir\fR>     Set fonts database path  (Default: current path)
+\fB\-d\fR, \fB\-\-dbpath\fR        <\fIdir\fR>     Set fonts database path  (Default: current path)
 .TP
-\fB\-s\fR, \fB\-\-subset\-only\fR  <\fIbool\fR>    Subset fonts but not embed them into subtitle  (Default: False)
+\fB\-s\fR, \fB\-\-subset\-only\fR   <\fIbool\fR>    Subset fonts but not embed them into subtitle  (Default: False)
 .TP
-\fB\-e\fR, \fB\-\-embed\-only\fR   <\fIbool\fR>    Embed fonts into subtitle but not subset them (Default: False)
+\fB\-e\fR, \fB\-\-embed\-only\fR    <\fIbool\fR>    Embed fonts into subtitle but not subset them (Default: False)
 .TP
-\fB\-r\fR, \fB\-\-rename\fR       <\fIbool\fR>    Rename subsetted fonts (Default: False)
+\fB\-r\fR, \fB\-\-rename\fR        <\fIbool\fR>    Rename subsetted fonts (Default: False)
 .TP
-\fB\-l\fR, \fB\-\-luminance\fR    <\fInum\fR>     Set subtitle brightness for HDR contents  (Default: 203)
+\fB\-l\fR, \fB\-\-luminance\fR     <\fInum\fR>     Set subtitle brightness for HDR contents  (Default: 203)
 .TP
-\fB\-m\fR, \fB\-\-multi\-thread\fR <\fInum\fR>     Enable multi thread mode, <\fInum\fR> is the number of threads for processing (Default: <cpu_count> + 1)
+\fB\-m\fR, \fB\-\-multi\-thread\fR  <\fInum\fR>     Enable multi thread mode, <\fInum\fR> is the number of threads for processing (Default: <cpu_count> + 1)
 .TP
-\fB\-v\fR, \fB\-\-verbose\fR      <\fInum\fR>     Set logging level (0 to 3), 0 is off  (Default: 3)
+\fB\-c\fR, \fB\-\-font\-combined\fR <\fIbool\fR>    !!Experimental!! When there are multiple input files, combine the (subsetted) fonts with the same fontname together (Default: False)
 .TP
-\fB\-h\fR, \fB\-\-help\fR                   Get help info
+\fB\-v\fR, \fB\-\-verbose\fR       <\fInum\fR>     Set logging level (0 to 3), 0 is off  (Default: 3)
+.TP
+\fB\-h\fR, \fB\-\-help\fR                    Get help info
 .SH "CAUTION"
 According \fBASS Specs\fR, only Truetype fonts can be embedded into ASS Script.
 This program will ignore this rule and embed non\-ttf fonts in by force.
