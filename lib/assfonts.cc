@@ -39,12 +39,12 @@
 
 namespace fs = ghc::filesystem;
 
-using LogType = struct {
+struct LogType {
   ASSFONTS_LOG_LEVEL level;
   std::string msg;
 };
 
-using LogQueue = struct {
+struct LogQueue {
   bool is_finished = false;
   std::queue<LogType> queue;
 };

@@ -38,6 +38,7 @@ class HbBlob {
     Destroy();
     hb_blob_ = prev.hb_blob_;
     prev.hb_blob_ = nullptr;
+    return *this;
   }
 
   inline hb_blob_t*& get() { return hb_blob_; }
@@ -66,6 +67,7 @@ class HbFace {
     Destroy();
     hb_face_ = prev.hb_face_;
     prev.hb_face_ = nullptr;
+    return *this;
   }
 
   inline hb_face_t*& get() { return hb_face_; }
@@ -94,6 +96,7 @@ class HbSet {
     Destroy();
     hb_set_ = prev.hb_set_;
     prev.hb_set_ = nullptr;
+    return *this;
   }
 
   inline hb_set_t*& get() { return hb_set_; }
@@ -127,6 +130,7 @@ class HbSubsetInput {
     Destroy();
     hb_subset_input_ = prev.hb_subset_input_;
     prev.hb_subset_input_ = nullptr;
+    return *this;
   }
 
   inline hb_subset_input_t*& get() { return hb_subset_input_; }

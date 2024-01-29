@@ -53,10 +53,10 @@ class AssFontEmbedder {
 
  private:
   const AssParser& ap_;
+  std::vector<FontSubsetter::FontSubsetInfo> subfonts_info_;
   std::shared_ptr<Logger> logger_;
   AString output_dir_path_;
   std::map<std::string, std::string> fontname_map_;
-  std::vector<FontSubsetter::FontSubsetInfo> subfonts_info_;
 
   void WriteOutput(const std::vector<std::string>& text, size_t& num_line,
                    std::ofstream& output_ass);

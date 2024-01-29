@@ -99,10 +99,10 @@ class FontSubsetter {
  private:
   FT_Library ft_library_;
   const FontParser& fp_;
+  std::map<AssParser::FontDesc, std::unordered_set<char32_t>> font_sets_;
   std::shared_ptr<Logger> logger_;
   AString subfont_dir_;
   std::vector<FontSubsetInfo> subfonts_info_;
-  std::map<AssParser::FontDesc, std::unordered_set<char32_t>> font_sets_;
 
   bool FindFont(
       const std::pair<AssParser::FontDesc, std::unordered_set<char32_t>>&

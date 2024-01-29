@@ -48,6 +48,7 @@ class FTLibrary {
     Destroy();
     ft_library_ = prev.ft_library_;
     prev.ft_library_ = nullptr;
+    return *this;
   }
 
   inline FT_Library& get() { return ft_library_; }
@@ -72,6 +73,7 @@ class FTFace {
     Destroy();
     ft_face_ = prev.ft_face_;
     prev.ft_face_ = nullptr;
+    return *this;
   }
 
   inline FT_Face& get() { return ft_face_; }
