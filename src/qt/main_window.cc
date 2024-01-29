@@ -932,7 +932,9 @@ void MainWindow::OnResetActionTrigger() {
   input_line_->clear();
   output_line_->clear();
   font_line_->clear();
-  database_line_->clear();
+
+  QDir appdata_dir(QString::fromStdString(SAVE_FILES_PATH));
+  database_line_->setText(QDir::toNativeSeparators(appdata_dir.absolutePath()));
 
   hdr_combo_->setCurrentIndex(0);
   subset_checkbox_->setChecked(false);
@@ -955,6 +957,5 @@ void MainWindow::OnResetActionTrigger() {
                          QString::number(ASSFONTS_VERSION_PATCH);
   log_buffer_.push_back({ASSFONTS_TEXT, version_info});
   log_buffer_.push_back({ASSFONTS_TEXT, ""});
-  RefreshLogText();
   RefreshLogText();
 }

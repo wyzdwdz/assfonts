@@ -82,16 +82,19 @@ void ConsumeQueue(std::shared_ptr<ass::Logger> logger, LogQueue& queue,
       std::unique_lock<std::mutex> lock(mtx);
       cv.wait(lock, [&] { return !queue.queue.empty() || queue.is_finished; });
 
-      if (queue.is_finished) {
-        break;
-      }
-
-      if (queue.queue.empty()) {
-        continue;
-      }
-
       ShowLog(logger, queue.queue.front());
       queue.queue.pop();
+
+      if (queue.is_finished) {
+        while (true) {
+          if (queue.queue.empty()) {
+            break;
+          }
+          ShowLog(logger, queue.queue.front());
+          queue.queue.pop();
+        }
+        break;
+      }
     }
   }
 }

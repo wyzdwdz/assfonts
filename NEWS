@@ -3,6 +3,7 @@ Saturday, January 27, 2024
 ====================================
 - add new experimental feature: font combined
 - add new GUI feature: Reset all
+- fix bug: cannot show last log messages
 
 
 Overview of changes leading to v0.6.1
