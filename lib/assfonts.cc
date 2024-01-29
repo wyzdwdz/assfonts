@@ -82,6 +82,10 @@ void ConsumeQueue(std::shared_ptr<ass::Logger> logger, LogQueue& queue,
       std::unique_lock<std::mutex> lock(mtx);
       cv.wait(lock, [&] { return !queue.queue.empty() || queue.is_finished; });
 
+      if (queue.queue.empty()) {
+        break;
+      }
+
       ShowLog(logger, queue.queue.front());
       queue.queue.pop();
 
