@@ -95,13 +95,12 @@ jobs:
           shell: bash
           run: |
             cd /var/www
-            pip3 install -U conan
             conan export --version 8.0.1 -nr recipes/harfbuzz_expt
             conan export --version system -nr recipes/dbus_system
             conan export --version 5.15.10 -nr recipes/qt5_fix
             conan config install .github/conan2-linux
             conan install . -pr:h ${{ matrix.profile }} -pr:b ${{ matrix.profile }}
-            apt update && apt -y install squashfs-tools libxcb-xinerama0
+            apt update && apt -y install squashfs-tools
             cp -f ./install/bin/assfonts assfonts-${{ github.ref_name }}-aarch64-Linux
             linuxdeploy --appdir=./assfonts-gui_AppDir -e ./install/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
             mkdir -p ./assfonts-gui_AppDir/usr/share/doc/assfonts
