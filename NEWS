@@ -1,3 +1,9 @@
+Overview of changes leading to v0.6.3
+Saturday, Wednesday 30, 2024
+====================================
+- fix logger bug: crash when print curly brackets
+
+
 Overview of changes leading to v0.6.2
 Saturday, January 27, 2024
 ====================================
