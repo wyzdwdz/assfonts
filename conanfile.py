@@ -31,6 +31,9 @@ class Assfonts(ConanFile):
         self.requires("openssl/1.1.1u", override=True)
         self.requires("zlib/1.2.13", override=True)
         self.requires("libgettext/0.21", override=True)
+        self.requires("libpng/1.6.40", override=True)
+        if self.settings.os == "Linux":
+            self.requires("expat/2.5.0", override=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/3.26.3")
