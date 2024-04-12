@@ -38,7 +38,7 @@ jobs:
           shell: bash
           run: |
             cd /var/www
-            pip3 install -U conan==2.0.17
+            pip3 install -U conan==2.2
             export CONAN_HOME=/var/www/.conan2
             apt update && apt -y install lld-10
             update-alternatives --install /usr/bin/ld ld /usr/lib/llvm-10/bin/lld 10
@@ -66,7 +66,7 @@ jobs:
           shell: bash
           run: |
             cd /var/www
-            pip3 install -U conan==2.0.17
+            pip3 install -U conan==2.2
             export CONAN_HOME=/var/www/.conan2
             apt update && apt -y install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu lld-10
             update-alternatives --install /usr/bin/ld ld /usr/lib/llvm-10/bin/lld 10
@@ -95,7 +95,7 @@ jobs:
           shell: bash
           run: |
             cd /var/www
-            pip3 install -U conan==2.0.17
+            pip3 install -U conan==2.2
             conan export --version 8.0.1 -nr recipes/harfbuzz_expt
             conan export --version system -nr recipes/dbus_system
             conan export --version 5.15.10 -nr recipes/qt5_fix
@@ -157,7 +157,7 @@ jobs:
         id: conan
         uses: turtlebrowser/get-conan@main
         with:
-          version: 2.0.17
+          version: 2.2
 
       - name: set CONAN_HOME
         run: Add-Content -Path $env:GITHUB_ENV -Value "CONAN_HOME=${{ github.workspace }}\.conan2"
@@ -233,7 +233,7 @@ jobs:
         id: conan
         uses: turtlebrowser/get-conan@main
         with:
-          version: 2.0.17
+          version: 2.2
 
       - name: set CONAN_HOME
         run: echo "CONAN_HOME=${{ github.workspace }}/.conan2" >> "$GITHUB_ENV"
