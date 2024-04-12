@@ -397,8 +397,43 @@ void FontParser::ParseFontName(const FT_Face& ft_face,
   }
 
   wbuf = std::string(reinterpret_cast<char*>(name.string), name.string_len);
-  if (!IconvConvert(wbuf, buf, "UTF-16BE", "UTF-8")) {
-    return;
+
+  switch (name.encoding_id) {
+    case TT_MS_ID_PRC: {
+      std::string wbufn = wbuf;
+      for (auto it = wbufn.begin(); it != wbufn.end(); ++it) {
+        if (*it == '\0') {
+          it = wbufn.erase(it);
+        }
+      }
+      if (!IconvConvert(wbufn, buf, "GB2312", "UTF-8")) {
+        if (!IconvConvert(wbuf, buf, "UTF-16BE", "UTF-8")) {
+          return;
+        }
+      }
+      break;
+    }
+
+    case TT_MS_ID_BIG_5: {
+      std::string wbufn = wbuf;
+      for (auto it = wbufn.begin(); it != wbufn.end(); ++it) {
+        if (*it == '\0') {
+          it = wbufn.erase(it);
+        }
+      }
+      if (!IconvConvert(wbufn, buf, "BIG-5", "UTF-8")) {
+        if (!IconvConvert(wbuf, buf, "UTF-16BE", "UTF-8")) {
+          return;
+        }
+      }
+      break;
+    }
+
+    default:
+      if (!IconvConvert(wbuf, buf, "UTF-16BE", "UTF-8")) {
+        return;
+      }
+      break;
   }
 
   size_t last_none_zero = buf.find_last_not_of('\0');
