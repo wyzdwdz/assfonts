@@ -95,13 +95,8 @@ jobs:
           shell: bash
           run: |
             cd /var/www
-            pip3 install -U conan==2.2
-            conan export --version 8.0.1 -nr recipes/harfbuzz_expt
-            conan export --version system -nr recipes/dbus_system
-            conan export --version 5.15.10 -nr recipes/qt5_fix
-            conan config install .github/conan2-linux
-            conan install . -pr:h ${{ matrix.profile }} -pr:b ${{ matrix.profile }}
             apt update && apt -y install squashfs-tools
+            apt-get -y install libdbus-1-dev libdrm-dev libegl-mesa0 libegl1 libgbm1 libgl1-mesa-dev libgles1 libgles2 libglvnd-core-dev libglvnd-dev libopengl0 libpthread-stubs0-dev libwayland-client0 libwayland-server0 libx11-dev libx11-xcb-dev libxau-dev libxcb-dri2-0-dev libxcb-dri3-dev libxcb-glx0-dev libxcb-present-dev libxcb-randr0 libxcb-randr0-dev libxcb-render0 libxcb-render0-dev libxcb-shape0-dev libxcb-sync-dev libxcb-xfixes0 libxcb-xfixes0-dev libxcb1-dev libxdamage-dev libxdmcp-dev libxext-dev libxfixes-dev libxshmfence-dev libxxf86vm-dev mesa-common-dev x11proto-core-dev x11proto-damage-dev x11proto-dev x11proto-fixes-dev x11proto-xext-dev x11proto-xf86vidmode-dev xorg-sgml-doctools xtrans-dev libfontenc-dev libice-dev libsm-dev libxaw7-dev libxcb-composite0 libxcb-composite0-dev libxcb-cursor-dev libxcb-cursor0 libxcb-ewmh-dev libxcb-ewmh2 libxcb-icccm4 libxcb-icccm4-dev libxcb-image0 libxcb-image0-dev libxcb-keysyms1 libxcb-keysyms1-dev libxcb-render-util0 libxcb-render-util0-dev libxcb-res0 libxcb-res0-dev libxcb-shm0 libxcb-shm0-dev libxcb-xinerama0 libxcb-xinerama0-dev libxcb-xkb-dev libxcb-xkb1 libxcomposite-dev libxcursor-dev libxi-dev libxinerama-dev libxkbfile-dev libxmu-dev libxmu-headers libxmuu-dev libxpm-dev libxrandr-dev libxrender-dev libxres-dev libxres1 libxss-dev libxt-dev libxtst-dev libxv-dev uuid-dev x11proto-composite-dev x11proto-input-dev x11proto-randr-dev x11proto-record-dev x11proto-scrnsaver-dev x11proto-xinerama-dev
             cp -f ./install/bin/assfonts assfonts-${{ github.ref_name }}-aarch64-Linux
             linuxdeploy --appdir=./assfonts-gui_AppDir -e ./install/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
             mkdir -p ./assfonts-gui_AppDir/usr/share/doc/assfonts
