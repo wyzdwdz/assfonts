@@ -3,8 +3,8 @@ run-name: Build Release by ${{ github.actor }}
 on: 
   release:
     types: [ published ]
-  puch:
-    branches: 
+  push:
+    branches: [ vcpkg ] 
 jobs:
   build-linux:
     runs-on: ubuntu-22.04
