@@ -34,16 +34,16 @@ jobs:
             cd /var/www
             ~/linuxdeploy-aarch64.AppImage --appimage-extract-and-run
 
-      - name: aarch64 build appimage
-        if: ${{ matrix.arch == 'aarch64' }}
-        uses: addnab/docker-run-action@v3
-        with:
-          image: wyzdwdz/assfonts-arm64:latest
-          options: -v ${{ github.workspace }}:/var/www --platform linux/arm64
-          shell: bash
-          run: |
-            cd /var/www
-            ~/linuxdeploy-aarch64.AppImage --appimage-extract-and-run
+      # - name: aarch64 build appimage
+      #   if: ${{ matrix.arch == 'aarch64' }}
+      #   uses: addnab/docker-run-action@v3
+      #   with:
+      #     image: wyzdwdz/assfonts-arm64:latest
+      #     options: -v ${{ github.workspace }}:/var/www --platform linux/arm64
+      #     shell: bash
+      #     run: |
+      #       cd /var/www
+      #       ~/linuxdeploy-aarch64.AppImage --appimage-extract-and-run
         
       - name: x86_64 build binary and appimage
         if: ${{ matrix.arch == 'x86_64' }}
