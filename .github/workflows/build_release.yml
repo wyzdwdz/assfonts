@@ -25,19 +25,19 @@ jobs:
         uses: docker/setup-qemu-action@v3
 
       - name: aarch64 build appimage
-      if: ${{ matrix.arch == 'aarch64' }}
-      uses: addnab/docker-run-action@v3
-      with:
-        image: wyzdwdz/assfonts-arm64:latest
-        options: -v ${{ github.workspace }}:/var/www --platform linux/arm64/v8
-        shell: bash
-        run: |
-          cd /var/www
-          cp -f ./out/install/linux-arm64/bin/assfonts assfonts-${{ github.ref_name }}-aarch64-Linux
-          ~/linuxdeploy-aarch64.AppImage --appimage-extract-and-run --appdir=./assfonts-gui_AppDir -e ./out/install/linux-arm64/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
-          mkdir -p ./assfonts-gui_AppDir/usr/share/doc/assfonts
-          cp LICENSE NEWS NOTICE ./assfonts-gui_AppDir/usr/share/doc/assfonts
-          ~/appimagetool-aarch64.AppImage --appimage-extract-and-run ./assfonts-gui_AppDir assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
+        if: ${{ matrix.arch == 'aarch64' }}
+        uses: addnab/docker-run-action@v3
+        with:
+          image: wyzdwdz/assfonts-arm64:latest
+          options: -v ${{ github.workspace }}:/var/www --platform linux/arm64/v8
+          shell: bash
+          run: |
+            cd /var/www
+            cp -f ./out/install/linux-arm64/bin/assfonts assfonts-${{ github.ref_name }}-aarch64-Linux
+            ~/linuxdeploy-aarch64.AppImage --appimage-extract-and-run --appdir=./assfonts-gui_AppDir -e ./out/install/linux-arm64/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
+            mkdir -p ./assfonts-gui_AppDir/usr/share/doc/assfonts
+            cp LICENSE NEWS NOTICE ./assfonts-gui_AppDir/usr/share/doc/assfonts
+            ~/appimagetool-aarch64.AppImage --appimage-extract-and-run ./assfonts-gui_AppDir assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
         
       - name: x86_64 build binary and appimage
         if: ${{ matrix.arch == 'x86_64' }}
