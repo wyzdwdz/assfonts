@@ -34,6 +34,7 @@ jobs:
           shell: bash
           run: |
             source ~/.bashrc
+            export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
             cd /var/www
             cp ./.github/linux/CMakeUserPresets.json .
             cmake . --preset linux-x64
@@ -53,6 +54,7 @@ jobs:
           shell: bash
           run: |
             source ~/.bashrc
+            export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
             cd /var/www
             cp ./.github/linux/CMakeUserPresets.json .
             cmake . --preset linux-arm64

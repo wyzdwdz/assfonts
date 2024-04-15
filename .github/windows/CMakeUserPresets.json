@@ -12,9 +12,6 @@
       "generator": "Ninja Multi-Config",
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
-        "CMAKE_C_COMPILER": "clang-cl.exe",
-        "CMAKE_CXX_COMPILER": "clang-cl.exe",
-        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/.github/windows/triplets",
         "VCPKG_HOST_TRIPLET": "x64-windows-static-md"
       },
       "vendor": {
