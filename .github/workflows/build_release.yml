@@ -22,18 +22,6 @@ jobs:
 
       - name: set up QEMU
         uses: docker/setup-qemu-action@v2
-
-      - name: aarch64 build appimage
-        if: ${{ matrix.arch == 'aarch64' }}
-        uses: addnab/docker-run-action@v3
-        with:
-          image: wyzdwdz/assfonts-arm64:latest
-          options: -v ${{ github.workspace }}:/var/www --platform linux/arm64
-          shell: bash
-          run: |
-            cd /var/www
-            ~/.local/bin/linuxdeploy
-            ~/.local/bin/appimagetool
         
       - name: x86_64 build binary and appimage
         if: ${{ matrix.arch == 'x86_64' }}
