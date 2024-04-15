@@ -1,0 +1,6 @@
+{
+    "Keys": [
+	 @FCITX5_QT_EXTRA_PLUGIN_NAME@
+	 "fcitx5"
+    ]
+}

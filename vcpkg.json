@@ -1,0 +1,32 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+    "name": "assfonts",
+    "version": "0.6.3",
+    "dependencies": [
+        {
+            "name": "harfbuzz",
+            "features": [
+                "experimental-api"
+            ]
+        },
+        "freetype",
+        "nlohmann-json",
+        "libiconv",
+        "fmt",
+        "cli11",
+        "ghc-filesystem",
+        "pcre2",
+        "string-view-lite",
+        "qtbase",
+        {
+            "name": "cpp-httplib",
+            "features": [
+                "openssl"
+            ]
+        },
+        {
+            "name": "ecm",
+            "platform": "linux"
+        }
+    ]
+}

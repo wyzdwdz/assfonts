@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(Qt4 @REQUIRED_QT4_VERSION@)
+
+include("${CMAKE_CURRENT_LIST_DIR}/Fcitx5Qt4DBusAddonsTargets.cmake")

@@ -28,7 +28,7 @@
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
 Q_IMPORT_PLUGIN(QIbusPlatformInputContextPlugin)
 Q_IMPORT_PLUGIN(QComposePlatformInputContextPlugin)
-Q_IMPORT_PLUGIN(QFcitxPlatformInputContextPlugin)
+Q_IMPORT_PLUGIN(QFcitx5PlatformInputContextPlugin)
 #elif _WIN32
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 #elif __APPLE__
@@ -36,8 +36,6 @@ Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin)
 #endif
 
 int main(int argc, char** argv) {
-  QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-  QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
   QApplication::setHighDpiScaleFactorRoundingPolicy(
       Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 

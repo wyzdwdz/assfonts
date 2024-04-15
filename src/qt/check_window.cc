@@ -72,7 +72,7 @@ void CheckWindow::InitConcurrents() {
   });
 
   QFuture<QString> future_version =
-      QtConcurrent::run(this, &CheckWindow::GetLatestVersion);
+      QtConcurrent::run([this] { return CheckWindow::GetLatestVersion(); });
   watcher_version_->setFuture(future_version);
 
   watcher_link_ = new QFutureWatcher<QString>(this);
@@ -80,7 +80,7 @@ void CheckWindow::InitConcurrents() {
           [this]() { link_->setText(watcher_link_->result()); });
 
   QFuture<QString> future_link =
-      QtConcurrent::run(this, &CheckWindow::GetDownloadLink);
+      QtConcurrent::run([this] { return CheckWindow::GetDownloadLink(); });
   watcher_link_->setFuture(future_link);
 }
 

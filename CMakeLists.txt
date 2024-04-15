@@ -1,21 +1,33 @@
 ﻿cmake_minimum_required (VERSION 3.16)
 
+include(FetchContent)
+FetchContent_Declare(vcpkg
+    GIT_REPOSITORY https://github.com/wyzdwdz/vcpkg.git
+    GIT_TAG vcpkg-assfonts
+)
+FetchContent_MakeAvailable(vcpkg)
+
+set(CMAKE_TOOLCHAIN_FILE "${vcpkg_SOURCE_DIR}/scripts/buildsystems/vcpkg.cmake" CACHE FILEPATH "")
+
 project (assfonts CXX C)
+
+set(VERSION_MAJOR 0)
+set(VERSION_MINOR 6)
+set(VERSION_PATCH 3)
 
 add_subdirectory(3rdparty)
 
-find_package(harfbuzz REQUIRED)
-find_package(freetype REQUIRED)
-find_package(nlohmann_json REQUIRED)
+find_package(harfbuzz CONFIG REQUIRED)
+find_package(Freetype REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Iconv REQUIRED)
-find_package(fmt REQUIRED)
-find_package(CLI11 REQUIRED)
-find_package(threadpool REQUIRED)
-find_package(ghc_filesystem REQUIRED)
-find_package(PCRE2 REQUIRED)
-find_package(string-view-lite REQUIRED)
-find_package(Qt5 REQUIRED)
-find_package(httplib REQUIRED)
+find_package(fmt CONFIG REQUIRED)
+find_package(CLI11 CONFIG REQUIRED)
+find_package(ghc_filesystem CONFIG REQUIRED)
+find_package(pcre2 CONFIG REQUIRED)
+find_package(string-view-lite CONFIG REQUIRED)
+find_package(Qt6 CONFIG REQUIRED COMPONENTS Core Gui Widgets Concurrent)
+find_package(httplib CONFIG REQUIRED)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     if(CMAKE_BUILD_TYPE MATCHES "Debug")
@@ -31,7 +43,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "
     endif()
 endif()
 
-set(CXX_STD_VER cxx_std_11)
+set(CXX_STD_VER cxx_std_17)
 
 include(GNUInstallDirs)
 

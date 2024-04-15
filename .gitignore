@@ -458,7 +458,7 @@ conanbuildinfo.cmake
 conanbuildinfo.txt
 conaninfo.txt
 graph_info.json
-CMakeUserPresets.json
+/CMakeUserPresets.json
 install/
 
 #output directory

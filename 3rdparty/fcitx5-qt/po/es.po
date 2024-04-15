@@ -1,0 +1,476 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#
+# Translators:
+# Adolfo Jayme Barrientos, 2012
+msgid ""
+msgstr ""
+"Project-Id-Version: fcitx5-qt\n"
+"Report-Msgid-Bugs-To: fcitx-dev@googlegroups.com\n"
+"POT-Creation-Date: 2023-11-18 20:22+0000\n"
+"PO-Revision-Date: 2015-12-12 07:18+0000\n"
+"Last-Translator: csslayer <wengxt@gmail.com>\n"
+"Language-Team: Spanish (http://www.transifex.com/fcitx/fcitx/language/es/)\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: qt5/quickphrase-editor/editor.cpp:260
+msgid "%1 is a system file, do you want to delete all phrases instead?"
+msgstr ""
+
+#. i18n: file: qt5/quickphrase-editor/editor.ui:52
+#. i18n: ectx: property (text), widget (QPushButton, addButton)
+#: rc.cpp:12
+#, kde-format
+msgid "&Add"
+msgstr ""
+
+#: qt5/guiwrapper/mainwindow.cpp:29 qt6/guiwrapper/mainwindow.cpp:29
+msgid "&Apply"
+msgstr ""
+
+#. i18n: file: qt5/quickphrase-editor/editor.ui:63
+#. i18n: ectx: property (text), widget (QPushButton, batchEditButton)
+#: rc.cpp:15
+#, kde-format
+msgid "&Batch Edit"
+msgstr ""
+
+#: qt5/guiwrapper/mainwindow.cpp:31 qt6/guiwrapper/mainwindow.cpp:31
+msgid "&Close"
+msgstr ""
+
+#. i18n: file: qt5/quickphrase-editor/editor.ui:74
+#. i18n: ectx: property (text), widget (QPushButton, deleteButton)
+#: rc.cpp:18
+#, kde-format
+msgid "&Delete"
+msgstr ""
+
+#. i18n: file: qt5/quickphrase-editor/editor.ui:103
+#. i18n: ectx: property (text), widget (QPushButton, importButton)
+#: rc.cpp:24
+#, kde-format
+msgid "&Import"
+msgstr ""
+
+#: qt5/guiwrapper/mainwindow.cpp:28 qt6/guiwrapper/mainwindow.cpp:28
+msgid "&Ok"
+msgstr ""
+
+#. i18n: file: qt5/quickphrase-editor/editor.ui:45
+#. i18n: ectx: property (text), widget (QPushButton, operationButton)
+#: rc.cpp:9
+#, kde-format
+msgid "&Operation"
+msgstr ""
+
+#: qt5/guiwrapper/mainwindow.cpp:30 qt6/guiwrapper/mainwindow.cpp:30
+msgid "&Reset"
+msgstr ""
+
+#: qt5/guiwrapper/wrapperapp.cpp:31 qt6/guiwrapper/wrapperapp.cpp:31
+msgid "A launcher for Fcitx Gui plugin."
+msgstr ""
+
+#: qt5/quickphrase-editor/editor.cpp:33
+msgid "Add File"
+msgstr ""
+
+#: qt5/quickphrase-editor/editor.cpp:272
+msgid "Are you sure to delete %1?"
+msgstr ""
+
+#. i18n: file: qt5/quickphrase-editor/batchdialog.ui:14
+#. i18n: ectx: property (windowTitle), widget (QDialog, BatchDialog)
+#: rc.cpp:3
+#, kde-format
+msgid "Batch editing"
+msgstr ""
+
+#: qt5/quickphrase-editor/editor.cpp:238
+msgid "Cannot create file %1."
+msgstr ""
+
+#: qt5/quickphrase-editor/editor.cpp:259
+msgid "Cannot remove system file"
+msgstr ""
+
+#: qt5/guiwrapper/wrapperapp.cpp:37 qt6/guiwrapper/wrapperapp.cpp:37
+#, fuzzy
+msgid "Config path"
+msgstr "Configurar"
+
+#: qt5/quickphrase-editor/editor.cpp:271
+msgid "Confirm deletion"
+msgstr ""
+
+#: qt5/quickphrase-editor/editor.cpp:221
+msgid "Create new file"
+msgstr ""
+
+#. i18n: file: qt5/quickphrase-editor/editor.ui:85
+#. i18n: ectx: property (text), widget (QPushButton, clearButton)
+#: rc.cpp:21
+#, kde-format
+msgid "De&lete All"
+msgstr ""
+
+#: qt5/quickphrase-editor/filelistmodel.cpp:29
+msgid "Default"
+msgstr ""
+
+#. i18n: file: qt5/quickphrase-editor/editor.ui:114
+#. i18n: ectx: property (text), widget (QPushButton, exportButton)
+#: rc.cpp:27
+#, kde-format
+msgid "E&xport"
+msgstr ""
+
+#: qt5/widgetsaddons/fcitxqtkeysequencewidget.cpp:355
+#: qt6/widgetsaddons/fcitxqtkeysequencewidget.cpp:324
+msgid "Empty"
+msgstr ""
+
+#: qt5/quickphrase-editor/editor.cpp:280
+msgid "Error while deleting %1."
+msgstr ""
+
+#: qt5/guiwrapper/mainwindow.cpp:106 qt6/guiwrapper/mainwindow.cpp:106
+msgid "Failed to notify Fcitx"
+msgstr ""
+
+#: qt5/guiwrapper/mainwindow.cpp:107 qt6/guiwrapper/mainwindow.cpp:107
+msgid "Failed to notify Fcitx about the configuration change."
+msgstr ""
+
+#: qt5/guiwrapper/org.fcitx.fcitx5-qt5-gui-wrapper.desktop.in.in:3
+msgid "Fcitx 5 Qt5 Gui Wrapper"
+msgstr ""
+
+#: qt6/guiwrapper/org.fcitx.fcitx5-qt6-gui-wrapper.desktop.in.in:3
+msgid "Fcitx 5 Qt6 Gui Wrapper"
+msgstr ""
+
+#: qt5/quickphrase-editor/editor.cpp:237 qt5/quickphrase-editor/editor.cpp:279
+msgid "File Operation Failed"
+msgstr ""
+
+#: qt5/quickphrase-editor/editor.cpp:226
+msgid "File name should not contain '/'."
+msgstr ""
+
+#: qt5/guiwrapper/org.fcitx.fcitx5-qt5-gui-wrapper.desktop.in.in:4
+#: qt6/guiwrapper/org.fcitx.fcitx5-qt6-gui-wrapper.desktop.in.in:4
+#, fuzzy
+msgid "Input Method Configuration helper"
+msgstr "Método de entrada desactivado"
+
+#: qt5/quickphrase-editor/editor.cpp:225
+msgid "Invalid filename"
+msgstr ""
+
+#: qt5/widgetsaddons/fcitxqtkeysequencewidget.cpp:179
+#: qt6/widgetsaddons/fcitxqtkeysequencewidget.cpp:148
+msgid "Key code mode"
+msgstr ""
+
+#: qt5/quickphrase-editor/model.cpp:73
+msgid "Keyword"
+msgstr ""
+
+#: qt5/guiwrapper/org.fcitx.fcitx5-qt5-gui-wrapper.desktop.in.in:5
+#: qt6/guiwrapper/org.fcitx.fcitx5-qt6-gui-wrapper.desktop.in.in:5
+msgid "Load configuration plugin for Fcitx Addon"
+msgstr ""
+
+#: qt5/guiwrapper/wrapperapp.cpp:34 qt6/guiwrapper/wrapperapp.cpp:34
+msgid "Parent window ID"
+msgstr ""
+
+#: qt5/quickphrase-editor/model.cpp:75
+msgid "Phrase"
+msgstr ""
+
+#: qt5/quickphrase-editor/editor.cpp:221
+msgid "Please input a filename for newfile"
+msgstr ""
+
+#: qt5/quickphrase-editor/editor.cpp:101
+#, fuzzy
+msgid "Quick Phrase Editor"
+msgstr "Lista de frases rápidas"
+
+#: qt5/quickphrase-editor/editor.cpp:37
+msgid "Refresh List"
+msgstr ""
+
+#: qt5/quickphrase-editor/editor.cpp:35
+msgid "Remove File"
+msgstr ""
+
+#: qt5/quickphrase-editor/editor.cpp:85
+msgid "Save Changes"
+msgstr ""
+
+#: qt5/guiwrapper/wrapperapp.cpp:35 qt6/guiwrapper/wrapperapp.cpp:35
+msgid "Test if config exists"
+msgstr ""
+
+#: qt5/quickphrase-editor/editor.cpp:86
+msgid ""
+"The content has changed.\n"
+"Do you want to save the changes or discard them?"
+msgstr ""
+
+#: qt5/widgetsaddons/fcitxqtkeysequencewidget.cpp:392
+#: qt6/widgetsaddons/fcitxqtkeysequencewidget.cpp:361
+msgid "The key you just pressed is not supported by Qt."
+msgstr ""
+
+#: qt5/widgetsaddons/fcitxqtkeysequencewidget.cpp:393
+#: qt6/widgetsaddons/fcitxqtkeysequencewidget.cpp:362
+msgid "Unsupported Key"
+msgstr ""
+
+#. i18n: file: qt5/quickphrase-editor/batchdialog.ui:50
+#. i18n: ectx: property (text), widget (QLabel, infoLabel)
+#: rc.cpp:6
+#, kde-format
+msgid "Use <Keyword> <Phrase> format on every line."
+msgstr ""
+
+#: qt5/guiwrapper/wrapperapp.cpp:37 qt6/guiwrapper/wrapperapp.cpp:37
+msgid "path"
+msgstr ""
+
+#: qt5/guiwrapper/wrapperapp.cpp:34 qt6/guiwrapper/wrapperapp.cpp:34
+msgid "winid"
+msgstr ""
+
+#~ msgid " Ctrl+Delete To Delete"
+#~ msgstr "Ctrl+Supr para eliminar"
+
+#~ msgid "All"
+#~ msgstr "Todo"
+
+#~ msgid "Appearance"
+#~ msgstr "Apariencia"
+
+#~ msgid "Auto Create Phrase"
+#~ msgstr "Crear frase automáticamente"
+
+#~ msgid "Background Image"
+#~ msgstr "Imagen de fondo"
+
+#~ msgid "Candidate Word Number"
+#~ msgstr "Número de palabra candidata"
+
+#~ msgid "Category"
+#~ msgstr "Categoría"
+
+#~ msgid "Code is "
+#~ msgstr "El código es"
+
+#~ msgid "Color of Cursor"
+#~ msgstr "Color del cursor"
+
+#~ msgid "Comment"
+#~ msgstr "Comentario"
+
+#~ msgid "Convert Simplified Chinese To Traditional Chinese"
+#~ msgstr "Convertir chino simplificado a chino tradicional"
+
+#~ msgid "Copy"
+#~ msgstr "Copiar"
+
+#~ msgid "Current Enabled Input Method List"
+#~ msgstr "Lista de métodos de entrada activados"
+
+#~ msgid "Current Input Method Name"
+#~ msgstr "Nombre del método de entrada actual"
+
+#~ msgid "Default Input Method State"
+#~ msgstr "Estado predeterminado del método de entrada"
+
+#~ msgid "Dependency"
+#~ msgstr "Dependencia"
+
+#~ msgid "Disabled"
+#~ msgstr "Desactivado"
+
+#~ msgid "Do not show input window if there is only preedit string"
+#~ msgstr "No mostrar ventanas de entrada si solo hay una cadena preeditada"
+
+#~ msgid "Enable"
+#~ msgstr "Activar"
+
+#~ msgid "Enabled"
+#~ msgstr "Activado"
+
+#~ msgid "Error: Load fontconfig failed"
+#~ msgstr "Error: Falló la carga de fontconfig"
+
+#~ msgid "Exit"
+#~ msgstr "Salir"
+
+#~ msgid "Fcitx"
+#~ msgstr "Fcitx"
+
+#~ msgid "Font"
+#~ msgstr "Tipo de letra"
+
+#~ msgid "Frontend"
+#~ msgstr "Interfaz"
+
+#~ msgid "Hide"
+#~ msgstr "Ocultar"
+
+#~ msgid "Inactive"
+#~ msgstr "Inactivo"
+
+#~ msgid "Input Font Size"
+#~ msgstr "Tamaño de letra de entrada"
+
+#~ msgid "Input Method"
+#~ msgstr "Método de entrada"
+
+#~ msgid "Input Speed: "
+#~ msgstr "Velocidad de entrada"
+
+#~ msgid ""
+#~ "Left/Right to choose selected character, Press Enter to confirm, Press "
+#~ "Escape to Cancel"
+#~ msgstr ""
+#~ "Izq/Der para elegir el carácter seleccionado. Oprima Intro para "
+#~ "confirmar. Oprima Escape para cancelar."
+
+#~ msgid "Library"
+#~ msgstr "Biblioteca"
+
+#~ msgid "MS"
+#~ msgstr "MS"
+
+#~ msgid "Menu Font"
+#~ msgstr "Tipo de letra del menú"
+
+#~ msgid "Menu Font Size"
+#~ msgstr "Tamaño de letra de los menús"
+
+#~ msgid "Migrate the old file path to the new one"
+#~ msgstr "Migrar la ruta de archivo anterior a la nueva"
+
+#~ msgid "Module"
+#~ msgstr "Módulo"
+
+#~ msgid "Name"
+#~ msgstr "Nombre"
+
+#~ msgid "Name that can be display in UI"
+#~ msgstr "Nombre que puede mostrarse en la IU"
+
+#~ msgid "Native"
+#~ msgstr "Nativo"
+
+#~ msgid "No"
+#~ msgstr "No"
+
+#~ msgid "Online Help"
+#~ msgstr "Ayuda en línea"
+
+#~ msgid "OpenCC"
+#~ msgstr "OpenCC"
+
+#~ msgid "Other Color"
+#~ msgstr "Otro color"
+
+#~ msgid "Output"
+#~ msgstr "Salida"
+
+#~ msgid "Parent"
+#~ msgstr "Padre"
+
+#~ msgid "Pinyin"
+#~ msgstr "Pinyin"
+
+#~ msgid "Pinyin: "
+#~ msgstr "Pinyin:"
+
+#~ msgid "Press Enter to input text"
+#~ msgstr "Oprima Intro para introducir texto"
+
+#~ msgid "Priority"
+#~ msgstr "Prioridad"
+
+#~ msgid "Resize"
+#~ msgstr "Redimensionar"
+
+#~ msgid "Save Auto Created Phrase"
+#~ msgstr "Guardar la frase creada automáticamente"
+
+#~ msgid "Show"
+#~ msgstr "Mostrar"
+
+#~ msgid "Show Input Speed"
+#~ msgstr "Mostrar velocidad de entrada"
+
+#~ msgid "Show Version"
+#~ msgstr "Mostrar versión"
+
+#~ msgid "Shuang Pin Schema"
+#~ msgstr "Shuang Pin Schema"
+
+#~ msgid "Shuangpin"
+#~ msgstr "Shuangpin"
+
+#~ msgid "Table"
+#~ msgstr "Tabla"
+
+#~ msgid "Type"
+#~ msgstr "Tipo"
+
+#~ msgid "UI"
+#~ msgstr "IU"
+
+#~ msgid "Unique Name for Table"
+#~ msgstr "Nombre único para la tabla"
+
+#~ msgid "Use Complete Pinyin"
+#~ msgstr "Usar pinyin completo"
+
+#~ msgid "Use Full Width Character"
+#~ msgstr "Usar carácter de anchura completa"
+
+#~ msgid "Use System Tray Icon"
+#~ msgstr "Usar icono en el área de notificación"
+
+#~ msgid "Use Wide Punctuation"
+#~ msgstr "Usar puntuación ancha"
+
+#~ msgid "User Defined"
+#~ msgstr "Definido por el usuario"
+
+#~ msgid "Virtual Keyboard"
+#~ msgstr "Teclado virtual"
+
+#~ msgid "Virtual Keyboard State"
+#~ msgstr "Estado del teclado virtual"
+
+#~ msgid "X11 not initialized"
+#~ msgstr "X11 no inicializado"
+
+#~ msgid "Zhongwenzhixing"
+#~ msgstr "Zhongwenzhixing"
+
+#~ msgid "Ziguang"
+#~ msgstr "Ziguang"
+
+#~ msgid "Ziranma"
+#~ msgstr "Ziranma"
+
+#~ msgid "your current font is: %s"
+#~ msgstr "su tipo de letra actual es: %s"

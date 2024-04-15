@@ -27,7 +27,7 @@
 #include <string>
 #include <vector>
 
-#include <ThreadPool/ThreadPool.h>
+#include "ThreadPool.h"
 #include <ghc/filesystem.hpp>
 
 #include "ass_font_embedder.h"

@@ -44,7 +44,7 @@ extern "C" {
 }
 #endif
 
-#include <ThreadPool/ThreadPool.h>
+#include "ThreadPool.h"
 #include <ghc/filesystem.hpp>
 #include <nlohmann/json.hpp>
 

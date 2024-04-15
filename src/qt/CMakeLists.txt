@@ -1,8 +1,15 @@
 ﻿cmake_minimum_required (VERSION 3.16)
 
-set(THIRD_PARTY_LIBS qt::qt
+set(THIRD_PARTY_LIBS Qt::Core
+                     Qt::Gui
+                     Qt::Widgets
+                     Qt::Concurrent
                      ghcFilesystem::ghc_filesystem
                      httplib::httplib)
+
+if(LINUX)
+    list(APPEND THIRD_PARTY_LIBS fcitx5platforminputcontextplugin-qt6)
+endif()
 
 set(TARGET_SOURCES main.cc
                    main_window.cc
@@ -23,7 +30,7 @@ elseif(APPLE)
 else()
 endif()
 
-qt5_add_resources(QT_RESOURCES resources/assfonts-gui.qrc)
+qt_add_resources(QT_RESOURCES resources/assfonts-gui.qrc)
 
 set(TARGET_NAME assfonts-gui)
 
@@ -33,12 +40,26 @@ set(CMAKE_AUTOUIC ON)
 						  
 add_executable(${TARGET_NAME} ${TARGET_SOURCES})
 
+if(LINUX)
+    qt_import_plugins(${TARGET_NAME} INCLUDE Qt::QXcbIntegrationPlugin
+                                             Qt::QIbusPlatformInputContextPlugin
+                                             Qt::QComposePlatformInputContextPlugin)
+elseif(WIN32)
+    qt_import_plugins(${TARGET_NAME} INCLUDE Qt::QWindowsIntegrationPlugin)
+elseif(APPLE)
+    qt_import_plugins(${TARGET_NAME} INCLUDE Qt::QCocoaIntegrationPlugin)
+endif()
+
 target_sources(${TARGET_NAME} PRIVATE ${QT_RESOURCES} ${TARGET_RESOURCES})
 
 target_link_libraries(${TARGET_NAME} PRIVATE ${THIRD_PARTY_LIBS} libassfonts)
 
 if(APPLE)
     target_link_options(${TARGET_NAME} PRIVATE -framework Foundation)
+endif()
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    target_link_options(${TARGET_NAME} PRIVATE -pthread -s)
 endif()
 
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTS})

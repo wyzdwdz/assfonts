@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Fcitx 5 Qt5 Gui Wrapper
+GenericName=Input Method Configuration helper
+Comment=Load configuration plugin for Fcitx Addon
+Icon=fcitx
+Exec=@CMAKE_INSTALL_FULL_LIBEXECDIR@/fcitx5-qt5-gui-wrapper
+Type=Application
+Categories=Settings;
+NoDisplay=true

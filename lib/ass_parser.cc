@@ -374,24 +374,24 @@ void AssParser::set_stylename_fontdesc() {
       has_default_style_ = true;
     }
 
-    stylename_fontdesc_[style.style[1].to_string()] = empty_font_desc;
+    stylename_fontdesc_[std::string(style.style[1])] = empty_font_desc;
     nonstd::string_view fontname = style.style[2];
 
     if (fontname[0] == '@') {
       fontname = fontname.substr(1);
     }
 
-    stylename_fontdesc_[style.style[1].to_string()].fontname =
-        fontname.to_string();
-    stylename_fontdesc_[style.style[1].to_string()].bold =
-        CalculateBold(StringToInt(style.style[8].to_string()));
-    stylename_fontdesc_[style.style[1].to_string()].italic =
-        CalculateItalic(StringToInt(style.style[9].to_string()));
+    stylename_fontdesc_[std::string(style.style[1])].fontname =
+        std::string(fontname);
+    stylename_fontdesc_[std::string(style.style[1])].bold =
+        CalculateBold(StringToInt(std::string(style.style[8])));
+    stylename_fontdesc_[std::string(style.style[1])].italic =
+        CalculateItalic(StringToInt(std::string(style.style[9])));
 
     RenameInfo rename_info = {
         style.line_num, static_cast<size_t>(fontname.begin() - style.line_beg),
         static_cast<size_t>(fontname.end() - style.line_beg),
-        fontname.to_string(), ""};
+        std::string(fontname), ""};
     rename_infos_.emplace_back(rename_info);
   }
 }
@@ -452,19 +452,19 @@ void AssParser::set_font_sets() {
 AssParser::FontDesc AssParser::GetFontDescStyle(const DialogueInfo& dialogue) {
   FontDesc font_desc_style;
 
-  if (stylename_fontdesc_.find(dialogue.dialogue[4].to_string()) ==
+  if (stylename_fontdesc_.find(std::string(dialogue.dialogue[4])) ==
       stylename_fontdesc_.end()) {
 
     if (has_default_style_) {
       font_desc_style = stylename_fontdesc_["Default"];
     } else {
       logger_->Warn("Style \"{}\" not found. (Line {})",
-                    dialogue.dialogue[4].to_string(), dialogue.line_num);
+                    std::string(dialogue.dialogue[4]), dialogue.line_num);
       font_desc_style.fontname = "";
     }
 
   } else {
-    font_desc_style = stylename_fontdesc_[dialogue.dialogue[4].to_string()];
+    font_desc_style = stylename_fontdesc_[std::string(dialogue.dialogue[4])];
   }
 
   return font_desc_style;
@@ -556,12 +556,12 @@ void AssParser::ChangeFontname(const nonstd::string_view code,
     if (font_view[0] == '@') {
       font_view = font_view.substr(1);
     }
-    font_desc.fontname = font_view.to_string();
+    font_desc.fontname = std::string(font_view);
 
     RenameInfo rename_info = {line_num,
                               static_cast<size_t>(font_view.begin() - line_beg),
                               static_cast<size_t>(font_view.end() - line_beg),
-                              font_view.to_string(), ""};
+                              std::string(font_view), ""};
     rename_infos_.emplace_back(rename_info);
   }
 }

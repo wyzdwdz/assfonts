@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.16)
 
-set(THIRD_PARTY_LIBS pcre2::pcre2)
+set(THIRD_PARTY_LIBS PCRE2::8BIT)
 
 set(TARGET_SOURCES ass_recolorize.cc)
 

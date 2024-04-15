@@ -1,0 +1,255 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the fcitx5-qt package.
+#
+# Translators:
+# Bon Keun Seo <scobyseo@gmail.com>, 2017
+# csslayer <wengxt@gmail.com>, 2022
+# Junghee Lee <daemul72@gmail.com>, 2022
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: fcitx5-qt\n"
+"Report-Msgid-Bugs-To: fcitx-dev@googlegroups.com\n"
+"POT-Creation-Date: 2023-11-18 20:24+0000\n"
+"PO-Revision-Date: 2017-12-20 02:52+0000\n"
+"Last-Translator: Junghee Lee <daemul72@gmail.com>, 2022\n"
+"Language-Team: Korean (https://app.transifex.com/fcitx/teams/12005/ko/)\n"
+"Language: ko\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: qt5/quickphrase-editor/editor.cpp:260
+msgid "%1 is a system file, do you want to delete all phrases instead?"
+msgstr "%1은(는) 시스템 파일입니다. 대신 모든 구문을 삭제하시겠습니까?"
+
+#. i18n: file: qt5/quickphrase-editor/editor.ui:52
+#. i18n: ectx: property (text), widget (QPushButton, addButton)
+#: rc.cpp:12
+#, kde-format
+msgid "&Add"
+msgstr "추가(&A)"
+
+#: qt5/guiwrapper/mainwindow.cpp:29 qt6/guiwrapper/mainwindow.cpp:29
+msgid "&Apply"
+msgstr "적용(&A)"
+
+#. i18n: file: qt5/quickphrase-editor/editor.ui:63
+#. i18n: ectx: property (text), widget (QPushButton, batchEditButton)
+#: rc.cpp:15
+#, kde-format
+msgid "&Batch Edit"
+msgstr "일괄수정(&B)"
+
+#: qt5/guiwrapper/mainwindow.cpp:31 qt6/guiwrapper/mainwindow.cpp:31
+msgid "&Close"
+msgstr "닫기(&C)"
+
+#. i18n: file: qt5/quickphrase-editor/editor.ui:74
+#. i18n: ectx: property (text), widget (QPushButton, deleteButton)
+#: rc.cpp:18
+#, kde-format
+msgid "&Delete"
+msgstr "삭제(&D)"
+
+#. i18n: file: qt5/quickphrase-editor/editor.ui:103
+#. i18n: ectx: property (text), widget (QPushButton, importButton)
+#: rc.cpp:24
+#, kde-format
+msgid "&Import"
+msgstr "가져오기(&I)"
+
+#: qt5/guiwrapper/mainwindow.cpp:28 qt6/guiwrapper/mainwindow.cpp:28
+msgid "&Ok"
+msgstr "확인(&O)"
+
+#. i18n: file: qt5/quickphrase-editor/editor.ui:45
+#. i18n: ectx: property (text), widget (QPushButton, operationButton)
+#: rc.cpp:9
+#, kde-format
+msgid "&Operation"
+msgstr "작동(&O)"
+
+#: qt5/guiwrapper/mainwindow.cpp:30 qt6/guiwrapper/mainwindow.cpp:30
+msgid "&Reset"
+msgstr "재설정(&R)"
+
+#: qt5/guiwrapper/wrapperapp.cpp:31 qt6/guiwrapper/wrapperapp.cpp:31
+msgid "A launcher for Fcitx Gui plugin."
+msgstr "Fcitx GUI 플러그인용 실행기"
+
+#: qt5/quickphrase-editor/editor.cpp:33
+msgid "Add File"
+msgstr "파일 추가"
+
+#: qt5/quickphrase-editor/editor.cpp:272
+msgid "Are you sure to delete %1?"
+msgstr "%1을(를) 삭제하시겠습니까?"
+
+#. i18n: file: qt5/quickphrase-editor/batchdialog.ui:14
+#. i18n: ectx: property (windowTitle), widget (QDialog, BatchDialog)
+#: rc.cpp:3
+#, kde-format
+msgid "Batch editing"
+msgstr "일괄 편집하기"
+
+#: qt5/quickphrase-editor/editor.cpp:238
+msgid "Cannot create file %1."
+msgstr "파일 %1을 만들수 없습니다."
+
+#: qt5/quickphrase-editor/editor.cpp:259
+msgid "Cannot remove system file"
+msgstr "시스템 파일을 제거할 수 없음"
+
+#: qt5/guiwrapper/wrapperapp.cpp:37 qt6/guiwrapper/wrapperapp.cpp:37
+msgid "Config path"
+msgstr "구성 경로"
+
+#: qt5/quickphrase-editor/editor.cpp:271
+msgid "Confirm deletion"
+msgstr "지우기 확인"
+
+#: qt5/quickphrase-editor/editor.cpp:221
+msgid "Create new file"
+msgstr "새로운 파일 생성"
+
+#. i18n: file: qt5/quickphrase-editor/editor.ui:85
+#. i18n: ectx: property (text), widget (QPushButton, clearButton)
+#: rc.cpp:21
+#, kde-format
+msgid "De&lete All"
+msgstr "모두 삭제(&L)"
+
+#: qt5/quickphrase-editor/filelistmodel.cpp:29
+msgid "Default"
+msgstr "기본값"
+
+#. i18n: file: qt5/quickphrase-editor/editor.ui:114
+#. i18n: ectx: property (text), widget (QPushButton, exportButton)
+#: rc.cpp:27
+#, kde-format
+msgid "E&xport"
+msgstr "내보내기(&X)"
+
+#: qt5/widgetsaddons/fcitxqtkeysequencewidget.cpp:355
+#: qt6/widgetsaddons/fcitxqtkeysequencewidget.cpp:324
+msgid "Empty"
+msgstr "비어있음"
+
+#: qt5/quickphrase-editor/editor.cpp:280
+msgid "Error while deleting %1."
+msgstr "%1을 지우는 중 오류 발생"
+
+#: qt5/guiwrapper/mainwindow.cpp:106 qt6/guiwrapper/mainwindow.cpp:106
+msgid "Failed to notify Fcitx"
+msgstr "Fcitx에 알리지 못함"
+
+#: qt5/guiwrapper/mainwindow.cpp:107 qt6/guiwrapper/mainwindow.cpp:107
+msgid "Failed to notify Fcitx about the configuration change."
+msgstr "구성 변경에 대해 Fcitx에 알리지 못했습니다."
+
+#: qt5/guiwrapper/org.fcitx.fcitx5-qt5-gui-wrapper.desktop.in.in:3
+msgid "Fcitx 5 Qt5 Gui Wrapper"
+msgstr "Fcitx 5 Qt5 Gui 래퍼"
+
+#: qt6/guiwrapper/org.fcitx.fcitx5-qt6-gui-wrapper.desktop.in.in:3
+msgid "Fcitx 5 Qt6 Gui Wrapper"
+msgstr ""
+
+#: qt5/quickphrase-editor/editor.cpp:237 qt5/quickphrase-editor/editor.cpp:279
+msgid "File Operation Failed"
+msgstr "파일 작업 실패"
+
+#: qt5/quickphrase-editor/editor.cpp:226
+msgid "File name should not contain '/'."
+msgstr "파일명에 '/'가 포함되지 않아야 합니다."
+
+#: qt5/guiwrapper/org.fcitx.fcitx5-qt5-gui-wrapper.desktop.in.in:4
+#: qt6/guiwrapper/org.fcitx.fcitx5-qt6-gui-wrapper.desktop.in.in:4
+msgid "Input Method Configuration helper"
+msgstr "입력기 구성 도우미"
+
+#: qt5/quickphrase-editor/editor.cpp:225
+msgid "Invalid filename"
+msgstr "잘못된 파일명"
+
+#: qt5/widgetsaddons/fcitxqtkeysequencewidget.cpp:179
+#: qt6/widgetsaddons/fcitxqtkeysequencewidget.cpp:148
+msgid "Key code mode"
+msgstr "키코드 방식"
+
+#: qt5/quickphrase-editor/model.cpp:73
+msgid "Keyword"
+msgstr "키워드"
+
+#: qt5/guiwrapper/org.fcitx.fcitx5-qt5-gui-wrapper.desktop.in.in:5
+#: qt6/guiwrapper/org.fcitx.fcitx5-qt6-gui-wrapper.desktop.in.in:5
+msgid "Load configuration plugin for Fcitx Addon"
+msgstr "Fcitx 애드온용 구성 플러그인 불러오기"
+
+#: qt5/guiwrapper/wrapperapp.cpp:34 qt6/guiwrapper/wrapperapp.cpp:34
+msgid "Parent window ID"
+msgstr "상위 창 ID"
+
+#: qt5/quickphrase-editor/model.cpp:75
+msgid "Phrase"
+msgstr "구문"
+
+#: qt5/quickphrase-editor/editor.cpp:221
+msgid "Please input a filename for newfile"
+msgstr "새 파일의 이름을 입력"
+
+#: qt5/quickphrase-editor/editor.cpp:101
+msgid "Quick Phrase Editor"
+msgstr "상용구 편집기"
+
+#: qt5/quickphrase-editor/editor.cpp:37
+msgid "Refresh List"
+msgstr "목록 갱신"
+
+#: qt5/quickphrase-editor/editor.cpp:35
+msgid "Remove File"
+msgstr "파일 제거"
+
+#: qt5/quickphrase-editor/editor.cpp:85
+msgid "Save Changes"
+msgstr "변경 저장"
+
+#: qt5/guiwrapper/wrapperapp.cpp:35 qt6/guiwrapper/wrapperapp.cpp:35
+msgid "Test if config exists"
+msgstr "구성이 있는지 확인"
+
+#: qt5/quickphrase-editor/editor.cpp:86
+msgid ""
+"The content has changed.\n"
+"Do you want to save the changes or discard them?"
+msgstr ""
+"내용이 변했습니다.\n"
+"변경사항을 저장할까요?"
+
+#: qt5/widgetsaddons/fcitxqtkeysequencewidget.cpp:392
+#: qt6/widgetsaddons/fcitxqtkeysequencewidget.cpp:361
+msgid "The key you just pressed is not supported by Qt."
+msgstr "방금 누른 키는 Qt가 지원하지 않습니다."
+
+#: qt5/widgetsaddons/fcitxqtkeysequencewidget.cpp:393
+#: qt6/widgetsaddons/fcitxqtkeysequencewidget.cpp:362
+msgid "Unsupported Key"
+msgstr "지원하지 않는 키"
+
+#. i18n: file: qt5/quickphrase-editor/batchdialog.ui:50
+#. i18n: ectx: property (text), widget (QLabel, infoLabel)
+#: rc.cpp:6
+#, kde-format
+msgid "Use <Keyword> <Phrase> format on every line."
+msgstr "모든 줄에 <Keyword> <Phrase> 형식을 사용합니다."
+
+#: qt5/guiwrapper/wrapperapp.cpp:37 qt6/guiwrapper/wrapperapp.cpp:37
+msgid "path"
+msgstr "경로"
+
+#: qt5/guiwrapper/wrapperapp.cpp:34 qt6/guiwrapper/wrapperapp.cpp:34
+msgid "winid"
+msgstr "winid"

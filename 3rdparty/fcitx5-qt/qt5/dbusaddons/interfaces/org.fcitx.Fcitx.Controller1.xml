@@ -1,0 +1,117 @@
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+ <interface name="org.fcitx.Fcitx.Controller1">
+  <method name="Exit">
+  </method>
+  <method name="Restart">
+  </method>
+  <method name="Configure">
+  </method>
+  <method name="ConfigureAddon">
+   <arg type="s" direction="in"/>
+  </method>
+  <method name="ConfigureIM">
+   <arg type="s" direction="in"/>
+  </method>
+  <method name="CurrentUI">
+   <arg type="s" direction="out"/>
+  </method>
+  <method name="AddonForIM">
+   <arg type="s" direction="in"/>
+   <arg type="s" direction="out"/>
+  </method>
+  <method name="Activate">
+  </method>
+  <method name="Toggle">
+  </method>
+  <method name="ResetIMList">
+  </method>
+  <method name="State">
+   <arg type="i" direction="out"/>
+  </method>
+  <method name="ReloadConfig">
+  </method>
+  <method name="ReloadAddonConfig">
+   <arg type="s" direction="in"/>
+  </method>
+  <method name="CurrentInputMethod">
+   <arg type="s" direction="out"/>
+  </method>
+  <method name="SetCurrentIM">
+   <arg type="s" direction="in"/>
+  </method>
+  <method name="FullInputMethodGroupInfo">
+      <arg type="s" direction="in"/>
+      <arg type="s" name="groupName" direction="out"/>
+      <arg type="s" name="defaultInputMethod" direction="out"/>
+      <arg type="s" name="defaultLayout" direction="out"/>
+      <arg type="a{sv}" name="properties" direction="out"/>
+      <arg type="a(sssssssbsa{sv})" name="inputMethodEntryList" direction="out"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out3" value="QVariantMap" />
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out4" value="FcitxQtFullInputMethodEntryList" />
+  </method>
+  <method name="InputMethodGroupInfo">
+      <arg type="s" direction="in"/>
+      <arg type="s" name="layout" direction="out"/>
+      <arg type="a(ss)" name="items" direction="out"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out1" value="FcitxQtStringKeyValueList" />
+  </method>
+  <method name="InputMethodGroups">
+   <arg type="as" direction="out"/>
+  </method>
+  <method name="AvailableInputMethods">
+   <arg type="a(ssssssb)" direction="out"/>
+   <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="FcitxQtInputMethodEntryList" />
+  </method>
+  <signal name="InputMethodGroupsChanged">
+  </signal>
+  <method name="AvailableKeyboardLayouts">
+      <arg type="a(ssasa(ssas))" direction="out" />
+   <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="FcitxQtLayoutInfoList" />
+  </method>
+  <method name="SetInputMethodGroupInfo">
+      <arg type="s" name="name" direction="in"/>
+      <arg type="s" name="layout" direction="in"/>
+      <arg type="a(ss)" name="entries" direction="in"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.In2" value="FcitxQtStringKeyValueList" />
+  </method>
+  <method name="AddInputMethodGroup">
+      <arg type="s" direction="in"/>
+  </method>
+  <method name="RemoveInputMethodGroup">
+      <arg type="s" direction="in"/>
+  </method>
+  <method name="GetConfig">
+      <arg type="s" direction="in"/>
+      <arg type="v" direction="out"/>
+      <arg type="a(sa(sssva{sv}))" direction="out"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out1" value="FcitxQtConfigTypeList" />
+  </method>
+  <method name="SetConfig">
+      <arg type="s" direction="in"/>
+      <arg type="v" direction="in"/>
+  </method>
+  <method name="GetAddons">
+      <arg type="a(sssibb)" direction="out"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="FcitxQtAddonInfoList" />
+  </method>
+  <method name="GetAddonsV2">
+      <arg type="a(sssibbbasas)" direction="out"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="FcitxQtAddonInfoV2List" />
+  </method>
+  <method name="SetAddonsState">
+      <arg type="a(sb)" direction="in"/>
+      <annotation name="org.qtproject.QtDBus.QtTypeName.In0" value="FcitxQtAddonStateList" />
+  </method>
+  <method name="Refresh">
+  </method>
+  <method name="CheckUpdate">
+      <arg type="b" direction="out"/>
+  </method>
+  <method name="CanRestart">
+      <arg type="b" direction="out"/>
+  </method>
+ </interface>
+</node>
+

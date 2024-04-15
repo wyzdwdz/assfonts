@@ -1,0 +1,254 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the fcitx5-qt package.
+#
+# Translators:
+# csslayer <wengxt@gmail.com>, 2023
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: fcitx5-qt\n"
+"Report-Msgid-Bugs-To: fcitx-dev@googlegroups.com\n"
+"POT-Creation-Date: 2023-11-22 20:24+0000\n"
+"PO-Revision-Date: 2017-12-20 02:52+0000\n"
+"Last-Translator: csslayer <wengxt@gmail.com>, 2023\n"
+"Language-Team: Chinese (China) (https://app.transifex.com/fcitx/teams/12005/"
+"zh_CN/)\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: qt6/quickphrase-editor/editor.cpp:260
+msgid "%1 is a system file, do you want to delete all phrases instead?"
+msgstr "%1 是系统文件，您是否想要改为清空所有词组？"
+
+#. i18n: file: qt6/quickphrase-editor/editor.ui:52
+#. i18n: ectx: property (text), widget (QPushButton, addButton)
+#: rc.cpp:12
+#, kde-format
+msgid "&Add"
+msgstr "添加(&A)"
+
+#: qt5/guiwrapper/mainwindow.cpp:29 qt6/guiwrapper/mainwindow.cpp:29
+msgid "&Apply"
+msgstr "应用(&A)"
+
+#. i18n: file: qt6/quickphrase-editor/editor.ui:63
+#. i18n: ectx: property (text), widget (QPushButton, batchEditButton)
+#: rc.cpp:15
+#, kde-format
+msgid "&Batch Edit"
+msgstr "批量编辑(&B)"
+
+#: qt5/guiwrapper/mainwindow.cpp:31 qt6/guiwrapper/mainwindow.cpp:31
+msgid "&Close"
+msgstr "关闭(&C)"
+
+#. i18n: file: qt6/quickphrase-editor/editor.ui:74
+#. i18n: ectx: property (text), widget (QPushButton, deleteButton)
+#: rc.cpp:18
+#, kde-format
+msgid "&Delete"
+msgstr "删除(&D)"
+
+#. i18n: file: qt6/quickphrase-editor/editor.ui:103
+#. i18n: ectx: property (text), widget (QPushButton, importButton)
+#: rc.cpp:24
+#, kde-format
+msgid "&Import"
+msgstr "导入(&I)"
+
+#: qt5/guiwrapper/mainwindow.cpp:28 qt6/guiwrapper/mainwindow.cpp:28
+msgid "&Ok"
+msgstr "确定(&O)"
+
+#. i18n: file: qt6/quickphrase-editor/editor.ui:45
+#. i18n: ectx: property (text), widget (QPushButton, operationButton)
+#: rc.cpp:9
+#, kde-format
+msgid "&Operation"
+msgstr "操作(&O)"
+
+#: qt5/guiwrapper/mainwindow.cpp:30 qt6/guiwrapper/mainwindow.cpp:30
+msgid "&Reset"
+msgstr "重置(&R)"
+
+#: qt5/guiwrapper/wrapperapp.cpp:31 qt6/guiwrapper/wrapperapp.cpp:31
+msgid "A launcher for Fcitx Gui plugin."
+msgstr "Fcitx 图形界面插件的启动器"
+
+#: qt6/quickphrase-editor/editor.cpp:33
+msgid "Add File"
+msgstr "添加文件"
+
+#: qt6/quickphrase-editor/editor.cpp:272
+msgid "Are you sure to delete %1?"
+msgstr "您确定要删除 %1？"
+
+#. i18n: file: qt6/quickphrase-editor/batchdialog.ui:14
+#. i18n: ectx: property (windowTitle), widget (QDialog, BatchDialog)
+#: rc.cpp:3
+#, kde-format
+msgid "Batch editing"
+msgstr "批量编辑"
+
+#: qt6/quickphrase-editor/editor.cpp:238
+msgid "Cannot create file %1."
+msgstr "无法创建文件 %1。"
+
+#: qt6/quickphrase-editor/editor.cpp:259
+msgid "Cannot remove system file"
+msgstr "无法移除系统文件"
+
+#: qt5/guiwrapper/wrapperapp.cpp:37 qt6/guiwrapper/wrapperapp.cpp:37
+msgid "Config path"
+msgstr "配置路径"
+
+#: qt6/quickphrase-editor/editor.cpp:271
+msgid "Confirm deletion"
+msgstr "确认删除"
+
+#: qt6/quickphrase-editor/editor.cpp:221
+msgid "Create new file"
+msgstr "创建新文件"
+
+#. i18n: file: qt6/quickphrase-editor/editor.ui:85
+#. i18n: ectx: property (text), widget (QPushButton, clearButton)
+#: rc.cpp:21
+#, kde-format
+msgid "De&lete All"
+msgstr "全部删除(&L)"
+
+#: qt6/quickphrase-editor/filelistmodel.cpp:29
+msgid "Default"
+msgstr "默认"
+
+#. i18n: file: qt6/quickphrase-editor/editor.ui:114
+#. i18n: ectx: property (text), widget (QPushButton, exportButton)
+#: rc.cpp:27
+#, kde-format
+msgid "E&xport"
+msgstr "导出(&X)"
+
+#: qt5/widgetsaddons/fcitxqtkeysequencewidget.cpp:353
+#: qt6/widgetsaddons/fcitxqtkeysequencewidget.cpp:322
+msgid "Empty"
+msgstr "空"
+
+#: qt6/quickphrase-editor/editor.cpp:280
+msgid "Error while deleting %1."
+msgstr "删除 %1 时出错。"
+
+#: qt5/guiwrapper/mainwindow.cpp:106 qt6/guiwrapper/mainwindow.cpp:106
+msgid "Failed to notify Fcitx"
+msgstr "通知 Fcitx 失败"
+
+#: qt5/guiwrapper/mainwindow.cpp:107 qt6/guiwrapper/mainwindow.cpp:107
+msgid "Failed to notify Fcitx about the configuration change."
+msgstr "通知 Fcitx 配置更改时失败。"
+
+#: qt5/guiwrapper/org.fcitx.fcitx5-qt5-gui-wrapper.desktop.in.in:3
+msgid "Fcitx 5 Qt5 Gui Wrapper"
+msgstr "Fcitx 5 Qt5 图形界面封装器"
+
+#: qt6/guiwrapper/org.fcitx.fcitx5-qt6-gui-wrapper.desktop.in.in:3
+msgid "Fcitx 5 Qt6 Gui Wrapper"
+msgstr "Fcitx 5 Qt6 图形界面封装器"
+
+#: qt6/quickphrase-editor/editor.cpp:237 qt6/quickphrase-editor/editor.cpp:279
+msgid "File Operation Failed"
+msgstr "文件操作失败"
+
+#: qt6/quickphrase-editor/editor.cpp:226
+msgid "File name should not contain '/'."
+msgstr "文件名不应该包括 “/”。"
+
+#: qt5/guiwrapper/org.fcitx.fcitx5-qt5-gui-wrapper.desktop.in.in:4
+#: qt6/guiwrapper/org.fcitx.fcitx5-qt6-gui-wrapper.desktop.in.in:4
+msgid "Input Method Configuration helper"
+msgstr "输入法配置助手程序"
+
+#: qt6/quickphrase-editor/editor.cpp:225
+msgid "Invalid filename"
+msgstr "文件名无效"
+
+#: qt5/widgetsaddons/fcitxqtkeysequencewidget.cpp:179
+#: qt6/widgetsaddons/fcitxqtkeysequencewidget.cpp:148
+msgid "Key code mode"
+msgstr "扫描码模式"
+
+#: qt6/quickphrase-editor/model.cpp:73
+msgid "Keyword"
+msgstr "关键字"
+
+#: qt5/guiwrapper/org.fcitx.fcitx5-qt5-gui-wrapper.desktop.in.in:5
+#: qt6/guiwrapper/org.fcitx.fcitx5-qt6-gui-wrapper.desktop.in.in:5
+msgid "Load configuration plugin for Fcitx Addon"
+msgstr "加载 Fcitx 附加组件的配置插件"
+
+#: qt5/guiwrapper/wrapperapp.cpp:34 qt6/guiwrapper/wrapperapp.cpp:34
+msgid "Parent window ID"
+msgstr "父窗口 ID"
+
+#: qt6/quickphrase-editor/model.cpp:75
+msgid "Phrase"
+msgstr "词组"
+
+#: qt6/quickphrase-editor/editor.cpp:221
+msgid "Please input a filename for newfile"
+msgstr "请输入新文件的文件名"
+
+#: qt6/quickphrase-editor/editor.cpp:101
+msgid "Quick Phrase Editor"
+msgstr "快速输入编辑器"
+
+#: qt6/quickphrase-editor/editor.cpp:37
+msgid "Refresh List"
+msgstr "刷新列表"
+
+#: qt6/quickphrase-editor/editor.cpp:35
+msgid "Remove File"
+msgstr "移除文件"
+
+#: qt6/quickphrase-editor/editor.cpp:85
+msgid "Save Changes"
+msgstr "保存更改"
+
+#: qt5/guiwrapper/wrapperapp.cpp:35 qt6/guiwrapper/wrapperapp.cpp:35
+msgid "Test if config exists"
+msgstr "检测配置是否存在"
+
+#: qt6/quickphrase-editor/editor.cpp:86
+msgid ""
+"The content has changed.\n"
+"Do you want to save the changes or discard them?"
+msgstr ""
+"内容已更改。\n"
+"您想要保存还是撤销这些修改？"
+
+#: qt5/widgetsaddons/fcitxqtkeysequencewidget.cpp:390
+#: qt6/widgetsaddons/fcitxqtkeysequencewidget.cpp:359
+msgid "The key you just pressed is not supported by Qt."
+msgstr "你刚刚按下的按键不被 Qt 支持。"
+
+#: qt5/widgetsaddons/fcitxqtkeysequencewidget.cpp:391
+#: qt6/widgetsaddons/fcitxqtkeysequencewidget.cpp:360
+msgid "Unsupported Key"
+msgstr "不支持的按键"
+
+#. i18n: file: qt6/quickphrase-editor/batchdialog.ui:50
+#. i18n: ectx: property (text), widget (QLabel, infoLabel)
+#: rc.cpp:6
+#, kde-format
+msgid "Use <Keyword> <Phrase> format on every line."
+msgstr "每行使用 <关键词> <词组> 的格式。"
+
+#: qt5/guiwrapper/wrapperapp.cpp:37 qt6/guiwrapper/wrapperapp.cpp:37
+msgid "path"
+msgstr "路径"
+
+#: qt5/guiwrapper/wrapperapp.cpp:34 qt6/guiwrapper/wrapperapp.cpp:34
+msgid "winid"
+msgstr "窗口 id"

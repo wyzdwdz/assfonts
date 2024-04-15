@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(Qt5Core @REQUIRED_QT5_VERSION@)
+find_dependency(Qt5DBus @REQUIRED_QT5_VERSION@)
+
+include("${CMAKE_CURRENT_LIST_DIR}/Fcitx5Qt5DBusAddonsTargets.cmake")

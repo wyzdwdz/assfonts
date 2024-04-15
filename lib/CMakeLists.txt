@@ -1,11 +1,10 @@
 ﻿cmake_minimum_required (VERSION 3.16)
 
-set(THIRD_PARTY_LIBS harfbuzz::harfbuzz
+set(THIRD_PARTY_LIBS harfbuzz::harfbuzz-subset
                      Freetype::Freetype
                      nlohmann_json::nlohmann_json
                      Iconv::Iconv
                      fmt::fmt
-                     threadpool::threadpool
                      ced
                      libasshdr
                      ghcFilesystem::ghc_filesystem
@@ -41,7 +40,7 @@ endif()
 target_include_directories(${TARGET_NAME} PUBLIC ${PROJECT_BINARY_DIR}/include)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_link_options(${TARGET_NAME} PRIVATE -pthread)
+    target_link_options(${TARGET_NAME} PRIVATE -pthread -s)
 endif()
 
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTS})

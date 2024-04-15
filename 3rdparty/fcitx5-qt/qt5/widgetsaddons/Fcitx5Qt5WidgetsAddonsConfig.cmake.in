@@ -1,0 +1,16 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(Fcitx5Utils)
+find_dependency(Qt5Core @REQUIRED_QT5_VERSION@)
+find_dependency(Qt5Gui @REQUIRED_QT5_VERSION@)
+find_dependency(Qt5Widgets @REQUIRED_QT5_VERSION@)
+
+include("${CMAKE_CURRENT_LIST_DIR}/Fcitx5Qt5WidgetsAddonsTargets.cmake")
+
+if(NOT TARGET Fcitx5Qt5::gui-wrapper)
+    add_executable(Fcitx5Qt5::gui-wrapper IMPORTED)
+    set_target_properties(Fcitx5Qt5::gui-wrapper PROPERTIES
+        IMPORTED_LOCATION "@CMAKE_INSTALL_FULL_LIBEXECDIR@/fcitx5-qt5-gui-wrapper")
+endif()
