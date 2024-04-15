@@ -4,7 +4,8 @@ on:
   release:
     types: [ published ]
   puch:
-    branches: [ vcpkg ]
+    branches:
+      - vcpkg
 jobs:
   build-linux:
     runs-on: ubuntu-22.04
