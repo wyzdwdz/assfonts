@@ -2,7 +2,7 @@ name: Build Release
 run-name: Build Release by ${{ github.actor }}
 on: 
   release:
-    types: [ published ]
+    types: [ published, push ]
 jobs:
   build-linux:
     runs-on: ubuntu-22.04
@@ -18,14 +18,6 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
 
-      # - name: restore conan cache
-      #   uses: actions/cache/restore@v3
-      #   with:
-      #     path: .conan2/p
-      #     key: conan2-linux-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
-      #     restore-keys: |
-      #       conan2-linux-${{ matrix.arch }}-
-        
       - name: set up QEMU
         uses: docker/setup-qemu-action@v2
         
@@ -33,79 +25,49 @@ jobs:
         if: ${{ matrix.arch == 'x86_64' }}
         uses: addnab/docker-run-action@v3
         with:
-          image: wyzdwdz/appimage-ubuntu18.04
-          options: -v ${{ github.workspace }}:/var/www --platform linux/amd64
+          image: wyzdwdz/assfonts-amd64:latest
+          options: -v ${{ github.workspace }}:/var/www
           shell: bash
           run: |
             cd /var/www
-            pip3 install -U conan==2.2
-            export CONAN_HOME=/var/www/.conan2
-            apt update && apt -y install lld-10
-            update-alternatives --install /usr/bin/ld ld /usr/lib/llvm-10/bin/lld 10
-            conan export --version 8.0.1 -nr recipes/harfbuzz_expt
-            conan export --version system -nr recipes/dbus_system
-            conan export --version 5.15.10 -nr recipes/qt5_fix
-            conan config install .github/conan2-linux
-            conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
-            source ./build/Release/generators/conanbuild.sh
-            cmake --preset conan-release
-            cmake --build --preset conan-release -j
-            cmake --install build/Release --prefix install --strip
-            cp -f ./install/bin/assfonts assfonts-${{ github.ref_name }}-x86_64-Linux
-            linuxdeploy --appdir=./assfonts-gui_AppDir -e ./install/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
+            cp -r -f ./.github/linux/triplets ~
+            cp ./.github/linux/CMakeUserPresets.json .
+            cmake . --preset linux-x64
+            cmake --build . --target install --preset linux-x64-release
+            cp -f ./out/install/linux-x64/bin/assfonts assfonts-${{ github.ref_name }}-x86_64-Linux
+            ~/linuxdeploy-x86_64.AppImage --appimage-extract-and-run --appdir=./assfonts-gui_AppDir -e ./out/install/linux-x64/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
             mkdir -p ./assfonts-gui_AppDir/usr/share/doc/assfonts
             cp LICENSE NEWS NOTICE ./assfonts-gui_AppDir/usr/share/doc/assfonts
-            appimagetool ./assfonts-gui_AppDir assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage
+            ~/appimagetool-x86_64.AppImage --appimage-extract-and-run ./assfonts-gui_AppDir assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage
 
       - name: aarch64 build binary
         if: ${{ matrix.arch == 'aarch64' }}
         uses: addnab/docker-run-action@v3
         with:
-          image: wyzdwdz/appimage-ubuntu18.04:latest
+          image: wyzdwdz/assfonts-amd64:latest
           options: -v ${{ github.workspace }}:/var/www --platform linux/amd64
           shell: bash
           run: |
             cd /var/www
-            pip3 install -U conan==2.2
-            export CONAN_HOME=/var/www/.conan2
-            apt update && apt -y install gcc-aarch64-linux-gnu g++-aarch64-linux-gnu lld-10
-            update-alternatives --install /usr/bin/ld ld /usr/lib/llvm-10/bin/lld 10
-            cp -f .github/apt-lists/amd64-sources.list /etc/apt/sources.list
-            cp -f .github/apt-lists/arm64-sources.list /etc/apt/sources.list.d/
-            dpkg --add-architecture arm64
-            apt update
-            export PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
-            conan export --version 8.0.1 -nr recipes/harfbuzz_expt
-            conan export --version system -nr recipes/dbus_system
-            conan export --version 5.15.10 -nr recipes/qt5_fix
-            conan export --version 2.11.5 -nr .github/recipes/libxml2_fix
-            conan config install .github/conan2-linux
-            conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
-            source ./build/Release/generators/conanbuild.sh
-            cmake --preset conan-release
-            cmake --build --preset conan-release -j
-            cmake --install build/Release --prefix install --strip
+            cp -r -f ./.github/linux/triplets ~
+            cp ./.github/linux/CMakeUserPresets.json .
+            cmake . --preset linux-arm64
+            cmake --build . --target install --preset linux-arm64-release
 
       - name: aarch64 build appimage
         if: ${{ matrix.arch == 'aarch64' }}
         uses: addnab/docker-run-action@v3
         with:
-          image: wyzdwdz/appimage-ubuntu18.04:latest
+          image: wyzdwdz/assfonts-arm64:latest
           options: -v ${{ github.workspace }}:/var/www --platform linux/arm64
           shell: bash
           run: |
             cd /var/www
-            apt update && apt -y install squashfs-tools
-            apt-get -y install libdbus-1-dev libdrm-dev libegl-mesa0 libegl1 libgbm1 libgl1-mesa-dev libgles1 libgles2 libglvnd-core-dev libglvnd-dev libopengl0 libpthread-stubs0-dev libwayland-client0 libwayland-server0 libx11-dev libx11-xcb-dev libxau-dev libxcb-dri2-0-dev libxcb-dri3-dev libxcb-glx0-dev libxcb-present-dev libxcb-randr0 libxcb-randr0-dev libxcb-render0 libxcb-render0-dev libxcb-shape0-dev libxcb-sync-dev libxcb-xfixes0 libxcb-xfixes0-dev libxcb1-dev libxdamage-dev libxdmcp-dev libxext-dev libxfixes-dev libxshmfence-dev libxxf86vm-dev mesa-common-dev x11proto-core-dev x11proto-damage-dev x11proto-dev x11proto-fixes-dev x11proto-xext-dev x11proto-xf86vidmode-dev xorg-sgml-doctools xtrans-dev libfontenc-dev libice-dev libsm-dev libxaw7-dev libxcb-composite0 libxcb-composite0-dev libxcb-cursor-dev libxcb-cursor0 libxcb-ewmh-dev libxcb-ewmh2 libxcb-icccm4 libxcb-icccm4-dev libxcb-image0 libxcb-image0-dev libxcb-keysyms1 libxcb-keysyms1-dev libxcb-render-util0 libxcb-render-util0-dev libxcb-res0 libxcb-res0-dev libxcb-shm0 libxcb-shm0-dev libxcb-xinerama0 libxcb-xinerama0-dev libxcb-xkb-dev libxcb-xkb1 libxcomposite-dev libxcursor-dev libxi-dev libxinerama-dev libxkbfile-dev libxmu-dev libxmu-headers libxmuu-dev libxpm-dev libxrandr-dev libxrender-dev libxres-dev libxres1 libxss-dev libxt-dev libxtst-dev libxv-dev uuid-dev x11proto-composite-dev x11proto-input-dev x11proto-randr-dev x11proto-record-dev x11proto-scrnsaver-dev x11proto-xinerama-dev
-            cp -f ./install/bin/assfonts assfonts-${{ github.ref_name }}-aarch64-Linux
-            linuxdeploy --appdir=./assfonts-gui_AppDir -e ./install/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
+            cp -f ./out/install/linux-arm64/bin/assfonts assfonts-${{ github.ref_name }}-aarch64-Linux
+            ~/linuxdeploy-aarch64.AppImage --appimage-extract-and-run --appdir=./assfonts-gui_AppDir -e ./out/install/linux-arm64/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
             mkdir -p ./assfonts-gui_AppDir/usr/share/doc/assfonts
             cp LICENSE NEWS NOTICE ./assfonts-gui_AppDir/usr/share/doc/assfonts
-            ln -sf assfonts-gui.png ./assfonts-gui_AppDir/.DirIcon
-            mksquashfs ./assfonts-gui_AppDir assfonts-gui_AppDir.squashfs -root-owned -noappend
-            wget https://github.com/AppImage/AppImageKit/releases/download/continuous/runtime-aarch64
-            cat runtime-aarch64 >> assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
-            cat assfonts-gui_AppDir.squashfs >> assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
+            ~/appimagetool-aarch64.AppImage --appimage-extract-and-run ./assfonts-gui_AppDir assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
 
       - name: upload Linux
         uses: actions/upload-artifact@v3
@@ -113,15 +75,6 @@ jobs:
           name: release-Linux-${{ matrix.arch }}
           path: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-Linux*
           if-no-files-found: error
-
-      - name: set read permission to conan cache
-        run: sudo chmod -R 777 .conan2/p
-
-      # - name: save conan cache
-      #   uses: actions/cache/save@v3
-      #   with:
-      #     path: .conan2/p
-      #     key: conan2-linux-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
 
   build-windows:
     runs-on: windows-2022
