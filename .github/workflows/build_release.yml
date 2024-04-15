@@ -35,8 +35,8 @@ jobs:
             cd /var/www
             cp -r -f ./.github/linux/triplets ~
             cp ./.github/linux/CMakeUserPresets.json .
-            cmake . --preset linux-x64
-            cmake --build . --target install --preset linux-x64-release
+            ~/.local/pipx/venvs/cmake/bin/cmake . --preset linux-x64
+            ~/.local/pipx/venvs/cmake/bin/cmake --build . --target install --preset linux-x64-release
             cp -f ./out/install/linux-x64/bin/assfonts assfonts-${{ github.ref_name }}-x86_64-Linux
             ~/linuxdeploy-x86_64.AppImage --appimage-extract-and-run --appdir=./assfonts-gui_AppDir -e ./out/install/linux-x64/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
             mkdir -p ./assfonts-gui_AppDir/usr/share/doc/assfonts
@@ -54,8 +54,8 @@ jobs:
             cd /var/www
             cp -r -f ./.github/linux/triplets ~
             cp ./.github/linux/CMakeUserPresets.json .
-            cmake . --preset linux-arm64
-            cmake --build . --target install --preset linux-arm64-release
+            ~/.local/pipx/venvs/cmake/bin/cmake . --preset linux-arm64
+            ~/.local/pipx/venvs/cmake/bin/cmake --build . --target install --preset linux-arm64-release
 
       - name: aarch64 build appimage
         if: ${{ matrix.arch == 'aarch64' }}
