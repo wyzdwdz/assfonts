@@ -31,16 +31,17 @@ jobs:
           options: -v ${{ github.workspace }}:/var/www --platform linux/amd64
           shell: bash
           run: |
+            source ~/.bashrc
             cd /var/www
             cp -r -f ./.github/linux/triplets ~
             cp ./.github/linux/CMakeUserPresets.json .
             cmake . --preset linux-x64
             cmake --build . --target install --preset linux-x64-release
             cp -f ./out/install/linux-x64/bin/assfonts assfonts-${{ github.ref_name }}-x86_64-Linux
-            ~/.local/bin/linuxdeploy --appdir=./assfonts-gui_AppDir -e ./out/install/linux-x64/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
+            linuxdeploy --appdir=./assfonts-gui_AppDir -e ./out/install/linux-x64/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
             mkdir -p ./assfonts-gui_AppDir/usr/share/doc/assfonts
             cp LICENSE NEWS NOTICE ./assfonts-gui_AppDir/usr/share/doc/assfonts
-             ~/.local/bin/appimagetool ./assfonts-gui_AppDir assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage
+            appimagetool ./assfonts-gui_AppDir assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage
 
       - name: aarch64 build binary
         if: ${{ matrix.arch == 'aarch64' }}
@@ -50,6 +51,7 @@ jobs:
           options: -v ${{ github.workspace }}:/var/www --platform linux/amd64
           shell: bash
           run: |
+            source ~/.bashrc
             cd /var/www
             cp -r -f ./.github/linux/triplets ~
             cp ./.github/linux/CMakeUserPresets.json .
@@ -64,12 +66,13 @@ jobs:
           options: -v ${{ github.workspace }}:/var/www --platform linux/arm64
           shell: bash
           run: |
+            source ~/.bashrc
             cd /var/www
             cp -f ./out/install/linux-arm64/bin/assfonts assfonts-${{ github.ref_name }}-aarch64-Linux
-            ~/.local/bin/linuxdeploy --appdir=./assfonts-gui_AppDir -e ./out/install/linux-arm64/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
+            linuxdeploy --appdir=./assfonts-gui_AppDir -e ./out/install/linux-arm64/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
             mkdir -p ./assfonts-gui_AppDir/usr/share/doc/assfonts
             cp LICENSE NEWS NOTICE ./assfonts-gui_AppDir/usr/share/doc/assfonts
-            ~/.local/bin/appimagetool ./assfonts-gui_AppDir assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
+            appimagetool ./assfonts-gui_AppDir assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
 
       - name: upload Linux
         uses: actions/upload-artifact@v3
