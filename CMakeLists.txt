@@ -1,13 +1,7 @@
 ﻿cmake_minimum_required (VERSION 3.16)
 
-include(FetchContent)
-FetchContent_Declare(vcpkg
-    GIT_REPOSITORY https://github.com/wyzdwdz/vcpkg.git
-    GIT_TAG vcpkg-assfonts
-)
-FetchContent_MakeAvailable(vcpkg)
-
-set(CMAKE_TOOLCHAIN_FILE "${vcpkg_SOURCE_DIR}/scripts/buildsystems/vcpkg.cmake" CACHE FILEPATH "")
+set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    CACHE STRING "Vcpkg toolchain file")
 
 project (assfonts CXX C)
 

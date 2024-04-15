@@ -18,7 +18,9 @@ jobs:
           - { arch: aarch64, profile: armv8 }
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
 
       - name: set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -33,7 +35,6 @@ jobs:
           run: |
             source ~/.bashrc
             cd /var/www
-            cp -r -f ./.github/linux/triplets ~
             cp ./.github/linux/CMakeUserPresets.json .
             cmake . --preset linux-x64
             cmake --build . --target install --preset linux-x64-release
@@ -53,7 +54,6 @@ jobs:
           run: |
             source ~/.bashrc
             cd /var/www
-            cp -r -f ./.github/linux/triplets ~
             cp ./.github/linux/CMakeUserPresets.json .
             cmake . --preset linux-arm64
             cmake --build . --target install --preset linux-arm64-release

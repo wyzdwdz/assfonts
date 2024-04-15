@@ -5,4 +5,4 @@ set(VCPKG_LIBRARY_LINKAGE static)
 set(VCPKG_CMAKE_SYSTEM_NAME Linux)
 set(VCPKG_BUILD_TYPE release)
 
-set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE /root/triplets/toolchains/clang-linux.cmake)
+set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/toolchains/clang-linux.cmake")
