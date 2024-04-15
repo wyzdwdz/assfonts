@@ -40,7 +40,7 @@ jobs:
             ~/.local/bin/linuxdeploy --appdir=./assfonts-gui_AppDir -e ./out/install/linux-x64/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
             mkdir -p ./assfonts-gui_AppDir/usr/share/doc/assfonts
             cp LICENSE NEWS NOTICE ./assfonts-gui_AppDir/usr/share/doc/assfonts
-            ~/.local/bin/appimagetool --appimage-extract-and-run ./assfonts-gui_AppDir assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage
+             ~/.local/bin/appimagetool ./assfonts-gui_AppDir assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage
 
       - name: aarch64 build binary
         if: ${{ matrix.arch == 'aarch64' }}
