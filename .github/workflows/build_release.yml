@@ -21,7 +21,16 @@ jobs:
         uses: easimon/maximize-build-space@master
         with:
           root-reserve-mb: 512
-          swap-size-mb: 1024
+          temp-reserve-mb: 32
+          swap-size-mb: 32
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+          build-mount-path: '/var/lib/docker/'
+          
+      - name: Restore /var/lib/docker/
+        run: sudo sh -c "mv ${GITHUB_WORKSPACE}/docker/* /var/lib/docker"
           
       - name: checkout
         uses: actions/checkout@v4
