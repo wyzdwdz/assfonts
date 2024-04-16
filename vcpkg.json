@@ -20,7 +20,7 @@
         {
             "name": "qtbase",
             "default-features": false,
-            features: [
+            "features": [
                 "concurrent",
                 "default-features",
                 "gui",
