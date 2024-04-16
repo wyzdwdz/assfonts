@@ -146,9 +146,6 @@ jobs:
 
       - name: install cmake
         uses: lukka/get-cmake@latest
-        
-      - name: setup Ninja
-        uses: seanmiddleditch/gha-setup-ninja@v4
 
       - name: build executable binary
         run: |

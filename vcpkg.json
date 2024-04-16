@@ -29,7 +29,7 @@
                 {
                     "name": "opengl",
                     "platform": "!ios"
-                }
+                },
                 "png",
                 "thread"
             ]
