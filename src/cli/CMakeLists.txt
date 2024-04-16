@@ -21,10 +21,6 @@ if(APPLE)
     target_link_options(${TARGET_NAME} PRIVATE -framework Foundation)
 endif()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_link_options(${TARGET_NAME} PRIVATE -s)
-endif()
-
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTS})
 
 target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})

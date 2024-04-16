@@ -59,7 +59,7 @@ if(APPLE)
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_link_options(${TARGET_NAME} PRIVATE -pthread -s)
+    target_link_options(${TARGET_NAME} PRIVATE -pthread)
 endif()
 
 target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTS})
