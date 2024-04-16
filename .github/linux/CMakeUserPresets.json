@@ -28,6 +28,9 @@
     {
       "name": "x64",
       "hidden": true,
+      "environment": {
+        "PKG_CONFIG_PATH": "/usr/lib/x86_64-linux-gnu/pkgconfig"
+      },
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x64-linux-release"
       },
@@ -39,6 +42,9 @@
     {
       "name": "arm64",
       "hidden": true,
+      "environment": {
+        "PKG_CONFIG_PATH": "/usr/lib/aarch64-linux-gnu/pkgconfig"
+      },
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "arm64-linux-release",
         "CMAKE_SYSROOT_COMPILE": "/usr/aarch64-linux-gnu",
