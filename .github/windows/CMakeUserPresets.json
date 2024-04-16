@@ -12,6 +12,7 @@
       "generator": "Ninja Multi-Config",
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+        "CMAKE_SYSTEM_NAME": "Windows",
         "VCPKG_HOST_TRIPLET": "x64-windows-static-md-release"
       }
     },

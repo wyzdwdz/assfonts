@@ -12,6 +12,7 @@
       "generator": "Ninja Multi-Config",
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+        "CMAKE_SYSTEM_NAME": "Linux",
         "VCPKG_HOST_TRIPLET": "x64-linux-release"
       }
     },
@@ -38,10 +39,13 @@
       },
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "arm64-linux-release",
+        "CMAKE_C_COMPILER": "aarch64-linux-gnu-gcc",
+        "CMAKE_CXX_COMPILER": "aarch64-linux-gnu-g++",
         "CMAKE_SYSROOT_COMPILE": "/usr/aarch64-linux-gnu",
         "CMAKE_FIND_ROOT_PATH": "/usr/lib/aarch64-linux-gnu",
         "CMAKE_FIND_ROOT_PATH_MODE_PROGRAM": "NEVER",
         "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY": "ONLY",
+        "CMAKE_FIND_ROOT_PATH_MODE_PACKAGE": "ONLY",
         "CMAKE_FIND_ROOT_PATH_MODE_INCLUDE": "BOTH",
         "CMAKE_CROSSCOMPILING": "ON"
       },
