@@ -1,0 +1,70 @@
+version: 1
+AppDir:
+  path: /root/assfonts/AppDir
+  app_info:
+    id: assfonts-gui
+    name: assfonts-gui
+    icon: icon
+    version: !!!VERSION!!!
+    exec: usr/bin/assfonts-gui
+    exec_args: $@
+  apt:
+    arch:
+    - arm64
+    allow_unauthenticated: true
+    sources:
+      - sourceline: 'deb http://deb.debian.org/debian bookworm main non-free-firmware'
+      - sourceline: 'deb http://deb.debian.org/debian-security/ bookworm-security main non-free-firmware'
+      - sourceline: 'deb http://deb.debian.org/debian bookworm-updates main non-free-firmware'
+    include:
+    - libc-bin
+    - libgcc-s1:arm64
+  files:
+    include:
+    - /lib/aarch64-linux-gnu/libGLX.so.0
+    - /lib/aarch64-linux-gnu/libGLdispatch.so.0
+    - /lib/aarch64-linux-gnu/libOpenGL.so.0
+    - /lib/aarch64-linux-gnu/libX11.so.6
+    - /lib/aarch64-linux-gnu/libXau.so.6
+    - /lib/aarch64-linux-gnu/libXdmcp.so.6
+    - /lib/aarch64-linux-gnu/libXrender.so.1
+    - /lib/aarch64-linux-gnu/libbsd.so.0
+    - /lib/aarch64-linux-gnu/libmd.so.0
+    - /lib/aarch64-linux-gnu/libstdc++.so.6
+    - /lib/aarch64-linux-gnu/libxcb-cursor.so.0
+    - /lib/aarch64-linux-gnu/libxcb-icccm.so.4
+    - /lib/aarch64-linux-gnu/libxcb-image.so.0
+    - /lib/aarch64-linux-gnu/libxcb-keysyms.so.1
+    - /lib/aarch64-linux-gnu/libxcb-randr.so.0
+    - /lib/aarch64-linux-gnu/libxcb-render-util.so.0
+    - /lib/aarch64-linux-gnu/libxcb-sync.so.1
+    - /lib/aarch64-linux-gnu/libxcb-util.so.1
+    - /lib/aarch64-linux-gnu/libxcb-xinput.so.0
+    - /lib/aarch64-linux-gnu/libxcb-xkb.so.1
+    - /lib/aarch64-linux-gnu/libxkbcommon-x11.so.0
+    - /lib/aarch64-linux-gnu/libxkbcommon.so.0
+    exclude:
+    - usr/share/man
+  runtime:
+    env:
+      QT_AUTO_SCREEN_SCALE_FACTOR: '1'
+      QT_QPA_PLATFORM: 'xcb'
+  test:
+    fedora-30:
+      image: appimagecrafters/tests-env:fedora-30
+      command: ./AppRun
+    debian-stable:
+      image: appimagecrafters/tests-env:debian-stable
+      command: ./AppRun
+    archlinux-latest:
+      image: appimagecrafters/tests-env:archlinux-latest
+      command: ./AppRun
+    centos-7:
+      image: appimagecrafters/tests-env:centos-7
+      command: ./AppRun
+    ubuntu-xenial:
+      image: appimagecrafters/tests-env:ubuntu-xenial
+      command: ./AppRun
+AppImage:
+  arch: aarch64
+  file_name: 'assfonts-gui-!!!VERSION!!!-aarch64-Linux.AppImage'

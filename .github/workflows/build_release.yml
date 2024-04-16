@@ -32,58 +32,29 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-
-      - name: set up QEMU
-        uses: docker/setup-qemu-action@v3
         
-      - name: x86_64 build binary and appimage
-        if: ${{ matrix.arch == 'x86_64' }}
+      - name: build binary and appimage
         uses: addnab/docker-run-action@v3
         with:
           image: wyzdwdz/assfonts-amd64:latest
-          options: -v ${{ github.workspace }}:/var/www --platform linux/amd64
+          options: -v ${{ github.workspace }}:/var/www
           shell: bash
           run: |
             source ~/.bashrc
             cd /var/www
             cp ./.github/linux/CMakeUserPresets.json .
-            cmake . --preset linux-x64
-            cmake --build . --target install --preset linux-x64-release -j
-            cp -f ./out/install/linux-x64/bin/assfonts assfonts-${{ github.ref_name }}-x86_64-Linux
-            linuxdeploy --appdir=./assfonts-gui_AppDir -e ./out/install/linux-x64/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
-            mkdir -p ./assfonts-gui_AppDir/usr/share/doc/assfonts
-            cp LICENSE NEWS NOTICE ./assfonts-gui_AppDir/usr/share/doc/assfonts
-            appimagetool ./assfonts-gui_AppDir assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage
-
-      - name: aarch64 build binary
-        if: ${{ matrix.arch == 'aarch64' }}
-        uses: addnab/docker-run-action@v3
-        with:
-          image: wyzdwdz/assfonts-amd64:latest
-          options: -v ${{ github.workspace }}:/var/www --platform linux/amd64
-          shell: bash
-          run: |
-            source ~/.bashrc
-            cd /var/www
-            cp ./.github/linux/CMakeUserPresets.json .
-            cmake . --preset linux-arm64
-            cmake --build . --target install --preset linux-arm64-release -j
-
-      - name: aarch64 build appimage
-        if: ${{ matrix.arch == 'aarch64' }}
-        uses: addnab/docker-run-action@v3
-        with:
-          image: wyzdwdz/assfonts-arm64:latest
-          options: -v ${{ github.workspace }}:/var/www --platform linux/arm64
-          shell: bash
-          run: |
-            source ~/.bashrc
-            cd /var/www
-            cp -f ./out/install/linux-arm64/bin/assfonts assfonts-${{ github.ref_name }}-aarch64-Linux
-            linuxdeploy --appdir=./assfonts-gui_AppDir -e ./out/install/linux-arm64/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
-            mkdir -p ./assfonts-gui_AppDir/usr/share/doc/assfonts
-            cp LICENSE NEWS NOTICE ./assfonts-gui_AppDir/usr/share/doc/assfonts
-            appimagetool ./assfonts-gui_AppDir assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
+            cmake . --preset linux-${{ matrix.profile }}
+            cmake --build . --target install --preset linux-${{ matrix.profile }}-release -j
+            mv ./out/install/linux-${{ matrix.profile }}/bin/assfonts assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Linux
+            cp ./.github/linux/AppImageBuilder_${{ matrix.profile }}.yml AppImageBuilder.yml
+            mkdir -p ./AppDir/usr
+            cp -r ./out/install/linux-${{ matrix.profile }}/* ./AppDir/usr
+            mkdir -p ./AppDir/usr/share/icons
+            cp ./src/qt/resources/icon.png ./AppDir/usr/share/icons
+            mkdir -p ./AppDir/usr/share/applications
+            cp ./src/qt/resources/assfonts-gui.desktop ./AppDir/usr/share/applications
+            sed -i 's/!!!VERSION!!!/${{ github.ref_name }}' AppImageBuilder.yml
+            appimage-builder --recipe AppImageBuilder.yml --skip-tests
 
       - name: upload Linux
         uses: actions/upload-artifact@v4
