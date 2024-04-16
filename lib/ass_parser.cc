@@ -389,8 +389,9 @@ void AssParser::set_stylename_fontdesc() {
         CalculateItalic(StringToInt(std::string(style.style[9])));
 
     RenameInfo rename_info = {
-        style.line_num, static_cast<size_t>(fontname.begin() - style.line_beg),
-        static_cast<size_t>(fontname.end() - style.line_beg),
+        style.line_num,
+        static_cast<size_t>(&(*fontname.begin()) - style.line_beg),
+        static_cast<size_t>(&(*fontname.end()) - style.line_beg),
         std::string(fontname), ""};
     rename_infos_.emplace_back(rename_info);
   }
@@ -481,7 +482,7 @@ void AssParser::GetCharacter(Iterator& wch, const Iterator end,
   }
 
   if (*wch == U'{') {
-    nonstd::string_view override(wch.ToStdIter(),
+    nonstd::string_view override(&(*wch.ToStdIter()),
                                  end.ToStdIter() - wch.ToStdIter());
     auto pos = U8Find(override, U"}", 0);
 
@@ -494,7 +495,7 @@ void AssParser::GetCharacter(Iterator& wch, const Iterator end,
 
     } else {
       override = nonstd::string_view(
-          (wch + 1).ToStdIter(),
+          &(*((wch + 1).ToStdIter())),
           (Iterator(override) += pos).ToStdIter() - (wch + 1).ToStdIter());
 
       StyleOverride(override, font_desc, font_desc_style, line_num, line_beg);
@@ -545,7 +546,7 @@ void AssParser::ChangeFontname(const nonstd::string_view code,
       ++pos;
     }
 
-    nonstd::string_view font_view(view_beg, iter.ToStdIter() - view_beg);
+    nonstd::string_view font_view(&(*view_beg), iter.ToStdIter() - view_beg);
     font_view = Trim(font_view);
 
     if (font_view.empty()) {
@@ -558,10 +559,10 @@ void AssParser::ChangeFontname(const nonstd::string_view code,
     }
     font_desc.fontname = std::string(font_view);
 
-    RenameInfo rename_info = {line_num,
-                              static_cast<size_t>(font_view.begin() - line_beg),
-                              static_cast<size_t>(font_view.end() - line_beg),
-                              std::string(font_view), ""};
+    RenameInfo rename_info = {
+        line_num, static_cast<size_t>(&(*font_view.begin()) - line_beg),
+        static_cast<size_t>(&(*font_view.end()) - line_beg),
+        std::string(font_view), ""};
     rename_infos_.emplace_back(rename_info);
   }
 }

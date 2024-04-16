@@ -14,8 +14,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - { arch: x86_64, profile: x86_64 }
-          - { arch: aarch64, profile: armv8 }
+          - { arch: x86_64, profile: x64 }
+          - { arch: aarch64, profile: arm64 }
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -89,60 +89,39 @@ jobs:
     strategy:
       matrix:
         include:
-          - { arch: x86_64, profile: x86_64 }
-          - { arch: aarch64, profile: armv8 }
+          - { arch: x86_64, profile: x64 }
+          - { arch: aarch64, profile: arm64 }
     steps:
       - name: checkout
-        uses: actions/checkout@v3
-
-      # - name: restore conan cache
-      #   uses: actions/cache/restore@v3
-      #   with:
-      #     path: .conan2/p
-      #     key: conan2-windows-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
-      #     restore-keys: |
-      #       conan2-windows-${{ matrix.arch }}-
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
 
       - name: install cmake
         uses: lukka/get-cmake@latest
-
-      - name: install Conan
-        id: conan
-        uses: turtlebrowser/get-conan@main
+        
+      - name: setup msvc x86_64
+        uses: TheMrMilchmann/setup-msvc-dev@v3
+        if: ${{ matrix.arch == 'x86_64' }}
         with:
-          version: 2.2
-
-      - name: set CONAN_HOME
-        run: Add-Content -Path $env:GITHUB_ENV -Value "CONAN_HOME=${{ github.workspace }}\.conan2"
-
-      - name: aarch64 fix conan recipes
+          arch: x64
+          
+      - name: setup msvc aarch64
+        uses: TheMrMilchmann/setup-msvc-dev@v3
         if: ${{ matrix.arch == 'aarch64' }}
-        run: |
-          conan export .github\recipes\libffi_fix -nr --version 3.4.4
-          conan export .github\recipes\libiconv_fix -nr --version 1.17
-
-      - name: fix qt recipe
-        run: |
-          conan export recipes/qt5_fix -nr --version 5.15.10
-
-      - name: aarch64 add tools to PATH
-        if: ${{ matrix.arch == 'aarch64' }}
-        run: Add-Content -Path $env:GITHUB_PATH -Value ((Get-Location -PSProvider FileSystem).Path + "\.github\tools")
+        with:
+          arch: amd64_arm64
 
       - name: build executable binary
         run: |
-          conan export --version 8.0.1 -nr recipes/harfbuzz_expt
-          conan config install .github\conan2-windows
-          conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
-          .\build\generators\conanbuild.bat
-          cmake --preset conan-default
-          cmake --build --preset conan-release -j
-          cmake --install build --prefix install
+          Copy-Item -Path ".\.github\windows\CMakeUserPresets.json" -Destination "CMakeUserPresets.json" -Force
+          cmake . --preset windows-${{ matrix.profile }}
+          cmake --build . --target install --preset windows-${{ matrix.profile }}-release
 
       - name: copy and rename
         run: |
-           Copy-Item -Path ".\install\bin\assfonts.exe" -Destination "assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe" -Force
-           Copy-Item -Path ".\install\bin\assfonts-gui.exe" -Destination "assfonts-gui-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe" -Force
+           Copy-Item -Path ".\out\install\windows-${{ matrix.profile }}\bin\assfonts.exe" -Destination "assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe" -Force
+           Copy-Item -Path ".\out\install\windows-${{ matrix.profile }}\bin\assfonts-gui.exe" -Destination "assfonts-gui-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe" -Force
 
       - name: upload Windows
         uses: actions/upload-artifact@v3
@@ -150,12 +129,6 @@ jobs:
           name: release-Windows-${{ matrix.arch }}
           path: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-Windows*
           if-no-files-found: error
-
-      # - name: save conan cache
-      #   uses: actions/cache/save@v3
-      #   with:
-      #     path: .conan2/p
-      #     key: conan2-windows-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
 
   build-macos:
     runs-on: macos-12

@@ -63,7 +63,7 @@ nonstd::string_view Trim(const nonstd::string_view sv) {
     return "";
   }
 
-  return nonstd::string_view(first, last - first);
+  return nonstd::string_view(&(*first), last - first);
 }
 
 std::string ToLower(const std::string& str) {
