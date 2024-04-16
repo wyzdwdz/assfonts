@@ -8,14 +8,7 @@ set(THIRD_PARTY_LIBS Qt::Core
                      httplib::httplib)
 
 if(LINUX)
-    list(APPEND THIRD_PARTY_LIBS fcitx5platforminputcontextplugin-qt6
-                                 Qt::QXcbIntegrationPlugin
-                                 Qt::QIbusPlatformInputContextPlugin
-                                 Qt::QComposePlatformInputContextPlugin)
-elseif(WIN32)
-    list(APPEND THIRD_PARTY_LIBS Qt::QWindowsIntegrationPlugin)
-elseif(APPLE)
-    list(APPEND THIRD_PARTY_LIBS Qt::QCocoaIntegrationPlugin)
+    list(APPEND THIRD_PARTY_LIBS fcitx5platforminputcontextplugin-qt6)
 endif()
 
 set(TARGET_SOURCES main.cc
@@ -46,6 +39,16 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 						  
 add_executable(${TARGET_NAME} ${TARGET_SOURCES})
+
+if(LINUX)
+    qt_import_plugins(${TARGET_NAME} INCLUDE Qt::QXcbIntegrationPlugin
+                                             Qt::QIbusPlatformInputContextPlugin
+                                             Qt::QComposePlatformInputContextPlugin)
+elseif(WIN32)
+    qt_import_plugins(${TARGET_NAME} INCLUDE Qt::QWindowsIntegrationPlugin)
+elseif(APPLE)
+    qt_import_plugins(${TARGET_NAME} INCLUDE Qt::QCocoaIntegrationPlugin)
+endif()
 
 target_sources(${TARGET_NAME} PRIVATE ${QT_RESOURCES} ${TARGET_RESOURCES})
 
