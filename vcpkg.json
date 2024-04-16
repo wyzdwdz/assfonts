@@ -21,7 +21,6 @@
             "name": "qtbase",
             "default-features": false,
             "features": [
-                "brotli",
                 "concurrent",
                 "dbus",
                 "default-features",
