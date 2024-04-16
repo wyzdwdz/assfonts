@@ -17,7 +17,16 @@
         "ghc-filesystem",
         "pcre2",
         "string-view-lite",
-        "qtbase",
+        {
+            "name": "qtbase",
+            "default-features": false,
+            features: [
+                "concurrent",
+                "default-features",
+                "gui",
+                "thread"
+            ]
+        },
         {
             "name": "cpp-httplib",
             "features": [

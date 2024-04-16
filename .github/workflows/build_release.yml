@@ -23,7 +23,7 @@ jobs:
           submodules: 'recursive'
 
       - name: set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         
       - name: x86_64 build binary and appimage
         if: ${{ matrix.arch == 'x86_64' }}
@@ -80,7 +80,7 @@ jobs:
             appimagetool ./assfonts-gui_AppDir assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
 
       - name: upload Linux
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: release-Linux-${{ matrix.arch }}
           path: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-Linux*
@@ -129,7 +129,7 @@ jobs:
            Copy-Item -Path ".\out\install\windows-${{ matrix.profile }}\bin\assfonts-gui.exe" -Destination "assfonts-gui-${{ github.ref_name }}-${{ matrix.arch }}-Windows.exe" -Force
 
       - name: upload Windows
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: release-Windows-${{ matrix.arch }}
           path: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-Windows*
@@ -147,7 +147,7 @@ jobs:
           - { arch: aarch64, profile: armv8 }
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # - name: restore conan cache
       #   uses: actions/cache/restore@v3
@@ -187,7 +187,7 @@ jobs:
           mv -f assfonts.dmg assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
 
       - name: upload macOS
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: release-macOS-${{ matrix.arch }}
           path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
@@ -207,35 +207,35 @@ jobs:
     needs: [ build-linux, build-windows, build-macos ]
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
           
       - name: download Linux x86_64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: release-Linux-x86_64
           
       - name: download Linux aarch64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: release-Linux-aarch64
 
       - name: download Windows x86_64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: release-Windows-x86_64
 
       - name: download Windows aarch64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: release-Windows-aarch64
 
       - name: download macOS x86_64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: release-macOS-x86_64
   
       - name: download macOS aarch64
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: release-macOS-aarch64
 
