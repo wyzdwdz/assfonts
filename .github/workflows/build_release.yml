@@ -53,7 +53,7 @@ jobs:
             cp ./src/qt/resources/icon.png ./AppDir/usr/share/icons
             mkdir -p ./AppDir/usr/share/applications
             cp ./src/qt/resources/assfonts-gui.desktop ./AppDir/usr/share/applications
-            sed -i 's/!!!VERSION!!!/${{ github.ref_name }}' AppImageBuilder.yml
+            sed -i 's@!!!VERSION!!!@${{ github.ref_name }}@g' AppImageBuilder.yml
             appimage-builder --recipe AppImageBuilder.yml --skip-tests
 
       - name: upload Linux
