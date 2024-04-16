@@ -152,7 +152,7 @@ jobs:
       - name: build executable binary
         run: |
           cp .github/macos/CMakeUserPresets.json .
-          cmake . --preset macos-${{ matrix.profile }}
+          cmake . --preset macos-${{ matrix.profile }} || cat /Users/runner/work/assfonts/assfonts/vcpkg/buildtrees/libb2/autoconf-${{ matrix.profile }}-osx-release-err.log
           cmake --build . --preset macos-${{ matrix.profile }} --target package -j
 
       - name: rename
