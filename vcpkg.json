@@ -28,7 +28,7 @@
                 "jpeg",
                 {
                     "name": "opengl",
-                    "platform", "!ios"
+                    "platform": "!ios"
                 }
                 "png",
                 "thread"
