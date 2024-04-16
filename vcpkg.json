@@ -31,7 +31,8 @@
                     "platform": "!ios"
                 },
                 "png",
-                "thread"
+                "thread",
+                "widgets"
             ]
         },
         {
