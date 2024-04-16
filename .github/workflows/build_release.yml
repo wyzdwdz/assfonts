@@ -18,7 +18,7 @@ jobs:
           - { arch: aarch64, profile: arm64 }
     steps:
       - name: Maximize build space
-        uses: easimon/maximize-build-space@latest
+        uses: easimon/maximize-build-space@v10
         with:
           root-reserve-mb: 512
           temp-reserve-mb: 32
