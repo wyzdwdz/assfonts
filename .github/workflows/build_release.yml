@@ -29,9 +29,6 @@ jobs:
           remove-codeql: 'true'
           build-mount-path: '/var/lib/docker/'
           
-      - name: Restore /var/lib/docker/
-        run: sudo sh -c "mv ${GITHUB_WORKSPACE}/docker/* /var/lib/docker"
-          
       - name: checkout
         uses: actions/checkout@v4
         with:
