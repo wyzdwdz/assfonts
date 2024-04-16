@@ -57,6 +57,11 @@ jobs:
             cp ./.github/linux/CMakeUserPresets.json .
             cmake . --preset linux-arm64
             cmake --build . --target install --preset linux-arm64-release
+            
+      - name: show log
+        if: ${{ matrix.arch == 'aarch64' }}
+        run: |
+          cat ./vcpkg/buildtrees/qtbase/install-arm64-linux-release-rel-out.log
 
       - name: aarch64 build appimage
         if: ${{ matrix.arch == 'aarch64' }}
