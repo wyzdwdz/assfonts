@@ -37,7 +37,7 @@ jobs:
             cd /var/www
             cp ./.github/linux/CMakeUserPresets.json .
             cmake . --preset linux-x64
-            cmake --build . --target install --preset linux-x64-release
+            cmake --build . --target install --preset linux-x64-release -j
             cp -f ./out/install/linux-x64/bin/assfonts assfonts-${{ github.ref_name }}-x86_64-Linux
             linuxdeploy --appdir=./assfonts-gui_AppDir -e ./out/install/linux-x64/bin/assfonts-gui -d ./src/qt/resources/assfonts-gui.desktop -i ./src/qt/resources/icon.png --icon-filename=assfonts-gui --custom-apprun=./src/qt/resources/AppRun
             mkdir -p ./assfonts-gui_AppDir/usr/share/doc/assfonts
@@ -56,7 +56,7 @@ jobs:
             cd /var/www
             cp ./.github/linux/CMakeUserPresets.json .
             cmake . --preset linux-arm64 || cat /var/www/vcpkg/buildtrees/qtbase/install-arm64-linux-release-rel-out.log
-            cmake --build . --target install --preset linux-arm64-release
+            cmake --build . --target install --preset linux-arm64-release -j
 
       - name: aarch64 build appimage
         if: ${{ matrix.arch == 'aarch64' }}
@@ -116,7 +116,7 @@ jobs:
         run: |
           Copy-Item -Path ".\.github\windows\CMakeUserPresets.json" -Destination "CMakeUserPresets.json" -Force
           cmake . --preset windows-${{ matrix.profile }}
-          cmake --build . --target install --preset windows-${{ matrix.profile }}-release
+          cmake --build . --target install --preset windows-${{ matrix.profile }}-release -j
 
       - name: copy and rename
         run: |
@@ -138,44 +138,20 @@ jobs:
     strategy:
       matrix:
         include:
-          - { arch: x86_64, profile: x86_64 }
-          - { arch: aarch64, profile: armv8 }
+          - { arch: x86_64, profile: x64 }
+          - { arch: aarch64, profile: arm64 }
     steps:
       - name: checkout
         uses: actions/checkout@v4
 
-      # - name: restore conan cache
-      #   uses: actions/cache/restore@v3
-      #   with:
-      #       path: .conan2/p
-      #       key: conan2-macos-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
-      #       restore-keys: |
-      #         conan2-macos-${{ matrix.arch }}-
-
       - name: install cmake
         uses: lukka/get-cmake@latest
 
-      - name: install Conan
-        id: conan
-        uses: turtlebrowser/get-conan@main
-        with:
-          version: 2.2
-
-      - name: set CONAN_HOME
-        run: echo "CONAN_HOME=${{ github.workspace }}/.conan2" >> "$GITHUB_ENV"
-
-      - name: fix qt recipe
-        run: |
-          conan export recipes/qt5_fix -nr --version 5.15.10
-
       - name: build executable binary
         run: |
-          conan export --version 8.0.1 -nr recipes/harfbuzz_expt
-          conan config install .github/conan2-macos
-          conan install . -b missing -pr:h ${{ matrix.profile }} -pr:b x86_64
-          source ./build/Release/generators/conanbuild.sh
-          cmake --preset conan-release
-          cmake --build --preset conan-release --target package -j
+          cp .github/macos/CMakeUserPresets.json .
+          cmake . --preset macos-{{ matrix.profile }}
+          cmake --build . --preset macos-{{ matrix.profile }} --target package -j
 
       - name: rename
         run: |
@@ -188,95 +164,89 @@ jobs:
           path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
           if-no-files-found: error
 
-      # - name: save conan cache
-      #   uses: actions/cache/save@v3
-      #   with:
-      #       path: .conan2/p
-      #       key: conan2-macos-${{ matrix.arch }}-${{ hashFiles('.conan2/p/cache.sqlite3') }}
-
-  release:
-    runs-on: ubuntu-22.04
-    defaults:
-      run:
-        shell: bash
-    needs: [ build-linux, build-windows, build-macos ]
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
+#  release:
+#    runs-on: ubuntu-22.04
+#    defaults:
+#      run:
+#        shell: bash
+#    needs: [ build-linux, build-windows, build-macos ]
+#    steps:
+#      - name: checkout
+#        uses: actions/checkout@v4
           
-      - name: download Linux x86_64
-        uses: actions/download-artifact@v4
-        with:
-          name: release-Linux-x86_64
+#      - name: download Linux x86_64
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: release-Linux-x86_64
           
-      - name: download Linux aarch64
-        uses: actions/download-artifact@v4
-        with:
-          name: release-Linux-aarch64
+#      - name: download Linux aarch64
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: release-Linux-aarch64
 
-      - name: download Windows x86_64
-        uses: actions/download-artifact@v4
-        with:
-          name: release-Windows-x86_64
+#      - name: download Windows x86_64
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: release-Windows-x86_64
 
-      - name: download Windows aarch64
-        uses: actions/download-artifact@v4
-        with:
-          name: release-Windows-aarch64
+#      - name: download Windows aarch64
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: release-Windows-aarch64
 
-      - name: download macOS x86_64
-        uses: actions/download-artifact@v4
-        with:
-          name: release-macOS-x86_64
+#      - name: download macOS x86_64
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: release-macOS-x86_64
   
-      - name: download macOS aarch64
-        uses: actions/download-artifact@v4
-        with:
-          name: release-macOS-aarch64
+#      - name: download macOS aarch64
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: release-macOS-aarch64
 
-      - name: create zips
-        run: |
-          sudo apt-get install -y zip
-          mkdir -p ./share/doc/assfonts
-          cp LICENSE LICENSE.txt
-          cp NEWS NEWS.txt
-          cp NOTICE NOTICE.txt
-          cp LICENSE NEWS NOTICE ./share/doc/assfonts/
-          mkdir -p ./share/man/man1
-          gzip -k ./doc/man/assfonts.1
-          cp ./doc/man/assfonts.1.gz ./share/man/man1/
-          mkdir bin
-          cp -f assfonts-${{ github.ref_name }}-x86_64-Linux ./bin/assfonts
-          cp -f assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage assfonts-gui.AppImage
-          tar -czvf assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz bin/assfonts assfonts-gui.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE ./share/man/man1/assfonts.1.gz
-          rm -rf assfonts-${{ github.ref_name }}-x86_64-Linux assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage
-          cp -f assfonts-${{ github.ref_name }}-aarch64-Linux ./bin/assfonts
-          cp -f assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage assfonts-gui.AppImage
-          tar -czvf assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz bin/assfonts assfonts-gui.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE ./share/man/man1/assfonts.1.gz
-          rm -rf assfonts-${{ github.ref_name }}-aarch64-Linux assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
-          cp -f assfonts-${{ github.ref_name }}-x86_64-Windows.exe assfonts.exe
-          cp -f assfonts-gui-${{ github.ref_name }}-x86_64-Windows.exe assfonts-gui.exe
-          zip assfonts-${{ github.ref_name }}-x86_64-Windows.zip assfonts.exe assfonts-gui.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
-          rm -rf assfonts-${{ github.ref_name }}-x86_64-Windows.exe assfonts-gui-${{ github.ref_name }}-x86_64-Windows.exe
-          cp -f assfonts-${{ github.ref_name }}-aarch64-Windows.exe assfonts.exe
-          cp -f assfonts-gui-${{ github.ref_name }}-aarch64-Windows.exe assfonts-gui.exe
-          zip assfonts-${{ github.ref_name }}-aarch64-Windows.zip assfonts.exe assfonts-gui.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
-          rm -rf assfonts-${{ github.ref_name }}-aarch64-Windows.exe assfonts-gui-${{ github.ref_name }}-aarch64-Windows.exe
+#      - name: create zips
+#        run: |
+#          sudo apt-get install -y zip
+#          mkdir -p ./share/doc/assfonts
+#          cp LICENSE LICENSE.txt
+#          cp NEWS NEWS.txt
+#          cp NOTICE NOTICE.txt
+#          cp LICENSE NEWS NOTICE ./share/doc/assfonts/
+#          mkdir -p ./share/man/man1
+#          gzip -k ./doc/man/assfonts.1
+#          cp ./doc/man/assfonts.1.gz ./share/man/man1/
+#          mkdir bin
+#          cp -f assfonts-${{ github.ref_name }}-x86_64-Linux ./bin/assfonts
+#          cp -f assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage assfonts-gui.AppImage
+#          tar -czvf assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz bin/assfonts assfonts-gui.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE ./share/man/man1/assfonts.1.gz
+#          rm -rf assfonts-${{ github.ref_name }}-x86_64-Linux assfonts-gui-${{ github.ref_name }}-x86_64-Linux.AppImage
+#          cp -f assfonts-${{ github.ref_name }}-aarch64-Linux ./bin/assfonts
+#          cp -f assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage assfonts-gui.AppImage
+#          tar -czvf assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz bin/assfonts assfonts-gui.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE ./share/man/man1/assfonts.1.gz
+#          rm -rf assfonts-${{ github.ref_name }}-aarch64-Linux assfonts-gui-${{ github.ref_name }}-aarch64-Linux.AppImage
+#          cp -f assfonts-${{ github.ref_name }}-x86_64-Windows.exe assfonts.exe
+#          cp -f assfonts-gui-${{ github.ref_name }}-x86_64-Windows.exe assfonts-gui.exe
+#          zip assfonts-${{ github.ref_name }}-x86_64-Windows.zip assfonts.exe assfonts-gui.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
+#          rm -rf assfonts-${{ github.ref_name }}-x86_64-Windows.exe assfonts-gui-${{ github.ref_name }}-x86_64-Windows.exe
+#          cp -f assfonts-${{ github.ref_name }}-aarch64-Windows.exe assfonts.exe
+#          cp -f assfonts-gui-${{ github.ref_name }}-aarch64-Windows.exe assfonts-gui.exe
+#          zip assfonts-${{ github.ref_name }}-aarch64-Windows.zip assfonts.exe assfonts-gui.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
+#          rm -rf assfonts-${{ github.ref_name }}-aarch64-Windows.exe assfonts-gui-${{ github.ref_name }}-aarch64-Windows.exe
 
-      - name: calculate hash
-        run: |
-          sha256sum assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz > assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz > assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-x86_64-Windows.zip > assfonts-${{ github.ref_name }}-x86_64-Windows.zip.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-aarch64-Windows.zip > assfonts-${{ github.ref_name }}-aarch64-Windows.zip.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-x86_64-macOS.dmg > assfonts-${{ github.ref_name }}-x86_64-macOS.dmg.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-aarch64-macOS.dmg > assfonts-${{ github.ref_name }}-aarch64-macOS.dmg.sha256sum
+#      - name: calculate hash
+#        run: |
+#          sha256sum assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz > assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz.sha256sum
+#          sha256sum assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz > assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz.sha256sum
+#          sha256sum assfonts-${{ github.ref_name }}-x86_64-Windows.zip > assfonts-${{ github.ref_name }}-x86_64-Windows.zip.sha256sum
+#          sha256sum assfonts-${{ github.ref_name }}-aarch64-Windows.zip > assfonts-${{ github.ref_name }}-aarch64-Windows.zip.sha256sum
+#          sha256sum assfonts-${{ github.ref_name }}-x86_64-macOS.dmg > assfonts-${{ github.ref_name }}-x86_64-macOS.dmg.sha256sum
+#          sha256sum assfonts-${{ github.ref_name }}-aarch64-macOS.dmg > assfonts-${{ github.ref_name }}-aarch64-macOS.dmg.sha256sum
 
-      - name: edit release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: assfonts-${{ github.ref_name }}-*
-          tag: ${{ github.ref }}
-          overwrite: false
-          file_glob: true
+#      - name: edit release
+#        uses: svenstaro/upload-release-action@v2
+#        with:
+#          repo_token: ${{ secrets.GITHUB_TOKEN }}
+#          file: assfonts-${{ github.ref_name }}-*
+#          tag: ${{ github.ref }}
+#          overwrite: false
+#          file_glob: true

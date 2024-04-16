@@ -22,8 +22,15 @@
             "default-features": false,
             "features": [
                 "concurrent",
+                "dbus",
                 "default-features",
                 "gui",
+                "jpeg",
+                {
+                    "name": "opengl",
+                    "platform", "!ios"
+                }
+                "png",
                 "thread"
             ]
         },
