@@ -28,7 +28,6 @@
                 "freetype",
                 "gui",
                 "harfbuzz",
-                "icu",
                 "jpeg",
                 {
                     "name": "opengl",
