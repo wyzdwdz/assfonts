@@ -21,18 +21,25 @@
             "name": "qtbase",
             "default-features": false,
             "features": [
+                "brotli",
                 "concurrent",
                 "dbus",
                 "default-features",
+                "doubleconversion",
+                "freetype",
                 "gui",
+                "harfbuzz",
+                "icu",
                 "jpeg",
                 {
                     "name": "opengl",
                     "platform": "!ios"
                 },
+                "pcre2",
                 "png",
                 "thread",
-                "widgets"
+                "widgets",
+                "zstd"
             ]
         },
         {
