@@ -55,7 +55,7 @@ jobs:
             source ~/.bashrc
             cd /var/www
             cp ./.github/linux/CMakeUserPresets.json .
-            cmake . --preset linux-arm64 || cat /var/www/vcpkg/buildtrees/qtbase/install-arm64-linux-release-rel-out.log
+            cmake . --preset linux-arm64
             cmake --build . --target install --preset linux-arm64-release -j
 
       - name: aarch64 build appimage
@@ -80,6 +80,13 @@ jobs:
           name: release-Linux-${{ matrix.arch }}
           path: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-Linux*
           if-no-files-found: error
+          
+      - name: upload issue
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.profile }}-issue
+          path: out/build/linux-${{ matrix.profile }}/vcpkg_installed/vcpkg/issue_body.md
 
   build-windows:
     runs-on: windows-2022
@@ -129,6 +136,13 @@ jobs:
           name: release-Windows-${{ matrix.arch }}
           path: assfonts*-${{ github.ref_name }}-${{ matrix.arch }}-Windows*
           if-no-files-found: error
+          
+      - name: upload issue
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-${{ matrix.profile }}-issue
+          path: out/build/windows-${{ matrix.profile }}/vcpkg_installed/vcpkg/issue_body.md
 
   build-macos:
     runs-on: macos-12
@@ -152,7 +166,7 @@ jobs:
       - name: build executable binary
         run: |
           cp .github/macos/CMakeUserPresets.json .
-          cmake . --preset macos-${{ matrix.profile }} || cat /Users/runner/work/assfonts/assfonts/vcpkg/buildtrees/libb2/autoconf-${{ matrix.profile }}-osx-release-err.log
+          cmake . --preset macos-${{ matrix.profile }}
           cmake --build . --preset macos-${{ matrix.profile }} --target package -j
 
       - name: rename
@@ -165,6 +179,13 @@ jobs:
           name: release-macOS-${{ matrix.arch }}
           path: assfonts-${{ github.ref_name }}-${{ matrix.arch }}-macOS.dmg
           if-no-files-found: error
+          
+      - name: upload issue
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.profile }}-issue
+          path: out/build/macos-${{ matrix.profile }}/vcpkg_installed/vcpkg/issue_body.md
 
 #  release:
 #    runs-on: ubuntu-22.04
