@@ -36,8 +36,6 @@ Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin)
 #endif
 
 int main(int argc, char** argv) {
-  qputenv("QT_QPA_PLATFORM", "windows:darkmode=0");
-  
   QApplication::setHighDpiScaleFactorRoundingPolicy(
       Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 
