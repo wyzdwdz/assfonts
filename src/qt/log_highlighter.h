@@ -28,6 +28,8 @@ class LogHighlighter : public QSyntaxHighlighter {
  public:
   LogHighlighter(QTextDocument* parent);
 
+  void SetColor();
+
  protected:
   void highlightBlock(const QString& text) override;
 

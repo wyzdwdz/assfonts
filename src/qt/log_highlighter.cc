@@ -25,19 +25,24 @@
 
 LogHighlighter::LogHighlighter(QTextDocument* parent)
     : QSyntaxHighlighter(parent) {
+  SetColor();
+
+  info_expression_ = QRegularExpression("^\\[INFO\\].*$");
+  warn_expression_ = QRegularExpression("^\\[WARN\\].*$");
+  error_expression_ = QRegularExpression("^\\[ERROR\\].*$");
+}
+
+void LogHighlighter::SetColor() {
   auto hints = QGuiApplication::styleHints();
   auto scheme = hints->colorScheme();
-  if(scheme == Qt::ColorScheme::Dark) {
-    warn_format_.setForeground(Qt::blue);
+
+  if (scheme == Qt::ColorScheme::Dark) {
+    warn_format_.setForeground(QColorConstants::Svg::lightskyblue);
     error_format_.setForeground(Qt::yellow);
   } else {
     warn_format_.setForeground(Qt::blue);
     error_format_.setForeground(Qt::red);
   }
-
-  info_expression_ = QRegularExpression("^\\[INFO\\].*$");
-  warn_expression_ = QRegularExpression("^\\[WARN\\].*$");
-  error_expression_ = QRegularExpression("^\\[ERROR\\].*$");
 }
 
 void LogHighlighter::highlightBlock(const QString& text) {

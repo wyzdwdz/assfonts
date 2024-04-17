@@ -77,6 +77,15 @@ void MainWindow::closeEvent(QCloseEvent* event) {
   }
 }
 
+void MainWindow::changeEvent(QEvent* event) {
+  if (event->type() == QEvent::ThemeChange) {
+    log_highlighter_->SetColor();
+    RefreshLogText();
+  }
+
+  event->accept();
+}
+
 void MainWindow::InitMenu() {
   QMenuBar* menu_bar = new QMenuBar;
   log_menu_ = menu_bar->addMenu(tr("&Log"));

@@ -59,6 +59,7 @@ class MainWindow : public QMainWindow {
 
  protected:
   void closeEvent(QCloseEvent* event) override;
+  void changeEvent(QEvent* event) override;
 
  signals:
   void OnSendBuild(QString fonts_path, QString db_path);
