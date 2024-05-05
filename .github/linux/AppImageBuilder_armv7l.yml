@@ -18,10 +18,9 @@ AppDir:
     - sourceline: 'deb http://deb.debian.org/debian bookworm-updates main non-free-firmware'
     include:
     - libc-bin
-    - libc6-i386
     - libgcc-s1:armhf
   files:
-    include: 
+    include:
     - /lib/arm-linux-gnueabihf/libGLX.so.0
     - /lib/arm-linux-gnueabihf/libGLdispatch.so.0
     - /lib/arm-linux-gnueabihf/libOpenGL.so.0

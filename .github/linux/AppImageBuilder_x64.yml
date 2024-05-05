@@ -58,4 +58,6 @@ AppDir:
       command: ./AppRun
 AppImage:
   arch: x86_64
+  comp: xz
+  update-information: guess
   file_name: 'assfonts-gui-!!!VERSION!!!-x86_64-Linux.AppImage'
