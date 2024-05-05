@@ -103,6 +103,12 @@ jobs:
         with:
           arch: amd64_arm64
 
+      - name: setup msvc i386
+        uses: TheMrMilchmann/setup-msvc-dev@v3
+        if: ${{ matrix.arch == 'i386' }}
+        with:
+          arch: amd64_x86
+
       - name: build executable binary
         run: |
           Copy-Item -Path ".\.github\windows\CMakeUserPresets.json" -Destination "CMakeUserPresets.json" -Force
