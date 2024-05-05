@@ -55,6 +55,29 @@
       }
     },
     {
+      "name": "armv7l",
+      "hidden": true,
+      "environment": {
+        "PKG_CONFIG_PATH": "/usr/lib/arm-linux-gnueabihf/pkgconfig"
+      },
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "arm-linux-release",
+        "CMAKE_C_COMPILER": "arm-linux-gnueabihf-gcc",
+        "CMAKE_CXX_COMPILER": "arm-linux-gnueabihf-g++",
+        "CMAKE_SYSROOT_COMPILE": "/usr/arm-linux-gnueabihf",
+        "CMAKE_FIND_ROOT_PATH": "/usr/lib/arm-linux-gnueabihf",
+        "CMAKE_FIND_ROOT_PATH_MODE_PROGRAM": "NEVER",
+        "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY": "ONLY",
+        "CMAKE_FIND_ROOT_PATH_MODE_PACKAGE": "ONLY",
+        "CMAKE_FIND_ROOT_PATH_MODE_INCLUDE": "BOTH",
+        "CMAKE_CROSSCOMPILING": "ON"
+      },
+      "architecture": {
+        "value": "armv7l",
+        "strategy": "external"
+      }
+    },
+    {
       "name": "linux-x64",
       "inherits": [
         "linux",
@@ -67,6 +90,14 @@
       "inherits": [
         "linux",
         "arm64"
+      ],
+      "binaryDir": "${sourceDir}/out/build/${presetName}"
+    },
+    {
+      "name": "linux-armv7l",
+      "inherits": [
+        "linux",
+        "armv7l"
       ],
       "binaryDir": "${sourceDir}/out/build/${presetName}"
     }
@@ -90,6 +121,16 @@
     {
       "name": "linux-arm64-debug",
       "configurePreset": "linux-arm64",
+      "configuration": "Debug"
+    },
+    {
+      "name": "linux-armv7l-release",
+      "configurePreset": "linux-armv7l",
+      "configuration": "Release"
+    },
+    {
+      "name": "linux-armv7l-debug",
+      "configurePreset": "linux-armv7l",
       "configuration": "Debug"
     }
   ]
