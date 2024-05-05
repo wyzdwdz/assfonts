@@ -1,0 +1,82 @@
+version: 1
+AppDir:
+  path: /root/assfonts/AppDir
+  app_info:
+    id: assfonts-gui
+    name: assfonts-gui
+    icon: icon
+    version: !!!VERSION!!!
+    exec: usr/bin/assfonts-gui
+    exec_args: $@
+  apt:
+    arch:
+    - armhf
+    allow_unauthenticated: true
+    sources:
+      - sourceline: 'deb http://deb.debian.org/debian bookworm main non-free-firmware'
+      - sourceline: 'deb http://deb.debian.org/debian-security/ bookworm-security main non-free-firmware'
+      - sourceline: 'deb http://deb.debian.org/debian bookworm-updates main non-free-firmware'
+    include:
+    - libc6:armhf
+    - libgcc-s1:armhf
+  files:
+    include: 
+    - /lib/arm-linux-gnueabihf/libGLX.so.0
+    - /lib/arm-linux-gnueabihf/libOpenGL.so.0 
+    - /lib/arm-linux-gnueabihf/libxcb-glx.so.0 
+    - /lib/arm-linux-gnueabihf/libEGL.so.1 
+    - /lib/arm-linux-gnueabihf/libX11.so.6 
+    - /lib/arm-linux-gnueabihf/libxkbcommon.so.0 
+    - /lib/arm-linux-gnueabihf/libX11-xcb.so.1 
+    - /lib/arm-linux-gnueabihf/libxcb-cursor.so.0 
+    - /lib/arm-linux-gnueabihf/libxcb-icccm.so.4 
+    - /lib/arm-linux-gnueabihf/libxcb-image.so.0 
+    - /lib/arm-linux-gnueabihf/libxcb-keysyms.so.1 
+    - /lib/arm-linux-gnueabihf/libxcb-randr.so.0 
+    - /lib/arm-linux-gnueabihf/libxcb-render-util.so.0 
+    - /lib/arm-linux-gnueabihf/libxcb-shm.so.0 
+    - /lib/arm-linux-gnueabihf/libxcb-sync.so.1
+    - /lib/arm-linux-gnueabihf/libxcb-xfixes.so.0 
+    - /lib/arm-linux-gnueabihf/libxcb-render.so.0 
+    - /lib/arm-linux-gnueabihf/libxcb-shape.so.0 
+    - /lib/arm-linux-gnueabihf/libxcb-xkb.so.1 
+    - /lib/arm-linux-gnueabihf/libxcb-xinput.so.0 
+    - /lib/arm-linux-gnueabihf/libxcb.so.1 
+    - /lib/arm-linux-gnueabihf/libxkbcommon-x11.so.0
+    - /lib/arm-linux-gnueabihf/libXrender.so.1 
+    - /lib/arm-linux-gnueabihf/libstdc++.so.6 
+    - /lib/arm-linux-gnueabihf/libGLdispatch.so.0 
+    - /lib/arm-linux-gnueabihf/libxcb-util.so.1 
+    - /lib/arm-linux-gnueabihf/libXau.so.6 
+    - /lib/arm-linux-gnueabihf/libXdmcp.so.6 
+    - /lib/arm-linux-gnueabihf/libbsd.so.0 
+    - /lib/arm-linux-gnueabihf/libmd.so.0
+    exclude:
+    - usr/share/man
+    - usr/share/doc/*/README.*
+    - usr/share/doc/*/changelog.*
+    - usr/share/doc/*/NEWS.*
+    - usr/share/doc/*/TODO.*
+  runtime:
+    env:
+      QT_AUTO_SCREEN_SCALE_FACTOR: '1'
+      QT_QPA_PLATFORM: 'xcb'
+  test:
+    fedora-30:
+      image: appimagecrafters/tests-env:fedora-30
+      command: ./AppRun
+    debian-stable:
+      image: appimagecrafters/tests-env:debian-stable
+      command: ./AppRun
+    archlinux-latest:
+      image: appimagecrafters/tests-env:archlinux-latest
+      command: ./AppRun
+    centos-7:
+      image: appimagecrafters/tests-env:centos-7
+      command: ./AppRun
+    ubuntu-xenial:
+      image: appimagecrafters/tests-env:ubuntu-xenial
+      command: ./AppRun
+AppImage:
+  arch: armhf
+  file_name: 'assfonts-gui-!!!VERSION!!!-armhf-Linux.AppImage'
