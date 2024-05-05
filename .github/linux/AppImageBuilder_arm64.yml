@@ -13,9 +13,9 @@ AppDir:
     - arm64
     allow_unauthenticated: true
     sources:
-      - sourceline: 'deb http://deb.debian.org/debian bookworm main non-free-firmware'
-      - sourceline: 'deb http://deb.debian.org/debian-security/ bookworm-security main non-free-firmware'
-      - sourceline: 'deb http://deb.debian.org/debian bookworm-updates main non-free-firmware'
+    - sourceline: 'deb http://deb.debian.org/debian bookworm main non-free-firmware'
+    - sourceline: 'deb http://deb.debian.org/debian-security/ bookworm-security main non-free-firmware'
+    - sourceline: 'deb http://deb.debian.org/debian bookworm-updates main non-free-firmware'
     include:
     - libc-bin
     - libgcc-s1:arm64

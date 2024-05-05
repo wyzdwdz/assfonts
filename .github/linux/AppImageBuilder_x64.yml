@@ -13,9 +13,9 @@ AppDir:
     - amd64
     allow_unauthenticated: true
     sources: 
-      - sourceline: 'deb http://deb.debian.org/debian bookworm main non-free-firmware'
-      - sourceline: 'deb http://deb.debian.org/debian-security/ bookworm-security main non-free-firmware'
-      - sourceline: 'deb http://deb.debian.org/debian bookworm-updates main non-free-firmware'
+    - sourceline: 'deb http://deb.debian.org/debian bookworm main non-free-firmware'
+    - sourceline: 'deb http://deb.debian.org/debian-security/ bookworm-security main non-free-firmware'
+    - sourceline: 'deb http://deb.debian.org/debian bookworm-updates main non-free-firmware'
     include:
     - libc-bin
     - libgcc-s1:amd64
@@ -34,10 +34,6 @@ AppDir:
     - /lib/x86_64-linux-gnu/libxkbcommon-x11.so.0
     exclude:
     - usr/share/man
-    - usr/share/doc/*/README.*
-    - usr/share/doc/*/changelog.*
-    - usr/share/doc/*/NEWS.*
-    - usr/share/doc/*/TODO.*
   runtime:
     env:
       QT_AUTO_SCREEN_SCALE_FACTOR: '1'
