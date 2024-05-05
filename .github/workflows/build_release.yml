@@ -81,6 +81,7 @@ jobs:
         include:
           - { arch: x86_64, profile: x64 }
           - { arch: aarch64, profile: arm64 }
+          - { arch: i386, profile: x86 }
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -207,6 +208,11 @@ jobs:
        with:
          name: release-Windows-aarch64
 
+     - name: download Windows i386
+       uses: actions/download-artifact@v4
+       with:
+         name: release-Windows-i386
+
      - name: download macOS x86_64
        uses: actions/download-artifact@v4
        with:
@@ -249,13 +255,19 @@ jobs:
          cp -f assfonts-gui-${{ github.ref_name }}-aarch64-Windows.exe assfonts-gui.exe
          zip assfonts-${{ github.ref_name }}-aarch64-Windows.zip assfonts.exe assfonts-gui.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
          rm -rf assfonts-${{ github.ref_name }}-aarch64-Windows.exe assfonts-gui-${{ github.ref_name }}-aarch64-Windows.exe
+         cp -f assfonts-${{ github.ref_name }}-i386-Windows.exe assfonts.exe
+         cp -f assfonts-gui-${{ github.ref_name }}-i386-Windows.exe assfonts-gui.exe
+         zip assfonts-${{ github.ref_name }}-i386-Windows.zip assfonts.exe assfonts-gui.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
+         rm -rf assfonts-${{ github.ref_name }}-i386-Windows.exe assfonts-gui-${{ github.ref_name }}-i386-Windows.exe
 
      - name: calculate hash
        run: |
          sha256sum assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz > assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz.sha256sum
          sha256sum assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz > assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz.sha256sum
+         sha256sum assfonts-${{ github.ref_name }}-armhf-Linux.tar.gz > assfonts-${{ github.ref_name }}-armhf-Linux.tar.gz.sha256sum
          sha256sum assfonts-${{ github.ref_name }}-x86_64-Windows.zip > assfonts-${{ github.ref_name }}-x86_64-Windows.zip.sha256sum
          sha256sum assfonts-${{ github.ref_name }}-aarch64-Windows.zip > assfonts-${{ github.ref_name }}-aarch64-Windows.zip.sha256sum
+         sha256sum assfonts-${{ github.ref_name }}-i386-Windows.zip > assfonts-${{ github.ref_name }}-i386-Windows.zip.sha256sum
          sha256sum assfonts-${{ github.ref_name }}-x86_64-macOS.dmg > assfonts-${{ github.ref_name }}-x86_64-macOS.dmg.sha256sum
          sha256sum assfonts-${{ github.ref_name }}-aarch64-macOS.dmg > assfonts-${{ github.ref_name }}-aarch64-macOS.dmg.sha256sum
 
