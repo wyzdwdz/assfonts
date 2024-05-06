@@ -144,6 +144,7 @@ jobs:
         include:
           - { arch: x86_64, profile: x64 }
           - { arch: aarch64, profile: arm64 }
+          - { arch: i386, profile: x86 }
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -228,6 +229,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: release-macOS-aarch64
+          
+      - name: download macOS i386
+        uses: actions/download-artifact@v4
+        with:
+          name: release-macOS-i386
 
       - name: create zips
         run: |
@@ -276,6 +282,7 @@ jobs:
           sha256sum assfonts-${{ github.ref_name }}-i386-Windows.zip > assfonts-${{ github.ref_name }}-i386-Windows.zip.sha256sum
           sha256sum assfonts-${{ github.ref_name }}-x86_64-macOS.dmg > assfonts-${{ github.ref_name }}-x86_64-macOS.dmg.sha256sum
           sha256sum assfonts-${{ github.ref_name }}-aarch64-macOS.dmg > assfonts-${{ github.ref_name }}-aarch64-macOS.dmg.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-i386-macOS.dmg > assfonts-${{ github.ref_name }}-i386-macOS.dmg.sha256sum
 
       - name: edit release
         uses: svenstaro/upload-release-action@v2
