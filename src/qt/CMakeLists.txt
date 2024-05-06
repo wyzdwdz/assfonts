@@ -62,8 +62,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
     target_link_options(${TARGET_NAME} PRIVATE -pthread)
 endif()
 
-target_compile_options(${TARGET_NAME} PRIVATE ${COMPILE_OPTS})
-
 target_compile_features(${TARGET_NAME} PRIVATE ${CXX_STD_VER})
 
 set_target_properties(${TARGET_NAME} PROPERTIES WIN32_EXECUTABLE ON

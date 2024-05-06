@@ -13,7 +13,9 @@
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
         "CMAKE_SYSTEM_NAME": "Darwin",
-        "VCPKG_HOST_TRIPLET": "x64-osx-release"
+        "VCPKG_HOST_TRIPLET": "x64-osx-release",
+        "CMAKE_C_FLAGS": "-fPIC",
+        "CMAKE_CXX_FLAGS": "-fPIC"
       }
     },
     {

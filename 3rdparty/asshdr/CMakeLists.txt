@@ -14,20 +14,6 @@ find_package(CLI11 CONFIG REQUIRED)
 set(THIRD_PARTY_INCLUDE_DIRS ${PCRE2_INCLUDE_DIR}
                              ${CLI11_INCLUDE_DIR})
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    if(CMAKE_BUILD_TYPE MATCHES "Debug")
-        SET(COMPILE_OPTIONS /Od /W4 /MDd)
-    elseif(CMAKE_BUILD_TYPE MATCHES "Release")
-        SET(COMPILE_OPTIONS /O2 /W4 /WX /MT)
-    endif()
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    if(CMAKE_BUILD_TYPE MATCHES "Debug")
-        SET(COMPILE_OPTIONS -O0 -Wall -fPIC)
-    elseif(CMAKE_BUILD_TYPE MATCHES "Release")
-        SET(COMPILE_OPTIONS -O2 -Wall -Werror -fPIC)
-    endif()
-endif()
-
 set(CXX_STD_VER cxx_std_17)
 
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib)

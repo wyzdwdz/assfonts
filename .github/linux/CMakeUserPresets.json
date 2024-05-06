@@ -13,7 +13,9 @@
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
         "CMAKE_SYSTEM_NAME": "Linux",
-        "VCPKG_HOST_TRIPLET": "x64-linux-release"
+        "VCPKG_HOST_TRIPLET": "x64-linux-release",
+        "CMAKE_C_FLAGS": "-fPIC",
+        "CMAKE_CXX_FLAGS": "-fPIC"
       }
     },
     {
