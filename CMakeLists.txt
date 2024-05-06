@@ -6,8 +6,8 @@ set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems
 project (assfonts CXX C)
 
 set(VERSION_MAJOR 0)
-set(VERSION_MINOR 6)
-set(VERSION_PATCH 3)
+set(VERSION_MINOR 7)
+set(VERSION_PATCH 0)
 
 add_subdirectory(3rdparty)
 
