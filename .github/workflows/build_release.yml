@@ -17,6 +17,7 @@ jobs:
           - { arch: x86_64, profile: x64 }
           - { arch: aarch64, profile: arm64 }
           - { arch: armhf, profile: armv7l }
+          - { arch: i686, profile: x86 }
     steps:
       - name: Maximize build space
         uses: easimon/maximize-build-space@v10
@@ -81,7 +82,7 @@ jobs:
         include:
           - { arch: x86_64, profile: x64 }
           - { arch: aarch64, profile: arm64 }
-          - { arch: i386, profile: x86 }
+          - { arch: i686, profile: x86 }
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -103,9 +104,9 @@ jobs:
         with:
           arch: amd64_arm64
 
-      - name: setup msvc i386
+      - name: setup msvc i686
         uses: TheMrMilchmann/setup-msvc-dev@v3
-        if: ${{ matrix.arch == 'i386' }}
+        if: ${{ matrix.arch == 'i686' }}
         with:
           arch: amd64_x86
 
@@ -203,6 +204,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: release-Linux-armhf
+          
+      - name: download Linux i686
+        uses: actions/download-artifact@v4
+        with:
+          name: release-Linux-i686
 
       - name: download Windows x86_64
         uses: actions/download-artifact@v4
@@ -214,10 +220,10 @@ jobs:
         with:
           name: release-Windows-aarch64
 
-      - name: download Windows i386
+      - name: download Windows i686
         uses: actions/download-artifact@v4
         with:
-          name: release-Windows-i386
+          name: release-Windows-i686
 
       - name: download macOS x86_64
         uses: actions/download-artifact@v4
@@ -253,6 +259,10 @@ jobs:
           cp -f assfonts-gui-${{ github.ref_name }}-armhf-Linux.AppImage assfonts-gui.AppImage
           tar -czvf assfonts-${{ github.ref_name }}-armhf-Linux.tar.gz bin/assfonts assfonts-gui.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE ./share/man/man1/assfonts.1.gz
           rm -rf assfonts-${{ github.ref_name }}-armhf-Linux assfonts-gui-${{ github.ref_name }}-armhf-Linux.AppImage
+          cp -f assfonts-${{ github.ref_name }}-i686-Linux ./bin/assfonts
+          cp -f assfonts-gui-${{ github.ref_name }}-i686-Linux.AppImage assfonts-gui.AppImage
+          tar -czvf assfonts-${{ github.ref_name }}-i686-Linux.tar.gz bin/assfonts assfonts-gui.AppImage ./share/doc/assfonts/LICENSE ./share/doc/assfonts/NEWS ./share/doc/assfonts/NOTICE ./share/man/man1/assfonts.1.gz
+          rm -rf assfonts-${{ github.ref_name }}-i686-Linux assfonts-gui-${{ github.ref_name }}-i686-Linux.AppImage
           cp -f assfonts-${{ github.ref_name }}-x86_64-Windows.exe assfonts.exe
           cp -f assfonts-gui-${{ github.ref_name }}-x86_64-Windows.exe assfonts-gui.exe
           zip assfonts-${{ github.ref_name }}-x86_64-Windows.zip assfonts.exe assfonts-gui.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
@@ -261,19 +271,20 @@ jobs:
           cp -f assfonts-gui-${{ github.ref_name }}-aarch64-Windows.exe assfonts-gui.exe
           zip assfonts-${{ github.ref_name }}-aarch64-Windows.zip assfonts.exe assfonts-gui.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
           rm -rf assfonts-${{ github.ref_name }}-aarch64-Windows.exe assfonts-gui-${{ github.ref_name }}-aarch64-Windows.exe
-          cp -f assfonts-${{ github.ref_name }}-i386-Windows.exe assfonts.exe
-          cp -f assfonts-gui-${{ github.ref_name }}-i386-Windows.exe assfonts-gui.exe
-          zip assfonts-${{ github.ref_name }}-i386-Windows.zip assfonts.exe assfonts-gui.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
-          rm -rf assfonts-${{ github.ref_name }}-i386-Windows.exe assfonts-gui-${{ github.ref_name }}-i386-Windows.exe
+          cp -f assfonts-${{ github.ref_name }}-i686-Windows.exe assfonts.exe
+          cp -f assfonts-gui-${{ github.ref_name }}-i686-Windows.exe assfonts-gui.exe
+          zip assfonts-${{ github.ref_name }}-i686-Windows.zip assfonts.exe assfonts-gui.exe LICENSE.txt NEWS.txt NOTICE.txt README.md
+          rm -rf assfonts-${{ github.ref_name }}-i686-Windows.exe assfonts-gui-${{ github.ref_name }}-i686-Windows.exe
 
       - name: calculate hash
         run: |
           sha256sum assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz > assfonts-${{ github.ref_name }}-x86_64-Linux.tar.gz.sha256sum
           sha256sum assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz > assfonts-${{ github.ref_name }}-aarch64-Linux.tar.gz.sha256sum
           sha256sum assfonts-${{ github.ref_name }}-armhf-Linux.tar.gz > assfonts-${{ github.ref_name }}-armhf-Linux.tar.gz.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-i686-Linux.tar.gz > assfonts-${{ github.ref_name }}-i686-Linux.tar.gz.sha256sum
           sha256sum assfonts-${{ github.ref_name }}-x86_64-Windows.zip > assfonts-${{ github.ref_name }}-x86_64-Windows.zip.sha256sum
           sha256sum assfonts-${{ github.ref_name }}-aarch64-Windows.zip > assfonts-${{ github.ref_name }}-aarch64-Windows.zip.sha256sum
-          sha256sum assfonts-${{ github.ref_name }}-i386-Windows.zip > assfonts-${{ github.ref_name }}-i386-Windows.zip.sha256sum
+          sha256sum assfonts-${{ github.ref_name }}-i686-Windows.zip > assfonts-${{ github.ref_name }}-i686-Windows.zip.sha256sum
           sha256sum assfonts-${{ github.ref_name }}-x86_64-macOS.dmg > assfonts-${{ github.ref_name }}-x86_64-macOS.dmg.sha256sum
           sha256sum assfonts-${{ github.ref_name }}-aarch64-macOS.dmg > assfonts-${{ github.ref_name }}-aarch64-macOS.dmg.sha256sum
 
