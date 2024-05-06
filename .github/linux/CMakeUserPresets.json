@@ -78,6 +78,29 @@
       }
     },
     {
+      "name": "x86",
+      "hidden": true,
+      "environment": {
+        "PKG_CONFIG_PATH": "/usr/lib/i386-linux-gnu/pkgconfig"
+      },
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x86-linux-release",
+        "CMAKE_C_COMPILER": "i686-linux-gnu-gcc",
+        "CMAKE_CXX_COMPILER": "i686-linux-gnu-g++",
+        "CMAKE_SYSROOT_COMPILE": "/usr/i686-linux-gnu",
+        "CMAKE_FIND_ROOT_PATH": "/usr/lib/i386-linux-gnu",
+        "CMAKE_FIND_ROOT_PATH_MODE_PROGRAM": "NEVER",
+        "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY": "ONLY",
+        "CMAKE_FIND_ROOT_PATH_MODE_PACKAGE": "ONLY",
+        "CMAKE_FIND_ROOT_PATH_MODE_INCLUDE": "BOTH",
+        "CMAKE_CROSSCOMPILING": "ON"
+      },
+      "architecture": {
+        "value": "x86",
+        "strategy": "external"
+      }
+    },
+    {
       "name": "linux-x64",
       "inherits": [
         "linux",
@@ -98,6 +121,14 @@
       "inherits": [
         "linux",
         "armv7l"
+      ],
+      "binaryDir": "${sourceDir}/out/build/${presetName}"
+    },
+    {
+      "name": "linux-x86",
+      "inherits": [
+        "linux",
+        "x86"
       ],
       "binaryDir": "${sourceDir}/out/build/${presetName}"
     }
@@ -131,6 +162,16 @@
     {
       "name": "linux-armv7l-debug",
       "configurePreset": "linux-armv7l",
+      "configuration": "Debug"
+    },
+    {
+      "name": "linux-x86-release",
+      "configurePreset": "linux-x86",
+      "configuration": "Release"
+    },
+    {
+      "name": "linux-x86-debug",
+      "configurePreset": "linux-x86",
       "configuration": "Debug"
     }
   ]
