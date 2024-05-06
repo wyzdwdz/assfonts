@@ -18,23 +18,14 @@ such as PGS.
 
 ### Build Requirements
 
-- Conan 2.0
-
 - CMake >= 3.16
 
 ### How to build
 
-Linux and macOS
-
 ```
-chmod +x build.sh
-./build.sh
-```
-
-Windows
-
-```
-.\build.bat
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build .
 ```
 
 ### How to use

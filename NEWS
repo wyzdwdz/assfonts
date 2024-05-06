@@ -1,3 +1,12 @@
+Overview of changes leading to v0.7.0
+Monday, May 6, 2024
+====================================
+- fix bug: failed to load some traditional chinese fonts
+- Qt version update to 6.6
+- new pre-build releases: linux-armhf, linux-i686, windows-i686
+- use VCPKG as C/C++ dependency manager
+
+
 Overview of changes leading to v0.6.3
 Saturday, Wednesday 30, 2024
 ====================================
