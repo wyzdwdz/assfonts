@@ -4,7 +4,7 @@ on:
   release:
     types: [ published ]
   push:
-    branches: [ vcpkg ] 
+    branches: [ main ] 
 jobs:
   build-linux:
     runs-on: ubuntu-22.04
