@@ -41,6 +41,10 @@
             ]
         },
         {
+            "name": "qtwayland",
+            "platform": "linux"
+        },
+        {
             "name": "cpp-httplib",
             "features": [
                 "openssl"

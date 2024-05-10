@@ -23,6 +23,10 @@ find_package(string-view-lite CONFIG REQUIRED)
 find_package(Qt6 CONFIG REQUIRED COMPONENTS Core Gui Widgets Concurrent)
 find_package(httplib CONFIG REQUIRED)
 
+if(LINUX)
+    find_package(Qt6WaylandClient CONFIG REQUIRED)
+endif()
+
 set(CXX_STD_VER cxx_std_17)
 
 include(GNUInstallDirs)
