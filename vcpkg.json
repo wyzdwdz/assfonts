@@ -42,7 +42,13 @@
         },
         {
             "name": "qtwayland",
-            "platform": "linux"
+            "platform": "linux",
+            "host": true
+        },
+        {
+            "name": "qtwayland",
+            "platform": "linux",
+            "host": false
         },
         {
             "name": "cpp-httplib",

@@ -22,34 +22,23 @@ AppDir:
   files:
     include:
     - /lib/arm-linux-gnueabihf/libGLX.so.0
-    - /lib/arm-linux-gnueabihf/libGLdispatch.so.0
     - /lib/arm-linux-gnueabihf/libOpenGL.so.0
-    - /lib/arm-linux-gnueabihf/libX11.so.6
-    - /lib/arm-linux-gnueabihf/libXau.so.6
-    - /lib/arm-linux-gnueabihf/libXdmcp.so.6
     - /lib/arm-linux-gnueabihf/libXrender.so.1
-    - /lib/arm-linux-gnueabihf/libbsd.so.0
-    - /lib/arm-linux-gnueabihf/libmd.so.0
     - /lib/arm-linux-gnueabihf/libstdc++.so.6
+    - /lib/arm-linux-gnueabihf/libwayland-cursor.so.0
+    - /lib/arm-linux-gnueabihf/libwayland-egl.so.1
     - /lib/arm-linux-gnueabihf/libxcb-cursor.so.0
     - /lib/arm-linux-gnueabihf/libxcb-icccm.so.4
-    - /lib/arm-linux-gnueabihf/libxcb-image.so.0
     - /lib/arm-linux-gnueabihf/libxcb-keysyms.so.1
     - /lib/arm-linux-gnueabihf/libxcb-randr.so.0
-    - /lib/arm-linux-gnueabihf/libxcb-render-util.so.0
     - /lib/arm-linux-gnueabihf/libxcb-sync.so.1
-    - /lib/arm-linux-gnueabihf/libxcb-util.so.1
     - /lib/arm-linux-gnueabihf/libxcb-xinput.so.0
-    - /lib/arm-linux-gnueabihf/libxcb-xkb.so.1
     - /lib/arm-linux-gnueabihf/libxkbcommon-x11.so.0
-    - /lib/arm-linux-gnueabihf/libxkbcommon.so.0
-    - /lib32/libstdc++.so.6
     exclude:
     - usr/share/man
   runtime:
     env:
       QT_AUTO_SCREEN_SCALE_FACTOR: '1'
-      QT_QPA_PLATFORM: 'xcb'
   test:
     fedora-30:
       image: appimagecrafters/tests-env:fedora-30
