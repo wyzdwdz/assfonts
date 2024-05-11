@@ -58,5 +58,5 @@ AppDir:
 AppImage:
   arch: armhf
   comp: xz
-  update-information: guess
+  update-information: gh-releases-zsync|wyzdwdz|assfonts|latest|assfonts-gui-*-armhf-Linux.AppImage.zsync
   file_name: 'assfonts-gui-!!!VERSION!!!-armhf-Linux.AppImage'
