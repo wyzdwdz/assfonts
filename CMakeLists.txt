@@ -7,7 +7,7 @@ project (assfonts CXX C)
 
 set(VERSION_MAJOR 0)
 set(VERSION_MINOR 7)
-set(VERSION_PATCH 0)
+set(VERSION_PATCH 1)
 
 add_subdirectory(3rdparty)
 
