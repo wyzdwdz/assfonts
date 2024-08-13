@@ -43,6 +43,7 @@ add_executable(${TARGET_NAME} ${TARGET_SOURCES})
 if(LINUX)
     qt_import_plugins(${TARGET_NAME} INCLUDE Qt::QXcbIntegrationPlugin
                                              Qt::QWaylandIntegrationPlugin
+                                             Qt::QWaylandEglPlatformIntegrationPlugin
                                              Qt::QIbusPlatformInputContextPlugin
                                              Qt::QComposePlatformInputContextPlugin)
 elseif(WIN32)
