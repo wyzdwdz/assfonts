@@ -25,7 +25,7 @@ AppDir:
     - /lib/arm-linux-gnueabihf/libOpenGL.so.0
     - /lib/arm-linux-gnueabihf/libXrender.so.1
     - /lib/arm-linux-gnueabihf/libstdc++.so.6
-    - /lib/arm-linux-gnueabihf/libwayland-cursor.so.0
+    #- /lib/arm-linux-gnueabihf/libwayland-cursor.so.0
     - /lib/arm-linux-gnueabihf/libwayland-egl.so.1
     - /lib/arm-linux-gnueabihf/libxcb-cursor.so.0
     - /lib/arm-linux-gnueabihf/libxcb-icccm.so.4

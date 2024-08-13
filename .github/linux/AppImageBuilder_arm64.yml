@@ -25,7 +25,7 @@ AppDir:
     - /lib/aarch64-linux-gnu/libOpenGL.so.0
     - /lib/aarch64-linux-gnu/libXrender.so.1
     - /lib/aarch64-linux-gnu/libstdc++.so.6
-    - /lib/aarch64-linux-gnu/libwayland-cursor.so.0
+    #- /lib/aarch64-linux-gnu/libwayland-cursor.so.0
     - /lib/aarch64-linux-gnu/libwayland-egl.so.1
     - /lib/aarch64-linux-gnu/libxcb-cursor.so.0
     - /lib/aarch64-linux-gnu/libxcb-icccm.so.4
