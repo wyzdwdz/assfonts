@@ -26,7 +26,7 @@ AppDir:
     - /lib/i386-linux-gnu/libXrender.so.1
     - /lib/i386-linux-gnu/libstdc++.so.6
     #- /lib/i386-linux-gnu/libwayland-cursor.so.0
-    - /lib/i386-linux-gnu/libwayland-egl.so.1
+    #- /lib/i386-linux-gnu/libwayland-egl.so.1
     - /lib/i386-linux-gnu/libxcb-cursor.so.0
     - /lib/i386-linux-gnu/libxcb-icccm.so.4
     - /lib/i386-linux-gnu/libxcb-keysyms.so.1
