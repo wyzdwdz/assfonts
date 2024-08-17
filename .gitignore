@@ -484,3 +484,5 @@ runtime-*
 
 #gzip
 *.gz
+
+[Tt]est/

@@ -1,3 +1,9 @@
+Overview of changes leading to v0.7.2
+Saturday, August 17, 2024
+====================================
+- fix GUI bug: no title bar in Wayland with mesa 24.0+
+
+
 Overview of changes leading to v0.7.1
 Sunday, June 23, 2024
 ====================================
