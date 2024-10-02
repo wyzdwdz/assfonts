@@ -69,5 +69,5 @@ Options:
  ```
  assfonts -s -i <ass_file>
  otf2ttf <ass_file>_subsetted/*.otf
- assfonts -n -f <ass_file>_subsetted/ -i <ass_file>
+ assfonts -f <ass_file>_subsetted/ -i <ass_file>
  ```
