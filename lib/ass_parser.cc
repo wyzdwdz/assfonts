@@ -407,7 +407,7 @@ int AssParser::CalculateBold(int value) {
 }
 
 int AssParser::CalculateItalic(int value) {
-  if (value == 1) {
+  if (value == 1 || value == -1) {
     return 100;
   } else if (value <= 0) {
     return 0;
