@@ -2245,24 +2245,24 @@ struct select{
         #endif
 
         //prevent public access to some funcitons
-        MatchEvaluator& setNumberedSubstringVector(VecNum* v){
-            RegexMatch::setNumberedSubstringVector(v);
+        MatchEvaluator& setNumberedSubstringVector(void* v){
+            RegexMatch::setNumberedSubstringVector(static_cast<VecNum*>(v));
             return *this;
         }
-        MatchEvaluator& setNamedSubstringVector(VecNas* v){
-            RegexMatch::setNamedSubstringVector(v);
+        MatchEvaluator& setNamedSubstringVector(void* v){
+            RegexMatch::setNamedSubstringVector(static_cast<VecNas*>(v));
             return *this;
         }
-        MatchEvaluator& setNameToNumberMapVector(VecNtN* v){
-            RegexMatch::setNameToNumberMapVector(v);
+        MatchEvaluator& setNameToNumberMapVector(void* v){
+            RegexMatch::setNameToNumberMapVector(static_cast<VecNtN*>(v));
             return *this;
         }
-        MatchEvaluator& setMatchStartOffsetVector(VecOff* v){
-            RegexMatch::setMatchStartOffsetVector(v);
+        MatchEvaluator& setMatchStartOffsetVector(void* v){
+            RegexMatch::setMatchStartOffsetVector(static_cast<VecOff*>(v));
             return *this;
         }
-        MatchEvaluator& setMatchEndOffsetVector(VecOff* v){
-            RegexMatch::setMatchEndOffsetVector(v);
+        MatchEvaluator& setMatchEndOffsetVector(void* v){
+            RegexMatch::setMatchEndOffsetVector(static_cast<VecOff*>(v));
             return *this;
         }
 
@@ -2667,7 +2667,7 @@ struct select{
         ///Call RegexMatch::setRegexObject(r).
         ///@param r constant Regex object pointer
         ///@return A reference to the calling MatchEvaluator object.
-        MatchEvaluator& setRegexObject (Regex const *r){
+        MatchEvaluator& setRegexObject (Regex *r){
             RegexMatch::setRegexObject(r);
             return *this;
         }
@@ -2675,7 +2675,7 @@ struct select{
         ///Call RegexMatch::setSubject(String const &s).
         ///@param s subject string.
         ///@return A reference to the calling MatchEvaluator object.
-        MatchEvaluator& setSubject (String const &s){
+        MatchEvaluator& setSubject (String &s){
             RegexMatch::setSubject(s);
             return *this;
         }
@@ -2683,7 +2683,7 @@ struct select{
         ///@overload
         ///@param s constant subject string by pointer
         ///@return A reference to the calling MatchEvaluator object.
-        MatchEvaluator& setSubject (String const *s){
+        MatchEvaluator& setSubject (String *s){
             RegexMatch::setSubject(s);
             return *this;
         }
