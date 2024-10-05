@@ -11,6 +11,7 @@
       "hidden": true,
       "generator": "Ninja Multi-Config",
       "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "true",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
         "CMAKE_SYSTEM_NAME": "Linux",
         "VCPKG_HOST_TRIPLET": "x64-linux-release",

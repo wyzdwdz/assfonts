@@ -161,16 +161,22 @@ class AssParser {
   void StyleOverride(const nonstd::string_view code, FontDesc& font_desc,
                      const FontDesc& font_desc_style,
                      const unsigned int line_num, const char* line_beg);
-  void ChangeFontname(const nonstd::string_view code, FontDesc& font_desc,
-                      const FontDesc& font_desc_style,
-                      const unsigned int line_num, const char* line_beg);
-  void ChangeBold(const nonstd::string_view code, FontDesc& font_desc,
-                  const FontDesc& font_desc_style);
-  void ChangeItalic(const nonstd::string_view code, FontDesc& font_desc,
-                    const FontDesc& font_desc_style);
+  Iterator::difference_type ChangeFontname(const nonstd::string_view code,
+                                           FontDesc& font_desc,
+                                           const FontDesc& font_desc_style,
+                                           const unsigned int line_num,
+                                           const char* line_beg);
+  Iterator::difference_type ChangeBold(const nonstd::string_view code,
+                                       FontDesc& font_desc,
+                                       const FontDesc& font_desc_style);
+  Iterator::difference_type ChangeItalic(const nonstd::string_view code,
+                                         FontDesc& font_desc,
+                                         const FontDesc& font_desc_style);
   void ChangeStyle(const nonstd::string_view code, FontDesc& font_desc,
-                   const FontDesc& font_desc_style,
-                   const unsigned int line_num);
+                   const FontDesc& font_desc_style, const unsigned int line_num,
+                   Iterator::difference_type font_pos,
+                   Iterator::difference_type bold_pos,
+                   Iterator::difference_type italic_pos);
 
   bool CleanFonts();
 

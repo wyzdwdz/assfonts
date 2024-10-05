@@ -517,20 +517,23 @@ void AssParser::StyleOverride(const nonstd::string_view code,
                               const FontDesc& font_desc_style,
                               const unsigned int line_num,
                               const char* line_beg) {
-  ChangeFontname(code, font_desc, font_desc_style, line_num, line_beg);
-  ChangeBold(code, font_desc, font_desc_style);
-  ChangeItalic(code, font_desc, font_desc_style);
-  ChangeStyle(code, font_desc, font_desc_style, line_num);
+  auto font_pos =
+      ChangeFontname(code, font_desc, font_desc_style, line_num, line_beg);
+  auto bold_pos = ChangeBold(code, font_desc, font_desc_style);
+  auto italic_pos = ChangeItalic(code, font_desc, font_desc_style);
+  ChangeStyle(code, font_desc, font_desc_style, line_num, font_pos, bold_pos,
+              italic_pos);
 }
 
-void AssParser::ChangeFontname(const nonstd::string_view code,
-                               FontDesc& font_desc,
-                               const FontDesc& font_desc_style,
-                               const unsigned int line_num,
-                               const char* line_beg) {
+AssParser::Iterator::difference_type AssParser::ChangeFontname(
+    const nonstd::string_view code, FontDesc& font_desc,
+    const FontDesc& font_desc_style, const unsigned int line_num,
+    const char* line_beg) {
   Iterator::difference_type pos = 0;
+  Iterator::difference_type last_pos = 0;
 
   while (true) {
+    last_pos = pos;
     pos = U8Find(code, U"\\fn", pos);
 
     if (pos == Iterator::NPOS) {
@@ -565,13 +568,18 @@ void AssParser::ChangeFontname(const nonstd::string_view code,
         std::string(font_view), ""};
     rename_infos_.emplace_back(rename_info);
   }
+
+  return last_pos;
 }
 
-void AssParser::ChangeBold(const nonstd::string_view code, FontDesc& font_desc,
-                           const FontDesc& font_desc_style) {
+AssParser::Iterator::difference_type AssParser::ChangeBold(
+    const nonstd::string_view code, FontDesc& font_desc,
+    const FontDesc& font_desc_style) {
   Iterator::difference_type pos = 0;
+  Iterator::difference_type last_pos = 0;
 
   while (true) {
+    last_pos = pos;
     pos = U8Find(code, U"\\b", pos);
 
     if (pos == Iterator::NPOS) {
@@ -602,14 +610,18 @@ void AssParser::ChangeBold(const nonstd::string_view code, FontDesc& font_desc,
       font_desc.bold = font_desc_style.bold;
     }
   }
+
+  return last_pos;
 }
 
-void AssParser::ChangeItalic(const nonstd::string_view code,
-                             FontDesc& font_desc,
-                             const FontDesc& font_desc_style) {
+AssParser::Iterator::difference_type AssParser::ChangeItalic(
+    const nonstd::string_view code, FontDesc& font_desc,
+    const FontDesc& font_desc_style) {
   Iterator::difference_type pos = 0;
+  Iterator::difference_type last_pos = 0;
 
   while (true) {
+    last_pos = pos;
     pos = U8Find(code, U"\\i", pos);
 
     if (pos == Iterator::NPOS) {
@@ -640,14 +652,22 @@ void AssParser::ChangeItalic(const nonstd::string_view code,
       font_desc.italic = font_desc_style.italic;
     }
   }
+
+  return last_pos;
 }
 
 void AssParser::ChangeStyle(const nonstd::string_view code, FontDesc& font_desc,
                             const FontDesc& font_desc_style,
-                            const unsigned int line_num) {
+                            const unsigned int line_num,
+                            Iterator::difference_type font_pos,
+                            Iterator::difference_type bold_pos,
+                            Iterator::difference_type italic_pos) {
   Iterator::difference_type pos = 0;
+  Iterator::difference_type last_pos = 0;
+  FontDesc update_desc = font_desc;
 
   while (true) {
+    last_pos = pos;
     pos = U8Find(code, U"\\r", pos);
 
     if (pos == Iterator::NPOS) {
@@ -673,16 +693,26 @@ void AssParser::ChangeStyle(const nonstd::string_view code, FontDesc& font_desc,
     std::string style_name = Trim(U32ToU8(style));
 
     if (style_name.empty()) {
-      font_desc = font_desc_style;
+      update_desc = font_desc_style;
       continue;
     }
 
     if (stylename_fontdesc_.find(style_name) == stylename_fontdesc_.end()) {
       logger_->Warn("Style \"{}\" not found. (Line {})", style_name, line_num);
-      font_desc = font_desc_style;
+      update_desc = font_desc_style;
     } else {
-      font_desc = stylename_fontdesc_[style_name];
+      update_desc = stylename_fontdesc_[style_name];
     }
+  }
+
+  if (last_pos > font_pos) {
+    font_desc.fontname = update_desc.fontname;
+  }
+  if (last_pos > bold_pos) {
+    font_desc.bold = update_desc.bold;
+  }
+  if (last_pos > italic_pos) {
+    font_desc.italic = update_desc.italic;
   }
 }
 
