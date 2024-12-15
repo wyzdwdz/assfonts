@@ -136,7 +136,7 @@ jobs:
           path: out/build/windows-${{ matrix.profile }}/vcpkg_installed/vcpkg/issue_body.md
           
   build-macos:
-    runs-on: macos-12
+    runs-on: macos-latest
     defaults:
       run:
         shell: bash
