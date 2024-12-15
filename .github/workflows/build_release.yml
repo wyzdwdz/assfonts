@@ -4,7 +4,7 @@ on:
   release:
     types: [ published ]
   push:
-    branches: [ main ] 
+    branches: [ qt6.8 ] 
 jobs:
   build-linux:
     runs-on: ubuntu-22.04
