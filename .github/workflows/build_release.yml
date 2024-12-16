@@ -42,6 +42,7 @@ jobs:
           options: -v ${{ github.workspace }}:/var/www
           shell: bash
           run: |
+            apt update && apt install gcc-multilib
             source ~/.bashrc
             cd /var/www
             cp ./.github/linux/CMakeUserPresets.json .
