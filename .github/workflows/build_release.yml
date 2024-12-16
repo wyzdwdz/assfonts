@@ -156,7 +156,7 @@ jobs:
 
       - name: build executable binary
         run: |
-          brew install automake autoconf-archive
+          brew install automake autoconf-archive libtool
           cp .github/macos/CMakeUserPresets.json .
           cmake . --preset macos-${{ matrix.profile }}
           cmake --build . --preset macos-${{ matrix.profile }}-release --target package -j
