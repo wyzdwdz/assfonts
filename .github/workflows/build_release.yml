@@ -72,6 +72,13 @@ jobs:
           name: linux-${{ matrix.profile }}-issue
           path: out/build/linux-${{ matrix.profile }}/vcpkg_installed/vcpkg/issue_body.md
 
+      - name: upload error
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.profile }}-error
+          path: vcpkg/buildtrees/detect_compiler/config-x86-linux-release-rel-err.log
+
   build-windows:
     runs-on: windows-2022
     defaults:
