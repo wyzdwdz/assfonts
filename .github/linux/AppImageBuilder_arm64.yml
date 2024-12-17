@@ -13,20 +13,30 @@ AppDir:
     - arm64
     allow_unauthenticated: true
     sources:
-    - sourceline: 'deb http://deb.debian.org/debian bookworm main non-free-firmware'
-    - sourceline: 'deb http://deb.debian.org/debian-security/ bookworm-security main non-free-firmware'
-    - sourceline: 'deb http://deb.debian.org/debian bookworm-updates main non-free-firmware'
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy main restricted
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy universe
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy-updates universe
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy multiverse
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy-updates multiverse
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy-backports main restricted
+        universe multiverse
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy-security universe
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy-security multiverse
     include:
     - libc-bin
+    - libcap2:arm64
+    - libdbus-1-3:arm64
     - libgcc-s1:arm64
+    - libgpg-error0:arm64
+    - liblzma5:arm64
   files:
     include:
     - /lib/aarch64-linux-gnu/libGLX.so.0
     - /lib/aarch64-linux-gnu/libOpenGL.so.0
     - /lib/aarch64-linux-gnu/libXrender.so.1
     - /lib/aarch64-linux-gnu/libstdc++.so.6
-    #- /lib/aarch64-linux-gnu/libwayland-cursor.so.0
-    #- /lib/aarch64-linux-gnu/libwayland-egl.so.1
     - /lib/aarch64-linux-gnu/libxcb-cursor.so.0
     - /lib/aarch64-linux-gnu/libxcb-icccm.so.4
     - /lib/aarch64-linux-gnu/libxcb-keysyms.so.1

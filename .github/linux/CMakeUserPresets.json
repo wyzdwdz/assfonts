@@ -88,9 +88,9 @@
       },
       "cacheVariables": {
         "VCPKG_TARGET_TRIPLET": "x86-linux-release",
-        "CMAKE_C_COMPILER": "i686-linux-gnu-gcc",
-        "CMAKE_CXX_COMPILER": "i686-linux-gnu-g++",
-        "CMAKE_SYSROOT_COMPILE": "/usr/i686-linux-gnu",
+        "CMAKE_C_FLAGS": "-m32",
+        "CMAKE_CXX_FLAGS": "-m32",
+        "CMAKE_EXE_LINKER_FLAGS": "-m32",
         "CMAKE_FIND_ROOT_PATH": "/usr/lib/i386-linux-gnu",
         "CMAKE_FIND_ROOT_PATH_MODE_PROGRAM": "NEVER",
         "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY": "ONLY",

@@ -13,20 +13,30 @@ AppDir:
     - i386
     allow_unauthenticated: true
     sources: 
-    - sourceline: 'deb http://deb.debian.org/debian bookworm main non-free-firmware'
-    - sourceline: 'deb http://deb.debian.org/debian-security/ bookworm-security main non-free-firmware'
-    - sourceline: 'deb http://deb.debian.org/debian bookworm-updates main non-free-firmware'
+    - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy main restricted
+    - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy-updates main restricted
+    - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy universe
+    - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy-updates universe
+    - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy multiverse
+    - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy-updates multiverse
+    - sourceline: deb http://archive.ubuntu.com/ubuntu/ jammy-backports main restricted
+        universe multiverse
+    - sourceline: deb http://security.ubuntu.com/ubuntu/ jammy-security main restricted
+    - sourceline: deb http://security.ubuntu.com/ubuntu/ jammy-security universe
+    - sourceline: deb http://security.ubuntu.com/ubuntu/ jammy-security multiverse
     include:
     - libc-bin
+    - libcap2:i386
+    - libdbus-1-3:i386
     - libgcc-s1:i386
+    - libgpg-error0:i386
+    - liblzma5:i386
   files:
     include:
     - /lib/i386-linux-gnu/libGLX.so.0
     - /lib/i386-linux-gnu/libOpenGL.so.0
     - /lib/i386-linux-gnu/libXrender.so.1
     - /lib/i386-linux-gnu/libstdc++.so.6
-    #- /lib/i386-linux-gnu/libwayland-cursor.so.0
-    #- /lib/i386-linux-gnu/libwayland-egl.so.1
     - /lib/i386-linux-gnu/libxcb-cursor.so.0
     - /lib/i386-linux-gnu/libxcb-icccm.so.4
     - /lib/i386-linux-gnu/libxcb-keysyms.so.1

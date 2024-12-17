@@ -13,20 +13,30 @@ AppDir:
     - armhf
     allow_unauthenticated: true
     sources:
-    - sourceline: 'deb http://deb.debian.org/debian bookworm main non-free-firmware'
-    - sourceline: 'deb http://deb.debian.org/debian-security/ bookworm-security main non-free-firmware'
-    - sourceline: 'deb http://deb.debian.org/debian bookworm-updates main non-free-firmware'
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy main restricted
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy universe
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy-updates universe
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy multiverse
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy-updates multiverse
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy-backports main restricted
+        universe multiverse
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy-security universe
+    - sourceline: deb http://ports.ubuntu.com/ubuntu-ports jammy-security multiverse
     include:
     - libc-bin
+    - libcap2:armhf
+    - libdbus-1-3:armhf
     - libgcc-s1:armhf
+    - libgpg-error0:armhf
+    - liblzma5:armhf
   files:
     include:
     - /lib/arm-linux-gnueabihf/libGLX.so.0
     - /lib/arm-linux-gnueabihf/libOpenGL.so.0
     - /lib/arm-linux-gnueabihf/libXrender.so.1
     - /lib/arm-linux-gnueabihf/libstdc++.so.6
-    #- /lib/arm-linux-gnueabihf/libwayland-cursor.so.0
-    #- /lib/arm-linux-gnueabihf/libwayland-egl.so.1
     - /lib/arm-linux-gnueabihf/libxcb-cursor.so.0
     - /lib/arm-linux-gnueabihf/libxcb-icccm.so.4
     - /lib/arm-linux-gnueabihf/libxcb-keysyms.so.1
