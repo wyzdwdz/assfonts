@@ -18,57 +18,61 @@ jobs:
           - { arch: aarch64, profile: arm64 }
           - { arch: armhf, profile: armv7l }
     steps:
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@v10
+        with:
+          root-reserve-mb: 8192
+          temp-reserve-mb: 32
+          swap-size-mb: 32
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+
       - name: checkout
         uses: actions/checkout@v4
         with:
           submodules: 'recursive'
 
-      - name: prepare build environment
-        if: ${{ matrix.arch == 'x86_64' }}
-        run: |
-          sudo apt update && sudo apt upgrade -y
-          sudo apt install -y git curl zip unzip tar gcc g++ make pkg-config python3 python3-jinja2 autoconf automake libtool '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev libegl1-mesa-dev libwayland-dev ninja-build pipx strace patchelf fakeroot squashfs-tools zsync xserver-xorg-core
-          pipx ensurepath && source ~/.bashrc
-          pipx install cmake 
-          pipx install git+https://github.com/AppImageCrafters/appimage-builder.git
-
-      - name: prepare build environment
-        if: ${{ matrix.arch == 'aarch64' }}
-        run: |
-          sudo apt update && sudo apt upgrade -y
-          sudo dpkg --add-architecture arm64
-          sudo apt update
-          sudo apt install -y git curl zip unzip tar gcc g++ gcc-aarch64-linux-gnu g++-aarch64-linux-gnu make pkg-config python3 python3-jinja2 autoconf automake libtool '^libxcb.*-dev':arm64 libx11-xcb-dev:arm64 libglu1-mesa-dev:arm64 libxrender-dev:arm64 libxi-dev:arm64 libxkbcommon-dev:arm64 libxkbcommon-x11-dev:arm64 libegl1-mesa-dev:arm64 libwayland-dev:arm64 '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev libegl1-mesa-dev libwayland-dev bison flex autoconf-archive ninja-build pipx strace patchelf fakeroot squashfs-tools zsync xserver-xorg-core:arm64
-          pipx ensurepath && source ~/.bashrc
-          pipx install cmake 
-          pipx install git+https://github.com/AppImageCrafters/appimage-builder.git
-
-      - name: prepare build environment
-        if: ${{ matrix.arch == 'armhf' }}
-        run: |
-          sudo apt update && sudo apt upgrade -y
-          sudo dpkg --add-architecture armhf
-          sudo apt update
-          sudo apt install -y git curl zip unzip tar gcc g++ gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf make pkg-config python3 python3-jinja2 autoconf automake libtool '^libxcb.*-dev':armhf libx11-xcb-dev:armhf libglu1-mesa-dev:armhf libxrender-dev:armhf libxi-dev:armhf libxkbcommon-dev:armhf libxkbcommon-x11-dev:armhf libegl1-mesa-dev:armhf libwayland-dev:armhf '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev libegl1-mesa-dev libwayland-dev bison flex autoconf-archive ninja-build pipx strace patchelf fakeroot squashfs-tools zsync xserver-xorg-core:armhf
-          pipx ensurepath && source ~/.bashrc
-          pipx install cmake 
-          pipx install git+https://github.com/AppImageCrafters/appimage-builder.git
-        
       - name: build binary and appimage
-        run: |
-          cp ./.github/linux/CMakeUserPresets.json .
-          cmake . --preset linux-${{ matrix.profile }}
-          cmake --build . --target install --preset linux-${{ matrix.profile }}-release -j
-          mv ./out/install/linux-${{ matrix.profile }}/bin/assfonts assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Linux
-          cp ./.github/linux/AppImageBuilder_${{ matrix.profile }}.yml AppImageBuilder.yml
-          mkdir -p ./AppDir/usr
-          cp -r ./out/install/linux-${{ matrix.profile }}/* ./AppDir/usr
-          mkdir -p ./AppDir/usr/share/icons
-          cp ./src/qt/resources/icon.png ./AppDir/usr/share/icons
-          mkdir -p ./AppDir/usr/share/applications
-          cp ./src/qt/resources/assfonts-gui.desktop ./AppDir/usr/share/applications
-          sed -i 's/!!!VERSION!!!/${{ github.ref_name }}/g' AppImageBuilder.yml
-          appimage-builder --recipe AppImageBuilder.yml --skip-tests
+        uses: addnab/docker-run-action@v3
+        with:
+          image: ubuntu:22.04
+          options: -v ${{ github.workspace }}:/var/www
+          shell: bash
+          run: |
+            apt update && apt upgrade -y
+            dpkg --add-architecture arm64
+            dpkg --add-architecture armhf
+            echo "deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy main restricted" >> /etc/apt/sources.list
+            echo "deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates main restricted" >> /etc/apt/sources.list
+            echo "deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy universe" >> /etc/apt/sources.list
+            echo "deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates universe" >> /etc/apt/sources.list
+            echo "deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy multiverse" >> /etc/apt/sources.list
+            echo "deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates multiverse" >> /etc/apt/sources.list
+            echo "deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy-backports main restricted universe multiverse" >> /etc/apt/sources.list
+            echo "deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy-security main restricted" >> /etc/apt/sources.list
+            echo "deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy-security universe" >> /etc/apt/sources.list
+            echo "deb [arch=arm64,armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy-security multiverse" >> /etc/apt/sources.list
+            apt update
+            apt install -y git curl zip unzip tar gcc g++ gcc-aarch64-linux-gnu g++-aarch64-linux-gnu gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf make pkg-config python3 python3-jinja2 autoconf automake libtool '^libxcb.*-dev':arm64 libx11-xcb-dev:arm64 libglu1-mesa-dev:arm64 libxrender-dev:arm64 libxi-dev:arm64 libxkbcommon-dev:arm64 libxkbcommon-x11-dev:arm64 libegl1-mesa-dev:arm64 libwayland-dev:arm64 '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev libegl1-mesa-dev libwayland-dev bison flex autoconf-archive ninja-build pipx strace patchelf fakeroot squashfs-tools zsync xserver-xorg-core:arm64 '^libxcb.*-dev':armhf libx11-xcb-dev:armhf libglu1-mesa-dev:armhf libxrender-dev:armhf libxi-dev:armhf libxkbcommon-dev:armhf libxkbcommon-x11-dev:armhf libegl1-mesa-dev:armhf libwayland-dev:armhf xserver-xorg-core:armhf xserver-xorg-core
+            pipx ensurepath && source ~/.bashrc
+            pipx install cmake 
+            pipx install git+https://github.com/AppImageCrafters/appimage-builder.git
+            cd /var/www
+            cp ./.github/linux/CMakeUserPresets.json .
+            cmake . --preset linux-${{ matrix.profile }}
+            cmake --build . --target install --preset linux-${{ matrix.profile }}-release -j
+            mv ./out/install/linux-${{ matrix.profile }}/bin/assfonts assfonts-${{ github.ref_name }}-${{ matrix.arch }}-Linux
+            cp ./.github/linux/AppImageBuilder_${{ matrix.profile }}.yml AppImageBuilder.yml
+            mkdir -p ./AppDir/usr
+            cp -r ./out/install/linux-${{ matrix.profile }}/* ./AppDir/usr
+            mkdir -p ./AppDir/usr/share/icons
+            cp ./src/qt/resources/icon.png ./AppDir/usr/share/icons
+            mkdir -p ./AppDir/usr/share/applications
+            cp ./src/qt/resources/assfonts-gui.desktop ./AppDir/usr/share/applications
+            sed -i 's/!!!VERSION!!!/${{ github.ref_name }}/g' AppImageBuilder.yml
+            appimage-builder --recipe AppImageBuilder.yml --skip-tests
 
       - name: upload Linux
         uses: actions/upload-artifact@v4
