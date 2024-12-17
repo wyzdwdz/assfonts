@@ -37,16 +37,6 @@ jobs:
         run: |
           sudo apt update && sudo apt upgrade -y
           sudo dpkg --add-architecture arm64
-          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy main restricted" | sudo tee -a /etc/apt/sources.list
-          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates main restricted" | sudo tee -a /etc/apt/sources.list
-          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy universe" | sudo tee -a /etc/apt/sources.list
-          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates universe" | sudo tee -a /etc/apt/sources.list
-          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy multiverse" | sudo tee -a /etc/apt/sources.list
-          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates multiverse" | sudo tee -a /etc/apt/sources.list
-          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-backports main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list
-          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-security main restricted" | sudo tee -a /etc/apt/sources.list
-          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-security universe" | sudo tee -a /etc/apt/sources.list
-          echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-security multiverse" | sudo tee -a /etc/apt/sources.list
           sudo apt update
           sudo apt install -y git curl zip unzip tar gcc g++ gcc-aarch64-linux-gnu g++-aarch64-linux-gnu make pkg-config python3 python3-jinja2 autoconf automake libtool '^libxcb.*-dev':arm64 libx11-xcb-dev:arm64 libglu1-mesa-dev:arm64 libxrender-dev:arm64 libxi-dev:arm64 libxkbcommon-dev:arm64 libxkbcommon-x11-dev:arm64 libegl1-mesa-dev:arm64 libwayland-dev:arm64 '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev libegl1-mesa-dev libwayland-dev bison flex autoconf-archive ninja-build pipx strace patchelf fakeroot squashfs-tools zsync xserver-xorg-core:arm64
           pipx ensurepath && source ~/.bashrc
@@ -58,16 +48,6 @@ jobs:
         run: |
           sudo apt update && sudo apt upgrade -y
           sudo dpkg --add-architecture armhf
-          echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy main restricted" | sudo tee /etc/apt/sources.list
-          echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates main restricted" | sudo tee /etc/apt/sources.list
-          echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy universe" | sudo tee /etc/apt/sources.list
-          echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates universe" | sudo tee /etc/apt/sources.list
-          echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy multiverse" | sudo tee /etc/apt/sources.list
-          echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates multiverse" | sudo tee /etc/apt/sources.list
-          echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy-backports main restricted universe multiverse" | sudo tee /etc/apt/sources.list
-          echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy-security main restricted" | sudo tee /etc/apt/sources.list
-          echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy-security universe" | sudo tee /etc/apt/sources.list
-          echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports/ jammy-security multiverse" | sudo tee /etc/apt/sources.list
           sudo apt update
           sudo apt install -y git curl zip unzip tar gcc g++ gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf make pkg-config python3 python3-jinja2 autoconf automake libtool '^libxcb.*-dev':armhf libx11-xcb-dev:armhf libglu1-mesa-dev:armhf libxrender-dev:armhf libxi-dev:armhf libxkbcommon-dev:armhf libxkbcommon-x11-dev:armhf libegl1-mesa-dev:armhf libwayland-dev:armhf '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev libegl1-mesa-dev libwayland-dev bison flex autoconf-archive ninja-build pipx strace patchelf fakeroot squashfs-tools zsync xserver-xorg-core:armhf
           pipx ensurepath && source ~/.bashrc
