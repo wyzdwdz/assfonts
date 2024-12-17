@@ -47,6 +47,7 @@ jobs:
             export PATH="${PATH}:/root/.local/bin"
             pipx install cmake 
             pipx install git+https://github.com/AppImageCrafters/appimage-builder.git
+            rm -rf /var/lib/apt/lists/* && apt clean
             cd /var/www
             cp ./.github/linux/CMakeUserPresets.json .
             cmake . --preset linux-${{ matrix.profile }}
@@ -87,6 +88,7 @@ jobs:
             export PATH="${PATH}:/root/.local/bin"
             pipx install cmake 
             pipx install git+https://github.com/AppImageCrafters/appimage-builder.git
+            rm -rf /var/lib/apt/lists/* && apt clean
             cd /var/www
             cp ./.github/linux/CMakeUserPresets.json .
             cmake . --preset linux-${{ matrix.profile }}
@@ -127,6 +129,7 @@ jobs:
             export PATH="${PATH}:/root/.local/bin"
             pipx install cmake 
             pipx install git+https://github.com/AppImageCrafters/appimage-builder.git
+            rm -rf /var/lib/apt/lists/* && apt clean
             cd /var/www
             cp ./.github/linux/CMakeUserPresets.json .
             cmake . --preset linux-${{ matrix.profile }}
