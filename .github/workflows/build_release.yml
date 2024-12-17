@@ -39,9 +39,8 @@ jobs:
         if: ${{ matrix.arch == 'x86_64' }}
         with:
           image: ubuntu:22.04
-          options: -v ${{ github.workspace }}:/var/www
+          options: -v ${{ github.workspace }}:/var/www -e DEBIAN_FRONTEND=noninteractive
           shell: bash
-          options: "-e DEBIAN_FRONTEND=noninteractive"
           run: |
             apt update && apt upgrade -y
             apt install -y git curl zip unzip tar gcc g++ make pkg-config python3 python3-jinja2 autoconf automake libtool '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev libegl1-mesa-dev libwayland-dev ninja-build pipx strace patchelf fakeroot squashfs-tools zsync xserver-xorg-core
@@ -68,9 +67,8 @@ jobs:
         if: ${{ matrix.arch == 'aarch64' }}
         with:
           image: ubuntu:22.04
-          options: -v ${{ github.workspace }}:/var/www
+          options: -v ${{ github.workspace }}:/var/www -e DEBIAN_FRONTEND=noninteractive
           shell: bash
-          options: "-e DEBIAN_FRONTEND=noninteractive"
           run: |
             apt update && apt upgrade -y
             dpkg --add-architecture arm64
@@ -109,9 +107,8 @@ jobs:
         if: ${{ matrix.arch == 'armhf' }}
         with:
           image: ubuntu:22.04
-          options: -v ${{ github.workspace }}:/var/www
+          options: -v ${{ github.workspace }}:/var/www -e DEBIAN_FRONTEND=noninteractive
           shell: bash
-          options: "-e DEBIAN_FRONTEND=noninteractive"
           run: |
             apt update && apt upgrade -y
             dpkg --add-architecture armhf
