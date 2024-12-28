@@ -552,7 +552,7 @@ AssParser::Iterator::difference_type AssParser::ChangeFontname(
     nonstd::string_view font_view(&(*view_beg), iter.ToStdIter() - view_beg);
     font_view = Trim(font_view);
 
-    if (font_view.empty()) {
+    if (font_view.empty() || font_view == '0') {
       font_desc.fontname = font_desc_style.fontname;
       continue;
     }
