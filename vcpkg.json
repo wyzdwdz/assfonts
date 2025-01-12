@@ -22,7 +22,10 @@
             "default-features": false,
             "features": [
                 "concurrent",
-                "dbus",
+                {
+                    "name": "dbus",
+                    "platform": "linux"
+                },
                 "default-features",
                 "doubleconversion",
                 "freetype",
