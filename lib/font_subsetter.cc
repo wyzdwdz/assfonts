@@ -409,7 +409,7 @@ bool FontSubsetter::CheckGlyph(
     if (!codepoint) {
       continue;
     }
-    if (!FT_Get_Char_Index(ft_face, codepoint)) {
+    if (FT_Get_Char_Index(ft_face, codepoint) == 0) {
       missing_codepoints.emplace_back(codepoint);
     }
   }
